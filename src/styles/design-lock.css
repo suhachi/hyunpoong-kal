@@ -1,0 +1,136 @@
+/**
+ * 🔒 디자인 CSS 잠금 파일 (안전 버전)
+ * 
+ * 브랜드 컬러와 타이포그래피만 보호하고, 레이아웃은 건드리지 않습니다.
+ * 
+ * ⚠️ 주의: 이 파일은 브랜드 아이덴티티만 보호합니다!
+ */
+
+/* ============================================
+   1. 브랜드 컬러 강제 고정 (최우선)
+   ============================================ */
+
+:root {
+  /* 브랜드 컬러 - 절대 변경 금지! */
+  --color-hyunpung-red: #D61C1C !important;
+  --color-shinkal-orange: #F37021 !important;
+  --color-dark-brown: #2E1C10 !important;
+  --color-cream-bg: #F9F6F3 !important;
+  --color-brass-gold: #C7A45A !important;
+  
+  /* Primary 컬러 매핑 강제 */
+  --color-primary: #D61C1C !important;
+  --color-primary-hover: #b71616 !important;
+  --color-primary-light: rgba(214, 28, 28, 0.1) !important;
+  
+  /* Secondary 컬러 매핑 강제 */
+  --color-secondary: #F37021 !important;
+  --color-secondary-hover: #d45e1a !important;
+  --color-secondary-light: rgba(243, 112, 33, 0.1) !important;
+  
+  /* Accent 컬러 매핑 강제 */
+  --color-accent: #C7A45A !important;
+  --color-accent-hover: #b08f4a !important;
+  --color-accent-light: rgba(199, 164, 90, 0.1) !important;
+  
+  /* 배경/전경색 강제 */
+  --background: #ffffff !important;
+  --foreground: #2E1C10 !important;
+  --muted: #F9F6F3 !important;
+}
+
+/* ============================================
+   2. 타이포그래피 강제 고정
+   ============================================ */
+
+:root {
+  /* 폰트 패밀리 */
+  --font-sans: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 
+               'Apple SD Gothic Neo', 'Segoe UI', 'Malgun Gothic', 
+               'Noto Sans KR', sans-serif !important;
+  
+  /* 폰트 크기 */
+  --text-xs: 0.75rem !important;
+  --text-sm: 0.875rem !important;
+  --text-base: 1rem !important;
+  --text-lg: 1.125rem !important;
+  --text-xl: 1.25rem !important;
+  --text-2xl: 1.5rem !important;
+  --text-3xl: 1.875rem !important;
+  --text-4xl: 2.25rem !important;
+  --text-5xl: 3rem !important;
+  
+  /* 폰트 굵기 */
+  --font-weight-light: 300 !important;
+  --font-weight-normal: 400 !important;
+  --font-weight-medium: 500 !important;
+  --font-weight-semibold: 600 !important;
+  --font-weight-bold: 700 !important;
+  --font-weight-extrabold: 800 !important;
+  
+  /* 줄 높이 */
+  --leading-none: 1 !important;
+  --leading-tight: 1.25 !important;
+  --leading-snug: 1.375 !important;
+  --leading-normal: 1.5 !important;
+  --leading-relaxed: 1.75 !important;
+  --leading-loose: 2 !important;
+}
+
+/* ============================================
+   3. 다크모드 방지 (브랜드 컬러 유지)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 다크모드에서도 브랜드 컬러 유지 */
+    --background: #ffffff !important;
+    --foreground: #2E1C10 !important;
+    --color-primary: #D61C1C !important;
+    --color-secondary: #F37021 !important;
+    --color-accent: #C7A45A !important;
+  }
+  
+  body {
+    background-color: #ffffff !important;
+    color: #2E1C10 !important;
+  }
+}
+
+/* ============================================
+   4. 폰트 적용 강제 (body만)
+   ============================================ */
+
+body {
+  font-family: var(--font-sans) !important;
+}
+
+/* ============================================
+   5. 선택 영역 스타일 (브랜드 컬러)
+   ============================================ */
+
+::selection {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+}
+
+::-moz-selection {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+}
+
+/* ============================================
+   6. 스크롤바 스타일 (브랜드 컬러)
+   ============================================ */
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary) !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-hover) !important;
+}
+
+/* ============================================
+   끝. 레이아웃은 globals.css와 Tailwind에 맡깁니다.
+   ============================================ */

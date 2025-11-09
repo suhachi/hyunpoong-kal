@@ -1,0 +1,42 @@
+{
+  "name": "hyunpung-chicken-noodle-pwa",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:report": "playwright show-report",
+    "diagnose": "echo '🔧 시스템 진단 중...' && node -e \"console.log('Node:', process.version, '\\nNPM:', process.env.npm_config_user_agent)\" && npm list react react-dom",
+    "clean": "rm -rf node_modules/.vite .vite dist",
+    "reset": "npm run clean && npm install",
+    "dev:simple": "echo '⚠️  간단한 버전으로 실행 중...' && vite",
+    "design:lock": "chmod +x scripts/lock-design.sh && ./scripts/lock-design.sh",
+    "design:verify": "grep -q 'design-lock.css' main.tsx && echo '✅ 디자인 잠금 활성화됨' || echo '❌ 디자인 잠금 비활성화됨'"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0",
+    "firebase": "^10.7.1",
+    "lucide-react": "^0.363.0",
+    "date-fns": "^3.3.1",
+    "recharts": "^2.12.0",
+    "sonner": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.56",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "autoprefixer": "^10.4.18",
+    "postcss": "^8.4.35"
+  }
+}
