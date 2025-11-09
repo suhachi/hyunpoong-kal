@@ -1,11 +1,11 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-
 // ⚠️ 경고: 아래 CSS import 순서를 절대 변경하지 마세요!
 // ⚠️ 이 import를 삭제하면 디자인이 완전히 깨집니다!
 import './styles/globals.css';        // 1. Tailwind CSS + 기본 스타일
 import './styles/design-lock.css';    // 2. 브랜드 컬러 강제 고정 (최우선!)
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 import { registerServiceWorker, setupNetworkListeners } from './lib/utils/pwa';
 import { toast } from 'sonner@2.0.3';
 
