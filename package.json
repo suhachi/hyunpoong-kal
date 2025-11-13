@@ -1,7 +1,8 @@
 {
-      "name": "Brand Report Overview",
+      "name": "brand-report-overview",
       "version": "0.1.0",
       "private": true,
+      "type": "module",
       "dependencies": {
             "@axe-core/playwright": "*",
             "@google-cloud/storage": "*",
