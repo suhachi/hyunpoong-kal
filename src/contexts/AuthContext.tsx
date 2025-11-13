@@ -66,6 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
+    
     if (USE_FIREBASE && auth) {
       // Firebase Auth 리스너
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -98,15 +101,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return () => unsubscribe();
     } else {
       // Mock Auth
+      console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
+      console.log('[AuthContext] 🔍 Mock 모드 초기화 시작');
       try {
         const mockUserData = localStorage.getItem('mockUser');
+        console.log('[AuthContext] 📦 mockUserData:', mockUserData);
         if (mockUserData) {
-          setUser(JSON.parse(mockUserData));
+          const parsed = JSON.parse(mockUserData);
+          console.log('[AuthContext] ✅ 파싱 성공:', parsed);
+          setUser(parsed);
+        } else {
+          console.warn('[AuthContext] ⚠️ mockUser가 localStorage에 없습니다');
         }
       } catch (error) {
-        console.error('[AuthContext] Mock 사용자 로드 실패:', error);
+        console.error('[AuthContext] ❌ Mock 사용자 로드 실패:', error);
       } finally {
         setLoading(false);
+        console.log('[AuthContext] 🏁 초기화 완료, loading=false');
       }
     }
   }, []);

@@ -24,18 +24,22 @@ let storageInstance: FirebaseStorage | null = null;
 let analyticsInstance: Analytics | null = null;
 
 if (USE_FIREBASE) {
+  // eslint-disable-next-line no-console
+  console.log('[Firebase] 초기화 시작 (USE_FIREBASE=true)');
   try {
     app = initializeApp(firebaseConfig);
     authInstance = getAuth(app);
     firestoreDb = getFirestore(app);
     storageInstance = getStorage(app);
     analyticsInstance = typeof window !== 'undefined' ? getAnalytics(app) : null;
+    // eslint-disable-next-line no-console
     console.log('[Firebase] 초기화 완료');
   } catch (error) {
     console.error('[Firebase] 초기화 실패:', error);
   }
 } else {
-  console.log('[Firebase] Mock 모드 (USE_FIREBASE=false)');
+  // eslint-disable-next-line no-console
+  console.log('[Firebase] SKIP init: USE_FIREBASE=false (Mock 모드)');
 }
 
 // Mock Firestore (개발용)

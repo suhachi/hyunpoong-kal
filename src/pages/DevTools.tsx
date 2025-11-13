@@ -19,14 +19,14 @@ export function DevTools() {
     loadCurrentUser();
   }, []);
 
-  async function loadCurrentUser() {
-    const user = await getCurrentUser();
+  function loadCurrentUser() {
+    const user = getCurrentUser();
     setCurrentUser(user);
   }
 
   function handleRoleSwitch(role: 'customer' | 'owner' | 'admin') {
     mockLogin(role);
-    loadCurrentUser();
+    // mockLogin()이 window.location.reload()를 호출하므로 loadCurrentUser()는 실행되지 않음
   }
 
   return (

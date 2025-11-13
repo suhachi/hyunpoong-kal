@@ -57,7 +57,15 @@ const getEnv = (key: string, defaultValue: string = '', required: boolean = fals
 };
 
 // Firebase 사용 여부 (개발 중에는 false, 배포 시 true)
-export const USE_FIREBASE = getEnv('VITE_USE_FIREBASE') === 'true';
+// 기존: export const USE_FIREBASE = getEnv('VITE_USE_FIREBASE') === 'true';
+// 임시: Phase1 QA용 Mock 강제 모드
+export const USE_FIREBASE = false; // TODO: Phase2에서 env 기반으로 되돌리기
+
+// 디버그 로그 추가
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line no-console
+  console.log('[env] USE_FIREBASE:', USE_FIREBASE, 'VITE_USE_FIREBASE:', getEnv('VITE_USE_FIREBASE'));
+}
 
 // 앱 설정
 export const APP_CONFIG = {

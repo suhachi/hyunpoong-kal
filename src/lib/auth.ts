@@ -85,7 +85,8 @@ export function isCustomer(user: AuthUser | null): boolean {
  * Mock 로그인 (테스트용)
  */
 export function mockLogin(role: UserRole): void {
-  localStorage.setItem('mockRole', role);
+  const mockUser = role === 'owner' || role === 'admin' ? MOCK_ADMIN : MOCK_CUSTOMER;
+  localStorage.setItem('mockUser', JSON.stringify(mockUser));
   window.location.reload();
 }
 
@@ -93,7 +94,7 @@ export function mockLogin(role: UserRole): void {
  * Mock 로그아웃 (테스트용)
  */
 export function mockLogout(): void {
-  localStorage.removeItem('mockRole');
+  localStorage.removeItem('mockUser');
   window.location.reload();
 }
 

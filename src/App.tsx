@@ -108,7 +108,7 @@ export default function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute requiredRole="owner">
+                <ProtectedRoute roles={["owner", "admin"]}>
                   <AdminLayout />
                 </ProtectedRoute>
               }

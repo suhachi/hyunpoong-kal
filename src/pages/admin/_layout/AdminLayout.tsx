@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -19,30 +19,13 @@ import {
 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Credits } from '../../../components/shared/Credits';
-import { requireAdmin, mockLogout, type AuthUser } from '../../../lib/auth';
-import { toast } from 'sonner';
+import { useAuth } from '../../../contexts/AuthContext';
+import { mockLogout } from '../../../lib/auth';
 
 export function AdminLayout() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  async function checkAuth() {
-    try {
-      const authUser = await requireAdmin();
-      setUser(authUser);
-    } catch (error) {
-      // requireAdmin이 리다이렉트 처리
-      toast.error('관리자 권한이 필요합니다.');
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function handleLogout() {
     mockLogout();
@@ -52,14 +35,16 @@ export function AdminLayout() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#F9F6F3]">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#D61C1C]/10 flex items-center justify-center">
-            <span className="text-3xl">🍜</span>
-          </div>
-          <p className="text-[#8B7355]">로딩 중...</p>
-        </div>
+        <div className="text-center text-[#8B7355]">로딩 중...</div>
       </div>
     );
+  }
+
+  if (!user) {
+    // 이 경우는 ProtectedRoute 설정이 잘못됐을 때만 발생해야 함
+    // 안전장치 정도로만 남겨두기
+    navigate('/dev', { replace: true });
+    return null;
   }
 
   return (
