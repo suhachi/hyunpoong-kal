@@ -58,8 +58,8 @@ export function PaymentTab() {
     toast.success('명령어가 복사되었습니다');
   };
 
-  const isNicePayConfigured = healthCheck?.nicepay.configured || false;
-  const allNicePayFieldsSet = healthCheck?.nicepay.fields
+  const isNicePayConfigured = healthCheck?.nicepay?.configured || false;
+  const allNicePayFieldsSet = healthCheck?.nicepay?.fields
     ? Object.values(healthCheck.nicepay.fields).every(v => v)
     : false;
 
@@ -194,8 +194,8 @@ function NicePaySettings({
   onRecheck: () => void;
   onCopyCommand: (cmd: string) => void;
 }) {
-  const isConfigured = healthCheck?.nicepay.configured || false;
-  const allFieldsSet = healthCheck?.nicepay.fields
+  const isConfigured = healthCheck?.nicepay?.configured || false;
+  const allFieldsSet = healthCheck?.nicepay?.fields
     ? Object.values(healthCheck.nicepay.fields).every(v => v)
     : false;
 
@@ -245,7 +245,7 @@ function NicePaySettings({
             <div className="space-y-2">
               <span className="text-xs font-medium text-[#2E1C10]/60">필수 설정</span>
               
-              {healthCheck && Object.entries(healthCheck.nicepay.fields).map(([key, value]) => (
+              {healthCheck?.nicepay?.fields && Object.entries(healthCheck.nicepay.fields).map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between text-xs">
                   <span className="text-[#2E1C10]/70">{key}</span>
                   {value ? (

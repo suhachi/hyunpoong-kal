@@ -39,13 +39,13 @@ export async function getAdminSettings(): Promise<AdminSettings> {
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      const data = docSnap.data();
+      const data = docSnap.data() || {};
       return {
         delivery: data.delivery || DEFAULT_DELIVERY_SETTINGS,
         maps: data.maps || DEFAULT_MAPS_SETTINGS,
         fcm: data.fcm || DEFAULT_FCM_SETTINGS,
         operations: data.operations || DEFAULT_OPERATIONS_SETTINGS,
-        updatedAt: data.updatedAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate?.() || new Date(),
         updatedBy: data.updatedBy || '',
         updatedByName: data.updatedByName || '',
       };

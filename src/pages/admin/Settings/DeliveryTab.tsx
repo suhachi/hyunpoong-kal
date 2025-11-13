@@ -206,7 +206,7 @@ export function DeliveryTab() {
               <Label>최대 배달 거리 (km)</Label>
               <Input
                 type="number"
-                value={settings.maxDistanceKm}
+                value={settings?.maxDistanceKm ?? 5}
                 onChange={(e) => setSettings({
                   ...settings,
                   maxDistanceKm: parseFloat(e.target.value) || 0
@@ -222,7 +222,7 @@ export function DeliveryTab() {
             <div className="space-y-2">
               <Label>거리별 요금</Label>
               <div className="space-y-2">
-                {settings.feeTable.map((zone, index) => (
+                {(settings?.feeTable || []).map((zone, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
                       type="number"
@@ -262,7 +262,7 @@ export function DeliveryTab() {
                 <span className="text-sm text-[#2E1C10]/60">+</span>
                 <Input
                   type="number"
-                  value={settings.nightSurcharge}
+                  value={settings?.nightSurcharge ?? 0}
                   onChange={(e) => setSettings({
                     ...settings,
                     nightSurcharge: parseInt(e.target.value) || 0
