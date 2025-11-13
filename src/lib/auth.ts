@@ -4,6 +4,8 @@
  * USE_FIREBASE=true: Firebase Auth 사용
  */
 
+import { USE_FIREBASE } from '../config/env';
+
 export type UserRole = 'customer' | 'owner' | 'admin';
 
 export interface AuthUser {
@@ -13,9 +15,6 @@ export interface AuthUser {
   role: UserRole;
   storeId?: string; // owner인 경우 관리하는 매장 ID
 }
-
-// Firebase 사용 여부 (개발 시 false)
-const USE_FIREBASE = false;
 
 /**
  * Mock 인증 사용자 (개발용)
