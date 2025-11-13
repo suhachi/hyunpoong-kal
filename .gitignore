@@ -9,3 +9,8 @@ coverage/
 .vscode/
 .idea/
 playwright-report/
+
+# Encoding repair archive (DO NOT USE)
+encoding-fix.ps1
+encoding-fix-map.json
+encoding-issues.txt
