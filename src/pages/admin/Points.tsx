@@ -1,4 +1,5 @@
-﻿/**
+﻿// Route: /admin/points
+/**
  * 관리자 포인트 관리 페이지
  * Phase 3-3: Points System
  */
@@ -112,10 +113,11 @@ export function AdminPoints() {
   }
 
   // 통계 계산
-  const totalUsers = balances.length;
-  const totalPoints = balances.reduce((sum, b) => sum + b.balance, 0);
+  const safeBalances = balances || [];
+  const totalUsers = safeBalances.length;
+  const totalPoints = safeBalances.reduce((sum, b) => sum + b.balance, 0);
   const avgPoints = totalUsers > 0 ? Math.floor(totalPoints / totalUsers) : 0;
-  const activeUsers = balances.filter(b => b.balance > 0).length;
+  const activeUsers = safeBalances.filter(b => b.balance > 0).length;
 
   return (
     <div className="p-6 space-y-6">

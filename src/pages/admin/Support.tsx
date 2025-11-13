@@ -1,4 +1,5 @@
-﻿/**
+﻿// Route: /admin/support
+/**
  * 관리자 고객지원 채팅 관리 페이지
  * Phase 3-2: Support Chat
  * Firebase Firestore 실시간 채팅 시스템
@@ -478,17 +479,17 @@ export function AdminSupport() {
   }
 
   // 필터링된 세션
-  const filteredSessions = sessions.filter((s) => {
+  const filteredSessions = (sessions || []).filter((s) => {
     if (filterTab === 'open') return s.open;
     if (filterTab === 'closed') return !s.open;
     return true;
   });
 
   // 통계
-  const openSessions = sessions.filter((s) => s.open);
+  const openSessions = (sessions || []).filter((s) => s.open);
   const unreadCount = USE_FIREBASE 
     ? stats.pending 
-    : sessions.filter((s) => hasUnreadMessagesMock(s.id)).length;
+    : (sessions || []).filter((s) => hasUnreadMessagesMock(s.id)).length;
 
   return (
     <div className="space-y-6">

@@ -1,4 +1,5 @@
-﻿/**
+﻿// Route: /admin/analytics
+/**
  * 관리자 관제/메트릭 페이지
  * Phase 2-9: KPI 대시보드 + 차트
  */

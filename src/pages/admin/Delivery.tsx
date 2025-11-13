@@ -1,3 +1,4 @@
+// Route: /admin/delivery
 /**
  * 관리자 배달 관제 페이지
  * Phase 3-1: GPS Tracking
@@ -109,7 +110,7 @@ export function AdminDelivery() {
   }
 
   // 통계 계산
-  const activeTasks = tasks.filter(
+  const activeTasks = (tasks || []).filter(
     (t) => t.status !== 'completed' && t.status !== 'canceled'
   );
   const delayedTasks = activeTasks.filter((t) => {

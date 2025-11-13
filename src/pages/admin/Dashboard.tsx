@@ -1,3 +1,4 @@
+// Route: /admin
 import { useState, useEffect } from 'react';
 import { DollarSign, ShoppingBag, Star, TrendingUp } from 'lucide-react';
 import { StatCard } from '../../components/admin/common/StatCard';

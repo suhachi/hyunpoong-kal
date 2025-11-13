@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from 'react';
+﻿// Route: /admin/orders
+import { useState, useEffect } from 'react';
 import type { Order, OrderStatus } from '../../types/order';
 import { ORDER_STATUS_TRANSITIONS } from '../../types/order';
 import { Card } from '../../components/ui/card';

@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from 'react';
+﻿// Route: /admin/reviews
+import { useState, useEffect } from 'react';
 import { Star, Image as ImageIcon, Filter, SortAsc } from 'lucide-react';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -104,7 +105,7 @@ export function AdminReviews() {
   }
 
   function handleReply(reviewId: string) {
-    const review = reviews.find((r) => r.id === reviewId);
+    const review = (reviews || []).find((r) => r.id === reviewId);
     if (!review) return;
 
     setSelectedReview(review);

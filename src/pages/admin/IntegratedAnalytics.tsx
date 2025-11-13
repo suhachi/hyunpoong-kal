@@ -1,4 +1,5 @@
-﻿/**
+﻿// Route: /admin/integrated-analytics
+/**
  * 통합 분석 페이지
  * Phase 3-7: 통합 리포트
  */
@@ -226,7 +227,7 @@ export function IntegratedAnalytics() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {report.insights.map((insight, index) => (
+              {(report.insights || []).map((insight, index) => (
                 <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
                   <span className="text-[#D61C1C] mt-0.5">•</span>
                   <span>{insight}</span>
@@ -245,7 +246,7 @@ export function IntegratedAnalytics() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {report.recommendations.map((rec, index) => (
+              {(report.recommendations || []).map((rec, index) => (
                 <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
                   <span className="text-[#F37021] mt-0.5">✓</span>
                   <span>{rec}</span>
@@ -327,7 +328,7 @@ export function IntegratedAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {report.topMenus.map((menu, index) => (
+                {(report.topMenus || []).map((menu, index) => (
                   <div key={menu.menuId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <Badge variant="outline">{index + 1}</Badge>
