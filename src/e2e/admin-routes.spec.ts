@@ -1,6 +1,19 @@
+/**
+ * Admin Routes E2E Test
+ * 
+ * Phase 1 - T2-4: 관리자 라우트 스모크 테스트
+ * 
+ * 목적:
+ * - 관리자 11개 라우트가 에러 없이 렌더링되는지 확인
+ * - 콘솔 에러 감지
+ * - 기본 가시성 확인
+ * 
+ * @tag @admin
+ */
+
 import { test, expect } from '@playwright/test';
 
-// 관리자 접근에 필요한 mock 사용자 주입
+// Mock 관리자 사용자 (USE_FIREBASE=false 환경)
 const mockAdmin = {
   uid: 'admin-001',
   email: 'admin@hyunpungkalguksu.com',
@@ -9,56 +22,58 @@ const mockAdmin = {
   storeId: 'store-hyunpung',
 };
 
+// 테스트 대상 관리자 라우트 (11개)
 const routes = [
-  '/admin',
-  '/admin/orders',
-  '/admin/menus',
-  '/admin/reviews',
-  '/admin/analytics',
-  '/admin/integrated-analytics',
-  '/admin/delivery',
-  '/admin/promotions',
-  '/admin/points',
-  '/admin/support',
-  '/admin/settings',
+  { path: '/admin', name: 'Dashboard' },
+  { path: '/admin/orders', name: 'Orders' },
+  { path: '/admin/menus', name: 'Menus' },
+  { path: '/admin/reviews', name: 'Reviews' },
+  { path: '/admin/analytics', name: 'Analytics' },
+  { path: '/admin/integrated-analytics', name: 'IntegratedAnalytics' },
+  { path: '/admin/delivery', name: 'Delivery' },
+  { path: '/admin/promotions', name: 'Promotions' },
+  { path: '/admin/points', name: 'Points' },
+  { path: '/admin/support', name: 'Support' },
+  { path: '/admin/settings', name: 'Settings' },
 ];
 
-test.describe('Admin Routes', () => {
+test.describe('Admin Routes @admin', () => {
   test.beforeEach(async ({ page }) => {
-    // 콘솔 에러 감시를 위해 리스너 설치
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') errors.push(msg.text());
-    });
-
-    // 첫 네비게이션 전 localStorage에 mock 주입
+    // 첫 네비게이션 전 localStorage에 mock 사용자 주입
     await page.addInitScript((admin) => {
       localStorage.setItem('mockUser', JSON.stringify(admin));
       localStorage.setItem('mockRole', 'owner');
     }, mockAdmin);
   });
 
-  for (const path of routes) {
-    test(`renders ${path} without red console errors`, async ({ page }) => {
+  for (const route of routes) {
+    test(`renders ${route.path} (${route.name}) without console errors`, async ({ page }) => {
+      // 콘솔 에러 수집
       const errors: string[] = [];
       page.on('console', (msg) => {
-        if (msg.type() === 'error') errors.push(msg.text());
+        if (msg.type() === 'error') {
+          errors.push(msg.text());
+        }
       });
 
-      const res = await page.goto(path, { waitUntil: 'domcontentloaded' });
-      expect(res?.ok()).toBeTruthy();
+      // 페이지 네비게이션
+      const res = await page.goto(route.path, { waitUntil: 'domcontentloaded' });
+      expect(res?.ok(), `HTTP response for ${route.path}`).toBeTruthy();
 
-      // 기본 가시성 확인(바디 표기)
+      // 기본 가시성 확인 (body가 렌더링되었는지)
       await expect(page.locator('body')).toBeVisible();
 
-      // 네트워크 안정화 대기
+      // 네트워크 안정화 대기 (Mock API 응답 포함)
       await page.waitForLoadState('networkidle');
 
-      // 빨간 에러가 없는지 확인
+      // 최소 100ms 대기 (렌더링 완료 보장)
+      await page.waitForTimeout(100);
+
+      // 콘솔 에러 검증
       if (errors.length > 0) {
-        console.error(`Console errors on ${path}:\n` + errors.join('\n'));
+        console.error(`\n❌ Console errors on ${route.path}:\n` + errors.join('\n'));
       }
-      expect(errors, `Console errors on ${path}`).toEqual([]);
+      expect(errors, `No console errors on ${route.path}`).toEqual([]);
     });
   }
 });

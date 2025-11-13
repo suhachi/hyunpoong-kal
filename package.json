@@ -71,6 +71,12 @@
       },
       "scripts": {
             "dev": "vite",
-            "build": "vite build"
+            "build": "vite build",
+            "test:e2e": "playwright test -c src/playwright.config.ts",
+            "test:e2e:admin": "playwright test -c src/playwright.config.ts --project=chromium --grep @admin",
+            "test:e2e:admin:routes": "playwright test -c src/playwright.config.ts admin-routes.spec.ts --project=chromium",
+            "test:e2e:admin:settings": "playwright test -c src/playwright.config.ts admin-settings.spec.ts --project=chromium",
+            "test:e2e:ui": "playwright test -c src/playwright.config.ts --ui",
+            "test:e2e:report": "playwright show-report"
       }
 }
