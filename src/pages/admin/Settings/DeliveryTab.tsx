@@ -64,7 +64,7 @@ export function DeliveryTab() {
       await saveAdminSettings(
         { delivery: settings },
         user.uid,
-        user.name
+        user.displayName
       );
       setOriginalSettings(settings);
       toast.success('설정을 저장했습니다');
