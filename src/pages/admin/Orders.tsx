@@ -329,7 +329,7 @@ export function AdminOrders() {
               />
             </div>
 
-            {cancelDialog.order?.payment.method !== 'on_site' && (
+            {cancelDialog.order?.payment?.method !== 'on_site' && (
               <div className="p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
                 ⚠️ 결제가 승인된 주문입니다. 취소 시 자동으로 환불 처리됩니다.
               </div>

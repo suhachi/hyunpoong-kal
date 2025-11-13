@@ -125,6 +125,18 @@ interface SidebarNavProps {
 }
 
 function SidebarNav({ onItemClick }: SidebarNavProps) {
+  // Admin Sidebar 메뉴 목록 (현재 기준)
+  // 1) 대시보드              /admin
+  // 2) 주문 관리             /admin/orders
+  // 3) 배달 관제             /admin/delivery
+  // 4) 고객 지원             /admin/support
+  // 5) 리뷰 관리             /admin/reviews
+  // 6) 메뉴 관리             /admin/menus
+  // 7) 쿠폰/프로모션         /admin/promotions
+  // 8) 포인트 관리           /admin/points
+  // 9) 관제 대시보드(분석)    /admin/analytics
+  // 10) 통합 리포트          /admin/integrated-analytics
+  // 11) 설정                 /admin/settings
   const navItems = [
     { to: '/admin', icon: LayoutDashboard, label: '대시보드', end: true },
     { to: '/admin/orders', icon: ShoppingBag, label: '주문 관리' },
