@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 배달 대행사 설정 탭
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
@@ -21,7 +21,7 @@ import {
   Truck,
   Terminal,
 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { getAdminSettings, saveAdminSettings } from '../../../lib/admin/settingsCenter.api';
 import { formatPrice } from '../../../lib/utils';
 import { getCurrentUser } from '../../../lib/auth';

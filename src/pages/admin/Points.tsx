@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 관리자 포인트 관리 페이지
  * Phase 3-3: Points System
  */
@@ -32,7 +32,7 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { StatCard } from '../../components/admin/common/StatCard';
 import { getAllPointsBalances, adjustPoints, POINTS_POLICY } from '../../lib/points.api';
 import { FEATURE_FLAGS } from '../../config/env';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { PointsBalance } from '../../types/points';
 import { formatPrice } from '../../lib/utils';
 

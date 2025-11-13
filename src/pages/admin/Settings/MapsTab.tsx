@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 지도/지오코딩 설정 탭
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
@@ -9,7 +9,7 @@ import { Badge } from '../../../components/ui/badge';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { Separator } from '../../../components/ui/separator';
 import { CheckCircle2, XCircle, AlertCircle, Copy, Download, Map as MapIcon } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export function MapsTab() {
   // 환경 변수 확인 (Figma Make 호환)

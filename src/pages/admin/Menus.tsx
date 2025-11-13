@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 관리자 메뉴 관리 페이지
  * Phase 2-6: 목록/검색/필터/품절 토글/시간제 설정/가격·설명 수정
  */
@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from '../../components/ui/select';
 import { Search, RefreshCw, Plus, Upload } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export function AdminMenus() {
   const [menus, setMenus] = useState<Menu[]>([]);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 옵션 그룹 관리 컴포넌트
  * 관리자가 옵션 그룹과 옵션 항목을 생성/수정/삭제
  */
@@ -37,7 +37,7 @@ import {
 } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { Plus, Edit2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import {
   Collapsible,
   CollapsibleContent,

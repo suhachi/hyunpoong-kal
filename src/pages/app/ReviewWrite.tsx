@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Upload, X, Image as ImageIcon, Loader2, Gift } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Card } from '../../components/ui/card';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import {
   processImages,
   validateImageFiles,

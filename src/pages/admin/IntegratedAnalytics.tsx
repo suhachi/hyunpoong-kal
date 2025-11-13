@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 통합 분석 페이지
  * Phase 3-7: 통합 리포트
  */
@@ -21,7 +21,7 @@ import {
   Bell,
   Calendar,
 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import {
   BarChart,
   Bar,

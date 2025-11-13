@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 결제 설정 탭 (NICEPAY / 토스페이먼츠)
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
@@ -21,7 +21,7 @@ import {
   FileText,
   CreditCard,
 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { checkFunctionsHealth } from '../../../lib/admin/settingsCenter.api';
 import type { FunctionsHealthCheck } from '../../../types/adminSettings';
 

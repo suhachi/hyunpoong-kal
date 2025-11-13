@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 고객 지원 1:1 채팅 페이지
  * Phase 3-2: Support Chat
  */
@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
 import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
 import type { ChatSession, ChatMessage, MessageSender } from '../../types/support';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 // 운영 시간 체크
 function isBusinessHours(): boolean {

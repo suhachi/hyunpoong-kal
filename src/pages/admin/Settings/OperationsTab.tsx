@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 운영/보안 설정 탭
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
@@ -8,7 +8,7 @@ import { Button } from '../../../components/ui/button';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { Separator } from '../../../components/ui/separator';
 import { Shield, Terminal, Copy, FileText, Rocket } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export function OperationsTab() {
   // 배포 스크립트

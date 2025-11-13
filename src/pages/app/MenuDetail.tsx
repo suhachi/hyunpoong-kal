@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingCart, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -8,7 +8,7 @@ import { Checkbox } from '../../components/ui/checkbox';
 import { Label } from '../../components/ui/label';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { useCart } from '../../contexts/CartContext';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import menusData from '../../data/menus.json';
 import type { Menu } from '../../types/menu';
 import { formatPrice } from '../../lib/utils';

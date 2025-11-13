@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 알림함 페이지
  * 푸시 알림 내역 조회 및 관리
  * Phase 3-6: 푸시 알림 시스템
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Bell, BellOff, CheckCheck, ArrowLeft, Settings } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import {
   getNotifications,
   markAsRead,

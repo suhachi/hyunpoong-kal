@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 마이페이지
  * 고객 정보 및 주요 기능 접근 허브
  * 
@@ -11,7 +11,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { User, ShoppingBag, Ticket, Gift, Bell, MessageSquare, LogOut, Settings } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from 'sonner';
 
 export function My() {
   const { user, signOut } = useAuth();

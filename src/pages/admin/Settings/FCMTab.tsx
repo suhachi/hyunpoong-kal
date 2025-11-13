@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FCM 알림 설정 탭
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
@@ -10,7 +10,7 @@ import { Badge } from '../../../components/ui/badge';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { Separator } from '../../../components/ui/separator';
 import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { runFCMDiagnostics } from '../../../lib/admin/settingsCenter.api';
 import type { DiagnosticResult } from '../../../types/adminSettings';
 

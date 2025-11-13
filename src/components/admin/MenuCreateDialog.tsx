@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 메뉴 등록 다이얼로그
  * Phase 2-6: 신규 메뉴 생성 폼
  * 옵션 그룹을 동적으로 선택하고 사용
@@ -32,7 +32,7 @@ import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, X, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { formatPrice } from '../../lib/utils';
 
 interface MenuCreateDialogProps {

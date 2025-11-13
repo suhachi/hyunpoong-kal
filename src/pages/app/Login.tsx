@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 로그인 페이지
  * 이메일 로그인 / 구글 로그인 지원
  * 
@@ -16,7 +16,7 @@ import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Separator } from '../../components/ui/separator';
 import { ChickenIcon } from '../../components/icons';
 import { LogIn, Mail, Lock, Chrome, AlertCircle, Loader2 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { DEBUG } from '../../config/env';
 
 export function Login() {

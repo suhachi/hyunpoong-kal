@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import type { Order, OrderStatus } from '../../types/order';
 import { ORDER_STATUS_TRANSITIONS } from '../../types/order';
 import { Card } from '../../components/ui/card';
@@ -33,7 +33,7 @@ import {
   type OrderSortDirection,
 } from '../../lib/admin/orders.api';
 import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);

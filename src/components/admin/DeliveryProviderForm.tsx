@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 배달대행사 API 설정 폼
  * 관리자가 배달대행사 API 정보를 입력하고 연동 테스트
  */
@@ -23,7 +23,7 @@ import {
   TestTube
 } from 'lucide-react';
 import { DeliveryProviderSettings } from '../../types/settings';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface DeliveryProviderFormProps {
   value: DeliveryProviderSettings;

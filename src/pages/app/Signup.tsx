@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 회원가입 페이지
  * 이메일 가입 / 구글 가입 지원
  * 
@@ -17,7 +17,7 @@ import { Separator } from '../../components/ui/separator';
 import { Checkbox } from '../../components/ui/checkbox';
 import { ChickenIcon } from '../../components/icons';
 import { UserPlus, Mail, Lock, User, Chrome, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export function Signup() {
   const navigate = useNavigate();

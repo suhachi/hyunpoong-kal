@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Phone, CheckCircle2, Clock, Loader2, XCircle, AlertCircle, Receipt, Download, MapPin, Navigation, Gift } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -17,7 +17,7 @@ import { Input } from '../../components/ui/input';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { PriceBreakdown } from '../../components/shared/PriceBreakdown';
 import { generateReceipt, requestCashReceipt } from '../../lib/functions';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { delivery, isDeliveryEnabled } from '../../lib/delivery';
 import { earnPoints, calculateEarnPoints } from '../../lib/points.api';
 import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';

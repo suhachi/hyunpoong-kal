@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 관리자 고객지원 채팅 관리 페이지
  * Phase 3-2: Support Chat
  * Firebase Firestore 실시간 채팅 시스템
@@ -31,7 +31,7 @@ import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
 import { formatDateTime } from '../../lib/utils';
 import { getCurrentUser } from '../../lib/auth';
 import type { ChatSession, ChatMessage } from '../../types/support';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 // Firebase API (실제 환경에서 사용)
 import {

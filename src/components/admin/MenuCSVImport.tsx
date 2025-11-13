@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 메뉴 CSV 일괄 등록
  * Phase 2-6: CSV 파일로 메뉴 대량 등록
  */
@@ -18,7 +18,7 @@ import { Input } from '../ui/input';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { formatPrice } from '../../lib/utils';
 
 interface CSVRow {

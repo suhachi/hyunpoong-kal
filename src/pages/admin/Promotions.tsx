@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 관리자 쿠폰/프로모션 관리 페이지
  * Phase 2-8: 쿠폰 발급 및 통계
  */
@@ -11,7 +11,7 @@ import { StatCard } from '../../components/admin/common/StatCard';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
 import { Plus, Ticket } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,

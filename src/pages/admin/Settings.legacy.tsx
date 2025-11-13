@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 레거시 관리자 설정 페이지 (백업)
  * Phase 2-7: 영업시간/배달비/최소주문/크레딧
  * 
@@ -19,7 +19,7 @@ import { DeliveryProviderForm } from '../../components/admin/DeliveryProviderFor
 import { Button } from '../../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Save, RotateCcw } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { DEFAULT_DELIVERY_PROVIDER_SETTINGS } from '../../types/settings';
 
 export function AdminSettingsLegacy() {

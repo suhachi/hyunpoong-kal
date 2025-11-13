@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Modal } from './common/Modal';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { Review } from '../../types/review';
 
 export interface ReplyModalProps {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Wallet, HandCoins, Loader2, AlertCircle, Gift } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -10,7 +10,7 @@ import { Separator } from '../../components/ui/separator';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Switch } from '../../components/ui/switch';
 import { useCart } from '../../contexts/CartContext';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { getPointsBalance, spendPoints, POINTS_POLICY } from '../../lib/points.api';
 import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
 import type { PaymentMethod } from '../../types/order';

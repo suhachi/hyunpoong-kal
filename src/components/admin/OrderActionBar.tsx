@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 import { Bell, Printer, Download } from 'lucide-react';
 import { Button } from '../ui/button';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { generateReceipt } from '../../lib/functions';
 import type { Order } from '../../types/order';
 
