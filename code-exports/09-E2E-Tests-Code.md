@@ -1,3 +1,169 @@
+# E2E Tests - Full Source Code
+
+**Generated**: 2025-11-14-1904  
+**Project**: hyunpoong-kal  
+**Company**: KS Company (BRN: 553-17-00098)
+
+---
+
+## Overview
+
+Complete source code of Playwright E2E tests.
+
+---
+## src\playwright.config.ts
+
+```typescript
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Playwright E2E 테스트 설정
+ * KS컴퍼니 (사업자번호: 553-17-00098)
+ */
+
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+  ],
+  use: {
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+  ],
+
+  webServer: {
+    command: 'pnpm dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
+});
+
+```
+
+---
+
+## src\e2e\admin-routes.spec.ts
+
+```typescript
+/**
+ * Admin Routes E2E Test
+ * 
+ * Phase 1 - T2-4: 관리자 라우트 스모크 테스트
+ * 
+ * 목적:
+ * - 관리자 11개 라우트가 에러 없이 렌더링되는지 확인
+ * - 콘솔 에러 감지
+ * - 기본 가시성 확인
+ * 
+ * @tag @admin
+ */
+
+import { test, expect } from '@playwright/test';
+
+// Mock 관리자 사용자 (USE_FIREBASE=false 환경)
+const mockAdmin = {
+  uid: 'admin-001',
+  email: 'admin@hyunpungkalguksu.com',
+  displayName: '관리자',
+  role: 'owner',
+  storeId: 'store-hyunpung',
+};
+
+// 테스트 대상 관리자 라우트 (11개)
+const routes = [
+  { path: '/admin', name: 'Dashboard' },
+  { path: '/admin/orders', name: 'Orders' },
+  { path: '/admin/menus', name: 'Menus' },
+  { path: '/admin/reviews', name: 'Reviews' },
+  { path: '/admin/analytics', name: 'Analytics' },
+  { path: '/admin/integrated-analytics', name: 'IntegratedAnalytics' },
+  { path: '/admin/delivery', name: 'Delivery' },
+  { path: '/admin/promotions', name: 'Promotions' },
+  { path: '/admin/points', name: 'Points' },
+  { path: '/admin/support', name: 'Support' },
+  { path: '/admin/settings', name: 'Settings' },
+];
+
+test.describe('Admin Routes @admin', () => {
+  test.beforeEach(async ({ page }) => {
+    // 첫 네비게이션 전 localStorage에 mock 사용자 주입
+    await page.addInitScript((admin) => {
+      localStorage.setItem('mockUser', JSON.stringify(admin));
+      localStorage.setItem('mockRole', 'owner');
+    }, mockAdmin);
+  });
+
+  for (const route of routes) {
+    test(`renders ${route.path} (${route.name}) without console errors`, async ({ page }) => {
+      // 콘솔 에러 수집
+      const errors: string[] = [];
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') {
+          errors.push(msg.text());
+        }
+      });
+
+      // 페이지 네비게이션
+      const res = await page.goto(route.path, { waitUntil: 'domcontentloaded' });
+      expect(res?.ok(), `HTTP response for ${route.path}`).toBeTruthy();
+
+      // 기본 가시성 확인 (body가 렌더링되었는지)
+      await expect(page.locator('body')).toBeVisible();
+
+      // 네트워크 안정화 대기 (Mock API 응답 포함)
+      await page.waitForLoadState('networkidle');
+
+      // 최소 100ms 대기 (렌더링 완료 보장)
+      await page.waitForTimeout(100);
+
+      // 콘솔 에러 검증
+      if (errors.length > 0) {
+        console.error(`\n❌ Console errors on ${route.path}:\n` + errors.join('\n'));
+      }
+      expect(errors, `No console errors on ${route.path}`).toEqual([]);
+    });
+  }
+});
+
+```
+
+---
+
+## src\e2e\admin-settings.spec.ts
+
+```typescript
 /**
  * Admin Settings E2E Test
  * 
@@ -67,7 +233,7 @@ test.describe('Admin Settings Pages @admin', () => {
       await page.waitForTimeout(100);
     }
 
-    // NicePay 설정 UI 확인
+    // NicePay/Toss 선택 UI 확인
     await expect(page.getByText(/NicePay|나이스페이/i)).toBeVisible();
 
     // 에러 검증
@@ -177,3 +343,7 @@ test.describe('Admin Settings Pages @admin', () => {
     expect(errors, 'No console errors during all tabs switching').toEqual([]);
   });
 });
+
+```
+
+---
