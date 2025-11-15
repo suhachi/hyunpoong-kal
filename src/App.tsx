@@ -10,6 +10,7 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Toaster } from './components/ui/sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -53,8 +54,21 @@ import { AdminPoints } from './pages/admin/Points';
 // 개발 도구
 import { DevTools } from './pages/DevTools';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
+import { ensureFcmToken, FCM_TOKEN_KEY } from './lib/fcm';
 
 export default function App() {
+  // T2-9: 앱 진입 시 1회 FCM 토큰 보장 시도 (Mock 우선)
+  useEffect(() => {
+    try {
+      const existing = localStorage.getItem(FCM_TOKEN_KEY);
+      if (!existing) {
+        ensureFcmToken().catch((err) => console.error('[FCM] ensureFcmToken error', err));
+      }
+    } catch (e) {
+      console.warn('[FCM] 초기 토큰 확인 실패:', e);
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>

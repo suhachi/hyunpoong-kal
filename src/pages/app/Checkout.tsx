@@ -31,7 +31,7 @@ export function Checkout() {
     clearCart,
   } = useCart();
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('on_site');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -394,28 +394,6 @@ export function Checkout() {
         <div>
           <h2 className="text-[#2E1C10] mb-3">결제 수단</h2>
           <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
-            <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="card" id="card" />
-              <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer flex-1">
-                <CreditCard className="w-5 h-5 text-[#D61C1C]" />
-                <div>
-                  <p className="text-[#2E1C10]">신용/체크카드</p>
-                  <p className="text-sm text-[#2E1C10]/60">NICEPAY 안전 결제</p>
-                </div>
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="easy_pay" id="easy_pay" />
-              <Label htmlFor="easy_pay" className="flex items-center gap-2 cursor-pointer flex-1">
-                <Wallet className="w-5 h-5 text-[#F37021]" />
-                <div>
-                  <p className="text-[#2E1C10]">간편결제</p>
-                  <p className="text-sm text-[#2E1C10]/60">카카오페이, 네이버페이 등</p>
-                </div>
-              </Label>
-            </div>
-
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
               <RadioGroupItem value="on_site" id="on_site" />
               <Label htmlFor="on_site" className="flex items-center gap-2 cursor-pointer flex-1">

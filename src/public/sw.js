@@ -112,7 +112,7 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// 푸시 알림 (향후 확장)
+// T2-9: FCM 푸시 알림(Mock) 뼈대
 self.addEventListener('push', (event) => {
   console.log('[SW] 푸시 알림 수신:', event);
   

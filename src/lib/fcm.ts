@@ -31,7 +31,7 @@ export async function requestNotificationPermission(
     // Mock: localStorage에 권한 상태 저장
     localStorage.setItem('notification_permission', 'granted');
     const mockToken = `mock-fcm-token-${userId}-${Date.now()}`;
-    localStorage.setItem('fcm_token', mockToken);
+    localStorage.setItem(FCM_TOKEN_KEY, mockToken);
     
     return mockToken;
   }
@@ -46,18 +46,29 @@ export async function requestNotificationPermission(
     }
 
     // Firebase Messaging 설정
-    const { getToken } = await import('firebase/messaging');
-    const { messaging } = await import('./firebase');
-    const vapidKey = getMetaEnv('VITE_FIREBASE_VAPID_KEY');
+    const { getToken, getMessaging, isSupported } = await import('firebase/messaging');
+    const firebaseApp = (await import('./firebase')).default;
+    const vapidKey = getMetaEnv('VITE_FCM_VAPID_KEY') || getMetaEnv('VITE_FIREBASE_VAPID_KEY');
     
     if (!vapidKey) {
       console.error('VAPID key not configured');
       return null;
     }
-    
+    if (!(await isSupported())) {
+      console.error('FCM is not supported in this browser');
+      return null;
+    }
+    if (!firebaseApp) {
+      console.error('Firebase app is not initialized');
+      return null;
+    }
+    const messaging = getMessaging(firebaseApp as any);
+
     const token = await getToken(messaging, {
       vapidKey,
     });
+    // 로컬에도 저장 (개발 편의)
+    localStorage.setItem(FCM_TOKEN_KEY, token);
 
     // Firestore에 토큰 저장
     const { doc, setDoc } = await import('firebase/firestore');
@@ -75,6 +86,60 @@ export async function requestNotificationPermission(
     return token;
   } catch (error) {
     console.error('Failed to get FCM token:', error);
+    return null;
+  }
+}
+
+// T2-9: FCM 토큰 발급 보장(모크 우선) + localStorage 저장
+export const FCM_TOKEN_KEY = 'hp_kal_fcm_token';
+
+export async function ensureFcmToken(): Promise<string | null> {
+  try {
+    const existing = localStorage.getItem(FCM_TOKEN_KEY);
+    if (existing) return existing;
+
+    if (!('Notification' in window)) {
+      console.warn('[FCM] Notification API not supported');
+      return null;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('[FCM] Notification permission not granted:', permission);
+      return null;
+    }
+
+    if (!USE_FIREBASE) {
+      const mock = `mock-fcm-token-${Date.now()}`;
+      localStorage.setItem(FCM_TOKEN_KEY, mock);
+      console.info('[FCM] Mock token stored:', mock);
+      return mock;
+    }
+
+    const { getToken, getMessaging, isSupported } = await import('firebase/messaging');
+    const firebaseApp = (await import('./firebase')).default;
+    if (!(await isSupported())) {
+      console.warn('[FCM] Messaging not supported in this browser');
+      return null;
+    }
+    if (!firebaseApp) {
+      console.warn('[FCM] Firebase app not initialized');
+      return null;
+    }
+    const messaging = getMessaging(firebaseApp as any);
+    const vapidKey = getMetaEnv('VITE_FCM_VAPID_KEY') || getMetaEnv('VITE_FIREBASE_VAPID_KEY');
+    if (!vapidKey) {
+      console.warn('[FCM] VAPID key not configured');
+      return null;
+    }
+    const token = await getToken(messaging, { vapidKey });
+    if (token) {
+      localStorage.setItem(FCM_TOKEN_KEY, token);
+      console.info('[FCM] Token stored:', token);
+    }
+    return token ?? null;
+  } catch (err) {
+    console.error('[FCM] ensureFcmToken error:', err);
     return null;
   }
 }
@@ -124,8 +189,13 @@ export async function setupForegroundMessageListener(
   }
 
   try {
-    const { onMessage: onFCMMessage } = await import('firebase/messaging');
-    const { messaging } = await import('./firebase');
+    const { onMessage: onFCMMessage, getMessaging, isSupported } = await import('firebase/messaging');
+    const firebaseApp = (await import('./firebase')).default;
+    if (!(await isSupported()) || !firebaseApp) {
+      console.warn('[FCM] Messaging not supported or app not initialized');
+      return null;
+    }
+    const messaging = getMessaging(firebaseApp as any);
     const unsubscribe = onFCMMessage(messaging, (payload) => {
       console.log('Foreground message received:', payload);
       onMessage(payload);
