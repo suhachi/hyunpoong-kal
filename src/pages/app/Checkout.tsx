@@ -12,6 +12,7 @@ import { Switch } from '../../components/ui/switch';
 import { useCart } from '../../contexts/CartContext';
 import { toast } from 'sonner';
 import { getPointsBalance, spendPoints, POINTS_POLICY } from '../../lib/points.api';
+import { ordersRepository } from '../../lib/orders.repository';
 import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
 import type { PaymentMethod } from '../../types/order';
 import { CheckoutSummary } from '../../components/app/CheckoutSummary';
@@ -27,7 +28,6 @@ export function Checkout() {
     couponDiscount,
     getSubtotal,
     getDeliveryFee,
-    getTotalAmount,
     clearCart,
   } = useCart();
 
@@ -181,10 +181,25 @@ export function Checkout() {
           createdAt: new Date().toISOString(),
         };
 
-        // localStorage에 저장
-        const orders = JSON.parse(localStorage.getItem('orders') || '{}');
-        orders[orderId] = orderData;
-        localStorage.setItem('orders', JSON.stringify(orders));
+        // local development: create order via OrdersRepository (localStorage-backed)
+        const newOrder = await ordersRepository.createOrder({
+          storeId: 'store-hyunpung',
+          userId: uid,
+          items: orderData.items,
+          subtotal,
+          discount: couponDiscount,
+          couponId: undefined,
+          deliveryFee,
+          finalAmount: totalAmount,
+          deliveryType,
+          deliveryAddress: deliveryType === 'delivery' ? deliveryAddress : undefined,
+          phone,
+          email: email || undefined,
+          requests: requests || undefined,
+          payment: orderData.payment,
+        });
+        // NOTE: newOrder.orderId contains the id used by repository
+        const createdId = newOrder.orderId;
 
         // 장바구니 비우기
         clearCart();
@@ -192,10 +207,10 @@ export function Checkout() {
         // 성공 메시지
         if (paymentMethod === 'on_site') {
           toast.success('주문이 접수되었습니다');
-          navigate(`/order/${orderId}?result=on_site`);
+          navigate(`/order/${createdId}?result=on_site`);
         } else {
           toast.success('결제가 완료되었습니다');
-          navigate(`/order/${orderId}?result=success`);
+          navigate(`/order/${createdId}?result=success`);
         }
       }
     } catch (error) {
@@ -215,8 +230,11 @@ export function Checkout() {
             결제
           </h1>
           <p className="text-[#2E1C10]/60">
-            결제 정보를 입력해 주세요
-          </p>
+              결제 정보를 입력해 주세요
+            </p>
+            <Alert className="mt-3">
+              현재 이 앱은 실제 PG 연동 없이 Mock 기반 주문 생성만 지원합니다. (결제는 Phase 3 이후 연동 예정)
+            </Alert>
         </div>
 
         {/* 주문 요약 */}

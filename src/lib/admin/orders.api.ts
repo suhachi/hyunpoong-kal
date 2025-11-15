@@ -4,6 +4,7 @@
  */
 
 import type { Order, OrderStatus, OrderLog } from '../../types/order';
+import { ordersRepository } from '../orders.repository';
 
 // 환경 플래그
 const USE_FIREBASE = false;
@@ -301,6 +302,18 @@ export async function fetchOrders(
   if (!USE_FIREBASE) {
     // Mock 데이터 필터링
     let filtered = mockOrders.filter((order) => order.storeId === storeId);
+    // localStorage 기반 주문도 합치기
+    try {
+      const localOrders = await ordersRepository.listOrdersByStore(storeId);
+      // convert to a map by orderId to override mockOrders with local orders if same id
+      const map = new Map(filtered.map((o) => [o.orderId, o]));
+      for (const o of localOrders) {
+        map.set(o.orderId, o);
+      }
+      filtered = Array.from(map.values());
+    } catch (e) {
+      // ignore repository failure
+    }
 
     // 상태 필터
     if (filters.status && filters.status !== 'all') {
@@ -375,6 +388,12 @@ export async function updateOrderStatus(
   reason?: string
 ): Promise<{ success: boolean; error?: string }> {
   if (!USE_FIREBASE) {
+    // Try localStorage repo first
+    const localOrder = await ordersRepository.updateStatus(orderId, newStatus);
+    if (localOrder) {
+      return { success: true };
+    }
+
     const order = mockOrders.find((o) => o.orderId === orderId);
     if (!order) {
       return { success: false, error: '주문을 찾을 수 없습니다' };

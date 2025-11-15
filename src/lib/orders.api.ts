@@ -5,6 +5,7 @@
 
 import { db } from './firebase';
 import { USE_FIREBASE } from '../config/env';
+import { ordersRepository } from './orders.repository';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import type { Order, OrderStatus } from '../types/order';
 
@@ -13,12 +14,9 @@ import type { Order, OrderStatus } from '../types/order';
  */
 export async function getOrdersByUser(userId: string): Promise<Order[]> {
   if (!USE_FIREBASE) {
-    // Mock 모드: localStorage에서 조회
+    // Mock 모드: localStorage에서 조회 via repository
     try {
-      const orders = JSON.parse(localStorage.getItem('orders') || '{}');
-      
-      // 객체를 배열로 변환하고 시간순 정렬
-      const orderList = Object.values(orders) as Order[];
+      const orderList = await ordersRepository.listOrdersByUser(userId);
       
       // 최신순 정렬
       orderList.sort((a, b) => {
@@ -64,7 +62,8 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
   if (!USE_FIREBASE) {
     try {
       const orders = JSON.parse(localStorage.getItem('orders') || '{}');
-      return Promise.resolve(orders[orderId] || null);
+      const found = orders[orderId] || null;
+      return Promise.resolve(found);
     } catch (error) {
       console.error('Failed to load order from localStorage:', error);
       return Promise.resolve(null);

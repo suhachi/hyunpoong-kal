@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+test.describe('Order Flow (Mock)', () => {
+  test('Customer can create order (checkout → order tracking) - stub', async ({ page }) => {
+    // TODO: Implement steps once environment and fixtures are stable.
+    test.skip(true, 'Stub test for Phase2: implement when test fixtures ready');
+  });
+
+  test('Admin sees order on /admin/orders - stub', async ({ page }) => {
+    test.skip(true, 'Stub test for Phase2: implement when admin login and fixtures available');
+  });
+});
+import { test, expect } from '@playwright/test';
+
 /**
  * 주문 플로우 E2E 테스트
  * KS컴퍼니 (사업자번호: 553-17-00098)

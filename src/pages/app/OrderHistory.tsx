@@ -27,7 +27,7 @@ import { formatPrice } from '../../lib/utils';
 
 type FilterStatus = OrderStatus | 'all' | 'reviewable';
 
-const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
+const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
   pending: { label: '결제대기', variant: 'outline', color: 'text-gray-500' },
   accepted: { label: '접수완료', variant: 'default', color: 'text-green-600' },
   preparing: { label: '조리중', variant: 'secondary', color: 'text-orange-600' },

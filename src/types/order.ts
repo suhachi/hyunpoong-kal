@@ -8,11 +8,17 @@ type FirebaseTimestamp = {
 };
 
 export type OrderStatus = 
-  | 'pending'    // 주문 접수 대기
-  | 'accepted'   // 접수 확인
-  | 'preparing'  // 조리 중
-  | 'completed'  // 완료
-  | 'canceled';  // 취소
+  | 'pending'        // 주문 접수 대기
+  | 'placed'         // 주문 생성 / 접수 대기 (간헐적 표현 존재)
+  | 'accepted'       // 접수 확인
+  | 'preparing'      // 조리 중 (legacy)
+  | 'cooking'        // 조리 중 (현재 일부 페이지에서 사용)
+  | 'out_for_delivery' // 배달 중
+  | 'pickup_ready'   // 포장 완료 (픽업 준비됨)
+  | 'completed'      // 완료
+  | 'done'           // 완료 (legacy/alternate)
+  | 'canceled'       // 취소
+  | 'payment_failed'; // 결제 실패 (edge case)
 
 export type PaymentMethod = 
   | 'card'        // 신용/체크카드
@@ -101,8 +107,9 @@ export interface Order {
     companyName: string;
   };
   
-  createdAt: FirebaseTimestamp;
-  updatedAt: FirebaseTimestamp;
+  // Firestore uses FirebaseTimestamp, local mock uses ISO string
+  createdAt: FirebaseTimestamp | string;
+  updatedAt: FirebaseTimestamp | string;
 }
 
 // 주문 로그 (감사 추적)
@@ -121,9 +128,15 @@ export interface OrderLog {
 
 // 주문 상태 전이 가드
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  pending: ['accepted', 'canceled'],
-  accepted: ['preparing', 'canceled'],
+  pending: ['accepted', 'canceled', 'payment_failed'],
+  placed: ['accepted', 'canceled'],
+  accepted: ['preparing', 'cooking', 'out_for_delivery', 'canceled'],
   preparing: ['completed', 'canceled'],
-  completed: [],  // 완료 후 변경 불가
-  canceled: [],   // 취소 후 변경 불가
+  cooking: ['out_for_delivery', 'completed', 'canceled'],
+  out_for_delivery: ['completed', 'canceled'],
+  pickup_ready: ['completed', 'canceled'],
+  completed: [],
+  done: [],
+  canceled: [],
+  payment_failed: ['pending', 'canceled'],
 };

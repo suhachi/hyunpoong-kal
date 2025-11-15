@@ -72,7 +72,7 @@ interface LocalOrder {
   pointsEarned?: number; // 적립된 포인트 (완료 시)
 }
 
-const statusConfig: Record<OrderStatus, { label: string; icon: any; color: string }> = {
+const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   pending: { label: '결제 대기', icon: Clock, color: 'text-gray-500' },
   payment_failed: { label: '결제 실패', icon: XCircle, color: 'text-red-500' },
   placed: { label: '주문 접수', icon: CheckCircle2, color: 'text-green-500' },

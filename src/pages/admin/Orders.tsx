@@ -181,6 +181,11 @@ export function AdminOrders() {
       <div>
         <h1 className="text-2xl text-[#333] mb-2">주문 관리</h1>
         <p className="text-[#8B7355]">실시간 주문 현황을 확인하고 상태를 관리하세요</p>
+        <div className="mt-2">
+          <Alert className="border-blue-100 bg-blue-50 text-sm">
+            현재 결제 관련 기능은 Phase 3 이후 PG 연동으로 대체될 예정이며, 이 화면은 Mock/로컬 주문으로 동작합니다.
+          </Alert>
+        </div>
       </div>
 
       {/* 상태별 통계 */}
