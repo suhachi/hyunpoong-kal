@@ -115,19 +115,36 @@ self.addEventListener('sync', (event) => {
 // T2-9: FCM 푸시 알림(Mock) 뼈대
 self.addEventListener('push', (event) => {
   console.log('[SW] 푸시 알림 수신:', event);
-  
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || '현풍닭칼국수';
-  const options = {
-    body: data.body || '새로운 알림이 있습니다.',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    data: data,
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+
+  event.waitUntil((async () => {
+    // DevTools의 "Push" 기본 문자열 입력도 동작하도록 안전 파싱
+    let data = {};
+    try {
+      if (event.data) {
+        const raw = typeof event.data.text === 'function' ? await event.data.text() : '';
+        if (raw) {
+          try {
+            data = JSON.parse(raw);
+          } catch (_) {
+            data = { title: '테스트 알림', body: raw };
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[SW] Push data parse error:', e);
+      data = {};
+    }
+
+    const title = data.title || '현풍닭칼국수';
+    const options = {
+      body: data.body || '새로운 알림이 있습니다.',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      data,
+    };
+
+    await self.registration.showNotification(title, options);
+  })());
 });
 
 // 알림 클릭 이벤트
