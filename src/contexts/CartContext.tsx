@@ -16,6 +16,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [couponId, setCouponId] = useState<string | undefined>();
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
+  // T2-15: Cart hydration / storage sync 안정화 리팩터
+  // - Phase 1: Mock/Firebase 공통에서 결정적 초기화 보장 (loadFromStorage 단일화)
+  // - forceReload를 얇은 wrapper로 단순화하여 중복 로직 제거
+  // - 이벤트(storage / visibility / focus) 한 곳에서 바인딩
+  // TODO(T2-15): Phase 2에서 order-flow E2E 재활성화 후 디버그 로그 제거 + 필요 시 testId 기반 개선
   // 단일 진실: localStorage에서 장바구니 로드 (JSON 파싱 실패 시 안전하게 무시)
   const loadFromStorage = useCallback(() => {
     try {
@@ -24,7 +29,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const data = JSON.parse(stored);
       // T2-14 디버깅용 임시 로그: localStorage에서 읽어온 데이터
       // TODO: Remove T2-14 debug logs after E2E 안정화
-      console.log('[CartContext] T2-14 loaded from storage', data);
+      console.log('[CartContext] T2-14 loaded from storage', data); // TODO(T2-15): Phase 2 안정화 후 제거
       setItems(data.items || []);
       setDeliveryTypeState(data.deliveryType || 'delivery');
       setDeliveryAddressState(data.deliveryAddress);
@@ -40,7 +45,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // T2-14 디버깅용 임시 로그: 컴포넌트 최초 마운트 시 initial items 상태 로깅
     // TODO: Remove T2-14 debug logs after E2E 안정화
-    console.log('[CartContext] T2-14 initial items', items);
+    console.log('[CartContext] T2-14 initial items', items); // TODO(T2-15): Phase 2 안정화 후 제거
     loadFromStorage();
 
     const handleStorageChange = (e: StorageEvent) => {
@@ -193,7 +198,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const forceReload = useCallback(() => {
     // T2-14 디버깅용 임시 로그: forceReload 호출 시점
     // TODO: Remove T2-14 debug logs after E2E 안정화
-    console.log('[CartContext] T2-14 forceReload called');
+    console.log('[CartContext] T2-14 forceReload called'); // TODO(T2-15): Phase 2 안정화 후 제거
     loadFromStorage();
   }, [loadFromStorage]);
 

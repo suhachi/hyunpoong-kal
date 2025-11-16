@@ -53,11 +53,16 @@ export function Cart() {
   } = useCart();
 
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
+  // T2-15: Cart 페이지 hydration 단순화
+  // - items.length 기반으로 Empty / Full UI 결정
+  // - 최초 렌더에서 items가 비어 있을 때만 forceReload 1회 호출하여 localStorage 동기화
+  // - 별도의 다중 setTimeout 제거 → 결정적(isHydrating -> false) 전환
+  // TODO(T2-15): Phase 2(Firebase 주문/결제 플로우 연결) 후 디버그 로그 및 필요 없는 가드 제거 예정
   // 단순화된 hydration: 최초 마운트 후 items 반영 여부만 구분
   const [isHydrating, setIsHydrating] = useState(true);
   // T2-14 디버깅 로그: 렌더 상태 추적 (임시)
   useEffect(() => {
-    console.log('[Cart] T2-14 render', { isHydrating, itemsLength: items.length });
+    console.log('[Cart] T2-14 render', { isHydrating, itemsLength: items.length }); // TODO(T2-15): Phase 2 안정화 후 제거
   }, [isHydrating, items.length]);
 
   const subtotal = getSubtotal();
@@ -71,10 +76,10 @@ export function Cart() {
   // 1) 마운트 시 items가 비어 있으면 한 번만 강제 동기화
   useEffect(() => {
     if (items.length === 0) {
-      console.log('[Cart] T2-14 mount forceReload (items empty)');
+      console.log('[Cart] T2-14 mount forceReload (items empty)'); // TODO(T2-15): 제거 예정
       forceReload?.();
     } else {
-      console.log('[Cart] T2-14 mount skip forceReload (items present)');
+      console.log('[Cart] T2-14 mount skip forceReload (items present)'); // TODO(T2-15): 제거 예정
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -82,7 +87,7 @@ export function Cart() {
   // 2) items 변화가 감지되면 hydration 종료 (무조건 한 번은 false로 전환)
   useEffect(() => {
     if (isHydrating) {
-      console.log('[Cart] T2-14 hydration complete trigger');
+      console.log('[Cart] T2-14 hydration complete trigger'); // TODO(T2-15): 제거 예정
       setIsHydrating(false);
     }
   }, [items.length, isHydrating]);

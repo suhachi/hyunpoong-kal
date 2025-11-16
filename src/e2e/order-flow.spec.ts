@@ -94,8 +94,20 @@ test.describe('Order flow skeleton (S02)', () => {
 // =============================================================
 // S03: 고객 주문 생성 → 주문내역 표시 (happy path, Mock/결제 OFF)
 // =============================================================
-// 임시 Skip: Cart hydration 관련 E2E 비결정성으로 Phase1 범위에서 제외
-// 추후 Phase2(Firebase 결제/주문 전면 재설계)에서 재활성화 예정
+// Phase 1 결정 사항:
+// - CartContext / Cart.tsx hydration 구조는 T2-15에서 최소 안정화 수준까지 단순화 완료.
+// - 하지만 Mock 모드 + 빠른 E2E 환경에서 /cart 진입 직후 '주문 방식' 섹션이 간헐적 타이밍 이슈로 늦게 렌더되어
+//   테스트가 과도하게 예민(flaky)해짐.
+// - 실제 수동 브라우저 흐름 및 관리자 DoD 요건은 충족하므로, 고객 Order-flow 전체 E2E는 Phase 2 범위로 격리.
+// Skip 사유:
+//   1) 기능 자체 이상 없음 (수동 플로우 정상) → 테스트 안정성 문제
+//   2) Phase 2에서 Firebase 모드 + data-testid 기반 셀렉터로 재작성 예정
+//   3) 현재 수정은 비용 대비 효과 낮음 → 전면 재설계 시 복원
+// 재활성 조건(Phase 2):
+//   - Firebase 주문/결제 실제 데이터 흐름 연결
+//   - Cart 렌더 안정성 재검증 (필요 시 추가 idle/hydration 가드)
+//   - data-testid 적용 후 selector 안정성 확보
+// TODO(Phase2): 아래 describe에서 skip 제거 후 셀렉터(testId) 기반으로 리팩터링
 test.describe.skip('Order flow (Mock, payment OFF)', () => {
   test('고객이 메뉴를 주문하면 주문내역에서 보인다 (Mock, payment OFF)', async ({ page }) => {
     // 1) 고객 로그인
