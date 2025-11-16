@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Wallet, HandCoins, Loader2, AlertCircle, Gift } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -12,7 +12,7 @@ import { Switch } from '../../components/ui/switch';
 import { useCart } from '../../contexts/CartContext';
 import { toast } from 'sonner';
 import { getPointsBalance, spendPoints, POINTS_POLICY } from '../../lib/points.api';
-import { ordersRepository } from '../../lib/orders.repository';
+import { createOrder } from '../../lib/orders.api';
 import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
 import type { PaymentMethod } from '../../types/order';
 import { CheckoutSummary } from '../../components/app/CheckoutSummary';
@@ -31,6 +31,9 @@ export function Checkout() {
     clearCart,
   } = useCart();
 
+  // 주문 완료 플래그 (리다이렉트 방지용)
+  const isOrderCompleting = useRef(false);
+
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('on_site');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -48,9 +51,9 @@ export function Checkout() {
   const pointsDiscount = usePoints ? pointsToUse : 0;
   const totalAmount = baseTotal - pointsDiscount;
 
-  // 장바구니 비어있으면 리다이렉트
+  // 장바구니 비어있으면 리다이렉트 (단, 주문 완료 중일 때는 제외)
   useEffect(() => {
-    if (items.length === 0) {
+    if (items.length === 0 && !isOrderCompleting.current) {
       navigate('/cart');
     }
   }, [items, navigate]);
@@ -63,7 +66,8 @@ export function Checkout() {
   }, []);
 
   // Mock UID (실제로는 Auth에서 가져옴)
-  const uid = 'user_001';
+  // NOTE: OrderHistory 등 고객 영역은 'user-001' 형식을 사용하므로 일치시킴
+  const uid = 'user-001';
 
   async function loadPointsBalance() {
     try {
@@ -120,8 +124,37 @@ export function Checkout() {
     setIsProcessing(true);
 
     try {
-      // 1. 주문 ID 생성
-      const orderId = `ORD${Date.now()}`;
+      // 1. 주문 생성 (Firebase 또는 localStorage)
+      const newOrder = await createOrder({
+        storeId: 'store-hyunpung',
+        userId: uid,
+        items: items.map((item) => ({
+          menuId: item.menuId,
+          menuName: item.menuName,
+          menuImage: item.menuImage || '',
+          quantity: item.quantity,
+          options: item.options,
+          price: item.menuPrice,
+          subtotal: item.subtotal,
+        })),
+        subtotal,
+        discount: couponDiscount,
+        couponId: undefined,
+        deliveryFee,
+        finalAmount: totalAmount,
+        deliveryType,
+        deliveryAddress: deliveryType === 'delivery' ? deliveryAddress : undefined,
+        phone,
+        email: email || undefined,
+        requests: requests || undefined,
+        payment: {
+          method: paymentMethod,
+          status: paymentMethod === 'on_site' ? 'pending' : 'authorized',
+          amount: totalAmount,
+        },
+      });
+      
+      const orderId = newOrder.orderId;
       
       // 2. 포인트 사용 처리
       if (usePoints && pointsToUse > 0) {
@@ -136,93 +169,41 @@ export function Checkout() {
             note: `주문 결제 시 포인트 사용`,
           });
         } catch (error) {
-          toast.error('포인트 사용 중 오류가 발생했습니다');
-          setIsProcessing(false);
-          return;
+          console.error('Points spend error:', error);
+          // 포인트 차감 실패해도 주문은 유지 (주문 완료 후 포인트 차감 실패 처리)
+          toast.warning('포인트 차감 중 오류가 발생했습니다');
         }
       }
-      
-      if (USE_FIREBASE) {
-        // Firebase 연동 코드 (나중에 활성화)
-        // TODO: Firestore에 주문 저장
-        // TODO: NICEPAY 결제 호출
+
+      // 3. 주문 완료 플래그 설정 (useEffect 리다이렉트 방지)
+      isOrderCompleting.current = true;
+
+      // 4. 성공 메시지 및 주문 트래킹으로 이동 (먼저 실행)
+      if (paymentMethod === 'on_site') {
+        console.log('[debug] firing success toast: 주문이 접수되었습니다');
+        toast.success(<span data-testid="toast.order.success">주문이 접수되었습니다</span>, { duration: 5000 });
+        // 토스트 DOM 마운트 확보를 위한 짧은 지연
+        await new Promise((r) => setTimeout(r, 75));
+        navigate(`/order/${orderId}?result=on_site`);
       } else {
-        // 로컬 개발 모드: 주문 데이터를 localStorage에 저장
-        const orderData = {
-          orderId,
-          items: items.map((item) => ({
-            menuId: item.menuId,
-            menuName: item.menuName,
-            quantity: item.quantity,
-            options: item.options,
-            price: item.menuPrice,
-            subtotal: item.subtotal,
-          })),
-          subtotal,
-          discount: couponDiscount,
-          pointsDiscount: pointsDiscount,
-          deliveryFee,
-          finalAmount: totalAmount,
-          deliveryType,
-          deliveryAddress: deliveryType === 'delivery' ? deliveryAddress : undefined,
-          phone,
-          email: email || undefined,
-          requests: requests || undefined,
-          status: 'placed',
-          payment: {
-            method: paymentMethod,
-            status: paymentMethod === 'on_site' ? 'pending' : 'authorized',
-            amount: totalAmount,
-          },
-          timeline: {
-            pending: new Date().toISOString(),
-            placed: new Date().toISOString(),
-          },
-          createdAt: new Date().toISOString(),
-        };
-
-        // local development: create order via OrdersRepository (localStorage-backed)
-        const newOrder = await ordersRepository.createOrder({
-          storeId: 'store-hyunpung',
-          userId: uid,
-          items: orderData.items,
-          subtotal,
-          discount: couponDiscount,
-          couponId: undefined,
-          deliveryFee,
-          finalAmount: totalAmount,
-          deliveryType,
-          deliveryAddress: deliveryType === 'delivery' ? deliveryAddress : undefined,
-          phone,
-          email: email || undefined,
-          requests: requests || undefined,
-          payment: orderData.payment,
-        });
-        // NOTE: newOrder.orderId contains the id used by repository
-        const createdId = newOrder.orderId;
-
-        // 장바구니 비우기
-        clearCart();
-
-        // 성공 메시지
-        if (paymentMethod === 'on_site') {
-          toast.success('주문이 접수되었습니다');
-          navigate(`/order/${createdId}?result=on_site`);
-        } else {
-          toast.success('결제가 완료되었습니다');
-          navigate(`/order/${createdId}?result=success`);
-        }
+        console.log('[debug] firing success toast: 결제가 완료되었습니다');
+        toast.success(<span data-testid="toast.payment.success">결제가 완료되었습니다</span>, { duration: 5000 });
+        await new Promise((r) => setTimeout(r, 75));
+        navigate(`/order/${orderId}?result=success`);
       }
+
+      // 5. 장바구니 비우기 (navigate 완료 후 실행)
+      setTimeout(() => clearCart(), 100);
     } catch (error) {
       console.error('Payment error:', error);
-      toast.error('결제 처리 중 오류가 발생했습니다');
+      toast.error(error instanceof Error ? error.message : '결제 처리 중 오류가 발생했습니다');
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="pb-32">
+    <div className="pb-32" data-testid="checkout.page">
       <div className="px-4 py-6 space-y-6">
         {/* 헤더 */}
         <div>
@@ -434,6 +415,7 @@ export function Checkout() {
           className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
           disabled={!canProceed || isProcessing}
           onClick={handlePayment}
+          data-testid="checkout.button.submit"
         >
           {isProcessing ? (
             <>

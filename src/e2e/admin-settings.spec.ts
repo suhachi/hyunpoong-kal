@@ -16,7 +16,7 @@ import { test, expect } from '@playwright/test';
 // Mock 관리자 사용자
 const mockAdmin = {
   uid: 'admin-001',
-  email: 'admin@hyunpungkalguksu.com',
+  email: 'admin@hyunpoongkalguksu.com',
   displayName: '관리자',
   role: 'owner',
   storeId: 'store-hyunpung',

@@ -54,7 +54,7 @@ export function MenuList() {
   }, [menus, selectedCategory, searchQuery]);
   
   return (
-    <div className="pb-6">
+    <div className="pb-6" data-testid="menu-list.page">
       {/* 검색 */}
       <div className="sticky top-14 z-40 bg-[#F9F6F3] pt-4 px-4 pb-3">
         <div className="relative">
@@ -93,7 +93,7 @@ export function MenuList() {
                 검색 결과가 없습니다
               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-4" data-testid="menu-list.items">
                 {filteredMenus.map((menu) => (
                   <MenuCard key={menu.menuId} menu={menu} />
                 ))}
@@ -112,10 +112,13 @@ interface MenuCardProps {
 
 function MenuCard({ menu }: MenuCardProps) {
   return (
-    <Link to={`/menu/${menu.menuId}`}>
-      <div className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
-        !menu.isAvailable ? 'opacity-60' : ''
-      }`}>
+    <Link to={`/menu/${menu.menuId}`} data-testid="menu-list.item.link">
+      <div
+        className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+          !menu.isAvailable ? 'opacity-60' : ''
+        }`}
+        data-testid="menu-list.item"
+      >
         <div className="flex gap-4 p-4">
           {/* 메뉴 이미지 */}
           <div className="relative flex-shrink-0 w-24 h-24 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
@@ -145,7 +148,7 @@ function MenuCard({ menu }: MenuCardProps) {
           {/* 메뉴 정보 */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="text-[#2E1C10] truncate">
+              <h3 className="text-[#2E1C10] truncate" data-testid="menu-list.item.name">
                 {menu.name}
               </h3>
             </div>
@@ -170,7 +173,7 @@ function MenuCard({ menu }: MenuCardProps) {
             </p>
             
             {/* 가격 */}
-            <p className="text-[#D61C1C]">
+            <p className="text-[#D61C1C]" data-testid="menu-list.item.price">
               {formatPrice(menu.price)}
             </p>
             

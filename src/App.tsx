@@ -83,12 +83,14 @@ export default function App() {
               
               {/* 메뉴 */}
               <Route path="menu" element={<MenuList />} />
-              <Route path="menu/:id" element={<MenuDetail />} />
+              {/* T2-12: Route param은 MenuDetail의 useParams<{ menuId }>() 와 일치해야 함 */}
+              <Route path="menu/:menuId" element={<MenuDetail />} />
               
               {/* 장바구니 & 주문 */}
               <Route path="cart" element={<Cart />} />
               <Route path="checkout" element={<Checkout />} />
-              <Route path="orders/:orderId" element={<OrderTracking />} />
+              {/* 주문 추적: 테스트 및 문서에서 /order/:orderId 사용 */}
+              <Route path="order/:orderId" element={<OrderTracking />} />
               <Route path="order-history" element={<OrderHistory />} />
               
               {/* 리뷰 */}

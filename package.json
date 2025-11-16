@@ -77,6 +77,7 @@
             "test:e2e:admin:routes": "playwright test -c src/playwright.config.ts admin-routes.spec.ts --project=chromium",
             "test:e2e:admin:settings": "playwright test -c src/playwright.config.ts admin-settings.spec.ts --project=chromium",
             "test:e2e:ui": "playwright test -c src/playwright.config.ts --ui",
-            "test:e2e:report": "playwright show-report"
+            "test:e2e:report": "playwright show-report",
+            "test:e2e:orderflow": "playwright test -c src/playwright.config.ts src/e2e/order-flow.spec.ts --project=chromium --grep @orderflow"
       }
 }

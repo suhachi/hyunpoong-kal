@@ -90,6 +90,13 @@ export interface FCMSettings {
 }
 
 /**
+ * 포인트 설정
+ */
+export interface PointsSettings {
+  enabled: boolean;
+}
+
+/**
  * 운영 설정
  */
 export interface OperationsSettings {
@@ -122,6 +129,7 @@ export interface AdminSettings {
   delivery: DeliverySettings;
   maps: MapsSettings;
   fcm: FCMSettings;
+  points: PointsSettings;
   operations: OperationsSettings;
   
   // 메타데이터
@@ -204,6 +212,10 @@ export const DEFAULT_MAPS_SETTINGS: MapsSettings = {
 export const DEFAULT_FCM_SETTINGS: FCMSettings = {
   enabled: false,
   serviceWorkerPath: '/firebase-messaging-sw.js',
+};
+
+export const DEFAULT_POINTS_SETTINGS: PointsSettings = {
+  enabled: true,
 };
 
 export const DEFAULT_OPERATIONS_SETTINGS: OperationsSettings = {

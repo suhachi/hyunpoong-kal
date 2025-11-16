@@ -68,6 +68,39 @@ async function loginAsAdminWithLocalStorage(page: Page) {
     localStorage.setItem('mockUser', JSON.stringify(mockAdmin));
     localStorage.setItem('mockRole', 'owner');
   });
+
+  // Firebase 모드일 때: 익명 로그인 시도 (권한 가드 통과 목적)
+  if (process.env.VITE_USE_FIREBASE === 'true') {
+    // 먼저 루트 로드하여 앱 Firebase 초기화 유도
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+    // auth 모듈 동적 import 후 익명 로그인
+    await page.evaluate(async () => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { getAuth, signInAnonymously } = await import('firebase/auth');
+        const auth = getAuth();
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
+        // 익명 uid를 mockUser에 동기화하여 userId/권한 혼동 방지
+        if (auth.currentUser) {
+          try {
+            const raw = localStorage.getItem('mockUser');
+            if (raw) {
+              const obj = JSON.parse(raw);
+              obj.uid = auth.currentUser.uid;
+              localStorage.setItem('mockUser', JSON.stringify(obj));
+            }
+          } catch {}
+        }
+      } catch (e) {
+        console.warn('[admin-login] anonymous sign-in failed', e);
+      }
+    });
+  }
+
   await page.goto(`${ADMIN_BASE_URL}/orders`);
   await expect(page).toHaveURL(/\/admin\/orders/);
 }
@@ -459,14 +492,8 @@ test.describe('@orderflow Firebase Order flow', () => {
     console.log('[debug] After submit - URL:', await page.url());
     console.log('[debug] Console logs:', JSON.stringify(consoleLogs, null, 2));
     
-    // 토스트 또는 에러 확인
-    const toastVisible = await page.getByText(/주문이 접수되었습니다/).isVisible().catch(() => false);
-    if (!toastVisible) {
-      console.log('[debug] Toast not visible, checking for errors');
-      const errorVisible = await page.getByText(/오류/).isVisible().catch(() => false);
-      console.log('[debug] Error message visible:', errorVisible);
-      throw new Error('주문 완료 토스트가 표시되지 않음');
-    }
+    // 토스트 testId 기반 확인 (문자열 매칭 취약성 제거)
+    await expect(page.getByTestId('toast.order.success')).toBeVisible({ timeout: 5000 });
 
     // ============================================================
     // 2단계: OrderTracking 기본 요소 testId 기반 검증
@@ -497,7 +524,17 @@ test.describe('@orderflow Firebase Order flow', () => {
     // ============================================================
     // 3단계: 관리자 화면에서 동일 주문 조회
     // ============================================================
+    // Mock(localStorage) 모드에서는 브라우저 context가 분리되면 주문 데이터가 공유되지 않으므로
+    // 고객 context의 localStorage.orders 내용을 그대로 주입하여 동일 데이터셋을 재현한다.
+    const ordersRaw = await page.evaluate(() => localStorage.getItem('orders'));
     const adminContext = await browser.newContext();
+    if (ordersRaw) {
+      await adminContext.addInitScript((data) => {
+        try {
+          if (data) localStorage.setItem('orders', data as string);
+        } catch {}
+      }, ordersRaw);
+    }
     const adminPage = await adminContext.newPage();
     await loginAsAdminWithLocalStorage(adminPage);
 
@@ -508,7 +545,13 @@ test.describe('@orderflow Firebase Order flow', () => {
     // 요약 항목 표시 (최초 하나 가시성 확인 후 orderId 포함 여부 확인)
     await expect(adminPage.getByTestId('admin.orders.item.summary').first()).toBeVisible({ timeout: 20000 });
     if (orderId) {
-      await expect(adminPage.getByText(orderId)).toBeVisible({ timeout: 20000 });
+      // 전체 ID 텍스트 직접 매칭 (테이블/카드 공통) 또는 요약 영역 내 존재 폴링
+      await expect.poll(async () => {
+        return await adminPage.evaluate((oid) => {
+          return !!Array.from(document.querySelectorAll('[data-testid="admin.orders.item.summary"]'))
+            .some(el => el.textContent?.includes(oid));
+        }, orderId);
+      }, { timeout: 20000 }).toBeTruthy();
       await expect(adminPage.getByTestId('admin.orders.item.detail-button').first()).toBeVisible({ timeout: 20000 });
       console.log('✓ 관리자 화면에서 주문 확인:', orderId);
     }

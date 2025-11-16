@@ -36,10 +36,12 @@ import { FEATURE_FLAGS } from '../../config/env';
 import { toast } from 'sonner';
 import type { PointsBalance } from '../../types/points';
 import { formatPrice } from '../../lib/utils';
+import { getAdminSettings } from '../../lib/admin/settingsCenter.api';
 
 export function AdminPoints() {
   const [balances, setBalances] = useState<Array<PointsBalance & { phone?: string; name?: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const [pointsEnabled, setPointsEnabled] = useState<boolean>(true);
   
   // 조정 다이얼로그
   const [adjustDialog, setAdjustDialog] = useState(false);
@@ -49,7 +51,13 @@ export function AdminPoints() {
   const [adjusting, setAdjusting] = useState(false);
 
   useEffect(() => {
-    loadBalances();
+    (async () => {
+      try {
+        const s = await getAdminSettings();
+        setPointsEnabled(!!s.points?.enabled);
+      } catch {}
+      loadBalances();
+    })();
   }, []);
 
   async function loadBalances() {
@@ -99,13 +107,13 @@ export function AdminPoints() {
     setAdjustDialog(true);
   }
 
-  if (!FEATURE_FLAGS.points) {
+  if (!FEATURE_FLAGS.points || !pointsEnabled) {
     return (
       <div className="p-6">
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            포인트 기능이 비활성화되어 있습니다.
+            포인트 기능이 비활성화되어 있습니다. 설정 센터 &gt; 운영/보안 탭에서 활성화해 주세요.
           </AlertDescription>
         </Alert>
       </div>

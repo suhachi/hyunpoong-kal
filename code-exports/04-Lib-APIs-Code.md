@@ -1,6 +1,6 @@
 # Lib APIs - Full Source Code
 
-**Generated**: 2025-11-14-1904  
+**Generated**: 2025-11-15-2002  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -96,6 +96,7 @@ export default app;
 
 import { db } from './firebase';
 import { USE_FIREBASE } from '../config/env';
+import { ordersRepository } from './orders.repository';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import type { Order, OrderStatus } from '../types/order';
 
@@ -104,12 +105,9 @@ import type { Order, OrderStatus } from '../types/order';
  */
 export async function getOrdersByUser(userId: string): Promise<Order[]> {
   if (!USE_FIREBASE) {
-    // Mock 모드: localStorage에서 조회
+    // Mock 모드: localStorage에서 조회 via repository
     try {
-      const orders = JSON.parse(localStorage.getItem('orders') || '{}');
-      
-      // 객체를 배열로 변환하고 시간순 정렬
-      const orderList = Object.values(orders) as Order[];
+      const orderList = await ordersRepository.listOrdersByUser(userId);
       
       // 최신순 정렬
       orderList.sort((a, b) => {
@@ -155,7 +153,8 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
   if (!USE_FIREBASE) {
     try {
       const orders = JSON.parse(localStorage.getItem('orders') || '{}');
-      return Promise.resolve(orders[orderId] || null);
+      const found = orders[orderId] || null;
+      return Promise.resolve(found);
     } catch (error) {
       console.error('Failed to load order from localStorage:', error);
       return Promise.resolve(null);
@@ -1427,12 +1426,14 @@ export async function getTodayCompletedCount(): Promise<number> {
 
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import { USE_FIREBASE, FEATURE_FLAGS } from '../../config/env';
 import {
   AdminSettings,
   DEFAULT_DELIVERY_SETTINGS,
   DEFAULT_MAPS_SETTINGS,
   DEFAULT_FCM_SETTINGS,
   DEFAULT_OPERATIONS_SETTINGS,
+  DEFAULT_POINTS_SETTINGS,
   FunctionsHealthCheck,
   DiagnosticResult,
   DiagnosticCheck,
@@ -1451,11 +1452,66 @@ const getMetaEnv = (key: string): string | undefined => {
 };
 
 const SETTINGS_DOC_PATH = 'adminSettings/core';
+const ADMIN_SETTINGS_LS_KEY = 'hp_kal_admin_settings';
+
+function isBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
+
+function getDefaultAdminSettings(): AdminSettings {
+  return {
+    delivery: DEFAULT_DELIVERY_SETTINGS,
+    maps: DEFAULT_MAPS_SETTINGS,
+    fcm: DEFAULT_FCM_SETTINGS,
+    points: { ...DEFAULT_POINTS_SETTINGS, enabled: FEATURE_FLAGS.points },
+    operations: DEFAULT_OPERATIONS_SETTINGS,
+    updatedAt: new Date(),
+    updatedBy: '',
+    updatedByName: '',
+  };
+}
+
+function loadSettingsFromLocalStorage(): AdminSettings {
+  if (!isBrowser()) return getDefaultAdminSettings();
+  try {
+    const raw = localStorage.getItem(ADMIN_SETTINGS_LS_KEY);
+    if (!raw) return getDefaultAdminSettings();
+    const data = JSON.parse(raw);
+    return {
+      delivery: data.delivery || DEFAULT_DELIVERY_SETTINGS,
+      maps: data.maps || DEFAULT_MAPS_SETTINGS,
+      fcm: data.fcm || DEFAULT_FCM_SETTINGS,
+      points: data.points || { ...DEFAULT_POINTS_SETTINGS, enabled: FEATURE_FLAGS.points },
+      operations: data.operations || DEFAULT_OPERATIONS_SETTINGS,
+      updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
+      updatedBy: data.updatedBy || '',
+      updatedByName: data.updatedByName || '',
+    } as AdminSettings;
+  } catch (e) {
+    console.warn('[settingsCenter] Failed to parse local settings, using defaults', e);
+    return getDefaultAdminSettings();
+  }
+}
+
+function saveSettingsToLocalStorage(settings: AdminSettings): void {
+  if (!isBrowser()) return;
+  const payload = {
+    ...settings,
+    // serialize Date for storage
+    updatedAt: settings.updatedAt?.toISOString?.() || new Date().toISOString(),
+  };
+  localStorage.setItem(ADMIN_SETTINGS_LS_KEY, JSON.stringify(payload));
+}
 
 /**
  * 관리자 설정 조회
  */
 export async function getAdminSettings(): Promise<AdminSettings> {
+  // Mock/LocalStorage 분기 (USE_FIREBASE=false)
+  if (!USE_FIREBASE) {
+    return loadSettingsFromLocalStorage();
+  }
+
   try {
     const docRef = doc(db, SETTINGS_DOC_PATH);
     const docSnap = await getDoc(docRef);
@@ -1466,6 +1522,7 @@ export async function getAdminSettings(): Promise<AdminSettings> {
         delivery: data.delivery || DEFAULT_DELIVERY_SETTINGS,
         maps: data.maps || DEFAULT_MAPS_SETTINGS,
         fcm: data.fcm || DEFAULT_FCM_SETTINGS,
+        points: data.points || { ...DEFAULT_POINTS_SETTINGS, enabled: FEATURE_FLAGS.points },
         operations: data.operations || DEFAULT_OPERATIONS_SETTINGS,
         updatedAt: data.updatedAt?.toDate?.() || new Date(),
         updatedBy: data.updatedBy || '',
@@ -1474,15 +1531,7 @@ export async function getAdminSettings(): Promise<AdminSettings> {
     }
 
     // 기본값 반환
-    return {
-      delivery: DEFAULT_DELIVERY_SETTINGS,
-      maps: DEFAULT_MAPS_SETTINGS,
-      fcm: DEFAULT_FCM_SETTINGS,
-      operations: DEFAULT_OPERATIONS_SETTINGS,
-      updatedAt: new Date(),
-      updatedBy: '',
-      updatedByName: '',
-    };
+    return getDefaultAdminSettings();
   } catch (error) {
     console.error('Failed to get admin settings:', error);
     throw new Error('설정을 불러오는데 실패했습니다');
@@ -1497,6 +1546,26 @@ export async function saveAdminSettings(
   userId: string,
   userName: string
 ): Promise<AdminSettings> {
+  // Mock/LocalStorage 분기 (USE_FIREBASE=false)
+  if (!USE_FIREBASE) {
+    const current = loadSettingsFromLocalStorage();
+    const updated: AdminSettings = {
+      ...current,
+      ...settings,
+      // 부분 병합: 중첩 객체를 안전하게 병합
+      delivery: { ...current.delivery, ...(settings.delivery || {}) },
+      maps: { ...current.maps, ...(settings.maps || {}) },
+      fcm: { ...current.fcm, ...(settings.fcm || {}) },
+      points: { ...current.points, ...(settings.points || {}) },
+      operations: { ...current.operations, ...(settings.operations || {}) },
+      updatedAt: new Date(),
+      updatedBy: userId,
+      updatedByName: userName,
+    };
+    saveSettingsToLocalStorage(updated);
+    return updated;
+  }
+
   try {
     const docRef = doc(db, SETTINGS_DOC_PATH);
     
@@ -1505,6 +1574,7 @@ export async function saveAdminSettings(
     const updatedSettings = {
       ...currentSettings,
       ...settings,
+      // Firestore merge 시 중첩 병합 유지를 위한 얕은 병합 (필요 시 세부 병합 구현)
       updatedAt: serverTimestamp(),
       updatedBy: userId,
       updatedByName: userName,

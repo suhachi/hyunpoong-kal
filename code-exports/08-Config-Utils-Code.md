@@ -1,6 +1,6 @@
 # Config & Utils - Full Source Code
 
-**Generated**: 2025-11-14-1904  
+**Generated**: 2025-11-15-2002  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -158,6 +158,7 @@ export function logError(...args: any[]) {
 
   export default defineConfig({
     plugins: [react()],
+      publicDir: 'src/public',
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -180,6 +181,7 @@ export function logError(...args: any[]) {
     server: {
       port: 3000,
       open: true,
+      strictPort: true, // 테스트 환경에서 포트 충돌 시 명확히 실패하도록 고정
     },
   });
 ```

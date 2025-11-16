@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { OrderStatusBadge } from '../shared/OrderStatusBadge';
-import { formatPrice, formatDateTime } from '../../lib/utils';
+import { formatPrice, formatRelativeTime } from '../../lib/utils';
 
 interface OrderTableProps {
   orders: Order[];
@@ -36,25 +36,9 @@ const paymentMethodLabels: Record<string, string> = {
 };
 
 export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: OrderTableProps) {
-  // 날짜 포맷팅
-  const formatDate = (timestamp: { seconds: number }) => {
-    const date = new Date(timestamp.seconds * 1000);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}시간 전`;
-
-    return date.toLocaleDateString('ko-KR', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  // 날짜 포맷팅 (상대 시간 기반: '방금 전', 'n분 전' 등)
+  const formatDate = (timestamp: any) => {
+    return formatRelativeTime(timestamp);
   };
 
 
@@ -124,9 +108,13 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
           </TableHeader>
           <TableBody>
             {orders.map((order) => (
-              <TableRow key={order.orderId} className="hover:bg-gray-50">
+              <TableRow
+                key={order.orderId}
+                className="hover:bg-gray-50"
+                data-testid="admin.orders.item"
+              >
                 <TableCell>
-                  <div className="space-y-1">
+                  <div className="space-y-1" data-testid="admin.orders.item.summary">
                     <div className="text-sm text-[#333]">{order.orderId}</div>
                     <div className="text-xs text-[#8B7355]">{order.phone}</div>
                   </div>
@@ -157,7 +145,7 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                     {paymentMethodLabels[order.payment.method] || order.payment.method}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell data-testid="admin.orders.item.status">
                   <OrderStatusBadge status={order.status} />
                 </TableCell>
                 <TableCell className="text-right">
@@ -167,6 +155,7 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       size="sm"
                       onClick={() => onViewDetail(order)}
                       className="h-8 w-8 p-0"
+                      data-testid="admin.orders.item.detail-button"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -238,13 +227,19 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
       {/* 모바일 카드 */}
       <div className="md:hidden divide-y">
         {orders.map((order) => (
-          <div key={order.orderId} className="p-4 space-y-3">
+          <div
+            key={order.orderId}
+            className="p-4 space-y-3"
+            data-testid="admin.orders.item"
+          >
             <div className="flex items-start justify-between">
-              <div className="space-y-1">
+              <div className="space-y-1" data-testid="admin.orders.item.summary">
                 <div className="text-sm text-[#333]">{order.orderId}</div>
                 <div className="text-xs text-[#8B7355]">{formatDate(order.createdAt)}</div>
               </div>
-              <OrderStatusBadge status={order.status} />
+              <div data-testid="admin.orders.item.status">
+                <OrderStatusBadge status={order.status} />
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -264,6 +259,7 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                 size="sm"
                 onClick={() => onViewDetail(order)}
                 className="flex-1"
+                data-testid="admin.orders.item.detail-button"
               >
                 상세보기
               </Button>

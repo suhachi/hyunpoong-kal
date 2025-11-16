@@ -59,7 +59,8 @@ const getEnv = (key: string, defaultValue: string = '', required: boolean = fals
 // Firebase 사용 여부 (개발 중에는 false, 배포 시 true)
 // 기존: export const USE_FIREBASE = getEnv('VITE_USE_FIREBASE') === 'true';
 // 임시: Phase1 QA용 Mock 강제 모드
-export const USE_FIREBASE = false; // TODO: Phase2에서 env 기반으로 되돌리기
+// TODO: Phase2에서 env 기반으로 되돌리기 (현재는 테스트용으로 env 변수 사용 허용)
+export const USE_FIREBASE = getEnv('VITE_USE_FIREBASE') === 'true';
 
 // 디버그 로그 추가
 if (typeof window !== 'undefined') {

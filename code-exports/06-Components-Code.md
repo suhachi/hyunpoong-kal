@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-11-14-1904  
+**Generated**: 2025-11-15-2002  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -2747,7 +2747,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { MapPin, Phone, Mail, FileText, CreditCard, Clock } from 'lucide-react';
 import { fetchOrderLogs } from '../../lib/admin/orders.api';
 import { OrderActionBar } from './OrderActionBar';
-import { formatPrice, formatDateTime } from '../../lib/utils';
+import { formatPrice, formatDateTime, formatTime } from '../../lib/utils';
 
 interface OrderDetailDrawerProps {
   order: Order | null;
@@ -2770,13 +2770,6 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
 
   if (!order) return null;
 
-  const formatTime = (timestamp: { seconds: number }) => {
-    const date = new Date(timestamp.seconds * 1000);
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   // 상태 라벨
   const statusLabels: Record<string, string> = {
@@ -2803,7 +2796,21 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
       label: statusLabels[status] || status,
       timestamp: timestamp!,
     }))
-    .sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
+    .sort((a, b) => {
+      const toMs = (t: any) => {
+        if (!t) return 0;
+        if (typeof t === 'string') {
+          const ms = Date.parse(t);
+          return isNaN(ms) ? 0 : ms;
+        }
+        if (typeof t === 'object') {
+          if ('seconds' in t && typeof (t as any).seconds === 'number') return (t as any).seconds * 1000;
+          if ('toDate' in t && typeof (t as any).toDate === 'function') return (t as any).toDate().getTime();
+        }
+        return 0;
+      };
+      return toMs(a.timestamp) - toMs(b.timestamp);
+    });
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -3115,7 +3122,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { OrderStatusBadge } from '../shared/OrderStatusBadge';
-import { formatPrice, formatDateTime } from '../../lib/utils';
+import { formatPrice, formatRelativeTime } from '../../lib/utils';
 
 interface OrderTableProps {
   orders: Order[];
@@ -3133,25 +3140,9 @@ const paymentMethodLabels: Record<string, string> = {
 };
 
 export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: OrderTableProps) {
-  // 날짜 포맷팅
-  const formatDate = (timestamp: { seconds: number }) => {
-    const date = new Date(timestamp.seconds * 1000);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}시간 전`;
-
-    return date.toLocaleDateString('ko-KR', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  // 날짜 포맷팅 (상대 시간 기반: '방금 전', 'n분 전' 등)
+  const formatDate = (timestamp: any) => {
+    return formatRelativeTime(timestamp);
   };
 
 

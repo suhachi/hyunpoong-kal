@@ -21,7 +21,7 @@ export interface AuthUser {
  */
 const MOCK_ADMIN: AuthUser = {
   uid: 'admin-001',
-  email: 'admin@hyunpungkalguksu.com',
+  email: 'admin@hyunpoongkalguksu.com',
   displayName: '관리자',
   role: 'owner',
   storeId: 'store-hyunpung',

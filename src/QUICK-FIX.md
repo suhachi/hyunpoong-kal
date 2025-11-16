@@ -148,7 +148,7 @@ npm run dev
 화면이 보이면:
 
 1. **홈 화면** → ✅ 작동
-2. **로그인** → `customer@example.com` / `test1234`
+2. **로그인** → `customer@example.com` / `111111`
 3. **관리자** → 홈 하단 "관리자 대시보드" 버튼
 
 ---

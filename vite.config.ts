@@ -28,5 +28,6 @@
     server: {
       port: 3000,
       open: true,
+      strictPort: true, // 테스트 환경에서 포트 충돌 시 명확히 실패하도록 고정
     },
   });

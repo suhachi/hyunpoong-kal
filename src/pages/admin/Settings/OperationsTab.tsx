@@ -7,10 +7,48 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../../components/ui/button';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { Separator } from '../../../components/ui/separator';
-import { Shield, Terminal, Copy, FileText, Rocket } from 'lucide-react';
+import { Shield, Terminal, Copy, FileText, Rocket, Gift } from 'lucide-react';
 import { toast } from 'sonner';
+import { Switch } from '../../../components/ui/switch';
+import { useEffect, useState } from 'react';
+import { getAdminSettings, saveAdminSettings } from '../../../lib/admin/settingsCenter.api';
+import type { AdminSettings } from '../../../types/adminSettings';
+import { getCurrentUser } from '../../../lib/auth';
 
 export function OperationsTab() {
+  const [settings, setSettings] = useState<AdminSettings | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await getAdminSettings();
+        setSettings(s);
+      } catch (e) {
+        toast.error('설정을 불러오지 못했습니다');
+      }
+    })();
+  }, []);
+
+  const handleTogglePoints = async (enabled: boolean) => {
+    if (!settings) return;
+    const user = getCurrentUser();
+    try {
+      setSaving(true);
+      const updated = await saveAdminSettings(
+        { points: { ...settings.points, enabled } },
+        user?.uid || 'system',
+        user?.displayName || user?.email || 'system'
+      );
+      setSettings(updated);
+      toast.success(`포인트 기능이 ${enabled ? '활성화' : '비활성화'}되었습니다`);
+    } catch (e) {
+      toast.error('저장에 실패했습니다');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // 배포 스크립트
   const deployScripts = [
     {
@@ -40,6 +78,40 @@ export function OperationsTab() {
 
   return (
     <div className="space-y-6">
+      {/* 포인트 기능 토글 */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Gift className="w-5 h-5 text-[#D61C1C]" />
+            <CardTitle>포인트 기능</CardTitle>
+          </div>
+          <CardDescription>
+            포인트 리워드 시스템 사용 여부를 제어합니다
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-[#2E1C10]">포인트 시스템 활성화</p>
+            <p className="text-xs text-[#2E1C10]/60">체크 해제 시 포인트 관리 페이지에서 안내가 표시됩니다</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-[#2E1C10]/60">
+              {settings?.points?.enabled ? 'ON' : 'OFF'}
+            </span>
+            {settings ? (
+              <Switch
+                className="border border-[#2E1C10]/20"
+                checked={!!settings.points.enabled}
+                onCheckedChange={handleTogglePoints}
+                disabled={saving}
+              />
+            ) : (
+              <div className="h-[1.15rem] w-8 rounded-full bg-gray-200 animate-pulse" />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 배포 스크립트 */}
       <Card>
         <CardHeader>

@@ -84,10 +84,10 @@ export function Login() {
   const fillTestAccount = (type: 'customer' | 'admin') => {
     if (type === 'customer') {
       setEmail('customer@example.com');
-      setPassword('test1234');
+      setPassword('111111');
     } else {
-      setEmail('admin@hyunpungkalguksu.com');
-      setPassword('admin1234');
+      setEmail('admin@hyunpoongkalguksu.com');
+      setPassword('111111');
     }
   };
 

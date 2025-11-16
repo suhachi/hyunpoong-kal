@@ -13,7 +13,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { MapPin, Phone, Mail, FileText, CreditCard, Clock } from 'lucide-react';
 import { fetchOrderLogs } from '../../lib/admin/orders.api';
 import { OrderActionBar } from './OrderActionBar';
-import { formatPrice, formatDateTime } from '../../lib/utils';
+import { formatPrice, formatDateTime, formatTime } from '../../lib/utils';
 
 interface OrderDetailDrawerProps {
   order: Order | null;
@@ -36,13 +36,6 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
 
   if (!order) return null;
 
-  const formatTime = (timestamp: { seconds: number }) => {
-    const date = new Date(timestamp.seconds * 1000);
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   // 상태 라벨
   const statusLabels: Record<string, string> = {
@@ -69,7 +62,21 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
       label: statusLabels[status] || status,
       timestamp: timestamp!,
     }))
-    .sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
+    .sort((a, b) => {
+      const toMs = (t: any) => {
+        if (!t) return 0;
+        if (typeof t === 'string') {
+          const ms = Date.parse(t);
+          return isNaN(ms) ? 0 : ms;
+        }
+        if (typeof t === 'object') {
+          if ('seconds' in t && typeof (t as any).seconds === 'number') return (t as any).seconds * 1000;
+          if ('toDate' in t && typeof (t as any).toDate === 'function') return (t as any).toDate().getTime();
+        }
+        return 0;
+      };
+      return toMs(a.timestamp) - toMs(b.timestamp);
+    });
 
   return (
     <Sheet open={open} onOpenChange={onClose}>

@@ -7,7 +7,9 @@ import type { Order, OrderStatus, OrderLog } from '../../types/order';
 import { ordersRepository } from '../orders.repository';
 
 // 환경 플래그
-const USE_FIREBASE = false;
+import { USE_FIREBASE } from '../../config/env';
+import { db } from '../firebase';
+import { collection, query, where, orderBy, getDocs, doc, getDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 // Mock 데이터
 const mockOrders: Order[] = [
@@ -325,14 +327,27 @@ export async function fetchOrders(
       filtered = filtered.filter((order) => order.payment.method === filters.paymentMethod);
     }
 
-    // 기간 필터
+    // 기간 필터 (createdAt가 string 또는 FirebaseTimestamp 모두 지원)
+    const getCreatedAtSeconds = (value: any): number => {
+      if (!value) return 0;
+      if (typeof value === 'string') {
+        const ms = Date.parse(value);
+        return isNaN(ms) ? 0 : Math.floor(ms / 1000);
+      }
+      if (typeof value === 'object') {
+        if ('seconds' in value && typeof (value as any).seconds === 'number') return (value as any).seconds;
+        if ('toDate' in value && typeof (value as any).toDate === 'function') return Math.floor((value as any).toDate().getTime() / 1000);
+      }
+      return 0;
+    };
+
     if (filters.startDate) {
-      const startTime = filters.startDate.getTime() / 1000;
-      filtered = filtered.filter((order) => order.createdAt.seconds >= startTime);
+      const startTime = Math.floor(filters.startDate.getTime() / 1000);
+      filtered = filtered.filter((order) => getCreatedAtSeconds(order.createdAt) >= startTime);
     }
     if (filters.endDate) {
-      const endTime = filters.endDate.getTime() / 1000;
-      filtered = filtered.filter((order) => order.createdAt.seconds <= endTime);
+      const endTime = Math.floor(filters.endDate.getTime() / 1000);
+      filtered = filtered.filter((order) => getCreatedAtSeconds(order.createdAt) <= endTime);
     }
 
     // 검색어 필터
@@ -350,8 +365,8 @@ export async function fetchOrders(
     filtered.sort((a, b) => {
       let aVal: number, bVal: number;
       if (sortField === 'createdAt') {
-        aVal = a.createdAt.seconds;
-        bVal = b.createdAt.seconds;
+        aVal = getCreatedAtSeconds(a.createdAt);
+        bVal = getCreatedAtSeconds(b.createdAt);
       } else {
         aVal = a.finalAmount;
         bVal = b.finalAmount;
@@ -362,8 +377,75 @@ export async function fetchOrders(
     return new Promise((resolve) => setTimeout(() => resolve(filtered), 500));
   }
 
-  // TODO: Firestore 연동
-  throw new Error('Firestore 연동이 아직 구현되지 않았습니다');
+  // Firebase 모드: Firestore 쿼리
+  try {
+    let q = query(
+      collection(db, 'orders'),
+      where('storeId', '==', storeId)
+    );
+
+    // 상태 필터
+    if (filters.status && filters.status !== 'all') {
+      q = query(q, where('status', '==', filters.status));
+    }
+
+    // 결제수단 필터
+    if (filters.paymentMethod) {
+      q = query(q, where('payment.method', '==', filters.paymentMethod));
+    }
+
+    // 정렬 추가
+    q = query(q, orderBy('createdAt', sortDirection));
+
+    const snapshot = await getDocs(q);
+    let orders: Order[] = snapshot.docs.map((doc) => ({
+      orderId: doc.id,
+      ...doc.data(),
+    } as Order));
+
+    // 클라이언트 측 필터링 (복잡한 검색은 Firestore 쿼리로 처리 불가능할 수 있음)
+    if (filters.startDate) {
+      const startTime = Math.floor(filters.startDate.getTime() / 1000);
+      orders = orders.filter((order) => {
+        const createdAt = order.createdAt as any;
+        const seconds = createdAt?.seconds || 0;
+        return seconds >= startTime;
+      });
+    }
+
+    if (filters.endDate) {
+      const endTime = Math.floor(filters.endDate.getTime() / 1000);
+      orders = orders.filter((order) => {
+        const createdAt = order.createdAt as any;
+        const seconds = createdAt?.seconds || 0;
+        return seconds <= endTime;
+      });
+    }
+
+    if (filters.searchQuery) {
+      const queryStr = filters.searchQuery.toLowerCase();
+      orders = orders.filter(
+        (order) =>
+          order.orderId.toLowerCase().includes(queryStr) ||
+          order.phone.includes(queryStr) ||
+          order.items.some((item) => item.menuName.toLowerCase().includes(queryStr))
+      );
+    }
+
+    // amount 정렬이 필요한 경우 클라이언트에서 재정렬
+    if (sortField === 'amount') {
+      orders.sort((a, b) =>
+        sortDirection === 'desc'
+          ? b.finalAmount - a.finalAmount
+          : a.finalAmount - b.finalAmount
+      );
+    }
+
+    return orders;
+  } catch (error) {
+    console.error('Failed to fetch orders from Firestore:', error);
+    return [];
+  }
 }
 
 /**
@@ -425,8 +507,33 @@ export async function updateOrderStatus(
     return new Promise((resolve) => setTimeout(() => resolve({ success: true }), 500));
   }
 
-  // TODO: Firestore + Functions 연동
-  throw new Error('Firestore 연동이 아직 구현되지 않았습니다');
+  // Firebase 모드: Firestore 주문 상태 업데이트
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    const orderSnap = await getDoc(orderRef);
+
+    if (!orderSnap.exists()) {
+      return { success: false, error: '주문을 찾을 수 없습니다' };
+    }
+
+    const updateData: any = {
+      status: newStatus,
+      updatedAt: serverTimestamp(),
+      [`timeline.${newStatus}`]: serverTimestamp(),
+    };
+
+    if (newStatus === 'canceled' && reason) {
+      updateData['payment.cancelReason'] = reason;
+      updateData['payment.canceledAt'] = serverTimestamp();
+    }
+
+    await updateDoc(orderRef, updateData);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update order status in Firestore:', error);
+    return { success: false, error: '상태 업데이트 중 오류가 발생했습니다' };
+  }
 }
 
 /**

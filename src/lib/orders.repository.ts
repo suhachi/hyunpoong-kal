@@ -6,6 +6,7 @@ export interface CreateOrderPayload {
   items: Array<{
     menuId: string;
     menuName: string;
+    menuImage: string;
     quantity: number;
     options?: any;
     price: number;

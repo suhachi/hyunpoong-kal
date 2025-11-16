@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-14-1904  
+**Generated**: 2025-11-15-2002  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -62,9 +62,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Mock 사용자 데이터 (개발용)
 const MOCK_USERS = {
-  'admin@hyunpungkalguksu.com': {
+  'admin@hyunpoongkalguksu.com': {
     uid: 'admin-001',
-    email: 'admin@hyunpungkalguksu.com',
+    email: 'admin@hyunpoongkalguksu.com',
     displayName: '관리자',
     role: 'owner' as UserRole,
     storeId: 'store-hyunpung',
@@ -337,7 +337,7 @@ export function useAuth() {
 ## src\contexts\CartContext.tsx
 
 ```tsx
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import type { CartContextType, CartItem, DeliveryType, DeliveryAddress } from '../types/cart';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -357,20 +357,55 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // 로컬 스토리지에서 장바구니 복원
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        setItems(data.items || []);
-        setDeliveryTypeState(data.deliveryType || 'delivery');
-        setDeliveryAddressState(data.deliveryAddress);
-        setRequestsState(data.requests || '');
-        setCouponId(data.couponId);
-        setCouponDiscount(data.couponDiscount || 0);
+    const loadFromStorage = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const data = JSON.parse(stored);
+          setItems(data.items || []);
+          setDeliveryTypeState(data.deliveryType || 'delivery');
+          setDeliveryAddressState(data.deliveryAddress);
+          setRequestsState(data.requests || '');
+          setCouponId(data.couponId);
+          setCouponDiscount(data.couponDiscount || 0);
+        }
+      } catch (error) {
+        console.error('Failed to load cart from localStorage:', error);
       }
-    } catch (error) {
-      console.error('Failed to load cart from localStorage:', error);
-    }
+    };
+
+    // 초기 로드
+    loadFromStorage();
+
+    // storage event listener: 다른 탭이나 창에서 localStorage 변경 시 동기화
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) {
+        loadFromStorage();
+      }
+    };
+
+    // visibilitychange: 탭이 다시 활성화될 때 localStorage 재동기화
+    // 이를 통해 SPA 내 페이지 이동 후에도 최신 상태를 보장
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadFromStorage();
+      }
+    };
+
+    // focus: 창이 포커스를 받을 때 localStorage 재동기화
+    const handleFocus = () => {
+      loadFromStorage();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // 장바구니 상태 변경 시 로컬 스토리지 저장
@@ -499,6 +534,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return subtotal + deliveryFee - couponDiscount;
   };
 
+  // T2-13 Fix: forceReload를 useCallback으로 메모이제이션하여 참조 안정성 확보
+  // Cart 컴포넌트에서 useEffect 의존성 배열에 사용 시 무한 루프 방지
+  const forceReload = useCallback(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        setItems(data.items || []);
+        setDeliveryTypeState(data.deliveryType || 'delivery');
+        setDeliveryAddressState(data.deliveryAddress);
+        setRequestsState(data.requests || '');
+        setCouponId(data.couponId);
+        setCouponDiscount(data.couponDiscount || 0);
+      }
+    } catch (error) {
+      console.error('Failed to force reload cart from localStorage:', error);
+    }
+  }, []); // 의존성 없음: STORAGE_KEY는 상수, setState들은 React가 안정적으로 유지
+
   return (
     <CartContext.Provider
       value={{
@@ -521,6 +575,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         getSubtotal,
         getDeliveryFee,
         getTotalAmount,
+        forceReload,
       }}
     >
       {children}

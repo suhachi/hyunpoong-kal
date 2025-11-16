@@ -111,7 +111,7 @@ export function MenuDetail() {
   const isSoldOut = !menu.isAvailable && !menu.availableHours;
   
   return (
-    <div className="pb-24">
+    <div className="pb-24" data-testid="menu-detail.page">
       {/* 메뉴 이미지 */}
       <div className="relative aspect-square bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 overflow-hidden">
         {menu.image ? (
@@ -289,6 +289,7 @@ export function MenuDetail() {
             className="flex-1 bg-[#D61C1C] hover:bg-[#D61C1C]/90"
             onClick={handleAddToCart}
             disabled={isSoldOut || isTimeRestricted}
+            data-testid="menu-detail.button.add"
           >
             <ShoppingCart className="w-5 h-5 mr-2" />
             {isSoldOut ? '품절' : isTimeRestricted ? '시간제 메뉴' : `${formatPrice(totalPrice)} 담기`}

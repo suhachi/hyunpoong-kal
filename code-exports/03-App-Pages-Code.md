@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-11-14-1904  
+**Generated**: 2025-11-15-2002  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -527,9 +527,12 @@ export function Cart() {
     getDeliveryFee,
     getTotalAmount,
     addToCart,
+    forceReload,
   } = useCart();
 
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
+  // T2-13 Fix: 로딩 상태 추가 - forceReload 완료 전까지 EmptyState 표시 방지
+  const [isHydrating, setIsHydrating] = useState(true);
 
   const subtotal = getSubtotal();
   const deliveryFee = getDeliveryFee();
@@ -538,6 +541,18 @@ export function Cart() {
   const minOrderAmount = deliveryType === 'delivery' ? ORDER_LIMITS.MIN_AMOUNT_DELIVERY : ORDER_LIMITS.MIN_AMOUNT_PICKUP;
   const canProceed = subtotal >= minOrderAmount;
   const missingAmount = minOrderAmount - subtotal;
+
+  // T2-13 Fix: Cart 페이지 마운트 시 localStorage에서 최신 상태 강제 로드
+  // forceReload가 useCallback으로 메모이제이션되어 안정적인 참조를 가지므로
+  // [forceReload] 의존성 배열 사용 시 무한 루프가 발생하지 않음
+  // SPA 네비게이션 시 CartContext state와 localStorage 동기화 보장
+  useEffect(() => {
+    forceReload();
+    // 비동기 setState 완료를 기다리기 위해 다음 틱에 실행
+    setTimeout(() => {
+      setIsHydrating(false);
+    }, 0);
+  }, [forceReload]);
 
   // 메뉴 데이터 로드 (추천용)
   useEffect(() => {
@@ -575,6 +590,16 @@ export function Cart() {
       options: [],
       subtotal: menu.price,
     });
+  }
+
+  // T2-13 Fix: 로딩 중이면 빈 화면 대신 로딩 표시
+  if (isHydrating) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <div className="w-16 h-16 border-4 border-[#D61C1C]/30 border-t-[#D61C1C] rounded-full animate-spin"></div>
+        <p className="mt-4 text-[#2E1C10]/60">로딩 중...</p>
+      </div>
+    );
   }
 
   if (items.length === 0) {
@@ -884,7 +909,7 @@ import { formatPrice } from '../../lib/utils';
 
 type FilterStatus = OrderStatus | 'all' | 'reviewable';
 
-const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
+const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
   pending: { label: '결제대기', variant: 'outline', color: 'text-gray-500' },
   accepted: { label: '접수완료', variant: 'default', color: 'text-green-600' },
   preparing: { label: '조리중', variant: 'secondary', color: 'text-orange-600' },

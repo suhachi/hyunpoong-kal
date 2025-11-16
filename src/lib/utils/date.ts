@@ -124,7 +124,7 @@ export function isThisMonth(date: Date | Timestamp | string): boolean {
 /**
  * Date 객체로 변환 (헬퍼)
  */
-function convertToDate(date: Date | Timestamp | string): Date | null {
+function convertToDate(date: Date | Timestamp | string | { seconds?: number; nanoseconds?: number }): Date | null {
   if (date instanceof Date) {
     return date;
   }
@@ -133,8 +133,14 @@ function convertToDate(date: Date | Timestamp | string): Date | null {
     return (date as Timestamp).toDate();
   }
   
+  // FirebaseTimestamp 형태 지원: { seconds, nanoseconds }
+  if (date && typeof date === 'object' && 'seconds' in (date as any) && typeof (date as any).seconds === 'number') {
+    return new Date((date as any).seconds * 1000);
+  }
+  
   if (typeof date === 'string') {
-    return new Date(date);
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? null : d;
   }
   
   return null;

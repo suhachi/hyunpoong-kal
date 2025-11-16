@@ -298,11 +298,11 @@ npm run dev
 ```
 고객 계정:
 - 이메일: customer@example.com
-- 비밀번호: test1234
+- 비밀번호: 111111
 
 관리자 계정:
 - 이메일: admin@hyunpungkalguksu.com
-- 비밀번호: admin1234
+- 비밀번호: 111111
 ```
 
 ### 2. Firebase 연동 시

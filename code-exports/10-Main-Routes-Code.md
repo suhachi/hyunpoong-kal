@@ -1,6 +1,6 @@
 # Main & Routes - Full Source Code
 
-**Generated**: 2025-11-14-1904  
+**Generated**: 2025-11-15-2002  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -78,6 +78,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Toaster } from './components/ui/sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -121,8 +122,21 @@ import { AdminPoints } from './pages/admin/Points';
 // 개발 도구
 import { DevTools } from './pages/DevTools';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
+import { ensureFcmToken, FCM_TOKEN_KEY } from './lib/fcm';
 
 export default function App() {
+  // T2-9: 앱 진입 시 1회 FCM 토큰 보장 시도 (Mock 우선)
+  useEffect(() => {
+    try {
+      const existing = localStorage.getItem(FCM_TOKEN_KEY);
+      if (!existing) {
+        ensureFcmToken().catch((err) => console.error('[FCM] ensureFcmToken error', err));
+      }
+    } catch (e) {
+      console.warn('[FCM] 초기 토큰 확인 실패:', e);
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -137,7 +151,8 @@ export default function App() {
               
               {/* 메뉴 */}
               <Route path="menu" element={<MenuList />} />
-              <Route path="menu/:id" element={<MenuDetail />} />
+              {/* T2-12: Route param은 MenuDetail의 useParams<{ menuId }>() 와 일치해야 함 */}
+              <Route path="menu/:menuId" element={<MenuDetail />} />
               
               {/* 장바구니 & 주문 */}
               <Route path="cart" element={<Cart />} />
@@ -310,7 +325,8 @@ export default function App() {
               
               {/* 메뉴 */}
               <Route path="menu" element={<MenuList />} />
-              <Route path="menu/:id" element={<MenuDetail />} />
+              {/* T2-12: Route param은 MenuDetail의 useParams<{ menuId }>() 와 일치해야 함 */}
+              <Route path="menu/:menuId" element={<MenuDetail />} />
               
               {/* 장바구니 & 주문 */}
               <Route path="cart" element={<Cart />} />
