@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import type { CartContextType, CartItem, DeliveryType, DeliveryAddress } from '../types/cart';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -16,23 +16,52 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [couponId, setCouponId] = useState<string | undefined>();
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
-  // 로컬 스토리지에서 장바구니 복원
-  useEffect(() => {
+  // 단일 진실: localStorage에서 장바구니 로드 (JSON 파싱 실패 시 안전하게 무시)
+  const loadFromStorage = useCallback(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        setItems(data.items || []);
-        setDeliveryTypeState(data.deliveryType || 'delivery');
-        setDeliveryAddressState(data.deliveryAddress);
-        setRequestsState(data.requests || '');
-        setCouponId(data.couponId);
-        setCouponDiscount(data.couponDiscount || 0);
-      }
+      if (!stored) return;
+      const data = JSON.parse(stored);
+      // T2-14 디버깅용 임시 로그: localStorage에서 읽어온 데이터
+      // TODO: Remove T2-14 debug logs after E2E 안정화
+      console.log('[CartContext] T2-14 loaded from storage', data);
+      setItems(data.items || []);
+      setDeliveryTypeState(data.deliveryType || 'delivery');
+      setDeliveryAddressState(data.deliveryAddress);
+      setRequestsState(data.requests || '');
+      setCouponId(data.couponId);
+      setCouponDiscount(data.couponDiscount || 0);
     } catch (error) {
       console.error('Failed to load cart from localStorage:', error);
     }
   }, []);
+
+  // 초기 마운트 + 이벤트 바인딩(useEffect 하나만 사용)
+  useEffect(() => {
+    // T2-14 디버깅용 임시 로그: 컴포넌트 최초 마운트 시 initial items 상태 로깅
+    // TODO: Remove T2-14 debug logs after E2E 안정화
+    console.log('[CartContext] T2-14 initial items', items);
+    loadFromStorage();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) loadFromStorage();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') loadFromStorage();
+    };
+    const handleFocus = () => {
+      loadFromStorage();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [loadFromStorage, items]);
 
   // 장바구니 상태 변경 시 로컬 스토리지 저장
   useEffect(() => {
@@ -160,6 +189,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return subtotal + deliveryFee - couponDiscount;
   };
 
+  // forceReload: loadFromStorage thin wrapper (추가 부작용 없이 재동기화 전용)
+  const forceReload = useCallback(() => {
+    // T2-14 디버깅용 임시 로그: forceReload 호출 시점
+    // TODO: Remove T2-14 debug logs after E2E 안정화
+    console.log('[CartContext] T2-14 forceReload called');
+    loadFromStorage();
+  }, [loadFromStorage]);
+
   return (
     <CartContext.Provider
       value={{
@@ -182,6 +219,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         getSubtotal,
         getDeliveryFee,
         getTotalAmount,
+        forceReload,
       }}
     >
       {children}

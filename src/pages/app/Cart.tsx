@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { Alert, AlertDescription } from '../../components/ui/alert';
+import { Separator } from '../../components/ui/separator';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { useCart } from '../../contexts/CartContext';
 import { UpsellSection } from '../../components/app/UpsellSection';
@@ -48,9 +49,16 @@ export function Cart() {
     getDeliveryFee,
     getTotalAmount,
     addToCart,
+    forceReload,
   } = useCart();
 
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
+  // 단순화된 hydration: 최초 마운트 후 items 반영 여부만 구분
+  const [isHydrating, setIsHydrating] = useState(true);
+  // T2-14 디버깅 로그: 렌더 상태 추적 (임시)
+  useEffect(() => {
+    console.log('[Cart] T2-14 render', { isHydrating, itemsLength: items.length });
+  }, [isHydrating, items.length]);
 
   const subtotal = getSubtotal();
   const deliveryFee = getDeliveryFee();
@@ -60,9 +68,30 @@ export function Cart() {
   const canProceed = subtotal >= minOrderAmount;
   const missingAmount = minOrderAmount - subtotal;
 
-  // 메뉴 데이터 로드 (추천용)
+  // 1) 마운트 시 items가 비어 있으면 한 번만 강제 동기화
   useEffect(() => {
-    loadMenus();
+    if (items.length === 0) {
+      console.log('[Cart] T2-14 mount forceReload (items empty)');
+      forceReload?.();
+    } else {
+      console.log('[Cart] T2-14 mount skip forceReload (items present)');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 2) items 변화가 감지되면 hydration 종료 (무조건 한 번은 false로 전환)
+  useEffect(() => {
+    if (isHydrating) {
+      console.log('[Cart] T2-14 hydration complete trigger');
+      setIsHydrating(false);
+    }
+  }, [items.length, isHydrating]);
+
+  // 메뉴 데이터 로드 (추천용)
+  // T2-13: UpsellSection 메뉴 로딩은 선택적 기능이므로 당분간 비활성화
+  // public/data/menus.json이 준비되면 주석 해제
+  useEffect(() => {
+    // loadMenus();
   }, []);
 
   async function loadMenus() {
@@ -96,6 +125,16 @@ export function Cart() {
       options: [],
       subtotal: menu.price,
     });
+  }
+
+  // T2-13 Fix: 로딩 중이면 빈 화면 대신 로딩 표시
+  if (isHydrating) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <div className="w-16 h-16 border-4 border-[#D61C1C]/30 border-t-[#D61C1C] rounded-full animate-spin"></div>
+        <p className="mt-4 text-[#2E1C10]/60">로딩 중...</p>
+      </div>
+    );
   }
 
   if (items.length === 0) {
