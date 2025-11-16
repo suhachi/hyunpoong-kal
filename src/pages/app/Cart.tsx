@@ -53,17 +53,11 @@ export function Cart() {
   } = useCart();
 
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
-  // T2-15: Cart 페이지 hydration 단순화
-  // - items.length 기반으로 Empty / Full UI 결정
-  // - 최초 렌더에서 items가 비어 있을 때만 forceReload 1회 호출하여 localStorage 동기화
-  // - 별도의 다중 setTimeout 제거 → 결정적(isHydrating -> false) 전환
-  // TODO(T2-15): Phase 2(Firebase 주문/결제 플로우 연결) 후 디버그 로그 및 필요 없는 가드 제거 예정
-  // 단순화된 hydration: 최초 마운트 후 items 반영 여부만 구분
-  const [isHydrating, setIsHydrating] = useState(true);
-  // T2-14 디버깅 로그: 렌더 상태 추적 (임시)
-  useEffect(() => {
-    console.log('[Cart] T2-14 render', { isHydrating, itemsLength: items.length }); // TODO(T2-15): Phase 2 안정화 후 제거
-  }, [isHydrating, items.length]);
+  // T2-16: Cart 페이지 hydration 완전 제거
+  // - CartContext의 items를 즉시 신뢰하고 렌더링
+  // - localStorage 동기화는 CartContext에서 이미 처리됨
+  // - isHydrating 플래그 제거로 불필요한 로딩 상태 회피
+  const [isHydrating] = useState(false);
 
   const subtotal = getSubtotal();
   const deliveryFee = getDeliveryFee();
@@ -72,25 +66,6 @@ export function Cart() {
   const minOrderAmount = deliveryType === 'delivery' ? ORDER_LIMITS.MIN_AMOUNT_DELIVERY : ORDER_LIMITS.MIN_AMOUNT_PICKUP;
   const canProceed = subtotal >= minOrderAmount;
   const missingAmount = minOrderAmount - subtotal;
-
-  // 1) 마운트 시 items가 비어 있으면 한 번만 강제 동기화
-  useEffect(() => {
-    if (items.length === 0) {
-      console.log('[Cart] T2-14 mount forceReload (items empty)'); // TODO(T2-15): 제거 예정
-      forceReload?.();
-    } else {
-      console.log('[Cart] T2-14 mount skip forceReload (items present)'); // TODO(T2-15): 제거 예정
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 2) items 변화가 감지되면 hydration 종료 (무조건 한 번은 false로 전환)
-  useEffect(() => {
-    if (isHydrating) {
-      console.log('[Cart] T2-14 hydration complete trigger'); // TODO(T2-15): 제거 예정
-      setIsHydrating(false);
-    }
-  }, [items.length, isHydrating]);
 
   // 메뉴 데이터 로드 (추천용)
   // T2-13: UpsellSection 메뉴 로딩은 선택적 기능이므로 당분간 비활성화
@@ -132,19 +107,19 @@ export function Cart() {
     });
   }
 
-  // T2-13 Fix: 로딩 중이면 빈 화면 대신 로딩 표시
+  // 로딩 상태 (현재는 사용하지 않지만 향후 필요 시 활성화 가능)
   if (isHydrating) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      <div data-testid="cart.loading" className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <div className="w-16 h-16 border-4 border-[#D61C1C]/30 border-t-[#D61C1C] rounded-full animate-spin"></div>
-        <p className="mt-4 text-[#2E1C10]/60">로딩 중...</p>
+        <p className="mt-4 text-[#2E1C10]/60">장바구니를 불러오는 중...</p>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4" data-testid="cart.empty">
         <div className="w-24 h-24 mb-6 rounded-full bg-[#2E1C10]/5 flex items-center justify-center">
           <ShoppingBag className="w-12 h-12 text-[#2E1C10]/40" />
         </div>
@@ -165,10 +140,10 @@ export function Cart() {
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-32" data-testid="cart.page">
       <div className="px-4 py-6 space-y-6">
         {/* 장바구니 헤더 */}
-        <div>
+        <div data-testid="cart.header">
           <h1 className="text-2xl text-[#2E1C10] mb-1">
             장바구니
           </h1>
@@ -178,7 +153,7 @@ export function Cart() {
         </div>
 
         {/* 장바구니 아이템 */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-testid="cart.items">
           {items.map((item, index) => (
             <CartItemCard
               key={`${item.menuId}-${index}`}
@@ -192,13 +167,13 @@ export function Cart() {
         <Separator />
 
         {/* 배달/포장 선택 */}
-        <div>
+        <div data-testid="cart.method">
           <h2 className="text-[#2E1C10] mb-3">
             주문 방식
           </h2>
           <RadioGroup value={deliveryType} onValueChange={(v) => setDeliveryType(v as 'delivery' | 'pickup')}>
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="delivery" id="delivery" />
+              <RadioGroupItem value="delivery" id="delivery" data-testid="cart.method.radio-delivery" />
               <Label htmlFor="delivery" className="flex items-center gap-2 cursor-pointer flex-1">
                 <Truck className="w-5 h-5 text-[#D61C1C]" />
                 <div>
@@ -216,7 +191,7 @@ export function Cart() {
             </div>
 
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="pickup" id="pickup" />
+              <RadioGroupItem value="pickup" id="pickup" data-testid="cart.method.radio-pickup" />
               <Label htmlFor="pickup" className="flex items-center gap-2 cursor-pointer flex-1">
                 <ShoppingBag className="w-5 h-5 text-[#F37021]" />
                 <div>
@@ -239,6 +214,7 @@ export function Cart() {
             요청사항 (선택)
           </h2>
           <Textarea
+            data-testid="cart.input.requests"
             placeholder="예) 면 부드럽게 해주세요"
             value={requests}
             onChange={(e) => setRequests(e.target.value)}
@@ -284,7 +260,7 @@ export function Cart() {
       </div>
 
       {/* 하단 고정 결제 영역 */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-[#2E1C10]/10 px-4 py-4 space-y-3">
+      <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-[#2E1C10]/10 px-4 py-4 space-y-3" data-testid="cart.summary">
         {/* 금액 상세 - PriceBreakdown 컴포넌트 사용 */}
         <PriceBreakdown
           subtotal={subtotal}
@@ -296,6 +272,7 @@ export function Cart() {
 
         {/* 결제하기 버튼 */}
         <Button
+          data-testid="cart.button.submit"
           size="lg"
           className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
           disabled={!canProceed}
@@ -340,7 +317,7 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
   const imageUrl = menuImages[item.menuId];
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm">
+    <div className="bg-white rounded-2xl p-4 shadow-sm" data-testid="cart.item">
       <div className="flex gap-4">
         {/* 메뉴 이미지 */}
         <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
@@ -360,10 +337,11 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
         {/* 메뉴 정보 */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="text-[#2E1C10] truncate">
+            <h3 className="text-[#2E1C10] truncate" data-testid="cart.item.name">
               {item.menuName}
             </h3>
             <button
+              data-testid="cart.item.remove"
               onClick={onRemove}
               className="flex-shrink-0 p-1 hover:bg-[#2E1C10]/5 rounded"
               aria-label="삭제"
@@ -374,7 +352,7 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
 
           {/* 옵션 */}
           {optionsText && (
-            <p className="text-sm text-[#2E1C10]/60 mb-2">
+            <p className="text-sm text-[#2E1C10]/60 mb-2" data-testid="cart.item.options">
               {optionsText}
             </p>
           )}
@@ -384,16 +362,18 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
             {/* 수량 조절 */}
             <div className="flex items-center border border-[#2E1C10]/20 rounded-lg overflow-hidden">
               <button
+                data-testid="cart.item.quantity-decrease"
                 onClick={() => onUpdateQuantity(Math.max(1, item.quantity - 1))}
                 className="w-8 h-8 flex items-center justify-center hover:bg-[#F9F6F3]"
                 aria-label="수량 감소"
               >
                 <Minus className="w-3 h-3" />
               </button>
-              <span className="w-10 text-center text-sm text-[#2E1C10]">
+              <span className="w-10 text-center text-sm text-[#2E1C10]" data-testid="cart.item.quantity">
                 {item.quantity}
               </span>
               <button
+                data-testid="cart.item.quantity-increase"
                 onClick={() => onUpdateQuantity(item.quantity + 1)}
                 className="w-8 h-8 flex items-center justify-center hover:bg-[#F9F6F3]"
                 aria-label="수량 증가"
@@ -403,7 +383,7 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
             </div>
 
             {/* 가격 */}
-            <span className="text-[#D61C1C]">
+            <span className="text-[#D61C1C]" data-testid="cart.item.price">
               {formatPrice(item.subtotal)}
             </span>
           </div>

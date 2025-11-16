@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import type { CartContextType, CartItem, DeliveryType, DeliveryAddress } from '../types/cart';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,9 +27,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return;
       const data = JSON.parse(stored);
-      // T2-14 디버깅용 임시 로그: localStorage에서 읽어온 데이터
-      // TODO: Remove T2-14 debug logs after E2E 안정화
-      console.log('[CartContext] T2-14 loaded from storage', data); // TODO(T2-15): Phase 2 안정화 후 제거
       setItems(data.items || []);
       setDeliveryTypeState(data.deliveryType || 'delivery');
       setDeliveryAddressState(data.deliveryAddress);
@@ -43,9 +40,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // 초기 마운트 + 이벤트 바인딩(useEffect 하나만 사용)
   useEffect(() => {
-    // T2-14 디버깅용 임시 로그: 컴포넌트 최초 마운트 시 initial items 상태 로깅
-    // TODO: Remove T2-14 debug logs after E2E 안정화
-    console.log('[CartContext] T2-14 initial items', items); // TODO(T2-15): Phase 2 안정화 후 제거
     loadFromStorage();
 
     const handleStorageChange = (e: StorageEvent) => {
@@ -66,10 +60,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [loadFromStorage, items]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // 장바구니 상태 변경 시 로컬 스토리지 저장
+  // 장바구니 상태 변경 시 로컬 스토리지 저장 (초기 마운트 제외)
+  const isInitialMount = useRef(true);
   useEffect(() => {
+    // 초기 마운트 시에는 저장하지 않음 (loadFromStorage가 먼저 실행되도록)
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
     try {
       localStorage.setItem(
         STORAGE_KEY,
@@ -196,9 +198,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // forceReload: loadFromStorage thin wrapper (추가 부작용 없이 재동기화 전용)
   const forceReload = useCallback(() => {
-    // T2-14 디버깅용 임시 로그: forceReload 호출 시점
-    // TODO: Remove T2-14 debug logs after E2E 안정화
-    console.log('[CartContext] T2-14 forceReload called'); // TODO(T2-15): Phase 2 안정화 후 제거
     loadFromStorage();
   }, [loadFromStorage]);
 
