@@ -36,6 +36,7 @@ import {
 } from '../../lib/admin/orders.api';
 import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOrdersFallback } from '../../lib/fallback';
 
 export function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -75,21 +76,9 @@ export function AdminOrders() {
       console.error('주문 로드 실패:', error);
       toast.error('주문 목록을 불러오는데 실패했습니다 (fallback 적용)');
       // Firestore 권한 실패 시 localStorage 기반 fallback (E2E 안정화)
-      try {
-        const raw = localStorage.getItem('orders');
-        if (raw) {
-          const obj = JSON.parse(raw);
-          const arr: Order[] = Array.isArray(obj)
-            ? obj
-            : Array.isArray(Object.values(obj))
-              ? (Object.values(obj) as Order[])
-              : [];
-          setOrders(arr);
-          setFilteredOrders(arr);
-        }
-      } catch (fallbackErr) {
-        console.warn('[AdminOrders] localStorage fallback 실패:', fallbackErr);
-      }
+      const arr = getOrdersFallback();
+      setOrders(arr);
+      setFilteredOrders(arr);
     } finally {
       setLoading(false);
     }

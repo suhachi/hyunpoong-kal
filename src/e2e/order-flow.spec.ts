@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { loginAsAdminWithLocalStorage } from './utils/auth';
 
 // 명시적인 baseURL 강제 (환경변수 우선)
 test.use({ baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000' });
@@ -7,18 +8,14 @@ test.use({ baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:30
 // S02: 로그인/컨텍스트 헬퍼 정리 (주문 생성 로직은 S03에서 구현 예정)
 // =============================================================
 
-const APP_BASE_URL = '/';
-const ADMIN_BASE_URL = '/admin';
+// base URLs are configured via Playwright config and env
 
-type LoginOptions = {
-  email: string;
-  password: string;
-};
+// (reserved for future login options)
 
 /**
  * 고객 로그인 헬퍼 (S03에서 셀렉터/텍스트 구체화 예정)
  */
-async function loginAsCustomer(page: Page, opts?: Partial<LoginOptions>) {
+async function loginAsCustomer(page: Page) {
   // 테스트 안정성을 위해 항상 Mock 고객 세션을 선주입한다
   await page.addInitScript(() => {
     const mockCustomer = {
@@ -52,58 +49,7 @@ async function loginAsCustomer(page: Page, opts?: Partial<LoginOptions>) {
   await expect(page).toHaveURL(/\/menu$/);
 }
 
-/**
- * 관리자 mock 세션 주입 헬퍼
- * - localStorage에 mockUser / mockRole 세팅 후 /admin/orders 진입
- */
-async function loginAsAdminWithLocalStorage(page: Page) {
-  await page.addInitScript(() => {
-    const mockAdmin = {
-      uid: 'admin-001',
-      email: 'admin@hyunpoongkalguksu.com',
-      displayName: '관리자',
-      role: 'owner',
-      storeId: 'store-hyunpung',
-    };
-    localStorage.setItem('mockUser', JSON.stringify(mockAdmin));
-    localStorage.setItem('mockRole', 'owner');
-  });
-
-  // Firebase 모드일 때: 익명 로그인 시도 (권한 가드 통과 목적)
-  if (process.env.VITE_USE_FIREBASE === 'true') {
-    // 먼저 루트 로드하여 앱 Firebase 초기화 유도
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
-    // auth 모듈 동적 import 후 익명 로그인
-    await page.evaluate(async () => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const { getAuth, signInAnonymously } = await import('firebase/auth');
-        const auth = getAuth();
-        if (!auth.currentUser) {
-          await signInAnonymously(auth);
-        }
-        // 익명 uid를 mockUser에 동기화하여 userId/권한 혼동 방지
-        if (auth.currentUser) {
-          try {
-            const raw = localStorage.getItem('mockUser');
-            if (raw) {
-              const obj = JSON.parse(raw);
-              obj.uid = auth.currentUser.uid;
-              localStorage.setItem('mockUser', JSON.stringify(obj));
-            }
-          } catch {}
-        }
-      } catch (e) {
-        console.warn('[admin-login] anonymous sign-in failed', e);
-      }
-    });
-  }
-
-  await page.goto(`${ADMIN_BASE_URL}/orders`);
-  await expect(page).toHaveURL(/\/admin\/orders/);
-}
+// 관리자 헬퍼는 테스트 전용 유틸로 이동 (src/e2e/utils/auth.ts)
 
 // (미사용) 추후 S03/S04에서 주문ID 활용 필요 시 재활성화 예정
 // async function getLatestOrderId(page: Page): Promise<string | null> {
