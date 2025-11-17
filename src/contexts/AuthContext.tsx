@@ -13,12 +13,12 @@ import {
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser,
   updateProfile
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { USE_FIREBASE } from '../config/env';
+import { resolveUser } from '../lib/auth/resolveUser';
 
 export type UserRole = 'customer' | 'owner' | 'admin';
 
@@ -65,58 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 내부 전용 사용자 해석기: Firebase → localStorage(mockUser) → minimal default
-  // 반환 타입은 AuthContext의 AuthUser와 1:1 동일. 필수 필드(uid, role, storeId, displayName) 포함 보장.
-  const resolveUserInternal = async (firebaseUser: FirebaseUser): Promise<AuthUser> => {
-    let resolvedUser: AuthUser | null = null;
-    try {
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      const userData = userDoc.data();
-      if (userData) {
-        resolvedUser = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          displayName: firebaseUser.displayName || (userData as any).displayName || '사용자',
-          photoURL: firebaseUser.photoURL || undefined,
-          role: ((userData as any).role as UserRole) || 'customer',
-          // 필드 존재 보장. 값이 없으면 undefined를 명시적으로 둬서 shape 유지
-          storeId: (userData as any).storeId ?? undefined,
-          createdAt: (userData as any).createdAt?.toDate?.() || new Date(),
-        };
-      }
-    } catch (docErr) {
-      // eslint-disable-next-line no-console
-      console.warn('[AuthContext] Firestore userDoc read 실패, mockUser fallback 시도:', docErr);
-      try {
-        const mockRaw = localStorage.getItem('mockUser');
-        if (mockRaw) {
-          const parsed = JSON.parse(mockRaw);
-          resolvedUser = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email || parsed.email || '',
-            displayName: parsed.displayName || firebaseUser.displayName || '사용자',
-            role: (parsed.role as UserRole) || 'customer',
-            storeId: parsed.storeId ?? undefined,
-            createdAt: new Date(),
-          };
-        }
-      } catch (fallbackErr) {
-        console.error('[AuthContext] mockUser fallback 실패:', fallbackErr);
-      }
-    }
-
-    if (!resolvedUser) {
-      resolvedUser = {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email || '',
-        displayName: firebaseUser.displayName || '사용자',
-        role: 'customer',
-        storeId: undefined,
-        createdAt: new Date(),
-      };
-    }
-    return resolvedUser;
-  };
+  // AuthResolver는 외부 파일로 이동 (동작 동일, 위치만 이동)
 
   useEffect(() => {
     // eslint-disable-next-line no-console
@@ -127,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         try {
           if (firebaseUser) {
-            const resolved = await resolveUserInternal(firebaseUser);
+            const resolved = (await resolveUser(firebaseUser)) as AuthUser;
             setUser(resolved);
           } else {
             setUser(null);

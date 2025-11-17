@@ -1,6 +1,6 @@
-<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="14.831164000000001">
-<testsuite name="order-flow.spec.ts" timestamp="2025-11-17T02:48:44.520Z" hostname="chromium" tests="1" failures="0" skipped="0" time="11.039" errors="0">
-<testcase name="@orderflow Firebase Order flow › @orderflow 고객 주문이 완료되고 관리자에서 조회된다 (Firebase)" classname="order-flow.spec.ts" time="11.039">
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="15.03591">
+<testsuite name="order-flow.spec.ts" timestamp="2025-11-17T02:51:29.890Z" hostname="chromium" tests="1" failures="0" skipped="0" time="11.19" errors="0">
+<testcase name="@orderflow Firebase Order flow › @orderflow 고객 주문이 완료되고 관리자에서 조회된다 (Firebase)" classname="order-flow.spec.ts" time="11.19">
 <system-out>
 <![CDATA[[debug] URL after /menu: http://localhost:3000/menu
 [debug] about to click first menu link, href: /menu/menu-001
@@ -15,16 +15,16 @@
 [debug] Phone and terms filled
 [debug] Checkout submit button is enabled
 [debug] Checkout submit button clicked
-[debug] After submit - URL: http://localhost:3000/order/ORD1763347731473?result=on_site
+[debug] After submit - URL: http://localhost:3000/order/ORD1763347896950?result=on_site
 [debug] Console logs: [
   {
     "type": "log",
     "text": "[debug] firing success toast: 주문이 접수되었습니다"
   }
 ]
-[debug] URL after OrderTracking: http://localhost:3000/order/ORD1763347731473?result=on_site
-[OrderTracking] 주문 ID: ORD1763347731473
-✓ 관리자 화면에서 주문 확인: ORD1763347731473
+[debug] URL after OrderTracking: http://localhost:3000/order/ORD1763347896950?result=on_site
+[OrderTracking] 주문 ID: ORD1763347896950
+✓ 관리자 화면에서 주문 확인: ORD1763347896950
 ]]>
 </system-out>
 <system-err>

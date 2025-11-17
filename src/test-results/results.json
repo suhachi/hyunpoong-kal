@@ -165,7 +165,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 11039,
+                      "duration": 11190,
                       "errors": [],
                       "stdout": [
                         {
@@ -208,19 +208,19 @@
                           "text": "[debug] Checkout submit button clicked\n"
                         },
                         {
-                          "text": "[debug] After submit - URL: http://localhost:3000/order/ORD1763347731473?result=on_site\n"
+                          "text": "[debug] After submit - URL: http://localhost:3000/order/ORD1763347896950?result=on_site\n"
                         },
                         {
                           "text": "[debug] Console logs: [\n  {\n    \"type\": \"log\",\n    \"text\": \"[debug] firing success toast: 주문이 접수되었습니다\"\n  }\n]\n"
                         },
                         {
-                          "text": "[debug] URL after OrderTracking: http://localhost:3000/order/ORD1763347731473?result=on_site\n"
+                          "text": "[debug] URL after OrderTracking: http://localhost:3000/order/ORD1763347896950?result=on_site\n"
                         },
                         {
-                          "text": "[OrderTracking] 주문 ID: ORD1763347731473\n"
+                          "text": "[OrderTracking] 주문 ID: ORD1763347896950\n"
                         },
                         {
-                          "text": "✓ 관리자 화면에서 주문 확인: ORD1763347731473\n"
+                          "text": "✓ 관리자 화면에서 주문 확인: ORD1763347896950\n"
                         }
                       ],
                       "stderr": [
@@ -229,7 +229,7 @@
                         }
                       ],
                       "retry": 0,
-                      "startTime": "2025-11-17T02:48:45.668Z",
+                      "startTime": "2025-11-17T02:51:31.070Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -249,8 +249,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-11-17T02:48:42.296Z",
-    "duration": 14831.164,
+    "startTime": "2025-11-17T02:51:27.658Z",
+    "duration": 15035.91,
     "expected": 1,
     "skipped": 0,
     "unexpected": 0,
