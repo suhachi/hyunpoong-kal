@@ -16,6 +16,7 @@ import {
   MessageSquare,
   Gift,
   TrendingUp,
+  FileText,
 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Credits } from '../../../components/shared/Credits';
@@ -144,6 +145,7 @@ function SidebarNav({ onItemClick }: SidebarNavProps) {
     { to: '/admin/support', icon: MessageSquare, label: '고객 지원' },
     { to: '/admin/reviews', icon: Star, label: '리뷰 관리' },
     { to: '/admin/menus', icon: UtensilsCrossed, label: '메뉴 관리' },
+    { to: '/admin/notices', icon: FileText, label: '게시판 관리' },
     { to: '/admin/promotions', icon: Ticket, label: '쿠폰/프로모션' },
     { to: '/admin/points', icon: Gift, label: '포인트 관리' },
     { to: '/admin/analytics', icon: BarChart3, label: '관제 대시보드' },

@@ -1,12 +1,13 @@
 {
-      "name": "brand-report-overview",
-      "version": "0.1.0",
+      "name": "hyunpoong-kal",
+      "version": "0.9.0",
       "private": true,
+      "description": "현풍닭칼국수 PWA - 매장/포장 주문 전용 웹앱 (v0.9.0, 비결제 Mock 모드)",
       "type": "module",
       "dependencies": {
             "@axe-core/playwright": "*",
             "@google-cloud/storage": "*",
-            "@playwright/test": "*",
+            "@playwright/test": "^1.56.1",
             "@radix-ui/react-accordion": "*",
             "@radix-ui/react-alert-dialog": "*",
             "@radix-ui/react-aspect-ratio": "*",
@@ -49,6 +50,7 @@
             "pages": "*",
             "path": "*",
             "pdfkit": "*",
+            "playwright": "^1.56.1",
             "react": "^18.3.1",
             "react-day-picker": "*",
             "react-dom": "^18.3.1",
@@ -57,17 +59,17 @@
             "react-router-dom": "*",
             "recharts": "*",
             "sonner": "^2.0.3",
-      "tailwind-merge": "*",
-      "vaul": "*"
+            "tailwind-merge": "*",
+            "vaul": "*"
       },
       "devDependencies": {
-      "@tailwindcss/postcss": "^4.0.0",
-      "@types/node": "^20.10.0",
-      "@vitejs/plugin-react-swc": "^3.10.2",
-      "autoprefixer": "^10.4.20",
-      "postcss": "^8.4.47",
-      "tailwindcss": "^3.4.14",
-      "vite": "6.3.5"
+            "@tailwindcss/postcss": "^4.0.0",
+            "@types/node": "^20.10.0",
+            "@vitejs/plugin-react-swc": "^3.10.2",
+            "autoprefixer": "^10.4.20",
+            "postcss": "^8.4.47",
+            "tailwindcss": "^3.4.14",
+            "vite": "6.3.5"
       },
       "scripts": {
             "dev": "vite",

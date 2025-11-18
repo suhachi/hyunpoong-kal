@@ -1,68 +1,64 @@
 import type { User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { USE_FIREBASE } from '../../config/env';
+import type { AuthUser } from '../../contexts/AuthContext';
 
-// AuthResolver: Firebase → localStorage(mockUser) → minimal default
-// 반환 객체는 AuthContext의 AuthUser와 동일한 shape를 따릅니다.
-export async function resolveUser(firebaseUser: FirebaseUser): Promise<{
-  uid: string;
-  email: string;
-  displayName: string;
-  role: 'customer' | 'owner' | 'admin';
-  photoURL?: string;
-  storeId?: string;
-  createdAt: Date;
-}> {
-  let resolved: any = null;
+export function loadMockUserFromStorage(): AuthUser | null {
   try {
-    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-    const userData = userDoc.data();
-    if (userData) {
-      resolved = {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email || '',
-        displayName: firebaseUser.displayName || (userData as any).displayName || '사용자',
-        photoURL: firebaseUser.photoURL || undefined,
-        role: ((userData as any).role as any) || 'customer',
-        storeId: (userData as any).storeId ?? undefined,
-        createdAt: (userData as any).createdAt?.toDate?.() || new Date(),
-      };
+    const mockUserData = localStorage.getItem('mockUser');
+    if (!mockUserData) {
+      console.warn('[Auth] mockUser가 localStorage에 없습니다');
+      return null;
     }
-  } catch (e) {
-    // no-op: fallback으로 진행
-    // console.warn('[resolveUser] Firestore userDoc read 실패, mockUser fallback 진행', e);
+    const parsed = JSON.parse(mockUserData) as AuthUser;
+    return parsed;
+  } catch (error) {
+    console.error('[Auth] Mock 사용자 로드 실패:', error);
+    return null;
   }
+}
 
-  if (!resolved) {
+export async function resolveUserFromFirebaseUser(firebaseUser: FirebaseUser): Promise<AuthUser> {
+  const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+  const userData = userDoc.data() as any | undefined;
+
+  const displayName =
+    userData?.displayName ||
+    firebaseUser.displayName ||
+    '손님';
+
+  const role = (userData?.role as AuthUser['role']) || 'customer';
+
+  const authUser: AuthUser = {
+    uid: firebaseUser.uid,
+    email: firebaseUser.email || '',
+    displayName,
+    role,
+    photoURL: firebaseUser.photoURL || userData?.photoURL,
+    storeId: userData?.storeId,
+    createdAt: userData?.createdAt?.toDate
+      ? userData.createdAt.toDate()
+      : undefined,
+  };
+
+  return authUser;
+}
+
+export async function resolveUser(
+  firebaseUser: FirebaseUser | null
+): Promise<AuthUser | null> {
+  if (USE_FIREBASE && firebaseUser) {
     try {
-      const raw = typeof window !== 'undefined' ? localStorage.getItem('mockUser') : null;
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        resolved = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email || parsed.email || '',
-          displayName: parsed.displayName || firebaseUser.displayName || '사용자',
-          role: (parsed.role as any) || 'customer',
-          storeId: parsed.storeId ?? undefined,
-          createdAt: new Date(),
-        };
-      }
-    } catch (e) {
-      // no-op: 최종 디폴트로 진행
-      // console.error('[resolveUser] mockUser fallback 실패', e);
+      const authUser = await resolveUserFromFirebaseUser(firebaseUser);
+      return authUser;
+    } catch (error) {
+      console.error('[Auth] Firestore 사용자 정보 로드 실패:', error);
     }
   }
-
-  if (!resolved) {
-    resolved = {
-      uid: firebaseUser.uid,
-      email: firebaseUser.email || '',
-      displayName: firebaseUser.displayName || '사용자',
-      role: 'customer',
-      storeId: undefined,
-      createdAt: new Date(),
-    };
+  const mockUser = loadMockUserFromStorage();
+  if (mockUser) {
+    return mockUser;
   }
-
-  return resolved;
+  return null;
 }

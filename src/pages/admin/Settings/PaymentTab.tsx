@@ -56,7 +56,7 @@ export function PaymentTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-settings-payment-tab" className="space-y-6">
       {/* 결제 연동 상태 안내 */}
       <Alert>
         <AlertCircle className="w-4 h-4" />

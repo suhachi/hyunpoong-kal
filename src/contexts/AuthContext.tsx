@@ -18,7 +18,7 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { USE_FIREBASE } from '../config/env';
-import { resolveUser } from '../lib/auth/resolveUser';
+import { resolveUser, loadMockUserFromStorage } from '../lib/auth/resolveUser';
 
 export type UserRole = 'customer' | 'owner' | 'admin';
 
@@ -95,14 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
       console.log('[AuthContext] 🔍 Mock 모드 초기화 시작');
       try {
-        const mockUserData = localStorage.getItem('mockUser');
-        console.log('[AuthContext] 📦 mockUserData:', mockUserData);
-        if (mockUserData) {
-          const parsed = JSON.parse(mockUserData);
-          console.log('[AuthContext] ✅ 파싱 성공:', parsed);
-          setUser(parsed);
+        const mockUser = loadMockUserFromStorage();
+        if (mockUser) {
+          setUser(mockUser);
         } else {
-          console.warn('[AuthContext] ⚠️ mockUser가 localStorage에 없습니다');
+          console.warn('[AuthContext] ⚠️ mockUser가 없습니다');
         }
       } catch (error) {
         console.error('[AuthContext] ❌ Mock 사용자 로드 실패:', error);

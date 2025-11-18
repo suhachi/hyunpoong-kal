@@ -4,9 +4,8 @@
  * USE_FIREBASE=true: Firestore 연동
  */
 
-import { Coupon, CouponFilters, CouponStats, CouponIssue, getCouponStatus } from '../types/coupon';
 
-const USE_FIREBASE = false;
+import { USE_FIREBASE } from '../config/env';
 
 // Mock 데이터
 let mockCoupons: Coupon[] = [

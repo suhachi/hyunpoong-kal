@@ -50,6 +50,7 @@ import { AdminSupport } from './pages/admin/Support';
 import { AdminDelivery } from './pages/admin/Delivery';
 import { AdminPromotions } from './pages/admin/Promotions';
 import { AdminPoints } from './pages/admin/Points';
+import { AdminNotices } from './pages/admin/Notices';
 
 // 개발 도구
 import { DevTools } from './pages/DevTools';
@@ -137,6 +138,9 @@ export default function App() {
               
               {/* 메뉴 관리 */}
               <Route path="menus" element={<AdminMenus />} />
+              
+              {/* 게시판 관리 */}
+              <Route path="notices" element={<AdminNotices />} />
               
               {/* 리뷰 관리 */}
               <Route path="reviews" element={<AdminReviews />} />

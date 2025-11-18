@@ -39,10 +39,21 @@ const routes = [
 
 test.describe('Admin Routes @admin', () => {
   test.beforeEach(async ({ page }) => {
-    // 첫 네비게이션 전 localStorage에 mock 사용자 주입
+    // 테스트 환경 localStorage 클린업 및 mockUser 구조 보강
+    await page.addInitScript(() => {
+      localStorage.clear();
+    });
     await page.addInitScript((admin) => {
-      localStorage.setItem('mockUser', JSON.stringify(admin));
-      localStorage.setItem('mockRole', 'owner');
+      // 필수 필드 보장
+      const safeAdmin = {
+        uid: admin.uid || 'admin-001',
+        email: admin.email || 'admin@hyunpoongkalguksu.com',
+        displayName: admin.displayName || '관리자',
+        role: admin.role || 'owner',
+        storeId: admin.storeId || 'store-hyunpung',
+      };
+      localStorage.setItem('mockUser', JSON.stringify(safeAdmin));
+      localStorage.setItem('mockRole', safeAdmin.role);
     }, mockAdmin);
   });
 

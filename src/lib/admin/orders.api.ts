@@ -447,18 +447,28 @@ export async function fetchOrders(
     return [];
   }
 }
-
-/**
- * 주문 상세 조회
- */
 export async function fetchOrderById(orderId: string): Promise<Order | null> {
   if (!USE_FIREBASE) {
     const order = mockOrders.find((o) => o.orderId === orderId);
     return new Promise((resolve) => setTimeout(() => resolve(order || null), 300));
   }
 
-  // TODO: Firestore 연동
-  throw new Error('Firestore 연동이 아직 구현되지 않았습니다');
+  // Firestore 연동
+  try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    const orderRef = doc(db, 'orders', orderId);
+    const orderSnap = await getDoc(orderRef);
+    if (orderSnap.exists()) {
+      return {
+        orderId: orderSnap.id,
+        ...orderSnap.data(),
+      } as Order;
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to fetch order from Firestore:', error);
+    return null;
+  }
 }
 
 /**
@@ -537,21 +547,28 @@ export async function updateOrderStatus(
 }
 
 /**
- * 주문 로그 조회
+ * 주문 로그 조회 (Firestore 연동)
+ * logs 서브컬렉션 기준
  */
 export async function fetchOrderLogs(orderId: string): Promise<OrderLog[]> {
   if (!USE_FIREBASE) {
     const logs = mockLogs.filter((log) => log.orderId === orderId);
     return new Promise((resolve) => setTimeout(() => resolve(logs), 300));
   }
-
-  // TODO: Firestore 연동
-  throw new Error('Firestore 연동이 아직 구현되지 않았습니다');
+  // Firestore 연동: orders/{orderId}/logs 서브컬렉션
+  try {
+    const { collection, getDocs } = await import('firebase/firestore');
+    const logsRef = collection(db, 'orders', orderId, 'logs');
+    const snapshot = await getDocs(logsRef);
+    return snapshot.docs.map(doc => ({
+      logId: doc.id,
+      ...doc.data(),
+    })) as OrderLog[];
+  } catch (error) {
+    console.error('Failed to fetch order logs from Firestore:', error);
+    return [];
+  }
 }
-
-/**
- * 주문 통계 (대시보드용)
- */
 export interface OrderStats {
   total: number;
   pending: number;
@@ -562,16 +579,17 @@ export interface OrderStats {
   todayRevenue: number;
   todayOrders: number;
 }
-
 export async function fetchOrderStats(storeId: string): Promise<OrderStats> {
   if (!USE_FIREBASE) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayTimestamp = today.getTime() / 1000;
-
-    const orders = mockOrders.filter((o) => o.storeId === storeId);
-    const todayOrders = orders.filter((o) => o.createdAt.seconds >= todayTimestamp);
-
+    const orders: Order[] = mockOrders.filter((o) => o.storeId === storeId);
+    const todayOrders = orders.filter((o) => {
+      const createdAt = o.createdAt as any;
+      const seconds = createdAt?.seconds || 0;
+      return seconds >= todayTimestamp;
+    });
     return new Promise((resolve) =>
       setTimeout(
         () =>
@@ -591,7 +609,45 @@ export async function fetchOrderStats(storeId: string): Promise<OrderStats> {
       )
     );
   }
+  // Firestore 연동: storeId 기준 전체 주문 조회 후 클라이언트 집계
+  try {
+    const { collection, query, where, getDocs } = await import('firebase/firestore');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTimestamp = today.getTime() / 1000;
+    const q = query(collection(db, 'orders'), where('storeId', '==', storeId));
+    const snapshot = await getDocs(q);
+    const orders: Order[] = snapshot.docs.map(doc => ({ orderId: doc.id, ...doc.data() }));
+    const todayOrders = orders.filter((o) => {
+      const createdAt = o.createdAt as any;
+      const seconds = createdAt?.seconds || 0;
+      return seconds >= todayTimestamp;
+    });
 
-  // TODO: Firestore 연동
-  throw new Error('Firestore 연동이 아직 구현되지 않았습니다');
+    return {
+      total: orders.length,
+      pending: orders.filter((o) => o.status === 'pending').length,
+      accepted: orders.filter((o) => o.status === 'accepted').length,
+      preparing: orders.filter((o) => o.status === 'preparing').length,
+      completed: orders.filter((o) => o.status === 'completed').length,
+      canceled: orders.filter((o) => o.status === 'canceled').length,
+      todayRevenue: todayOrders
+        .filter((o) => o.status !== 'canceled')
+        .reduce((sum, o) => sum + o.finalAmount, 0),
+      todayOrders: todayOrders.length,
+    };
+  } catch (error) {
+    console.error('Failed to fetch order stats from Firestore:', error);
+    return {
+      total: 0,
+      pending: 0,
+      accepted: 0,
+      preparing: 0,
+      completed: 0,
+      canceled: 0,
+      todayRevenue: 0,
+      todayOrders: 0,
+
+    };
+  }
 }

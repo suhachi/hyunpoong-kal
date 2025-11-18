@@ -209,7 +209,7 @@ export function MenuCSVImport({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-xl p-8 shadow-lg">
         <DialogHeader>
           <DialogTitle>CSV 일괄 등록</DialogTitle>
           <DialogDescription>
@@ -217,78 +217,98 @@ export function MenuCSVImport({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* CSV 형식 안내 */}
-          <Alert>
-            <AlertCircle className="w-4 h-4" />
-            <AlertDescription>
-              <p className="mb-2">CSV 파일 형식:</p>
-              <code className="text-xs bg-gray-100 p-2 block rounded">
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertCircle className="w-5 h-5 text-blue-600" />
+            <AlertDescription className="text-sm">
+              <p className="mb-3 font-semibold text-blue-900">CSV 파일 형식:</p>
+              <code className="text-sm bg-gray-100 p-3 block rounded font-mono break-all">
                 name,category,price,description,badges,options,imageUrl,allergens,origin
               </code>
-              <p className="mt-2 text-xs">
-                • 필수: name, category, price, imageUrl<br />
-                • badges: 파이프(|)로 구분 (예: best|signature)<br />
-                • options: JSON 형식<br />
-                • allergens/origin: 파이프(|)로 구분
-              </p>
+              <div className="mt-3 text-sm space-y-1">
+                <p>• <strong>필수:</strong> name, category, price, imageUrl</p>
+                <p>• <strong>badges:</strong> 파이프(|)로 구분 (예: best|signature)</p>
+                <p>• <strong>options:</strong> JSON 형식</p>
+                <p>• <strong>allergens/origin:</strong> 파이프(|)로 구분</p>
+              </div>
             </AlertDescription>
           </Alert>
 
           {/* 파일 선택 */}
           <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              CSV 파일 선택
+            </label>
             <Input
               type="file"
               accept=".csv"
               onChange={handleFileChange}
+              className="h-12 text-base"
             />
+            {file && (
+              <p className="text-sm text-gray-600 mt-2">
+                선택된 파일: <span className="font-medium">{file.name}</span>
+              </p>
+            )}
           </div>
 
           {/* 미리보기 */}
           {parsedMenus.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Badge variant="default">
+                <Badge variant="default" className="text-base px-3 py-1">
                   정상 {validCount}개
                 </Badge>
                 {errorCount > 0 && (
-                  <Badge variant="destructive">
+                  <Badge variant="destructive" className="text-base px-3 py-1">
                     오류 {errorCount}개
                   </Badge>
                 )}
               </div>
 
-              <div className="max-h-60 overflow-y-auto space-y-2 border rounded-lg p-3">
+              <div className="max-h-96 overflow-y-auto space-y-3 border-2 rounded-lg p-4 bg-gray-50">
                 {parsedMenus.map((menu, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded ${
-                      menu.errors.length > 0 ? 'bg-red-50' : 'bg-green-50'
+                    className={`p-4 rounded-lg border ${
+                      menu.errors.length > 0 
+                        ? 'bg-red-50 border-red-200' 
+                        : 'bg-green-50 border-green-200'
                     }`}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm text-[#333]">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base text-[#333] mb-1">
                           {menu.errors.length > 0 ? (
-                            <AlertCircle className="w-4 h-4 inline mr-1 text-red-600" />
+                            <AlertCircle className="w-5 h-5 inline mr-2 text-red-600 align-middle" />
                           ) : (
-                            <CheckCircle2 className="w-4 h-4 inline mr-1 text-green-600" />
+                            <CheckCircle2 className="w-5 h-5 inline mr-2 text-green-600 align-middle" />
                           )}
-                          <span className="font-medium">
+                          <span className="font-semibold">
                             {menu.data.name || '(이름 없음)'}
                           </span>
-                          {' - '}
-                          {menu.data.price ? formatPrice(menu.data.price) : '0원'}
+                          <span className="ml-2 text-[#D61C1C] font-medium">
+                            {menu.data.price ? formatPrice(menu.data.price) : '0원'}
+                          </span>
                         </p>
+                        {menu.data.category && (
+                          <p className="text-sm text-gray-600 mb-2">
+                            카테고리: {menu.data.category}
+                          </p>
+                        )}
                         {menu.errors.length > 0 && (
-                          <ul className="mt-1 text-xs text-red-600 ml-5">
+                          <ul className="mt-2 text-sm text-red-700 space-y-1">
                             {menu.errors.map((error, i) => (
-                              <li key={i}>• {error}</li>
+                              <li key={i} className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>{error}</span>
+                              </li>
                             ))}
                           </ul>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
                         행 {menu.row}
                       </span>
                     </div>
@@ -299,13 +319,19 @@ export function MenuCSVImport({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            className="min-w-[100px]"
+            disabled={loading}
+          >
             취소
           </Button>
           <Button
             onClick={handleImport}
             disabled={loading || validCount === 0}
+            className="min-w-[150px]"
           >
             {loading ? '등록 중...' : `${validCount}개 메뉴 등록`}
           </Button>

@@ -45,7 +45,7 @@ test.describe('Admin Settings Pages @admin', () => {
     });
 
     // 페이지 타이틀 확인
-    await expect(page.locator('h1')).toContainText('설정');
+      await expect(page.getByTestId('admin-settings-page-root')).toBeVisible();
 
     // 에러 검증
     if (errors.length > 0) {
@@ -61,14 +61,12 @@ test.describe('Admin Settings Pages @admin', () => {
     });
 
     // Payment 탭 클릭 (이미 기본 탭일 수도 있음)
-    const paymentTab = page.getByRole('tab', { name: /결제/i });
-    if (await paymentTab.isVisible()) {
-      await paymentTab.click();
+      const paymentTrigger = page.getByTestId('admin-settings-tab-trigger-payment');
+      await expect(paymentTrigger).toBeVisible();
+      await paymentTrigger.click();
       await page.waitForTimeout(100);
-    }
-
-    // NicePay 설정 UI 확인
-    await expect(page.getByText(/NicePay|나이스페이/i)).toBeVisible();
+      const paymentTab = page.getByTestId('admin-settings-payment-tab');
+      await expect(paymentTab).toBeVisible();
 
     // 에러 검증
     expect(errors, 'No console errors on Payment tab').toEqual([]);
@@ -80,13 +78,12 @@ test.describe('Admin Settings Pages @admin', () => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
 
-    // Delivery 탭 클릭
-    const deliveryTab = page.getByRole('tab', { name: /배달/i });
-    await deliveryTab.click();
-    await page.waitForTimeout(100);
-
-    // 배달 설정 UI 확인
-    await expect(page.getByText(/배달 대행사|배달 설정/i)).toBeVisible();
+      const deliveryTrigger = page.getByTestId('admin-settings-tab-trigger-delivery');
+      await expect(deliveryTrigger).toBeVisible();
+      await deliveryTrigger.click();
+      await page.waitForTimeout(100);
+      const deliveryTab = page.getByTestId('admin-settings-delivery-tab');
+      await expect(deliveryTab).toBeVisible();
 
     // 에러 검증
     expect(errors, 'No console errors on Delivery tab').toEqual([]);
@@ -98,13 +95,12 @@ test.describe('Admin Settings Pages @admin', () => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
 
-    // Maps 탭 클릭
-    const mapsTab = page.getByRole('tab', { name: /지도/i });
-    await mapsTab.click();
-    await page.waitForTimeout(100);
-
-    // 지도 API 가이드 확인
-    await expect(page.getByText(/Kakao|Google|지도 API/i)).toBeVisible();
+      const mapsTrigger = page.getByTestId('admin-settings-tab-trigger-maps');
+      await expect(mapsTrigger).toBeVisible();
+      await mapsTrigger.click();
+      await page.waitForTimeout(100);
+      const mapsTab = page.getByTestId('admin-settings-maps-tab');
+      await expect(mapsTab).toBeVisible();
 
     // 에러 검증
     expect(errors, 'No console errors on Maps tab').toEqual([]);
@@ -116,13 +112,12 @@ test.describe('Admin Settings Pages @admin', () => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
 
-    // FCM 탭 클릭
-    const fcmTab = page.getByRole('tab', { name: /FCM|알림/i });
-    await fcmTab.click();
-    await page.waitForTimeout(100);
-
-    // FCM 진단 UI 확인
-    await expect(page.getByText(/FCM|Firebase Cloud Messaging|진단/i)).toBeVisible();
+      const fcmTrigger = page.getByTestId('admin-settings-tab-trigger-fcm');
+      await expect(fcmTrigger).toBeVisible();
+      await fcmTrigger.click();
+      await page.waitForTimeout(100);
+      const fcmTab = page.getByTestId('admin-settings-fcm-tab');
+      await expect(fcmTab).toBeVisible();
 
     // 에러 검증
     expect(errors, 'No console errors on FCM tab').toEqual([]);
@@ -134,13 +129,12 @@ test.describe('Admin Settings Pages @admin', () => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
 
-    // Operations 탭 클릭
-    const opsTab = page.getByRole('tab', { name: /운영|Operations/i });
-    await opsTab.click();
-    await page.waitForTimeout(100);
-
-    // 배포 스크립트 UI 확인
-    await expect(page.getByText(/배포|Deploy|Firestore Rules/i)).toBeVisible();
+      const opsTrigger = page.getByTestId('admin-settings-tab-trigger-operations');
+      await expect(opsTrigger).toBeVisible();
+      await opsTrigger.click();
+      await page.waitForTimeout(100);
+      const opsTab = page.getByTestId('admin-settings-operations-tab');
+      await expect(opsTab).toBeVisible();
 
     // 에러 검증
     expect(errors, 'No console errors on Operations tab').toEqual([]);
@@ -152,23 +146,29 @@ test.describe('Admin Settings Pages @admin', () => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
 
-    const tabs = [
-      { name: /결제/i, label: 'Payment' },
-      { name: /배달/i, label: 'Delivery' },
-      { name: /지도/i, label: 'Maps' },
-      { name: /FCM|알림/i, label: 'FCM' },
-      { name: /운영|Operations/i, label: 'Operations' },
-    ];
-
-    // 각 탭을 순서대로 클릭
-    for (const tab of tabs) {
-      const tabElement = page.getByRole('tab', { name: tab.name });
-      if (await tabElement.isVisible()) {
-        await tabElement.click();
+      const tabTriggers = [
+        'admin-settings-tab-trigger-payment',
+        'admin-settings-tab-trigger-delivery',
+        'admin-settings-tab-trigger-maps',
+        'admin-settings-tab-trigger-fcm',
+        'admin-settings-tab-trigger-operations',
+      ];
+      const tabContents = [
+        'admin-settings-payment-tab',
+        'admin-settings-delivery-tab',
+        'admin-settings-maps-tab',
+        'admin-settings-fcm-tab',
+        'admin-settings-operations-tab',
+      ];
+      for (let i = 0; i < tabTriggers.length; i++) {
+        const trigger = page.getByTestId(tabTriggers[i]);
+        await expect(trigger).toBeVisible();
+        await trigger.click();
         await page.waitForTimeout(50);
-        console.log(`✓ Clicked ${tab.label} tab`);
+        const content = page.getByTestId(tabContents[i]);
+        await expect(content).toBeVisible();
+        console.log(`✓ Clicked ${tabTriggers[i]} and verified ${tabContents[i]}`);
       }
-    }
 
     // 전체 탭 전환 후 에러 검증
     if (errors.length > 0) {

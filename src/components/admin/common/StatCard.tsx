@@ -16,10 +16,10 @@ export interface StatCardProps {
 
 export function StatCard({ title, value, icon: Icon, trend, subtitle, loading, variant = 'default' }: StatCardProps) {
   const variantColors = {
-    default: 'bg-[#D61C1C]/10 text-[#D61C1C]',
-    success: 'bg-green-500/10 text-green-600',
-    info: 'bg-blue-500/10 text-blue-600',
-    warning: 'bg-amber-500/10 text-amber-600',
+    default: 'bg-white text-[#D61C1C]',
+    success: 'bg-white text-green-600',
+    info: 'bg-white text-blue-600',
+    warning: 'bg-white text-amber-600',
   };
 
   if (loading) {

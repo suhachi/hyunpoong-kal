@@ -10,7 +10,35 @@ import menusData from '../../data/menus.json';
 const USE_FIREBASE = false;
 
 // Mock 데이터 (menus.json 기반)
-let mockMenus: Menu[] = Array.isArray(menusData) ? menusData : [];
+// localStorage에서 저장된 데이터를 먼저 확인, 없으면 menus.json 사용
+const STORAGE_KEY = 'hyunpoong_mock_menus';
+const getStoredMenus = (): Menu[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Date 객체 복원
+      return parsed.map((m: any) => ({
+        ...m,
+        // 필요시 Date 필드 복원
+      }));
+    }
+  } catch (error) {
+    console.error('Failed to load stored menus:', error);
+  }
+  return Array.isArray(menusData) ? menusData : [];
+};
+
+let mockMenus: Menu[] = getStoredMenus();
+
+// Mock 데이터를 localStorage에 저장
+const saveMenusToStorage = () => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockMenus));
+  } catch (error) {
+    console.error('Failed to save menus to storage:', error);
+  }
+};
 
 // Mock 로그
 let mockMenuLogs: MenuLog[] = [];
@@ -147,6 +175,9 @@ export async function toggleMenuAvailability(
     reason: newValue ? '판매 재개' : '품절 처리',
   });
 
+  // 변경사항을 localStorage에 저장
+  saveMenusToStorage();
+
   return menu;
 }
 
@@ -187,15 +218,18 @@ export async function updateMenuAvailableHours(
     reason: availableHours ? '시간제 판매 설정' : '시간제 판매 해제',
   });
 
+  // 변경사항을 localStorage에 저장
+  saveMenusToStorage();
+
   return menu;
 }
 
 /**
- * 메뉴 수정 (가격/설명)
+ * 메뉴 수정 (메뉴명/카테고리/가격/설명/이미지)
  */
 export async function updateMenu(
   menuId: string,
-  updates: Partial<Pick<Menu, 'price' | 'description'>>,
+  updates: Partial<Pick<Menu, 'name' | 'category' | 'price' | 'description' | 'image'>>,
   by: string,
   byName: string,
   reason?: string
@@ -231,6 +265,9 @@ export async function updateMenu(
       });
     }
   });
+
+  // 변경사항을 localStorage에 저장
+  saveMenusToStorage();
 
   return menu;
 }
@@ -352,6 +389,9 @@ export async function createMenu(
     reason: '신규 메뉴 등록',
   });
 
+  // 변경사항을 localStorage에 저장
+  saveMenusToStorage();
+
   return newMenu;
 }
 
@@ -389,4 +429,7 @@ export async function deleteMenu(
     at: new Date(),
     reason: '메뉴 삭제',
   });
+
+  // 변경사항을 localStorage에 저장
+  saveMenusToStorage();
 }

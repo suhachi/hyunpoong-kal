@@ -1,13 +1,40 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { ChevronRight, CloudSun, Star, Settings, Gift, Ticket } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { FEATURE_FLAGS } from '../../config/env';
 import { formatPrice } from '../../lib/utils';
+import { getMenus } from '../../lib/admin/menus.api';
+import { getActiveNotices } from '../../lib/admin/notices.api';
+import type { Menu } from '../../types/menu';
+import type { Notice } from '../../types/notice';
 
 export function Home() {
   const navigate = useNavigate();
+  const [recommendedMenus, setRecommendedMenus] = useState<Menu[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // 추천 메뉴 로드
+        const menus = await getMenus({});
+        const bestMenus = menus
+          .filter(m => m.badges.includes('best'))
+          .slice(0, 2);
+        setRecommendedMenus(bestMenus.length >= 2 ? bestMenus : menus.slice(0, 2));
+
+        // 공지사항 로드
+        const activeNotices = await getActiveNotices(1);
+        setNotices(activeNotices);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   // 개발자 전용: 관리자 권한으로 전환
   const handleAdminAccess = (path: string) => {
@@ -85,17 +112,13 @@ export function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <RecommendCard
-              name="현풍닭칼국수"
-              price={9000}
-              image="https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjBub29kbGUlMjBzb3VwfGVufDF8fHx8MTc2MTYyMzMxOXww&ixlib=rb-4.1.0&q=80&w=1080"
-              badge="베스트"
-            />
-            <RecommendCard
-              name="수육 (중)"
-              price={20000}
-              image="https://images.unsplash.com/photo-1645530656505-1b8a4057889b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjBwb3JrJTIwYmVsbHl8ZW58MXx8fHwxNzYxNjIzMzE5fDA&ixlib=rb-4.1.0&q=80&w=1080"
-            />
+            {recommendedMenus.map((menu) => (
+              <RecommendCard
+                key={menu.menuId}
+                menu={menu}
+                onClick={() => navigate(`/menu/${menu.menuId}`)}
+              />
+            ))}
           </div>
         </section>
         
@@ -112,7 +135,7 @@ export function Home() {
             </Link>
           </div>
           
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer" onClick={() => navigate('/review/1')}>
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -144,27 +167,50 @@ export function Home() {
         </section>
         
         {/* 공지사항 */}
-        <section className="p-4 bg-[#F37021]/10 rounded-2xl">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="border-[#F37021] text-[#F37021]">
-                  공지
-                </Badge>
-                <span className="text-xs text-[#2E1C10]/60">
-                  2024.10.28
-                </span>
-              </div>
-              <h3 className="text-sm text-[#2E1C10] mb-1">
-                사진 리뷰 쓰고 3,000원 쿠폰 받으세요!
-              </h3>
-              <p className="text-sm text-[#2E1C10]/60">
-                사진과 함께 리뷰를 남겨주시면 다음 주문에 사용 가능한 쿠폰을 드립니다.
-              </p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-[#2E1C10]/40 flex-shrink-0" />
-          </div>
-        </section>
+        {notices.length > 0 && (
+          <section 
+            className="p-4 bg-[#F37021]/10 rounded-2xl cursor-pointer hover:bg-[#F37021]/15 transition-colors"
+            onClick={() => navigate('/notices')}
+          >
+            {notices.map(notice => {
+              const typeColors = {
+                notice: 'border-[#F37021] text-[#F37021]',
+                event: 'border-blue-500 text-blue-600',
+                promotion: 'border-purple-500 text-purple-600',
+              };
+              const typeLabels = {
+                notice: '공지',
+                event: '이벤트',
+                promotion: '프로모션',
+              };
+              return (
+                <div key={notice.id} className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className={typeColors[notice.type]}>
+                        {typeLabels[notice.type]}
+                      </Badge>
+                      <span className="text-xs text-[#2E1C10]/60">
+                        {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                        }).replace(/\./g, '.').replace(/\s/g, '')}
+                      </span>
+                    </div>
+                    <h3 className="text-sm text-[#2E1C10] mb-1">
+                      {notice.title}
+                    </h3>
+                    <p className="text-sm text-[#2E1C10]/60">
+                      {notice.content}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#2E1C10]/40 flex-shrink-0" />
+                </div>
+              );
+            })}
+          </section>
+        )}
         
         {/* CTA 버튼 */}
         <Link to="/menu">
@@ -223,35 +269,46 @@ export function Home() {
 }
 
 interface RecommendCardProps {
-  name: string;
-  price: number;
-  image: string;
-  badge?: string;
+  menu: Menu;
+  onClick: () => void;
 }
 
-function RecommendCard({ name, price, image, badge }: RecommendCardProps) {
+function RecommendCard({ menu, onClick }: RecommendCardProps) {
+  const badgeLabels: Record<string, string> = {
+    best: '베스트',
+    signature: '시그니처',
+    spicy: '매운맛',
+    cold: '냉메뉴',
+    seasonal: '계절메뉴',
+  };
+
+  const hasBestBadge = menu.badges.includes('best');
+
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+    <div 
+      className="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      onClick={onClick}
+    >
       <div className="aspect-square bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 overflow-hidden">
         <ImageWithFallback
-          src={image}
-          alt={name}
+          src={menu.image}
+          alt={menu.name}
           className="w-full h-full object-cover"
         />
       </div>
       <div className="p-3">
         <div className="flex items-center gap-2 mb-1">
-          {badge && (
+          {hasBestBadge && (
             <Badge className="bg-[#D61C1C] text-white text-xs">
-              {badge}
+              베스트
             </Badge>
           )}
         </div>
         <h3 className="text-sm text-[#2E1C10] mb-1">
-          {name}
+          {menu.name}
         </h3>
         <p className="text-[#D61C1C]">
-          {formatPrice(price)}
+          {formatPrice(menu.price)}
         </p>
       </div>
     </div>

@@ -37,7 +37,7 @@ export function Modal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={sizeClasses[size]}>
+      <DialogContent className={sizeClasses[size] + ' bg-white'}>
         <DialogHeader>
           <DialogTitle className="text-[#333]">{title}</DialogTitle>
           {description && (

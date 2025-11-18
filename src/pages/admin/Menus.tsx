@@ -35,6 +35,16 @@ import {
 } from '../../components/ui/select';
 import { Search, RefreshCw, Plus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog';
 
 export function AdminMenus() {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -61,6 +71,10 @@ export function AdminMenus() {
   // 시간제 다이얼로그
   const [timeSettingMenu, setTimeSettingMenu] = useState<Menu | null>(null);
   const [timeDialogOpen, setTimeDialogOpen] = useState(false);
+
+  // 삭제 확인 다이얼로그
+  const [deletingMenuId, setDeletingMenuId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Undo 관련
   const [lastCreatedMenuId, setLastCreatedMenuId] = useState<string | null>(null);
@@ -123,7 +137,7 @@ export function AdminMenus() {
   };
 
   const handleSaveEdit = async (
-    updates: { price?: number; description?: string },
+    updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string },
     reason: string
   ) => {
     if (!user || !editingMenu) return;
@@ -144,8 +158,8 @@ export function AdminMenus() {
       );
 
       toast.success('메뉴 정보를 수정했습니다');
-      setEditDialogOpen(false);
       setEditingMenu(null);
+      setEditDialogOpen(false);
     } catch (error: any) {
       console.error('Failed to update menu:', error);
       toast.error(error.message || '메뉴 수정에 실패했습니다');
@@ -236,6 +250,39 @@ export function AdminMenus() {
     } catch (error: any) {
       console.error('Failed to undo create:', error);
       toast.error(error.message || '취소에 실패했습니다');
+    }
+  };
+
+  // 삭제 핸들러
+  const handleDelete = (menuId: string) => {
+    setDeletingMenuId(menuId);
+    setDeleteDialogOpen(true);
+  };
+
+  // 삭제 확인
+  const handleConfirmDelete = async () => {
+    if (!user || !deletingMenuId) return;
+
+    setActionLoading(true);
+    try {
+      await deleteMenu(deletingMenuId, user.uid, user.displayName || '관리자');
+
+      // UI에서 제거
+      setMenus(prev => prev.filter(m => m.menuId !== deletingMenuId));
+
+      toast.success('메뉴가 삭제되었습니다');
+
+      // 통계 갱신
+      loadData();
+
+      // 다이얼로그 닫기
+      setDeleteDialogOpen(false);
+      setDeletingMenuId(null);
+    } catch (error: any) {
+      console.error('Failed to delete menu:', error);
+      toast.error(error.message || '메뉴 삭제에 실패했습니다');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -382,6 +429,7 @@ export function AdminMenus() {
         onToggleAvailability={handleToggleAvailability}
         onEdit={handleEditMenu}
         onSetTimeLimit={handleSetTimeLimit}
+        onDelete={handleDelete}
         loading={loading}
       />
 
@@ -416,6 +464,28 @@ export function AdminMenus() {
         onSave={handleSaveTimeLimit}
         loading={actionLoading}
       />
+
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>메뉴 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말로 이 메뉴를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={actionLoading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {actionLoading ? '삭제 중...' : '삭제'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

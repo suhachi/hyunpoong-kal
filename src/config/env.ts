@@ -25,7 +25,7 @@ export const DEBUG = ENV === 'development';
 let envWarningShown = false;
 
 // 환경 변수 안전 접근 헬퍼 (Figma Make 환경 호환)
-const getEnv = (key: string, defaultValue: string = '', required: boolean = false): string => {
+export const getEnv = (key: string, defaultValue: string = '', required: boolean = false): string => {
   try {
     // import.meta 안전 체크 (Figma Make 등 특수 환경 대응)
     if (typeof import.meta === 'undefined' || !import.meta.env) {
@@ -56,11 +56,9 @@ const getEnv = (key: string, defaultValue: string = '', required: boolean = fals
   }
 };
 
-// Firebase 사용 여부 (개발 중에는 false, 배포 시 true)
-// 기존: export const USE_FIREBASE = getEnv('VITE_USE_FIREBASE') === 'true';
-// 임시: Phase1 QA용 Mock 강제 모드
-// TODO: Phase2에서 env 기반으로 되돌리기 (현재는 테스트용으로 env 변수 사용 허용)
-export const USE_FIREBASE = getEnv('VITE_USE_FIREBASE') === 'true';
+// Phase 1/2: 강제 Mock 모드 (LocalStorage)
+// TODO: Phase 3에서 실제 Firebase 연동 시 ENV 기반으로 전환
+export const USE_FIREBASE = false;
 
 // 디버그 로그 추가
 if (typeof window !== 'undefined') {
@@ -107,15 +105,17 @@ export const FEATURE_FLAGS = {
   delivery: getEnv('VITE_DELIVERY_ENABLED', ENV === 'development' ? 'true' : 'false') === 'true',
   deliveryProvider: getEnv('VITE_DELIVERY_PROVIDER', 'mock'),
   deliveryWebhookSecret: getEnv('VITE_DELIVERY_WEBHOOK_SECRET', 'change_me'),
-  
   // 고객 지원 채팅 기능 (개발 환경에서는 기본 활성화)
   support: getEnv('VITE_SUPPORT_ENABLED', ENV === 'development' ? 'true' : 'false') === 'true',
-  
   // 포인트 리워드 시스템 (개발 환경에서는 기본 활성화)
   points: getEnv('VITE_POINTS_ENABLED', ENV === 'development' ? 'true' : 'false') === 'true',
   pointsRate: parseFloat(getEnv('VITE_POINTS_RATE', '0.03')),
   pointsMinUse: parseInt(getEnv('VITE_POINTS_MIN_USE', '1000'), 10),
   pointsExpireDays: parseInt(getEnv('VITE_POINTS_EXPIRE_DAYS', '365'), 10),
+  // 온라인 결제 기능 (Phase 3)
+  // v0.9.0에서는 강제로 false (env 기본값도 false)
+  onlinePayment: getEnv('VITE_ONLINE_PAYMENT_ENABLED', 'false') === 'true',
+  onlinePaymentProvider: getEnv('VITE_ONLINE_PAYMENT_PROVIDER', 'none'),
 };
 
 // 로깅 유틸
@@ -128,3 +128,15 @@ export function log(...args: any[]) {
 export function logError(...args: any[]) {
   console.error('[App Error]', ...args);
 }
+
+// (중복 export 제거)
+export default {
+  ENV,
+  DEBUG,
+  USE_FIREBASE,
+  FIREBASE_CONFIG,
+  FEATURE_FLAGS,
+  log,
+  logError,
+  getEnv,
+};

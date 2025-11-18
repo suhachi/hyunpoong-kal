@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { MoreVertical, Edit2, Clock } from 'lucide-react';
+import { MoreVertical, Edit2, Clock, Trash2 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { formatPrice } from '../../lib/utils';
 
@@ -23,6 +23,7 @@ interface MenuTableProps {
   onToggleAvailability: (menuId: string) => void;
   onEdit?: (menu: Menu) => void;
   onSetTimeLimit?: (menu: Menu) => void;
+  onDelete?: (menuId: string) => void;
   loading?: boolean;
 }
 
@@ -31,6 +32,7 @@ export function MenuTable({
   onToggleAvailability,
   onEdit,
   onSetTimeLimit,
+  onDelete,
   loading,
 }: MenuTableProps) {
   if (loading) {
@@ -177,6 +179,15 @@ export function MenuTable({
                             시간제 설정
                           </DropdownMenuItem>
                         )}
+                        {onDelete && (
+                          <DropdownMenuItem 
+                            onClick={() => onDelete(menu.menuId)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            삭제
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -270,6 +281,15 @@ export function MenuTable({
                         <DropdownMenuItem onClick={() => onSetTimeLimit(menu)}>
                           <Clock className="w-4 h-4 mr-2" />
                           시간제 설정
+                        </DropdownMenuItem>
+                      )}
+                      {onDelete && (
+                        <DropdownMenuItem 
+                          onClick={() => onDelete(menu.menuId)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          삭제
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>

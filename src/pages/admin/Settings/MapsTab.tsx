@@ -10,11 +10,12 @@ import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { Separator } from '../../../components/ui/separator';
 import { CheckCircle2, XCircle, AlertCircle, Copy, Download, Map as MapIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { getEnv } from '../../../config/env';
 
 export function MapsTab() {
   // 환경 변수 확인 (Figma Make 호환)
-  const kakaoKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_KAKAO_MAP_KEY : '';
-  const googleKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY : '';
+  const kakaoKey = getEnv('VITE_KAKAO_MAP_KEY');
+  const googleKey = getEnv('VITE_GOOGLE_MAPS_API_KEY');
 
   // .env 템플릿 생성
   const generateEnvTemplate = () => {
@@ -37,7 +38,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div data-testid="admin-settings-maps-tab" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* 좌측: 상태 패널 */}
       <div className="lg:col-span-1 space-y-4">
         <Card>

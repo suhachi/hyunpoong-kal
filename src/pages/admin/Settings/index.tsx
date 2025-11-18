@@ -59,7 +59,7 @@ export function AdminSettingsCenter() {
   }
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-settings-page-root" className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -102,23 +102,23 @@ export function AdminSettingsCenter() {
       {/* 탭 메뉴 */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="payment" className="gap-2">
+          <TabsTrigger value="payment" className="gap-2" data-testid="admin-settings-tab-trigger-payment">
             <CreditCard className="w-4 h-4" />
             <span className="hidden sm:inline">결제</span>
           </TabsTrigger>
-          <TabsTrigger value="delivery" className="gap-2">
+          <TabsTrigger value="delivery" className="gap-2" data-testid="admin-settings-tab-trigger-delivery">
             <Truck className="w-4 h-4" />
             <span className="hidden sm:inline">배달대행</span>
           </TabsTrigger>
-          <TabsTrigger value="maps" className="gap-2">
+          <TabsTrigger value="maps" className="gap-2" data-testid="admin-settings-tab-trigger-maps">
             <Map className="w-4 h-4" />
             <span className="hidden sm:inline">지도/지오</span>
           </TabsTrigger>
-          <TabsTrigger value="fcm" className="gap-2">
+          <TabsTrigger value="fcm" className="gap-2" data-testid="admin-settings-tab-trigger-fcm">
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">알림/FCM</span>
           </TabsTrigger>
-          <TabsTrigger value="operations" className="gap-2">
+          <TabsTrigger value="operations" className="gap-2" data-testid="admin-settings-tab-trigger-operations">
             <Shield className="w-4 h-4" />
             <span className="hidden sm:inline">운영/보안</span>
           </TabsTrigger>

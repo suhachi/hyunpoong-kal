@@ -77,7 +77,7 @@ export function OperationsTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-settings-operations-tab" className="space-y-6">
       {/* 포인트 기능 토글 */}
       <Card>
         <CardHeader>

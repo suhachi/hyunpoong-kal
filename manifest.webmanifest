@@ -1,0 +1,22 @@
+{
+  "name": "현풍닭칼국수 주문/포장 웹앱",
+  "short_name": "현풍닭칼국수",
+  "description": "현풍닭칼국수 공식 주문/포장 전용 PWA입니다.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#B62020",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
