@@ -11,9 +11,10 @@ import { USE_FIREBASE } from '../../config/env';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, getDocs, doc, getDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
-// Mock 데이터
+// Mock 데이터 (샘플 데이터 제거 - 테스트 확인을 위해)
 const mockOrders: Order[] = [
-  {
+  // 샘플 데이터 제거됨 - 실제 주문만 표시
+  /*{
     orderId: 'ORD-20250128-001',
     userId: 'user-001',
     storeId: 'store-hyunpung',
@@ -90,7 +91,7 @@ const mockOrders: Order[] = [
     requests: '',
     status: 'accepted',
     payment: {
-      method: 'on_site',
+      method: 'meet_card',
       status: 'pending',
       amount: 9500,
     },
@@ -233,50 +234,12 @@ const mockOrders: Order[] = [
     createdAt: { seconds: (Date.now() - 90000000) / 1000, nanoseconds: 0 } as any,
     updatedAt: { seconds: (Date.now() - 88800000) / 1000, nanoseconds: 0 } as any,
   },
+  */
 ];
 
+// Mock 로그 데이터 (샘플 데이터 제거 - 테스트 확인을 위해)
 const mockLogs: OrderLog[] = [
-  {
-    logId: 'log-001',
-    orderId: 'ORD-20250128-002',
-    action: 'status_changed',
-    by: 'owner-001',
-    byName: '석경선',
-    at: { seconds: (Date.now() - 300000) / 1000, nanoseconds: 0 } as any,
-    from: 'pending',
-    to: 'accepted',
-  },
-  {
-    logId: 'log-002',
-    orderId: 'ORD-20250128-003',
-    action: 'status_changed',
-    by: 'owner-001',
-    byName: '석경선',
-    at: { seconds: (Date.now() - 900000) / 1000, nanoseconds: 0 } as any,
-    from: 'pending',
-    to: 'accepted',
-  },
-  {
-    logId: 'log-003',
-    orderId: 'ORD-20250128-003',
-    action: 'status_changed',
-    by: 'owner-001',
-    byName: '석경선',
-    at: { seconds: (Date.now() - 600000) / 1000, nanoseconds: 0 } as any,
-    from: 'accepted',
-    to: 'preparing',
-  },
-  {
-    logId: 'log-004',
-    orderId: 'ORD-20250127-038',
-    action: 'canceled',
-    by: 'owner-001',
-    byName: '석경선',
-    at: { seconds: (Date.now() - 88800000) / 1000, nanoseconds: 0 } as any,
-    from: 'pending',
-    to: 'canceled',
-    reason: '재료 소진으로 인한 취소',
-  },
+  // 샘플 데이터 제거됨 - 실제 주문 로그만 표시
 ];
 
 // 필터 옵션
@@ -496,7 +459,7 @@ export async function updateOrderStatus(
     order.timeline[newStatus] = { seconds: Date.now() / 1000, nanoseconds: 0 } as any;
     order.updatedAt = { seconds: Date.now() / 1000, nanoseconds: 0 } as any;
 
-    if (newStatus === 'canceled' && reason) {
+    if (newStatus === 'cancelled' && reason) {
       order.payment.cancelReason = reason;
       order.payment.canceledAt = { seconds: Date.now() / 1000, nanoseconds: 0 } as any;
     }
@@ -505,7 +468,7 @@ export async function updateOrderStatus(
     mockLogs.push({
       logId: `log-${Date.now()}`,
       orderId,
-      action: newStatus === 'canceled' ? 'canceled' : 'status_changed',
+      action: newStatus === 'cancelled' ? 'canceled' : 'status_changed',
       by: 'owner-001', // TODO: 실제 사용자 ID
       byName: '석경선',
       at: { seconds: Date.now() / 1000, nanoseconds: 0 } as any,
@@ -532,7 +495,7 @@ export async function updateOrderStatus(
       [`timeline.${newStatus}`]: serverTimestamp(),
     };
 
-    if (newStatus === 'canceled' && reason) {
+    if (newStatus === 'cancelled' && reason) {
       updateData['payment.cancelReason'] = reason;
       updateData['payment.canceledAt'] = serverTimestamp();
     }
@@ -573,9 +536,9 @@ export interface OrderStats {
   total: number;
   pending: number;
   accepted: number;
-  preparing: number;
+  cooking: number;
   completed: number;
-  canceled: number;
+  cancelled: number;
   todayRevenue: number;
   todayOrders: number;
 }
@@ -597,11 +560,11 @@ export async function fetchOrderStats(storeId: string): Promise<OrderStats> {
             total: orders.length,
             pending: orders.filter((o) => o.status === 'pending').length,
             accepted: orders.filter((o) => o.status === 'accepted').length,
-            preparing: orders.filter((o) => o.status === 'preparing').length,
+            cooking: orders.filter((o) => o.status === 'cooking' || o.status === 'delivering').length,
             completed: orders.filter((o) => o.status === 'completed').length,
-            canceled: orders.filter((o) => o.status === 'canceled').length,
+            cancelled: orders.filter((o) => o.status === 'cancelled').length,
             todayRevenue: todayOrders
-              .filter((o) => o.status !== 'canceled')
+              .filter((o) => o.status !== 'cancelled')
               .reduce((sum, o) => sum + o.finalAmount, 0),
             todayOrders: todayOrders.length,
           }),
@@ -628,11 +591,11 @@ export async function fetchOrderStats(storeId: string): Promise<OrderStats> {
       total: orders.length,
       pending: orders.filter((o) => o.status === 'pending').length,
       accepted: orders.filter((o) => o.status === 'accepted').length,
-      preparing: orders.filter((o) => o.status === 'preparing').length,
+      cooking: orders.filter((o) => o.status === 'cooking' || o.status === 'delivering').length,
       completed: orders.filter((o) => o.status === 'completed').length,
-      canceled: orders.filter((o) => o.status === 'canceled').length,
+      cancelled: orders.filter((o) => o.status === 'cancelled').length,
       todayRevenue: todayOrders
-        .filter((o) => o.status !== 'canceled')
+        .filter((o) => o.status !== 'cancelled')
         .reduce((sum, o) => sum + o.finalAmount, 0),
       todayOrders: todayOrders.length,
     };

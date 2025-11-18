@@ -8,23 +8,17 @@ type FirebaseTimestamp = {
 };
 
 export type OrderStatus = 
-  | 'pending'        // 주문 접수 대기
-  | 'placed'         // 주문 생성 / 접수 대기 (간헐적 표현 존재)
-  | 'accepted'       // 접수 확인
-  | 'preparing'      // 조리 중 (legacy)
-  | 'cooking'        // 조리 중 (현재 일부 페이지에서 사용)
-  | 'out_for_delivery' // 배달 중
-  | 'pickup_ready'   // 포장 완료 (픽업 준비됨)
-  | 'completed'      // 완료
-  | 'done'           // 완료 (legacy/alternate)
-  | 'canceled'       // 취소
-  | 'payment_failed'; // 결제 실패 (edge case)
+  | 'pending'     // 접수대기
+  | 'accepted'    // 접수확인
+  | 'cooking'     // 조리중
+  | 'delivering'  // 배달중
+  | 'completed'   // 완료
+  | 'cancelled';  // 취소
 
 export type PaymentMethod = 
-  | 'card'        // 신용/체크카드
-  | 'transfer'    // 계좌이체
-  | 'easy_pay'    // 간편결제
-  | 'on_site';    // 만나서 결제
+  | 'app_card'   // 앱 내 카드 선결제 (PG 연동용, 지금은 준비 중)
+  | 'meet_card'  // 만나서 카드 결제 (배달 기사 또는 매장에서 카드 단말기로 결제)
+  | 'meet_cash'; // 만나서 현금 결제 (배달 기사 또는 매장에서 현금으로 결제)
 
 export type PaymentStatus = 
   | 'pending'     // 결제 대기
@@ -128,15 +122,10 @@ export interface OrderLog {
 
 // 주문 상태 전이 가드
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  pending: ['accepted', 'canceled', 'payment_failed'],
-  placed: ['accepted', 'canceled'],
-  accepted: ['preparing', 'cooking', 'out_for_delivery', 'canceled'],
-  preparing: ['completed', 'canceled'],
-  cooking: ['out_for_delivery', 'completed', 'canceled'],
-  out_for_delivery: ['completed', 'canceled'],
-  pickup_ready: ['completed', 'canceled'],
+  pending: ['accepted', 'cancelled'],
+  accepted: ['cooking', 'cancelled'],
+  cooking: ['delivering', 'cancelled'],
+  delivering: ['completed', 'cancelled'],
   completed: [],
-  done: [],
-  canceled: [],
-  payment_failed: ['pending', 'canceled'],
+  cancelled: [],
 };

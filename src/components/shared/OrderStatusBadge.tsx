@@ -21,16 +21,18 @@ const statusConfig: Record<
   // 기본 주문 상태
   pending: { label: '접수대기', variant: 'secondary' },
   accepted: { label: '접수확인', variant: 'default' },
-  preparing: { label: '조리중', variant: 'outline' },
+  cooking: { label: '조리중', variant: 'outline' },
+  delivering: { label: '배달중', variant: 'secondary' },
   completed: { label: '완료', variant: 'default' },
-  canceled: { label: '취소', variant: 'destructive' },
+  cancelled: { label: '취소', variant: 'destructive' },
   
-  // 확장 상태 (OrderTracking용)
+  // 레거시 호환성 (하위 호환)
   placed: { label: '주문접수', variant: 'default' },
-  cooking: { label: '조리중', variant: 'secondary' },
+  preparing: { label: '조리중', variant: 'outline' },
   out_for_delivery: { label: '배달중', variant: 'secondary' },
   pickup_ready: { label: '포장완료', variant: 'default' },
   done: { label: '완료', variant: 'default' },
+  canceled: { label: '취소', variant: 'destructive' },
   payment_failed: { label: '결제실패', variant: 'destructive' },
 };
 

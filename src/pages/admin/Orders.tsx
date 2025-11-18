@@ -1,5 +1,5 @@
 ﻿// Route: /admin/orders
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Order, OrderStatus } from '../../types/order';
 import { ORDER_STATUS_TRANSITIONS } from '../../types/order';
 import { Card } from '../../components/ui/card';
@@ -37,6 +37,20 @@ import {
 import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOrdersFallback } from '../../lib/fallback';
+import { getOrderStatusLabelForAdmin } from '../../lib/orders.utils';
+import { formatPrice } from '../../lib/utils';
+
+// 주문 상태 탭 정의
+type OrderStatusTab = 'all' | 'pending' | 'accepted' | 'cooking' | 'completed' | 'cancelled';
+
+const ORDER_STATUS_TABS: { id: OrderStatusTab; label: string; statuses: OrderStatus[] }[] = [
+  { id: 'all', label: '전체', statuses: ['pending', 'accepted', 'cooking', 'delivering', 'completed', 'cancelled'] },
+  { id: 'pending', label: '접수대기', statuses: ['pending'] },
+  { id: 'accepted', label: '접수확인', statuses: ['accepted'] },
+  { id: 'cooking', label: '조리중', statuses: ['cooking', 'delivering'] },
+  { id: 'completed', label: '완료', statuses: ['completed'] },
+  { id: 'cancelled', label: '취소', statuses: ['cancelled'] },
+];
 
 export function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -46,7 +60,8 @@ export function AdminOrders() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // 필터/정렬 상태
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
+  const [currentTabId, setCurrentTabId] = useState<OrderStatusTab>('pending');
+  const currentTab = ORDER_STATUS_TABS.find((t) => t.id === currentTabId)!;
   const [searchQuery, setSearchQuery] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [sortField, setSortField] = useState<OrderSortField>('createdAt');
@@ -59,26 +74,82 @@ export function AdminOrders() {
   }>({ open: false, order: null });
   const [cancelReason, setCancelReason] = useState('');
 
+  // 새 주문 알림
+  const [newOrderAlert, setNewOrderAlert] = useState<{
+    open: boolean;
+    order: Order | null;
+  }>({ open: false, order: null });
+  const [processedOrderIds, setProcessedOrderIds] = useState<Set<string>>(new Set());
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previousOrdersRef = useRef<Order[]>([]);
+
   // 데이터 로드
   const loadOrders = async () => {
     setLoading(true);
     try {
       const filters: OrderFilters = {
-        status: statusFilter === 'all' ? undefined : statusFilter,
         paymentMethod: paymentFilter === 'all' ? undefined : paymentFilter,
         searchQuery: searchQuery || undefined,
       };
 
       const data = await fetchOrders('store-hyunpung', filters, sortField, sortDirection);
+      
+      // 새 주문 감지 (pending 상태인 주문만)
+      const previousOrders = previousOrdersRef.current;
+      const newPendingOrders = data.filter(
+        (order) =>
+          order.status === 'pending' &&
+          !processedOrderIds.has(order.orderId) &&
+          !previousOrders.some((prev) => prev.orderId === order.orderId)
+      );
+
+      // 새 주문이 있으면 알림
+      if (newPendingOrders.length > 0) {
+        const latestOrder = newPendingOrders[0]; // 가장 최신 주문
+        setNewOrderAlert({ open: true, order: latestOrder });
+        setProcessedOrderIds((prev) => {
+          const newSet = new Set(prev);
+          newPendingOrders.forEach((o) => newSet.add(o.orderId));
+          return newSet;
+        });
+
+        // 알림음 재생
+        try {
+          // 간단한 beep 소리 생성 (Web Audio API)
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.value = 800; // 800Hz
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (error) {
+          console.warn('알림음 재생 실패:', error);
+        }
+      }
+
+      previousOrdersRef.current = data;
       setOrders(data);
-      setFilteredOrders(data);
+      
+      // 탭별 필터링
+      const filtered = data.filter((order) => currentTab.statuses.includes(order.status));
+      setFilteredOrders(filtered);
     } catch (error) {
       console.error('주문 로드 실패:', error);
       toast.error('주문 목록을 불러오는데 실패했습니다 (fallback 적용)');
       // Firestore 권한 실패 시 localStorage 기반 fallback (E2E 안정화)
       const arr = getOrdersFallback();
       setOrders(arr);
-      setFilteredOrders(arr);
+      const filtered = arr.filter((order) => currentTab.statuses.includes(order.status));
+      setFilteredOrders(filtered);
     } finally {
       setLoading(false);
     }
@@ -86,12 +157,25 @@ export function AdminOrders() {
 
   useEffect(() => {
     loadOrders();
-  }, [statusFilter, paymentFilter, searchQuery, sortField, sortDirection]);
+    
+    // 주기적으로 새 주문 확인 (5초마다)
+    const interval = setInterval(() => {
+      loadOrders();
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [currentTabId, paymentFilter, searchQuery, sortField, sortDirection]);
+
+  // 탭 변경 시 필터링
+  useEffect(() => {
+    const filtered = orders.filter((order) => currentTab.statuses.includes(order.status));
+    setFilteredOrders(filtered);
+  }, [orders, currentTab]);
 
   // 상태 변경 처리
   const handleUpdateStatus = async (order: Order, newStatus: OrderStatus) => {
     // 취소 처리는 사유 입력 모달 표시
-    if (newStatus === 'canceled') {
+    if (newStatus === 'cancelled') {
       setCancelDialog({ open: true, order });
       return;
     }
@@ -176,9 +260,9 @@ export function AdminOrders() {
     total: orders.length,
     pending: orders.filter((o) => o.status === 'pending').length,
     accepted: orders.filter((o) => o.status === 'accepted').length,
-    preparing: orders.filter((o) => o.status === 'preparing').length,
+    cooking: orders.filter((o) => o.status === 'cooking' || o.status === 'delivering').length,
     completed: orders.filter((o) => o.status === 'completed').length,
-    canceled: orders.filter((o) => o.status === 'canceled').length,
+    cancelled: orders.filter((o) => o.status === 'cancelled').length,
   };
 
   return (
@@ -209,7 +293,7 @@ export function AdminOrders() {
           <div className="text-xs text-[#8B7355]">접수확인</div>
         </Card>
         <Card className="p-4">
-          <div className="text-2xl text-amber-600 mb-1">{stats.preparing}</div>
+          <div className="text-2xl text-amber-600 mb-1">{stats.cooking}</div>
           <div className="text-xs text-[#8B7355]">조리중</div>
         </Card>
         <Card className="p-4">
@@ -217,7 +301,7 @@ export function AdminOrders() {
           <div className="text-xs text-[#8B7355]">완료</div>
         </Card>
         <Card className="p-4">
-          <div className="text-2xl text-red-600 mb-1">{stats.canceled}</div>
+          <div className="text-2xl text-red-600 mb-1">{stats.cancelled}</div>
           <div className="text-xs text-[#8B7355]">취소</div>
         </Card>
       </div>
@@ -226,14 +310,13 @@ export function AdminOrders() {
       <Card className="p-4">
         <div className="space-y-4">
           {/* 상태 탭 */}
-          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+          <Tabs value={currentTabId} onValueChange={(v) => setCurrentTabId(v as OrderStatusTab)}>
             <TabsList className="w-full justify-start overflow-x-auto">
-              <TabsTrigger value="all">전체</TabsTrigger>
-              <TabsTrigger value="pending">접수대기</TabsTrigger>
-              <TabsTrigger value="accepted">접수확인</TabsTrigger>
-              <TabsTrigger value="preparing">조리중</TabsTrigger>
-              <TabsTrigger value="completed">완료</TabsTrigger>
-              <TabsTrigger value="canceled">취소</TabsTrigger>
+              {ORDER_STATUS_TABS.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </Tabs>
 
@@ -257,6 +340,10 @@ export function AdminOrders() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">모든 결제</SelectItem>
+                  <SelectItem value="app_card">앱 결제</SelectItem>
+                  <SelectItem value="meet_card">만나서 카드</SelectItem>
+                  <SelectItem value="meet_cash">만나서 현금</SelectItem>
+                  {/* 기존 호환성 */}
                   <SelectItem value="card">카드</SelectItem>
                   <SelectItem value="easy_pay">간편결제</SelectItem>
                   <SelectItem value="transfer">계좌이체</SelectItem>
@@ -310,6 +397,90 @@ export function AdminOrders() {
 
       {/* 인쇄용 주문서 (숨김) */}
       {selectedOrder && <PrintableOrder order={selectedOrder} />}
+      {newOrderAlert.order && <PrintableOrder order={newOrderAlert.order} />}
+
+      {/* 새 주문 알림 다이얼로그 */}
+      <Dialog
+        open={newOrderAlert.open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setNewOrderAlert({ open: false, order: null });
+          }
+        }}
+      >
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-[#D61C1C] flex items-center gap-2">
+              🔔 새 주문이 들어왔습니다!
+            </DialogTitle>
+            <DialogDescription>
+              주문 확인 후 접수하기 버튼을 눌러주세요.
+            </DialogDescription>
+          </DialogHeader>
+          {newOrderAlert.order && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-[#8B7355]">주문번호</Label>
+                  <p className="text-lg font-semibold text-[#2E1C10]">
+                    {newOrderAlert.order.orderId}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm text-[#8B7355]">주문 시간</Label>
+                  <p className="text-lg font-semibold text-[#2E1C10]">
+                    {new Date((newOrderAlert.order.createdAt as any)?.toDate?.() || newOrderAlert.order.createdAt).toLocaleTimeString('ko-KR')}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm text-[#8B7355]">주문 내역</Label>
+                <div className="mt-2 space-y-1">
+                  {newOrderAlert.order.items.map((item, idx) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                      <span className="text-[#2E1C10]">
+                        {item.menuName} {item.quantity > 1 && `x${item.quantity}`}
+                      </span>
+                      <span className="text-[#8B7355]">
+                        {formatPrice(item.price * item.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t">
+                <div>
+                  <Label className="text-sm text-[#8B7355]">총 금액</Label>
+                  <p className="text-xl font-bold text-[#D61C1C]">
+                    {formatPrice(newOrderAlert.order.finalAmount)}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setNewOrderAlert({ open: false, order: null });
+                    }}
+                  >
+                    닫기
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (newOrderAlert.order) {
+                        handleUpdateStatus(newOrderAlert.order, 'accepted');
+                        setNewOrderAlert({ open: false, order: null });
+                      }
+                    }}
+                    className="bg-[#D61C1C] hover:bg-[#B81515] text-white"
+                  >
+                    접수하기
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* 취소 확인 다이얼로그 */}
       <Dialog
@@ -343,7 +514,7 @@ export function AdminOrders() {
               />
             </div>
 
-            {cancelDialog.order?.payment?.method !== 'on_site' && (
+            {cancelDialog.order?.payment?.method === 'app_card' && (
               <div className="p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
                 ⚠️ 결제가 승인된 주문입니다. 취소 시 자동으로 환불 처리됩니다.
               </div>

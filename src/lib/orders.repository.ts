@@ -55,11 +55,10 @@ export class LocalOrdersRepository implements OrdersRepository {
       phone: payload.phone,
       email: payload.email,
       requests: payload.requests,
-      status: 'placed',
-      payment: payload.payment || { method: 'on_site', status: 'pending', amount: payload.finalAmount },
+      status: 'pending',
+      payment: payload.payment || { method: 'meet_card', status: 'pending', amount: payload.finalAmount },
       timeline: {
         pending: now,
-        placed: now,
       } as any,
       createdAt: now,
       updatedAt: now,

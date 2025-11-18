@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Wallet, HandCoins, Loader2, AlertCircle, Gift } from 'lucide-react';
+import { CreditCard, Wallet, HandCoins, Loader2, AlertCircle, Gift, Smartphone } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Label } from '../../components/ui/label';
@@ -13,7 +13,7 @@ import { useCart } from '../../contexts/CartContext';
 import { toast } from 'sonner';
 import { getPointsBalance, spendPoints, POINTS_POLICY } from '../../lib/points.api';
 import { createOrder } from '../../lib/orders.api';
-import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
+import { FEATURE_FLAGS } from '../../config/env';
 import type { PaymentMethod } from '../../types/order';
 import { CheckoutSummary } from '../../components/app/CheckoutSummary';
 import { formatPrice } from '../../lib/utils';
@@ -34,7 +34,9 @@ export function Checkout() {
   // 주문 완료 플래그 (리다이렉트 방지용)
   const isOrderCompleting = useRef(false);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('on_site');
+  // 배달 시 기본값: 만나서 카드, 포장 시 기본값: 만나서 카드
+  const isDelivery = deliveryType === 'delivery';
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('meet_card');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -64,6 +66,11 @@ export function Checkout() {
       loadPointsBalance();
     }
   }, []);
+
+  // 배달/포장 변경 시 결제 수단 초기화
+  useEffect(() => {
+    setPaymentMethod('meet_card');
+  }, [deliveryType]);
 
   // Mock UID (실제로는 Auth에서 가져옴)
   // NOTE: OrderHistory 등 고객 영역은 'user-001' 형식을 사용하므로 일치시킴
@@ -113,7 +120,13 @@ export function Checkout() {
   }
 
   // 배달 시 주소 필수 확인
-  const canProceed = agreeTerms && phone && (deliveryType === 'pickup' || deliveryAddress);
+  // 만나서 결제(meet_card, meet_cash)는 배달 주소가 필요 없음
+  const canProceed = agreeTerms && phone && (
+    deliveryType === 'pickup' || 
+    deliveryAddress || 
+    paymentMethod === 'meet_card' || 
+    paymentMethod === 'meet_cash'
+  );
 
   const handlePayment = async () => {
     if (!canProceed) {
@@ -149,7 +162,9 @@ export function Checkout() {
         requests: requests || undefined,
         payment: {
           method: paymentMethod,
-          status: paymentMethod === 'on_site' ? 'pending' : 'authorized',
+          status: (paymentMethod === 'meet_card' || paymentMethod === 'meet_cash') 
+            ? 'pending' 
+            : 'authorized',
           amount: totalAmount,
         },
       });
@@ -179,13 +194,16 @@ export function Checkout() {
       isOrderCompleting.current = true;
 
       // 4. 성공 메시지 및 주문 트래킹으로 이동 (먼저 실행)
-      if (paymentMethod === 'on_site') {
+      if (paymentMethod === 'meet_card' || paymentMethod === 'meet_cash') {
+        // 만나서 결제: 주문 접수만 완료
         console.log('[debug] firing success toast: 주문이 접수되었습니다');
         toast.success(<span data-testid="toast.order.success">주문이 접수되었습니다</span>, { duration: 5000 });
         // 토스트 DOM 마운트 확보를 위한 짧은 지연
         await new Promise((r) => setTimeout(r, 75));
         navigate(`/order/${orderId}?result=on_site`);
-      } else {
+      } else if (paymentMethod === 'app_card') {
+        // 앱 결제: 실제 PG 연동 필요 (현재는 준비 중)
+        // TODO: 실제 PG 결제 연동 구현 필요
         console.log('[debug] firing success toast: 결제가 완료되었습니다');
         toast.success(<span data-testid="toast.payment.success">결제가 완료되었습니다</span>, { duration: 5000 });
         await new Promise((r) => setTimeout(r, 75));
@@ -375,13 +393,38 @@ export function Checkout() {
         <div>
           <h2 className="text-[#2E1C10] mb-3">결제 수단</h2>
           <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
+            {/* 앱 결제 (배달/포장 모두 표시, 준비 중) */}
+            <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10 mb-2 opacity-60 pointer-events-none" aria-disabled="true">
+              <RadioGroupItem value="app_card" id="payment-app-card" disabled />
+              <Label htmlFor="payment-app-card" className="flex items-center gap-2 cursor-not-allowed flex-1">
+                <Smartphone className="w-5 h-5 text-[#D61C1C]" />
+                <div>
+                  <p className="text-[#2E1C10]">앱 결제 (준비 중)</p>
+                  <p className="text-sm text-[#2E1C10]/60">앱에서 바로 카드 결제가 가능하도록 준비 중입니다.</p>
+                </div>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10 mb-2">
+              <RadioGroupItem value="meet_card" id="payment-meet-card" />
+              <Label htmlFor="payment-meet-card" className="flex items-center gap-2 cursor-pointer flex-1">
+                <CreditCard className="w-5 h-5 text-[#C7A45A]" />
+                <div>
+                  <p className="text-[#2E1C10]">만나서 카드 결제</p>
+                  <p className="text-sm text-[#2E1C10]/60">
+                    {isDelivery ? '배달 기사님 또는 매장에서 카드 단말기로 결제합니다.' : '매장에서 카드 단말기로 결제합니다.'}
+                  </p>
+                </div>
+              </Label>
+            </div>
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="on_site" id="on_site" />
-              <Label htmlFor="on_site" className="flex items-center gap-2 cursor-pointer flex-1">
+              <RadioGroupItem value="meet_cash" id="payment-meet-cash" />
+              <Label htmlFor="payment-meet-cash" className="flex items-center gap-2 cursor-pointer flex-1">
                 <HandCoins className="w-5 h-5 text-[#C7A45A]" />
                 <div>
-                  <p className="text-[#2E1C10]">만나서 결제</p>
-                  <p className="text-sm text-[#2E1C10]/60">현금 또는 카드</p>
+                  <p className="text-[#2E1C10]">만나서 현금 결제</p>
+                  <p className="text-sm text-[#2E1C10]/60">
+                    {isDelivery ? '배달 기사님 또는 매장에서 현금으로 결제합니다.' : '매장에서 현금으로 결제합니다.'}
+                  </p>
                 </div>
               </Label>
             </div>

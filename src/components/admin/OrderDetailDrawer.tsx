@@ -14,6 +14,7 @@ import { MapPin, Phone, Mail, FileText, CreditCard, Clock } from 'lucide-react';
 import { fetchOrderLogs } from '../../lib/admin/orders.api';
 import { OrderActionBar } from './OrderActionBar';
 import { formatPrice, formatDateTime, formatTime } from '../../lib/utils';
+import { getOrderStatusLabelForAdmin } from '../../lib/orders.utils';
 
 interface OrderDetailDrawerProps {
   order: Order | null;
@@ -37,21 +38,20 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
   if (!order) return null;
 
 
-  // 상태 라벨
-  const statusLabels: Record<string, string> = {
-    pending: '접수대기',
-    accepted: '접수확인',
-    preparing: '조리중',
-    completed: '완료',
-    canceled: '취소',
-  };
+  // 상태 라벨은 getOrderStatusLabelForAdmin 사용
 
   // 결제수단 라벨
   const paymentMethodLabels: Record<string, string> = {
+    app_card: '앱 결제',
+    meet_card: '만나서 카드',
+    meet_cash: '만나서 현금',
+    // 기존 호환성 (레거시 데이터)
     card: '카드',
     transfer: '계좌이체',
     easy_pay: '간편결제',
     on_site: '만나서결제',
+    on_site_card: '만나서 카드',
+    on_site_cash: '만나서 현금',
   };
 
   // 타임라인 항목
@@ -80,7 +80,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg bg-white">
         <SheetHeader>
           <SheetTitle>주문 상세</SheetTitle>
           <SheetDescription>{order.orderId}</SheetDescription>
@@ -94,7 +94,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                 variant={
                   order.status === 'completed'
                     ? 'default'
-                    : order.status === 'canceled'
+                    : order.status === 'cancelled'
                     ? 'destructive'
                     : 'secondary'
                 }
@@ -103,14 +103,16 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                     ? 'bg-gray-100 text-gray-700'
                     : order.status === 'accepted'
                     ? 'bg-blue-100 text-blue-700'
-                    : order.status === 'preparing'
+                    : order.status === 'cooking'
                     ? 'bg-amber-100 text-amber-700'
+                    : order.status === 'delivering'
+                    ? 'bg-purple-100 text-purple-700'
                     : order.status === 'completed'
                     ? 'bg-green-100 text-green-700'
                     : ''
                 }
               >
-                {statusLabels[order.status]}
+                {getOrderStatusLabelForAdmin(order.status)}
               </Badge>
               <OrderActionBar order={order} />
             </div>
@@ -340,7 +342,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                       </div>
                       {log.from && log.to && (
                         <div className="text-[#8B7355]">
-                          {statusLabels[log.from]} → {statusLabels[log.to]}
+                          {getOrderStatusLabelForAdmin(log.from as any)} → {getOrderStatusLabelForAdmin(log.to as any)}
                         </div>
                       )}
                       {log.byName && (

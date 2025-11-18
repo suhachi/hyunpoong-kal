@@ -19,14 +19,16 @@ export function Dashboard() {
   }, []);
 
   async function loadStats() {
-    // Mock 데이터 로딩
+    // 실제 데이터 로딩 (샘플 데이터 제거)
     await new Promise((resolve) => setTimeout(resolve, 800));
 
+    // 실제 주문/매출 데이터를 가져와서 계산
+    // TODO: 실제 API 연동 시 여기서 데이터 로드
     setStats({
-      todaySales: 1250000,
-      todayOrders: 42,
-      averageRating: 4.8,
-      installRate: 68,
+      todaySales: 0,
+      todayOrders: 0,
+      averageRating: 0,
+      installRate: 0,
     });
 
     setLoading(false);

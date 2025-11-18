@@ -69,14 +69,14 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
       phone: payload.phone,
       email: payload.email || null,
       requests: payload.requests || null,
-      status: 'placed' as OrderStatus,
+      status: 'pending' as OrderStatus,
       payment: payload.payment || {
-        method: 'on_site',
+        method: 'meet_card',
         status: 'pending',
         amount: payload.finalAmount,
       },
       timeline: {
-        placed: serverTimestamp(),
+        pending: serverTimestamp(),
       },
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -243,14 +243,13 @@ export function calculateOrderStatistics(orders: Order[]): OrderStatistics {
     pending: orders.filter(o => o.status === 'pending').length,
     inProgress: orders.filter(o => 
       o.status === 'accepted' || 
-      o.status === 'preparing' || 
       o.status === 'cooking' || 
-      o.status === 'out_for_delivery'
+      o.status === 'delivering'
     ).length,
-    completed: orders.filter(o => o.status === 'completed' || o.status === 'done').length,
-    canceled: orders.filter(o => o.status === 'canceled').length,
+    completed: orders.filter(o => o.status === 'completed').length,
+    canceled: orders.filter(o => o.status === 'cancelled').length,
     totalSpent: orders
-      .filter(o => o.status !== 'canceled')
+      .filter(o => o.status !== 'cancelled')
       .reduce((sum, o) => sum + o.finalAmount, 0),
   };
 }

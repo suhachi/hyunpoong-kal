@@ -29,10 +29,16 @@ interface OrderTableProps {
 
 // 결제수단 라벨
 const paymentMethodLabels: Record<string, string> = {
+  app_card: '앱 결제',
+  meet_card: '만나서 카드',
+  meet_cash: '만나서 현금',
+  // 기존 호환성 (레거시 데이터)
   card: '카드',
   transfer: '계좌이체',
   easy_pay: '간편결제',
   on_site: '만나서결제',
+  on_site_card: '만나서 카드',
+  on_site_cash: '만나서 현금',
 };
 
 export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: OrderTableProps) {
@@ -174,10 +180,10 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                             <DropdownMenuItem
                               onClick={() => onUpdateStatus(order, 'accepted')}
                             >
-                              접수 확인
+                              접수하기
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'canceled')}
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
                               className="text-red-600"
                             >
                               주문 취소
@@ -187,27 +193,42 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                         {order.status === 'accepted' && (
                           <>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'preparing')}
+                              onClick={() => onUpdateStatus(order, 'cooking')}
                             >
-                              조리 시작
+                              조리중
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'canceled')}
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
                               className="text-red-600"
                             >
                               주문 취소
                             </DropdownMenuItem>
                           </>
                         )}
-                        {order.status === 'preparing' && (
+                        {order.status === 'cooking' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'delivering')}
+                            >
+                              배달
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'delivering' && (
                           <>
                             <DropdownMenuItem
                               onClick={() => onUpdateStatus(order, 'completed')}
                             >
-                              완료 처리
+                              완료
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'canceled')}
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
                               className="text-red-600"
                             >
                               주문 취소
@@ -277,21 +298,28 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       </DropdownMenuItem>
                     )}
                     {order.status === 'accepted' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'preparing')}>
-                        조리 시작
+                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'cooking')}>
+                        조리중
                       </DropdownMenuItem>
                     )}
-                    {order.status === 'preparing' && (
+                    {order.status === 'cooking' && (
+                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'delivering')}>
+                        배달
+                      </DropdownMenuItem>
+                    )}
+                    {order.status === 'delivering' && (
                       <DropdownMenuItem onClick={() => onUpdateStatus(order, 'completed')}>
-                        완료 처리
+                        완료
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem
-                      onClick={() => onUpdateStatus(order, 'canceled')}
-                      className="text-red-600"
-                    >
-                      주문 취소
-                    </DropdownMenuItem>
+                    {order.status !== 'completed' && order.status !== 'cancelled' && (
+                      <DropdownMenuItem
+                        onClick={() => onUpdateStatus(order, 'cancelled')}
+                        className="text-red-600"
+                      >
+                        주문 취소
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
