@@ -13,6 +13,7 @@ import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from '
 import { toast } from 'sonner';
 import { runFCMDiagnostics } from '../../../lib/admin/settingsCenter.api';
 import type { DiagnosticResult } from '../../../types/adminSettings';
+import { USE_FIREBASE } from '../../../config/env';
 
 export function FCMTab() {
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult | null>(null);
@@ -20,6 +21,37 @@ export function FCMTab() {
 
   // 진단 실행
   const runDiagnostics = async () => {
+    // Mock 모드 전용: 경고 대신 정보 상태만 설정
+    if (!USE_FIREBASE) {
+      setRunning(true);
+      try {
+        // Mock 모드용 정보 결과 생성
+        const mockResult: DiagnosticResult = {
+          overall: 'info',
+          checks: [
+            {
+              name: 'Mock 모드',
+              status: 'info',
+              message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+            },
+            {
+              name: '실서비스 전환',
+              status: 'info',
+              message: '실서비스 전환 후 Firebase 연결 및 FCM 설정을 진행해 주세요.',
+            },
+          ],
+        };
+        setDiagnostics(mockResult);
+        // Mock 모드에서는 toast를 띄우지 않음
+      } catch (error) {
+        console.error('Mock diagnostics failed:', error);
+      } finally {
+        setRunning(false);
+      }
+      return;
+    }
+
+    // 실서비스 모드: 기존 진단 로직 실행
     setRunning(true);
     try {
       const result = await runFCMDiagnostics();
@@ -41,6 +73,24 @@ export function FCMTab() {
   };
 
   useEffect(() => {
+    // Mock 모드에서는 자동 진단 실행하지 않음 (사용자가 버튼을 눌러야만 실행)
+    if (!USE_FIREBASE) {
+      // Mock 모드용 정보 결과만 설정
+      const mockResult: DiagnosticResult = {
+        overall: 'info',
+        checks: [
+          {
+            name: 'Mock 모드',
+            status: 'info',
+            message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+          },
+        ],
+      };
+      setDiagnostics(mockResult);
+      return;
+    }
+    
+    // 실서비스 모드에서만 자동 진단 실행
     runDiagnostics();
   }, []);
 
@@ -67,6 +117,11 @@ export function FCMTab() {
               <span className="text-sm text-[#2E1C10]/80">전체 상태</span>
               {!diagnostics ? (
                 <Badge variant="outline">확인 중...</Badge>
+              ) : diagnostics.overall === 'info' ? (
+                <Badge className="bg-blue-500 gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  정보
+                </Badge>
               ) : diagnostics.overall === 'pass' ? (
                 <Badge className="bg-green-500 gap-1">
                   <CheckCircle2 className="w-3 h-3" />
@@ -93,7 +148,9 @@ export function FCMTab() {
                 <span className="text-xs font-medium text-[#2E1C10]/60">진단 결과</span>
                 {diagnostics.checks.map((check, index) => (
                   <div key={index} className="flex items-start gap-2 text-xs">
-                    {check.status === 'pass' ? (
+                    {check.status === 'info' ? (
+                      <AlertCircle className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
+                    ) : check.status === 'pass' ? (
                       <CheckCircle2 className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
                     ) : check.status === 'warning' ? (
                       <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
@@ -127,6 +184,18 @@ export function FCMTab() {
 
       {/* 우측: 설정 가이드 */}
       <div className="lg:col-span-2 space-y-6">
+        {/* Mock 모드 안내 배너 */}
+        {!USE_FIREBASE && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-sm text-blue-900">
+              <strong>⚙️ 현재 이 프로젝트는 Mock 모드(USE_FIREBASE=false)입니다.</strong><br />
+              테스트 환경에서는 FCM 푸시를 사용하지 않으며, 아래 경고/진단 결과는 무시해도 됩니다.<br />
+              실서비스 전환 시 Firebase 연결 후 FCM 설정(서버 키, VAPID 키, Service Worker)을 완료해 주세요.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* 1. Firebase Cloud Messaging */}
         <Card>
           <CardHeader>
