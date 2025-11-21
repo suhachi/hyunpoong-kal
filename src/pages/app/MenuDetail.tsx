@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Checkbox } from '../../components/ui/checkbox';
 import { Label } from '../../components/ui/label';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
+import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import { useCart } from '../../contexts/CartContext';
 import { toast } from 'sonner';
 import menusData from '../../data/menus.json';
@@ -114,17 +115,13 @@ export function MenuDetail() {
     <div className="pb-24" data-testid="menu-detail.page">
       {/* 메뉴 이미지 */}
       <div className="relative aspect-square bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 overflow-hidden">
-        {menu.image ? (
-          <ImageWithFallback
-            src={menu.image}
-            alt={menu.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-9xl">🍜</span>
-          </div>
-        )}
+        <ImageWithFallback
+          src={menu.image || DEFAULT_MENU_IMAGE}
+          alt={menu.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
         {isSoldOut && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <Badge className="bg-gray-600 text-white text-lg px-4 py-2">

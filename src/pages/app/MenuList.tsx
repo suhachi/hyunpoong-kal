@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { Badge } from '../../components/ui/badge';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
+import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import menusData from '../../data/menus.json';
 import type { Menu, MenuCategory } from '../../types/menu';
 import { formatPrice } from '../../lib/utils';
@@ -110,7 +111,7 @@ interface MenuCardProps {
   menu: Menu;
 }
 
-function MenuCard({ menu }: MenuCardProps) {
+const MenuCardBase = ({ menu }: MenuCardProps) => {
   return (
     <Link to={`/menu/${menu.menuId}`} data-testid="menu-list.item.link">
       <div
@@ -122,17 +123,13 @@ function MenuCard({ menu }: MenuCardProps) {
         <div className="flex gap-4 p-4">
           {/* 메뉴 이미지 */}
           <div className="relative flex-shrink-0 w-24 h-24 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
-            {menu.image ? (
-              <ImageWithFallback
-                src={menu.image}
-                alt={menu.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-4xl">🍜</span>
-              </div>
-            )}
+            <ImageWithFallback
+              src={menu.image || DEFAULT_MENU_IMAGE}
+              alt={menu.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
             {!menu.isAvailable && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                 <Badge className="bg-gray-600 text-white">품절</Badge>
@@ -188,4 +185,6 @@ function MenuCard({ menu }: MenuCardProps) {
       </div>
     </Link>
   );
-}
+};
+
+const MenuCard = memo(MenuCardBase);

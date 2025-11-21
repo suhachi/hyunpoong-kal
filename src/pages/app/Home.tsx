@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { ChevronRight, CloudSun, Star, Settings, Gift, Ticket } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { FEATURE_FLAGS } from '../../config/env';
+import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import { formatPrice } from '../../lib/utils';
 import { getMenus } from '../../lib/admin/menus.api';
 import { getActiveNotices } from '../../lib/admin/notices.api';
@@ -37,10 +38,16 @@ export function Home() {
   }, []);
 
   // 개발자 전용: 관리자 권한으로 전환
-  const handleAdminAccess = (path: string) => {
+  const handleAdminAccess = useCallback((path: string) => {
     localStorage.setItem('mockRole', 'owner');
     navigate(path);
-  };
+  }, [navigate]);
+
+  // 추천 메뉴 클릭 핸들러
+  const handleMenuClick = useCallback((menuId: string) => {
+    navigate(`/menu/${menuId}`);
+  }, [navigate]);
+
   return (
     <div className="space-y-6">
       {/* 히어로 섹션 */}
@@ -116,7 +123,7 @@ export function Home() {
               <RecommendCard
                 key={menu.menuId}
                 menu={menu}
-                onClick={() => navigate(`/menu/${menu.menuId}`)}
+                onClick={() => handleMenuClick(menu.menuId)}
               />
             ))}
           </div>
@@ -153,6 +160,8 @@ export function Home() {
                   src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800"
                   alt="리뷰 사진"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="aspect-square rounded-lg overflow-hidden">
@@ -160,6 +169,8 @@ export function Home() {
                   src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800"
                   alt="리뷰 사진"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -273,7 +284,7 @@ interface RecommendCardProps {
   onClick: () => void;
 }
 
-function RecommendCard({ menu, onClick }: RecommendCardProps) {
+const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
   const badgeLabels: Record<string, string> = {
     best: '베스트',
     signature: '시그니처',
@@ -291,9 +302,11 @@ function RecommendCard({ menu, onClick }: RecommendCardProps) {
     >
       <div className="aspect-square bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 overflow-hidden">
         <ImageWithFallback
-          src={menu.image}
+          src={menu.image || DEFAULT_MENU_IMAGE}
           alt={menu.name}
           className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
       </div>
       <div className="p-3">
@@ -313,4 +326,6 @@ function RecommendCard({ menu, onClick }: RecommendCardProps) {
       </div>
     </div>
   );
-}
+};
+
+const RecommendCard = memo(RecommendCardBase);

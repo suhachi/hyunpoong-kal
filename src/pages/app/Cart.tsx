@@ -8,6 +8,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Separator } from '../../components/ui/separator';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
+import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import { useCart } from '../../contexts/CartContext';
 import { UpsellSection } from '../../components/app/UpsellSection';
 import { PriceBreakdown } from '../../components/shared/PriceBreakdown';
@@ -321,17 +322,13 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
       <div className="flex gap-4">
         {/* 메뉴 이미지 */}
         <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
-          {imageUrl ? (
-            <ImageWithFallback
-              src={imageUrl}
-              alt={item.menuName}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-3xl">🍜</span>
-            </div>
-          )}
+          <ImageWithFallback
+            src={imageUrl || DEFAULT_MENU_IMAGE}
+            alt={item.menuName}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
 
         {/* 메뉴 정보 */}
