@@ -25,6 +25,30 @@
   - 필수 개선:
   - 권장 개선:
 
+### 2025-01-18 (주문 시스템 개선 작업)
+- **작업 내용:**
+  - ✅ 주문 상태 머신 정리 (11가지 → 6가지 상태로 통일)
+  - ✅ 새 주문 알림 시스템 구현 (알림음 + 팝업 + 자동 프린트)
+  - ✅ 샘플 데이터 제거 (리뷰, 관제 대시보드, 쿠폰)
+  - ✅ 주문내역 라우팅 수정 (`/orders` → `/order-history`)
+- **수정된 파일:**
+  - `src/types/order.ts` - OrderStatus 타입 통일
+  - `src/lib/orders.utils.ts` - 상태 라벨 헬퍼 함수 (신규)
+  - `src/pages/admin/Orders.tsx` - 탭 필터 로직, 알림 시스템
+  - `src/components/admin/OrderTable.tsx` - 액션 버튼 정리
+  - `src/lib/admin/reviews.api.ts` - 리뷰 샘플 데이터 제거
+  - `src/lib/admin/analytics.api.ts` - 관제 대시보드 샘플 수치 제거
+  - `src/lib/coupons.api.ts` - 쿠폰 샘플 데이터 제거
+  - `src/pages/app/My.tsx` - 주문내역 라우팅 수정
+  - 기타 주문 관련 컴포넌트 및 API 파일
+- **상태:**
+  - ✅ 빌드 성공
+  - ✅ 타입 오류 없음
+  - ⏳ 기능 테스트 예정 (2025-01-19)
+- **참고 문서:**
+  - `docs/monitoring/HPKAL_v0.9.0_주문시스템-개선-보고서_2025-01-18.md`
+  - `docs/monitoring/확인사항-체크리스트_2025-01-18.md`
+
 ### D+1 (2025-11-19)
 - 체크 항목:
 - 발견 이슈:

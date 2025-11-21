@@ -4,62 +4,12 @@
  * USE_FIREBASE=true: Firestore 연동
  */
 
-
 import { USE_FIREBASE } from '../config/env';
+import type { Coupon, CouponFilters, CouponStats, CouponIssue } from '../types/coupon';
+import { getCouponStatus } from '../types/coupon';
 
-// Mock 데이터
-let mockCoupons: Coupon[] = [
-  {
-    id: 'coupon-001',
-    uid: 'user-001',
-    type: 'photo_review',
-    amount: 3000,
-    minSpend: 10000,
-    issuedAt: Date.now() - 1000 * 60 * 60 * 24 * 5, // 5일 전
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 25, // 25일 후
-    used: false,
-    title: '사진 리뷰 작성 감사 쿠폰',
-    description: '10,000원 이상 주문 시 사용 가능',
-  },
-  {
-    id: 'coupon-002',
-    uid: 'user-001',
-    type: 'welcome',
-    amount: 5000,
-    minSpend: 15000,
-    issuedAt: Date.now() - 1000 * 60 * 60 * 24 * 10, // 10일 전
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 20, // 20일 후
-    used: false,
-    title: '신규 가입 축하 쿠폰',
-    description: '15,000원 이상 주문 시 사용 가능',
-  },
-  {
-    id: 'coupon-003',
-    uid: 'user-001',
-    type: 'event',
-    amount: 2000,
-    minSpend: 10000,
-    issuedAt: Date.now() - 1000 * 60 * 60 * 24 * 40, // 40일 전
-    expiresAt: Date.now() - 1000 * 60 * 60 * 24 * 10, // 10일 전 (만료됨)
-    used: false,
-    title: '이벤트 쿠폰',
-    description: '만료됨',
-  },
-  {
-    id: 'coupon-004',
-    uid: 'user-001',
-    type: 'admin',
-    amount: 10000,
-    minSpend: 20000,
-    issuedAt: Date.now() - 1000 * 60 * 60 * 24 * 15, // 15일 전
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 15, // 15일 후
-    used: true,
-    usedAt: Date.now() - 1000 * 60 * 60 * 24 * 5,
-    orderId: 'order-123',
-    title: '고객 보상 쿠폰',
-    description: '이미 사용됨',
-  },
-];
+// Mock 데이터 (샘플 데이터 제거)
+let mockCoupons: Coupon[] = [];
 
 /**
  * 사용자 쿠폰 목록 조회
