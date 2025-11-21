@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-15-2002  
+**Generated**: 2025-11-21-1308  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -29,12 +29,12 @@ import {
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser,
   updateProfile
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { USE_FIREBASE } from '../config/env';
+import { resolveUser, loadMockUserFromStorage } from '../lib/auth/resolveUser';
 
 export type UserRole = 'customer' | 'owner' | 'admin';
 
@@ -81,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // AuthResolver는 외부 파일로 이동 (동작 동일, 위치만 이동)
+
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
@@ -90,19 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         try {
           if (firebaseUser) {
-            // Firestore에서 사용자 추가 정보 가져오기
-            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-            const userData = userDoc.data();
-            
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              displayName: firebaseUser.displayName || '사용자',
-              photoURL: firebaseUser.photoURL || undefined,
-              role: userData?.role || 'customer',
-              storeId: userData?.storeId,
-              createdAt: userData?.createdAt?.toDate(),
-            });
+            const resolved = (await resolveUser(firebaseUser)) as AuthUser;
+            setUser(resolved);
           } else {
             setUser(null);
           }
@@ -120,14 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
       console.log('[AuthContext] 🔍 Mock 모드 초기화 시작');
       try {
-        const mockUserData = localStorage.getItem('mockUser');
-        console.log('[AuthContext] 📦 mockUserData:', mockUserData);
-        if (mockUserData) {
-          const parsed = JSON.parse(mockUserData);
-          console.log('[AuthContext] ✅ 파싱 성공:', parsed);
-          setUser(parsed);
+        const mockUser = loadMockUserFromStorage();
+        if (mockUser) {
+          setUser(mockUser);
         } else {
-          console.warn('[AuthContext] ⚠️ mockUser가 localStorage에 없습니다');
+          console.warn('[AuthContext] ⚠️ mockUser가 없습니다');
         }
       } catch (error) {
         console.error('[AuthContext] ❌ Mock 사용자 로드 실패:', error);
@@ -337,7 +325,7 @@ export function useAuth() {
 ## src\contexts\CartContext.tsx
 
 ```tsx
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import type { CartContextType, CartItem, DeliveryType, DeliveryAddress } from '../types/cart';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -355,44 +343,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [couponId, setCouponId] = useState<string | undefined>();
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
-  // 로컬 스토리지에서 장바구니 복원
-  useEffect(() => {
-    const loadFromStorage = () => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const data = JSON.parse(stored);
-          setItems(data.items || []);
-          setDeliveryTypeState(data.deliveryType || 'delivery');
-          setDeliveryAddressState(data.deliveryAddress);
-          setRequestsState(data.requests || '');
-          setCouponId(data.couponId);
-          setCouponDiscount(data.couponDiscount || 0);
-        }
-      } catch (error) {
-        console.error('Failed to load cart from localStorage:', error);
-      }
-    };
+  // T2-15: Cart hydration / storage sync 안정화 리팩터
+  // - Phase 1: Mock/Firebase 공통에서 결정적 초기화 보장 (loadFromStorage 단일화)
+  // - forceReload를 얇은 wrapper로 단순화하여 중복 로직 제거
+  // - 이벤트(storage / visibility / focus) 한 곳에서 바인딩
+  // TODO(T2-15): Phase 2에서 order-flow E2E 재활성화 후 디버그 로그 제거 + 필요 시 testId 기반 개선
+  // 단일 진실: localStorage에서 장바구니 로드 (JSON 파싱 실패 시 안전하게 무시)
+  const loadFromStorage = useCallback(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return;
+      const data = JSON.parse(stored);
+      setItems(data.items || []);
+      setDeliveryTypeState(data.deliveryType || 'delivery');
+      setDeliveryAddressState(data.deliveryAddress);
+      setRequestsState(data.requests || '');
+      setCouponId(data.couponId);
+      setCouponDiscount(data.couponDiscount || 0);
+    } catch (error) {
+      console.error('Failed to load cart from localStorage:', error);
+    }
+  }, []);
 
-    // 초기 로드
+  // 초기 마운트 + 이벤트 바인딩(useEffect 하나만 사용)
+  useEffect(() => {
     loadFromStorage();
 
-    // storage event listener: 다른 탭이나 창에서 localStorage 변경 시 동기화
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
-        loadFromStorage();
-      }
+      if (e.key === STORAGE_KEY) loadFromStorage();
     };
-
-    // visibilitychange: 탭이 다시 활성화될 때 localStorage 재동기화
-    // 이를 통해 SPA 내 페이지 이동 후에도 최신 상태를 보장
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        loadFromStorage();
-      }
+      if (document.visibilityState === 'visible') loadFromStorage();
     };
-
-    // focus: 창이 포커스를 받을 때 localStorage 재동기화
     const handleFocus = () => {
       loadFromStorage();
     };
@@ -400,16 +382,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     window.addEventListener('storage', handleStorageChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
-
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 장바구니 상태 변경 시 로컬 스토리지 저장
+  // 장바구니 상태 변경 시 로컬 스토리지 저장 (초기 마운트 제외)
+  const isInitialMount = useRef(true);
   useEffect(() => {
+    // 초기 마운트 시에는 저장하지 않음 (loadFromStorage가 먼저 실행되도록)
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
     try {
       localStorage.setItem(
         STORAGE_KEY,
@@ -534,24 +523,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return subtotal + deliveryFee - couponDiscount;
   };
 
-  // T2-13 Fix: forceReload를 useCallback으로 메모이제이션하여 참조 안정성 확보
-  // Cart 컴포넌트에서 useEffect 의존성 배열에 사용 시 무한 루프 방지
+  // forceReload: loadFromStorage thin wrapper (추가 부작용 없이 재동기화 전용)
   const forceReload = useCallback(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        setItems(data.items || []);
-        setDeliveryTypeState(data.deliveryType || 'delivery');
-        setDeliveryAddressState(data.deliveryAddress);
-        setRequestsState(data.requests || '');
-        setCouponId(data.couponId);
-        setCouponDiscount(data.couponDiscount || 0);
-      }
-    } catch (error) {
-      console.error('Failed to force reload cart from localStorage:', error);
-    }
-  }, []); // 의존성 없음: STORAGE_KEY는 상수, setState들은 React가 안정적으로 유지
+    loadFromStorage();
+  }, [loadFromStorage]);
 
   return (
     <CartContext.Provider

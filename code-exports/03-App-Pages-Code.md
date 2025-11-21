@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-11-15-2002  
+**Generated**: 2025-11-21-1308  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -15,15 +15,42 @@ Complete source code of 9 user-facing pages.
 
 ```tsx
 import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { ChevronRight, CloudSun, Star, Settings, Gift, Ticket } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { FEATURE_FLAGS } from '../../config/env';
 import { formatPrice } from '../../lib/utils';
+import { getMenus } from '../../lib/admin/menus.api';
+import { getActiveNotices } from '../../lib/admin/notices.api';
+import type { Menu } from '../../types/menu';
+import type { Notice } from '../../types/notice';
 
 export function Home() {
   const navigate = useNavigate();
+  const [recommendedMenus, setRecommendedMenus] = useState<Menu[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // 추천 메뉴 로드
+        const menus = await getMenus({});
+        const bestMenus = menus
+          .filter(m => m.badges.includes('best'))
+          .slice(0, 2);
+        setRecommendedMenus(bestMenus.length >= 2 ? bestMenus : menus.slice(0, 2));
+
+        // 공지사항 로드
+        const activeNotices = await getActiveNotices(1);
+        setNotices(activeNotices);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   // 개발자 전용: 관리자 권한으로 전환
   const handleAdminAccess = (path: string) => {
@@ -101,17 +128,13 @@ export function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <RecommendCard
-              name="현풍닭칼국수"
-              price={9000}
-              image="https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjBub29kbGUlMjBzb3VwfGVufDF8fHx8MTc2MTYyMzMxOXww&ixlib=rb-4.1.0&q=80&w=1080"
-              badge="베스트"
-            />
-            <RecommendCard
-              name="수육 (중)"
-              price={20000}
-              image="https://images.unsplash.com/photo-1645530656505-1b8a4057889b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjBwb3JrJTIwYmVsbHl8ZW58MXx8fHwxNzYxNjIzMzE5fDA&ixlib=rb-4.1.0&q=80&w=1080"
-            />
+            {recommendedMenus.map((menu) => (
+              <RecommendCard
+                key={menu.menuId}
+                menu={menu}
+                onClick={() => navigate(`/menu/${menu.menuId}`)}
+              />
+            ))}
           </div>
         </section>
         
@@ -128,7 +151,7 @@ export function Home() {
             </Link>
           </div>
           
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer" onClick={() => navigate('/review/1')}>
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -160,27 +183,50 @@ export function Home() {
         </section>
         
         {/* 공지사항 */}
-        <section className="p-4 bg-[#F37021]/10 rounded-2xl">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="border-[#F37021] text-[#F37021]">
-                  공지
-                </Badge>
-                <span className="text-xs text-[#2E1C10]/60">
-                  2024.10.28
-                </span>
-              </div>
-              <h3 className="text-sm text-[#2E1C10] mb-1">
-                사진 리뷰 쓰고 3,000원 쿠폰 받으세요!
-              </h3>
-              <p className="text-sm text-[#2E1C10]/60">
-                사진과 함께 리뷰를 남겨주시면 다음 주문에 사용 가능한 쿠폰을 드립니다.
-              </p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-[#2E1C10]/40 flex-shrink-0" />
-          </div>
-        </section>
+        {notices.length > 0 && (
+          <section 
+            className="p-4 bg-[#F37021]/10 rounded-2xl cursor-pointer hover:bg-[#F37021]/15 transition-colors"
+            onClick={() => navigate('/notices')}
+          >
+            {notices.map(notice => {
+              const typeColors = {
+                notice: 'border-[#F37021] text-[#F37021]',
+                event: 'border-blue-500 text-blue-600',
+                promotion: 'border-purple-500 text-purple-600',
+              };
+              const typeLabels = {
+                notice: '공지',
+                event: '이벤트',
+                promotion: '프로모션',
+              };
+              return (
+                <div key={notice.id} className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className={typeColors[notice.type]}>
+                        {typeLabels[notice.type]}
+                      </Badge>
+                      <span className="text-xs text-[#2E1C10]/60">
+                        {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                        }).replace(/\./g, '.').replace(/\s/g, '')}
+                      </span>
+                    </div>
+                    <h3 className="text-sm text-[#2E1C10] mb-1">
+                      {notice.title}
+                    </h3>
+                    <p className="text-sm text-[#2E1C10]/60">
+                      {notice.content}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#2E1C10]/40 flex-shrink-0" />
+                </div>
+              );
+            })}
+          </section>
+        )}
         
         {/* CTA 버튼 */}
         <Link to="/menu">
@@ -239,35 +285,46 @@ export function Home() {
 }
 
 interface RecommendCardProps {
-  name: string;
-  price: number;
-  image: string;
-  badge?: string;
+  menu: Menu;
+  onClick: () => void;
 }
 
-function RecommendCard({ name, price, image, badge }: RecommendCardProps) {
+function RecommendCard({ menu, onClick }: RecommendCardProps) {
+  const badgeLabels: Record<string, string> = {
+    best: '베스트',
+    signature: '시그니처',
+    spicy: '매운맛',
+    cold: '냉메뉴',
+    seasonal: '계절메뉴',
+  };
+
+  const hasBestBadge = menu.badges.includes('best');
+
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+    <div 
+      className="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      onClick={onClick}
+    >
       <div className="aspect-square bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 overflow-hidden">
         <ImageWithFallback
-          src={image}
-          alt={name}
+          src={menu.image}
+          alt={menu.name}
           className="w-full h-full object-cover"
         />
       </div>
       <div className="p-3">
         <div className="flex items-center gap-2 mb-1">
-          {badge && (
+          {hasBestBadge && (
             <Badge className="bg-[#D61C1C] text-white text-xs">
-              {badge}
+              베스트
             </Badge>
           )}
         </div>
         <h3 className="text-sm text-[#2E1C10] mb-1">
-          {name}
+          {menu.name}
         </h3>
         <p className="text-[#D61C1C]">
-          {formatPrice(price)}
+          {formatPrice(menu.price)}
         </p>
       </div>
     </div>
@@ -337,7 +394,7 @@ export function MenuList() {
   }, [menus, selectedCategory, searchQuery]);
   
   return (
-    <div className="pb-6">
+    <div className="pb-6" data-testid="menu-list.page">
       {/* 검색 */}
       <div className="sticky top-14 z-40 bg-[#F9F6F3] pt-4 px-4 pb-3">
         <div className="relative">
@@ -376,7 +433,7 @@ export function MenuList() {
                 검색 결과가 없습니다
               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-4" data-testid="menu-list.items">
                 {filteredMenus.map((menu) => (
                   <MenuCard key={menu.menuId} menu={menu} />
                 ))}
@@ -395,10 +452,13 @@ interface MenuCardProps {
 
 function MenuCard({ menu }: MenuCardProps) {
   return (
-    <Link to={`/menu/${menu.menuId}`}>
-      <div className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
-        !menu.isAvailable ? 'opacity-60' : ''
-      }`}>
+    <Link to={`/menu/${menu.menuId}`} data-testid="menu-list.item.link">
+      <div
+        className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+          !menu.isAvailable ? 'opacity-60' : ''
+        }`}
+        data-testid="menu-list.item"
+      >
         <div className="flex gap-4 p-4">
           {/* 메뉴 이미지 */}
           <div className="relative flex-shrink-0 w-24 h-24 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
@@ -428,7 +488,7 @@ function MenuCard({ menu }: MenuCardProps) {
           {/* 메뉴 정보 */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="text-[#2E1C10] truncate">
+              <h3 className="text-[#2E1C10] truncate" data-testid="menu-list.item.name">
                 {menu.name}
               </h3>
             </div>
@@ -453,7 +513,7 @@ function MenuCard({ menu }: MenuCardProps) {
             </p>
             
             {/* 가격 */}
-            <p className="text-[#D61C1C]">
+            <p className="text-[#D61C1C]" data-testid="menu-list.item.price">
               {formatPrice(menu.price)}
             </p>
             
@@ -485,6 +545,7 @@ import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { Alert, AlertDescription } from '../../components/ui/alert';
+import { Separator } from '../../components/ui/separator';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { useCart } from '../../contexts/CartContext';
 import { UpsellSection } from '../../components/app/UpsellSection';
@@ -531,8 +592,11 @@ export function Cart() {
   } = useCart();
 
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
-  // T2-13 Fix: 로딩 상태 추가 - forceReload 완료 전까지 EmptyState 표시 방지
-  const [isHydrating, setIsHydrating] = useState(true);
+  // T2-16: Cart 페이지 hydration 완전 제거
+  // - CartContext의 items를 즉시 신뢰하고 렌더링
+  // - localStorage 동기화는 CartContext에서 이미 처리됨
+  // - isHydrating 플래그 제거로 불필요한 로딩 상태 회피
+  const [isHydrating] = useState(false);
 
   const subtotal = getSubtotal();
   const deliveryFee = getDeliveryFee();
@@ -542,21 +606,11 @@ export function Cart() {
   const canProceed = subtotal >= minOrderAmount;
   const missingAmount = minOrderAmount - subtotal;
 
-  // T2-13 Fix: Cart 페이지 마운트 시 localStorage에서 최신 상태 강제 로드
-  // forceReload가 useCallback으로 메모이제이션되어 안정적인 참조를 가지므로
-  // [forceReload] 의존성 배열 사용 시 무한 루프가 발생하지 않음
-  // SPA 네비게이션 시 CartContext state와 localStorage 동기화 보장
-  useEffect(() => {
-    forceReload();
-    // 비동기 setState 완료를 기다리기 위해 다음 틱에 실행
-    setTimeout(() => {
-      setIsHydrating(false);
-    }, 0);
-  }, [forceReload]);
-
   // 메뉴 데이터 로드 (추천용)
+  // T2-13: UpsellSection 메뉴 로딩은 선택적 기능이므로 당분간 비활성화
+  // public/data/menus.json이 준비되면 주석 해제
   useEffect(() => {
-    loadMenus();
+    // loadMenus();
   }, []);
 
   async function loadMenus() {
@@ -592,19 +646,19 @@ export function Cart() {
     });
   }
 
-  // T2-13 Fix: 로딩 중이면 빈 화면 대신 로딩 표시
+  // 로딩 상태 (현재는 사용하지 않지만 향후 필요 시 활성화 가능)
   if (isHydrating) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      <div data-testid="cart.loading" className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <div className="w-16 h-16 border-4 border-[#D61C1C]/30 border-t-[#D61C1C] rounded-full animate-spin"></div>
-        <p className="mt-4 text-[#2E1C10]/60">로딩 중...</p>
+        <p className="mt-4 text-[#2E1C10]/60">장바구니를 불러오는 중...</p>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4" data-testid="cart.empty">
         <div className="w-24 h-24 mb-6 rounded-full bg-[#2E1C10]/5 flex items-center justify-center">
           <ShoppingBag className="w-12 h-12 text-[#2E1C10]/40" />
         </div>
@@ -625,10 +679,10 @@ export function Cart() {
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-32" data-testid="cart.page">
       <div className="px-4 py-6 space-y-6">
         {/* 장바구니 헤더 */}
-        <div>
+        <div data-testid="cart.header">
           <h1 className="text-2xl text-[#2E1C10] mb-1">
             장바구니
           </h1>
@@ -638,7 +692,7 @@ export function Cart() {
         </div>
 
         {/* 장바구니 아이템 */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-testid="cart.items">
           {items.map((item, index) => (
             <CartItemCard
               key={`${item.menuId}-${index}`}
@@ -652,13 +706,13 @@ export function Cart() {
         <Separator />
 
         {/* 배달/포장 선택 */}
-        <div>
+        <div data-testid="cart.method">
           <h2 className="text-[#2E1C10] mb-3">
             주문 방식
           </h2>
           <RadioGroup value={deliveryType} onValueChange={(v) => setDeliveryType(v as 'delivery' | 'pickup')}>
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="delivery" id="delivery" />
+              <RadioGroupItem value="delivery" id="delivery" data-testid="cart.method.radio-delivery" />
               <Label htmlFor="delivery" className="flex items-center gap-2 cursor-pointer flex-1">
                 <Truck className="w-5 h-5 text-[#D61C1C]" />
                 <div>
@@ -676,7 +730,7 @@ export function Cart() {
             </div>
 
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="pickup" id="pickup" />
+              <RadioGroupItem value="pickup" id="pickup" data-testid="cart.method.radio-pickup" />
               <Label htmlFor="pickup" className="flex items-center gap-2 cursor-pointer flex-1">
                 <ShoppingBag className="w-5 h-5 text-[#F37021]" />
                 <div>
@@ -699,6 +753,7 @@ export function Cart() {
             요청사항 (선택)
           </h2>
           <Textarea
+            data-testid="cart.input.requests"
             placeholder="예) 면 부드럽게 해주세요"
             value={requests}
             onChange={(e) => setRequests(e.target.value)}
@@ -744,7 +799,7 @@ export function Cart() {
       </div>
 
       {/* 하단 고정 결제 영역 */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-[#2E1C10]/10 px-4 py-4 space-y-3">
+      <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-[#2E1C10]/10 px-4 py-4 space-y-3" data-testid="cart.summary">
         {/* 금액 상세 - PriceBreakdown 컴포넌트 사용 */}
         <PriceBreakdown
           subtotal={subtotal}
@@ -756,6 +811,7 @@ export function Cart() {
 
         {/* 결제하기 버튼 */}
         <Button
+          data-testid="cart.button.submit"
           size="lg"
           className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
           disabled={!canProceed}
@@ -800,7 +856,7 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
   const imageUrl = menuImages[item.menuId];
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm">
+    <div className="bg-white rounded-2xl p-4 shadow-sm" data-testid="cart.item">
       <div className="flex gap-4">
         {/* 메뉴 이미지 */}
         <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
@@ -820,10 +876,11 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
         {/* 메뉴 정보 */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="text-[#2E1C10] truncate">
+            <h3 className="text-[#2E1C10] truncate" data-testid="cart.item.name">
               {item.menuName}
             </h3>
             <button
+              data-testid="cart.item.remove"
               onClick={onRemove}
               className="flex-shrink-0 p-1 hover:bg-[#2E1C10]/5 rounded"
               aria-label="삭제"
@@ -834,7 +891,7 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
 
           {/* 옵션 */}
           {optionsText && (
-            <p className="text-sm text-[#2E1C10]/60 mb-2">
+            <p className="text-sm text-[#2E1C10]/60 mb-2" data-testid="cart.item.options">
               {optionsText}
             </p>
           )}
@@ -844,16 +901,18 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
             {/* 수량 조절 */}
             <div className="flex items-center border border-[#2E1C10]/20 rounded-lg overflow-hidden">
               <button
+                data-testid="cart.item.quantity-decrease"
                 onClick={() => onUpdateQuantity(Math.max(1, item.quantity - 1))}
                 className="w-8 h-8 flex items-center justify-center hover:bg-[#F9F6F3]"
                 aria-label="수량 감소"
               >
                 <Minus className="w-3 h-3" />
               </button>
-              <span className="w-10 text-center text-sm text-[#2E1C10]">
+              <span className="w-10 text-center text-sm text-[#2E1C10]" data-testid="cart.item.quantity">
                 {item.quantity}
               </span>
               <button
+                data-testid="cart.item.quantity-increase"
                 onClick={() => onUpdateQuantity(item.quantity + 1)}
                 className="w-8 h-8 flex items-center justify-center hover:bg-[#F9F6F3]"
                 aria-label="수량 증가"
@@ -863,7 +922,7 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
             </div>
 
             {/* 가격 */}
-            <span className="text-[#D61C1C]">
+            <span className="text-[#D61C1C]" data-testid="cart.item.price">
               {formatPrice(item.subtotal)}
             </span>
           </div>
@@ -1571,7 +1630,7 @@ export function My() {
       {/* 빠른 메뉴 그리드 */}
       <div className="grid grid-cols-2 gap-3">
         {/* 주문내역 */}
-        <Link to="/orders" className="block">
+        <Link to="/order-history" className="block">
           <Card className="rounded-2xl hover:shadow-md transition-all hover:scale-[1.02] border-[#E5DDD5] h-full">
             <CardHeader className="pb-3">
               <div className="w-12 h-12 rounded-full bg-[#D61C1C]/10 flex items-center justify-center mb-2">

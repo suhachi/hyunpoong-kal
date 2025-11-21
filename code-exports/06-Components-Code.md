@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-11-15-2002  
+**Generated**: 2025-11-21-1308  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -929,6 +929,7 @@ export function MenuCreateDialog({
   // 이미지
   const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // 옵션 그룹 관리
   const [availableOptionGroups, setAvailableOptionGroups] = useState<OptionGroup[]>([]);
@@ -965,6 +966,25 @@ export function MenuCreateDialog({
   const handleImageUrlChange = (url: string) => {
     setImageUrl(url);
     setImagePreview(url);
+    setImageFile(null);
+  };
+
+  // 이미지 파일 선택 핸들러
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setImageUrl('');
+    }
+  };
+
+  // 이미지 업로드 함수 (Firebase Storage 연동 필요, 여기선 mock)
+  const uploadImage = async (file: File): Promise<string> => {
+    // TODO: 실제 Firebase Storage 업로드 구현 필요
+    // 예시: await uploadToFirebase(file)
+    // 여기선 임시로 local preview URL 반환
+    return URL.createObjectURL(file);
   };
 
   // 옵션 그룹 선택/해제
@@ -988,51 +1008,46 @@ export function MenuCreateDialog({
     setIsAvailable(true);
     setImageUrl('');
     setImagePreview('');
+    setImageFile(null);
     setSelectedOptionGroupIds([]);
   };
 
-  // 저장
+  // 저장 핸들러
   const handleSave = async () => {
     // 검증
     if (!name.trim()) {
       toast.error('메뉴 이름을 입력하세요');
       return;
     }
-
     if (!price || parseFloat(price) < 0) {
       toast.error('올바른 가격을 입력하세요');
       return;
     }
-
-    if (!imageUrl.trim()) {
-      toast.error('이미지 URL을 입력하세요');
+    if (!imageUrl.trim() && !imageFile) {
+      toast.error('이미지 URL 또는 파일을 입력하세요');
       return;
     }
-
     setLoading(true);
-
     try {
-      // 선택된 옵션 그룹 가져오기
-      const selectedGroups = availableOptionGroups
-        .filter(g => selectedOptionGroupIds.includes(g.id))
-        .map(g => ({ ...g })); // 복사
-
+      const selectedGroups = availableOptionGroups.filter(group =>
+        selectedOptionGroupIds.includes(group.id)
+      );
+      let finalImageUrl = imageUrl.trim();
+      if (imageFile) {
+        finalImageUrl = await uploadImage(imageFile);
+      }
       const menuData: Partial<Menu> = {
         name: name.trim(),
         category,
         price: parseFloat(price),
         description: description.trim(),
-        image: imageUrl.trim(),
         badges: selectedBadges,
-        optionGroups: selectedGroups,
-        allergens: allergens
-          .split(',')
-          .map(a => a.trim())
-          .filter(Boolean),
+        allergens: allergens.trim(),
         origin: origin.trim() || '국내산',
         isAvailable,
+        image: finalImageUrl,
+        optionGroups: selectedGroups,
       };
-
       await onSave(menuData);
       resetForm();
       onOpenChange(false);
@@ -1043,6 +1058,7 @@ export function MenuCreateDialog({
     }
   };
 
+  // --- JSX 반환 시작 ---
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -1052,102 +1068,30 @@ export function MenuCreateDialog({
             새로운 메뉴를 등록합니다. 필수 항목(*)을 입력하세요.
           </DialogDescription>
         </DialogHeader>
-
-        <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="basic">기본 정보</TabsTrigger>
-            <TabsTrigger value="options">옵션</TabsTrigger>
-            <TabsTrigger value="detail">상세 정보</TabsTrigger>
-          </TabsList>
-
-          {/* 기본 정보 탭 */}
-          <TabsContent value="basic" className="space-y-4">
-            {/* 메뉴명 */}
+        <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
+          <div className="space-y-6">
+            {/* 이미지 등록 (URL 또는 파일) */}
             <div>
-              <Label htmlFor="name">메뉴명 *</Label>
-              <Input
-                id="name"
-                placeholder="현풍닭칼국수"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={50}
-              />
-              <p className="text-xs text-gray-500 mt-1">{name.length}/50</p>
-            </div>
-
-            {/* 카테고리 */}
-            <div>
-              <Label htmlFor="category">카테고리 *</Label>
-              <Select value={category} onValueChange={(v) => setCategory(v as MenuCategory)}>
-                <SelectTrigger id="category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* 가격 */}
-            <div>
-              <Label htmlFor="price">가격 (원) *</Label>
-              <Input
-                id="price"
-                type="number"
-                placeholder="9000"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                min="0"
-              />
-            </div>
-
-            {/* 설명 */}
-            <div>
-              <Label htmlFor="description">설명</Label>
-              <Textarea
-                id="description"
-                placeholder="메뉴 설명을 입력하세요"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            {/* 배지 */}
-            <div>
-              <Label>배지</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {Object.entries(BADGE_LABELS).map(([key, label]) => (
-                  <Badge
-                    key={key}
-                    variant={selectedBadges.includes(key as MenuBadge) ? 'default' : 'outline'}
-                    className="cursor-pointer"
-                    onClick={() => handleToggleBadge(key as MenuBadge)}
-                  >
-                    {label}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* 이미지 URL */}
-            <div>
-              <Label htmlFor="imageUrl">이미지 URL *</Label>
+              <Label htmlFor="imageUrl">이미지 URL</Label>
               <Input
                 id="imageUrl"
                 type="url"
                 placeholder="https://example.com/image.jpg"
                 value={imageUrl}
-                onChange={(e) => handleImageUrlChange(e.target.value)}
+                onChange={e => handleImageUrlChange(e.target.value)}
+                disabled={!!imageFile}
               />
               <p className="text-xs text-gray-500 mt-1">
                 권장: 1600px, WebP 형식, 3MB 이하
               </p>
-
+              <Label htmlFor="imageFile" className="mt-2">이미지 파일 업로드</Label>
+              <Input
+                id="imageFile"
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                disabled={!!imageUrl}
+              />
               {/* 이미지 미리보기 */}
               {imagePreview && (
                 <div className="mt-3 relative">
@@ -1165,155 +1109,78 @@ export function MenuCreateDialog({
                     size="sm"
                     className="absolute top-2 right-2"
                     onClick={() => {
-                      setImageUrl('');
                       setImagePreview('');
+                      setImageUrl('');
+                      setImageFile(null);
                     }}
                   >
-                    <X className="w-4 h-4" />
+                    제거
                   </Button>
                 </div>
               )}
             </div>
-
-            {/* 판매 여부 */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isAvailable"
-                checked={isAvailable}
-                onCheckedChange={(checked) => setIsAvailable(!!checked)}
-              />
-              <Label htmlFor="isAvailable" className="cursor-pointer">
-                판매 중
-              </Label>
-            </div>
-          </TabsContent>
-
-          {/* 옵션 탭 */}
-          <TabsContent value="options" className="space-y-4">
+            {/* 카테고리 */}
             <div>
-              <div className="mb-3">
-                <h4 className="text-sm mb-1">옵션 그룹 선택</h4>
-                <p className="text-xs text-gray-500">
-                  이 메뉴에 적용할 옵션 그룹을 선택하세요. 
-                  설정 &gt; 옵션 관리에서 옵션 그룹을 추가할 수 있습니다.
-                </p>
-              </div>
-
-              {availableOptionGroups.length === 0 ? (
-                <Card>
-                  <CardContent className="text-center py-8 text-gray-500">
-                    <p className="mb-2">등록된 옵션 그룹이 없습니다</p>
-                    <p className="text-xs">설정 &gt; 옵션 관리에서 먼저 옵션 그룹을 생성하세요</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {availableOptionGroups.map((group) => (
-                    <Card
-                      key={group.id}
-                      className={`cursor-pointer transition-all ${
-                        selectedOptionGroupIds.includes(group.id)
-                          ? 'border-[#D61C1C] bg-[#D61C1C]/5'
-                          : 'hover:border-gray-300'
-                      }`}
-                      onClick={() => handleToggleOptionGroup(group.id)}
-                    >
-                      <CardHeader className="pb-2">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-base flex items-center gap-2">
-                              <Checkbox
-                                checked={selectedOptionGroupIds.includes(group.id)}
-                                onCheckedChange={() => handleToggleOptionGroup(group.id)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                              {group.name}
-                            </CardTitle>
-                            <div className="flex items-center gap-2 mt-1">
-                              {group.required && (
-                                <Badge variant="secondary" className="text-xs">
-                                  필수
-                                </Badge>
-                              )}
-                              {group.multiSelect && (
-                                <Badge variant="outline" className="text-xs">
-                                  다중선택
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-2">
-                        <div className="flex flex-wrap gap-2">
-                          {group.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="text-xs px-2 py-1 bg-gray-100 rounded"
-                            >
-                              {item.name}
-                              {item.quantity > 1 && ` (${item.quantity}개)`}
-                              {item.price > 0 && ` +${formatPrice(item.price)}`}
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
+              <Label htmlFor="category">카테고리 *</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
                   ))}
-                </div>
-              )}
-
-              {selectedOptionGroupIds.length > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    ✓ {selectedOptionGroupIds.length}개의 옵션 그룹이 선택되었습니다
-                  </p>
-                </div>
-              )}
+                </SelectContent>
+              </Select>
             </div>
-          </TabsContent>
-
-          {/* 상세 정보 탭 */}
-          <TabsContent value="detail" className="space-y-4">
-            {/* 알레르기 유발 성분 */}
+            {/* 가격 */}
             <div>
-              <Label htmlFor="allergens">알레르기 유발 성분</Label>
+              <Label htmlFor="price">가격 (원) *</Label>
               <Input
-                id="allergens"
-                placeholder="밀, 대두, 닭고기 (쉼표로 구분)"
-                value={allergens}
-                onChange={(e) => setAllergens(e.target.value)}
+                id="price"
+                type="number"
+                placeholder="9000"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                min="0"
               />
             </div>
-
-            {/* 원산지 */}
+            {/* 설명 */}
             <div>
-              <Label htmlFor="origin">원산지</Label>
-              <Input
-                id="origin"
-                placeholder="국내산"
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
+              <Label htmlFor="description">설명</Label>
+              <Textarea
+                id="description"
+                placeholder="메뉴 설명을 입력하세요"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                rows={3}
               />
             </div>
-          </TabsContent>
-        </Tabs>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              resetForm();
-              onOpenChange(false);
-            }}
-            disabled={loading}
-          >
-            취소
-          </Button>
-          <Button onClick={handleSave} disabled={loading}>
-            {loading ? '등록 중...' : '등록'}
-          </Button>
-        </DialogFooter>
+            {/* 배지 */}
+            <div>
+              <Label>배지</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {Object.entries(BADGE_LABELS).map(([key, label]) => (
+                  <Badge
+                    key={key}
+                    variant={selectedBadges.includes(key as MenuBadge) ? 'default' : 'outline'}
+                    className="cursor-pointer"
+                    onClick={() => handleToggleBadge(key as MenuBadge)}
+                  >
+                    {label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            {/* 옵션 그룹 등 기타 필드 추가 필요시 여기에 */}
+            <div className="flex justify-end gap-2 mt-6">
+              <Button type="button" variant="outline" onClick={() => { resetForm(); onOpenChange(false); }} disabled={loading}>취소</Button>
+              <Button type="submit" disabled={loading}>등록</Button>
+            </div>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -1537,7 +1404,7 @@ export function MenuCSVImport({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-xl p-8 shadow-lg">
         <DialogHeader>
           <DialogTitle>CSV 일괄 등록</DialogTitle>
           <DialogDescription>
@@ -1545,78 +1412,98 @@ export function MenuCSVImport({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* CSV 형식 안내 */}
-          <Alert>
-            <AlertCircle className="w-4 h-4" />
-            <AlertDescription>
-              <p className="mb-2">CSV 파일 형식:</p>
-              <code className="text-xs bg-gray-100 p-2 block rounded">
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertCircle className="w-5 h-5 text-blue-600" />
+            <AlertDescription className="text-sm">
+              <p className="mb-3 font-semibold text-blue-900">CSV 파일 형식:</p>
+              <code className="text-sm bg-gray-100 p-3 block rounded font-mono break-all">
                 name,category,price,description,badges,options,imageUrl,allergens,origin
               </code>
-              <p className="mt-2 text-xs">
-                • 필수: name, category, price, imageUrl<br />
-                • badges: 파이프(|)로 구분 (예: best|signature)<br />
-                • options: JSON 형식<br />
-                • allergens/origin: 파이프(|)로 구분
-              </p>
+              <div className="mt-3 text-sm space-y-1">
+                <p>• <strong>필수:</strong> name, category, price, imageUrl</p>
+                <p>• <strong>badges:</strong> 파이프(|)로 구분 (예: best|signature)</p>
+                <p>• <strong>options:</strong> JSON 형식</p>
+                <p>• <strong>allergens/origin:</strong> 파이프(|)로 구분</p>
+              </div>
             </AlertDescription>
           </Alert>
 
           {/* 파일 선택 */}
           <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              CSV 파일 선택
+            </label>
             <Input
               type="file"
               accept=".csv"
               onChange={handleFileChange}
+              className="h-12 text-base"
             />
+            {file && (
+              <p className="text-sm text-gray-600 mt-2">
+                선택된 파일: <span className="font-medium">{file.name}</span>
+              </p>
+            )}
           </div>
 
           {/* 미리보기 */}
           {parsedMenus.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Badge variant="default">
+                <Badge variant="default" className="text-base px-3 py-1">
                   정상 {validCount}개
                 </Badge>
                 {errorCount > 0 && (
-                  <Badge variant="destructive">
+                  <Badge variant="destructive" className="text-base px-3 py-1">
                     오류 {errorCount}개
                   </Badge>
                 )}
               </div>
 
-              <div className="max-h-60 overflow-y-auto space-y-2 border rounded-lg p-3">
+              <div className="max-h-96 overflow-y-auto space-y-3 border-2 rounded-lg p-4 bg-gray-50">
                 {parsedMenus.map((menu, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded ${
-                      menu.errors.length > 0 ? 'bg-red-50' : 'bg-green-50'
+                    className={`p-4 rounded-lg border ${
+                      menu.errors.length > 0 
+                        ? 'bg-red-50 border-red-200' 
+                        : 'bg-green-50 border-green-200'
                     }`}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm text-[#333]">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base text-[#333] mb-1">
                           {menu.errors.length > 0 ? (
-                            <AlertCircle className="w-4 h-4 inline mr-1 text-red-600" />
+                            <AlertCircle className="w-5 h-5 inline mr-2 text-red-600 align-middle" />
                           ) : (
-                            <CheckCircle2 className="w-4 h-4 inline mr-1 text-green-600" />
+                            <CheckCircle2 className="w-5 h-5 inline mr-2 text-green-600 align-middle" />
                           )}
-                          <span className="font-medium">
+                          <span className="font-semibold">
                             {menu.data.name || '(이름 없음)'}
                           </span>
-                          {' - '}
-                          {menu.data.price ? formatPrice(menu.data.price) : '0원'}
+                          <span className="ml-2 text-[#D61C1C] font-medium">
+                            {menu.data.price ? formatPrice(menu.data.price) : '0원'}
+                          </span>
                         </p>
+                        {menu.data.category && (
+                          <p className="text-sm text-gray-600 mb-2">
+                            카테고리: {menu.data.category}
+                          </p>
+                        )}
                         {menu.errors.length > 0 && (
-                          <ul className="mt-1 text-xs text-red-600 ml-5">
+                          <ul className="mt-2 text-sm text-red-700 space-y-1">
                             {menu.errors.map((error, i) => (
-                              <li key={i}>• {error}</li>
+                              <li key={i} className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>{error}</span>
+                              </li>
                             ))}
                           </ul>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
                         행 {menu.row}
                       </span>
                     </div>
@@ -1627,13 +1514,19 @@ export function MenuCSVImport({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            className="min-w-[100px]"
+            disabled={loading}
+          >
             취소
           </Button>
           <Button
             onClick={handleImport}
             disabled={loading || validCount === 0}
+            className="min-w-[150px]"
           >
             {loading ? '등록 중...' : `${validCount}개 메뉴 등록`}
           </Button>
@@ -1654,8 +1547,8 @@ export function MenuCSVImport({
  * 메뉴 편집 다이얼로그 (가격/설명 수정)
  */
 
-import { useState } from 'react';
-import { Menu } from '../../types/menu';
+import { useState, useEffect, useRef } from 'react';
+import { Menu, MenuCategory, CATEGORY_LABELS } from '../../types/menu';
 import {
   Dialog,
   DialogContent,
@@ -1668,13 +1561,21 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import { formatPrice } from '../../lib/utils';
+import { toast } from 'sonner';
 
 interface MenuEditDialogProps {
   menu: Menu | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updates: { price?: number; description?: string }, reason: string) => void;
+  onSave: (updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string }, reason: string) => void;
   loading?: boolean;
 }
 
@@ -1685,28 +1586,98 @@ export function MenuEditDialog({
   onSave,
   loading,
 }: MenuEditDialogProps) {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState<MenuCategory>('noodle');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [reason, setReason] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 다이얼로그 열릴 때 또는 menu가 변경될 때 초기값 설정
+  useEffect(() => {
+    if (open && menu) {
+      setName(menu.name);
+      setCategory(menu.category);
+      setPrice(menu.price.toString());
+      setDescription(menu.description || '');
+      setReason('');
+      setImageUrl(menu.image || '');
+      setImageFile(null);
+      // 파일 입력 필드 리셋
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } else if (!open) {
+      // 다이얼로그가 닫힐 때 상태 초기화
+      setName('');
+      setCategory('noodle');
+      setPrice('');
+      setDescription('');
+      setReason('');
+      setImageUrl('');
+      setImageFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [open, menu?.menuId]);
 
   // 다이얼로그 열릴 때 초기값 설정
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && menu) {
-      setPrice(menu.price.toString());
-      setDescription(menu.description);
-      setReason('');
-    }
     onOpenChange(newOpen);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 이미지 파일 선택 핸들러
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 이전 blob URL 정리
+      if (imageUrl && imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imageUrl);
+      }
+      setImageFile(file);
+      setImageUrl(URL.createObjectURL(file));
+    }
+  };
+
+  // 이미지 업로드 함수 (Firebase Storage 연동 필요, 여기선 mock)
+  const uploadImage = async (file: File): Promise<string> => {
+    // TODO: 실제 Firebase Storage 업로드 구현 필요
+    // 예시: await uploadToFirebase(file)
+    // Mock 환경에서는 Base64로 변환하여 저장 (새로고침해도 유지됨)
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        resolve(base64String);
+      };
+      reader.onerror = () => {
+        reject(new Error('이미지 읽기에 실패했습니다'));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!menu || !reason.trim()) {
+    if (!menu) {
       return;
     }
 
-    const updates: { price?: number; description?: string } = {};
+    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string } = {};
+
+    // 메뉴명 변경
+    if (name.trim() !== menu.name) {
+      updates.name = name.trim();
+    }
+
+    // 카테고리 변경
+    if (category !== menu.category) {
+      updates.category = category;
+    }
 
     const newPrice = parseInt(price);
     if (!isNaN(newPrice) && newPrice !== menu.price) {
@@ -1715,6 +1686,25 @@ export function MenuEditDialog({
 
     if (description.trim() !== menu.description) {
       updates.description = description.trim();
+    }
+
+    // 이미지 변경 감지 및 저장
+    const currentImageUrl = menu.image || '';
+    const imageUrlChanged = imageUrl && imageUrl !== currentImageUrl;
+    
+    if (imageFile) {
+      // 파일이 선택된 경우 업로드 후 URL 저장
+      try {
+        const uploadedUrl = await uploadImage(imageFile);
+        updates.image = uploadedUrl;
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        toast.error('이미지 업로드에 실패했습니다');
+        return; // 업로드 실패 시 저장 중단
+      }
+    } else if (imageUrlChanged && !imageUrl.startsWith('blob:')) {
+      // 파일은 없지만 URL이 변경되었고, blob URL이 아닌 경우 (실제 URL)
+      updates.image = imageUrl;
     }
 
     if (Object.keys(updates).length === 0) {
@@ -1726,22 +1716,86 @@ export function MenuEditDialog({
 
   if (!menu) return null;
 
-  const hasChanges = 
+  const hasChanges =
+    name.trim() !== menu.name ||
+    category !== menu.category ||
     (parseInt(price) !== menu.price && !isNaN(parseInt(price))) ||
-    description.trim() !== menu.description;
+    description.trim() !== menu.description ||
+    imageFile !== null ||
+    (imageUrl && imageUrl !== (menu.image || ""));
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white rounded-xl p-6 shadow-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>메뉴 수정</DialogTitle>
             <DialogDescription>
-              {menu.name}의 가격과 설명을 수정합니다
+              메뉴명, 가격, 설명, 사진을 수정합니다
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {/* 메뉴명 */}
+            <div className="space-y-2">
+              <Label htmlFor="name">메뉴명</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="메뉴 이름을 입력하세요"
+                maxLength={50}
+              />
+              {name.trim() !== menu.name && (
+                <p className="text-xs text-[#F37021]">
+                  {menu.name} → {name.trim() || '(이름 없음)'}
+                </p>
+              )}
+            </div>
+
+            {/* 카테고리 */}
+            <div className="space-y-2">
+              <Label htmlFor="category">카테고리</Label>
+              <Select value={category} onValueChange={(value) => setCategory(value as MenuCategory)}>
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {category !== menu.category && (
+                <p className="text-xs text-[#F37021]">
+                  {CATEGORY_LABELS[menu.category]} → {CATEGORY_LABELS[category]}
+                </p>
+              )}
+            </div>
+
+            {/* 사진 변경 */}
+            <div className="space-y-2">
+              <Label htmlFor="image">사진</Label>
+              <div className="flex items-center gap-4">
+                {imageUrl ? (
+                  <img src={imageUrl} alt="미리보기" className="w-20 h-20 rounded object-cover border" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                ) : (
+                  <div className="w-20 h-20 rounded bg-gray-100 flex items-center justify-center text-gray-400">사진 없음</div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="block"
+                />
+              </div>
+            </div>
+
             {/* 가격 */}
             <div className="space-y-2">
               <Label htmlFor="price">가격 (원)</Label>
@@ -1780,15 +1834,12 @@ export function MenuEditDialog({
             {/* 변경 사유 */}
             {hasChanges && (
               <div className="space-y-2">
-                <Label htmlFor="reason">
-                  변경 사유 <span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="reason">변경 사유</Label>
                 <Input
                   id="reason"
                   value={reason}
                   onChange={e => setReason(e.target.value)}
-                  placeholder="예: 원가 상승으로 인한 가격 조정"
-                  required
+                  placeholder="예: 원가 상승으로 인한 가격 조정 (선택사항)"
                 />
               </div>
             )}
@@ -1805,7 +1856,7 @@ export function MenuEditDialog({
             </Button>
             <Button
               type="submit"
-              disabled={!hasChanges || !reason.trim() || loading}
+              disabled={!hasChanges || loading}
             >
               {loading ? '저장 중...' : '저장'}
             </Button>
@@ -1839,7 +1890,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { MoreVertical, Edit2, Clock } from 'lucide-react';
+import { MoreVertical, Edit2, Clock, Trash2 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { formatPrice } from '../../lib/utils';
 
@@ -1848,6 +1899,7 @@ interface MenuTableProps {
   onToggleAvailability: (menuId: string) => void;
   onEdit?: (menu: Menu) => void;
   onSetTimeLimit?: (menu: Menu) => void;
+  onDelete?: (menuId: string) => void;
   loading?: boolean;
 }
 
@@ -1856,6 +1908,7 @@ export function MenuTable({
   onToggleAvailability,
   onEdit,
   onSetTimeLimit,
+  onDelete,
   loading,
 }: MenuTableProps) {
   if (loading) {
@@ -2002,6 +2055,15 @@ export function MenuTable({
                             시간제 설정
                           </DropdownMenuItem>
                         )}
+                        {onDelete && (
+                          <DropdownMenuItem 
+                            onClick={() => onDelete(menu.menuId)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            삭제
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -2095,6 +2157,15 @@ export function MenuTable({
                         <DropdownMenuItem onClick={() => onSetTimeLimit(menu)}>
                           <Clock className="w-4 h-4 mr-2" />
                           시간제 설정
+                        </DropdownMenuItem>
+                      )}
+                      {onDelete && (
+                        <DropdownMenuItem 
+                          onClick={() => onDelete(menu.menuId)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          삭제
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
@@ -2748,6 +2819,7 @@ import { MapPin, Phone, Mail, FileText, CreditCard, Clock } from 'lucide-react';
 import { fetchOrderLogs } from '../../lib/admin/orders.api';
 import { OrderActionBar } from './OrderActionBar';
 import { formatPrice, formatDateTime, formatTime } from '../../lib/utils';
+import { getOrderStatusLabelForAdmin } from '../../lib/orders.utils';
 
 interface OrderDetailDrawerProps {
   order: Order | null;
@@ -2771,21 +2843,20 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
   if (!order) return null;
 
 
-  // 상태 라벨
-  const statusLabels: Record<string, string> = {
-    pending: '접수대기',
-    accepted: '접수확인',
-    preparing: '조리중',
-    completed: '완료',
-    canceled: '취소',
-  };
+  // 상태 라벨은 getOrderStatusLabelForAdmin 사용
 
   // 결제수단 라벨
   const paymentMethodLabels: Record<string, string> = {
+    app_card: '앱 결제',
+    meet_card: '만나서 카드',
+    meet_cash: '만나서 현금',
+    // 기존 호환성 (레거시 데이터)
     card: '카드',
     transfer: '계좌이체',
     easy_pay: '간편결제',
     on_site: '만나서결제',
+    on_site_card: '만나서 카드',
+    on_site_cash: '만나서 현금',
   };
 
   // 타임라인 항목
@@ -2814,7 +2885,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg bg-white">
         <SheetHeader>
           <SheetTitle>주문 상세</SheetTitle>
           <SheetDescription>{order.orderId}</SheetDescription>
@@ -2828,7 +2899,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                 variant={
                   order.status === 'completed'
                     ? 'default'
-                    : order.status === 'canceled'
+                    : order.status === 'cancelled'
                     ? 'destructive'
                     : 'secondary'
                 }
@@ -2837,14 +2908,16 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                     ? 'bg-gray-100 text-gray-700'
                     : order.status === 'accepted'
                     ? 'bg-blue-100 text-blue-700'
-                    : order.status === 'preparing'
+                    : order.status === 'cooking'
                     ? 'bg-amber-100 text-amber-700'
+                    : order.status === 'delivering'
+                    ? 'bg-purple-100 text-purple-700'
                     : order.status === 'completed'
                     ? 'bg-green-100 text-green-700'
                     : ''
                 }
               >
-                {statusLabels[order.status]}
+                {getOrderStatusLabelForAdmin(order.status)}
               </Badge>
               <OrderActionBar order={order} />
             </div>
@@ -3074,7 +3147,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                       </div>
                       {log.from && log.to && (
                         <div className="text-[#8B7355]">
-                          {statusLabels[log.from]} → {statusLabels[log.to]}
+                          {getOrderStatusLabelForAdmin(log.from as any)} → {getOrderStatusLabelForAdmin(log.to as any)}
                         </div>
                       )}
                       {log.byName && (
@@ -3133,10 +3206,16 @@ interface OrderTableProps {
 
 // 결제수단 라벨
 const paymentMethodLabels: Record<string, string> = {
+  app_card: '앱 결제',
+  meet_card: '만나서 카드',
+  meet_cash: '만나서 현금',
+  // 기존 호환성 (레거시 데이터)
   card: '카드',
   transfer: '계좌이체',
   easy_pay: '간편결제',
   on_site: '만나서결제',
+  on_site_card: '만나서 카드',
+  on_site_cash: '만나서 현금',
 };
 
 export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: OrderTableProps) {
@@ -3212,9 +3291,13 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
           </TableHeader>
           <TableBody>
             {orders.map((order) => (
-              <TableRow key={order.orderId} className="hover:bg-gray-50">
+              <TableRow
+                key={order.orderId}
+                className="hover:bg-gray-50"
+                data-testid="admin.orders.item"
+              >
                 <TableCell>
-                  <div className="space-y-1">
+                  <div className="space-y-1" data-testid="admin.orders.item.summary">
                     <div className="text-sm text-[#333]">{order.orderId}</div>
                     <div className="text-xs text-[#8B7355]">{order.phone}</div>
                   </div>
@@ -3245,7 +3328,7 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                     {paymentMethodLabels[order.payment.method] || order.payment.method}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell data-testid="admin.orders.item.status">
                   <OrderStatusBadge status={order.status} />
                 </TableCell>
                 <TableCell className="text-right">
@@ -3255,6 +3338,7 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       size="sm"
                       onClick={() => onViewDetail(order)}
                       className="h-8 w-8 p-0"
+                      data-testid="admin.orders.item.detail-button"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -3273,10 +3357,10 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                             <DropdownMenuItem
                               onClick={() => onUpdateStatus(order, 'accepted')}
                             >
-                              접수 확인
+                              접수하기
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'canceled')}
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
                               className="text-red-600"
                             >
                               주문 취소
@@ -3286,27 +3370,42 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                         {order.status === 'accepted' && (
                           <>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'preparing')}
+                              onClick={() => onUpdateStatus(order, 'cooking')}
                             >
-                              조리 시작
+                              조리중
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'canceled')}
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
                               className="text-red-600"
                             >
                               주문 취소
                             </DropdownMenuItem>
                           </>
                         )}
-                        {order.status === 'preparing' && (
+                        {order.status === 'cooking' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'delivering')}
+                            >
+                              배달
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'delivering' && (
                           <>
                             <DropdownMenuItem
                               onClick={() => onUpdateStatus(order, 'completed')}
                             >
-                              완료 처리
+                              완료
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'canceled')}
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
                               className="text-red-600"
                             >
                               주문 취소
@@ -3326,13 +3425,19 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
       {/* 모바일 카드 */}
       <div className="md:hidden divide-y">
         {orders.map((order) => (
-          <div key={order.orderId} className="p-4 space-y-3">
+          <div
+            key={order.orderId}
+            className="p-4 space-y-3"
+            data-testid="admin.orders.item"
+          >
             <div className="flex items-start justify-between">
-              <div className="space-y-1">
+              <div className="space-y-1" data-testid="admin.orders.item.summary">
                 <div className="text-sm text-[#333]">{order.orderId}</div>
                 <div className="text-xs text-[#8B7355]">{formatDate(order.createdAt)}</div>
               </div>
-              <OrderStatusBadge status={order.status} />
+              <div data-testid="admin.orders.item.status">
+                <OrderStatusBadge status={order.status} />
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -3352,6 +3457,7 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                 size="sm"
                 onClick={() => onViewDetail(order)}
                 className="flex-1"
+                data-testid="admin.orders.item.detail-button"
               >
                 상세보기
               </Button>
@@ -3369,21 +3475,28 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       </DropdownMenuItem>
                     )}
                     {order.status === 'accepted' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'preparing')}>
-                        조리 시작
+                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'cooking')}>
+                        조리중
                       </DropdownMenuItem>
                     )}
-                    {order.status === 'preparing' && (
+                    {order.status === 'cooking' && (
+                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'delivering')}>
+                        배달
+                      </DropdownMenuItem>
+                    )}
+                    {order.status === 'delivering' && (
                       <DropdownMenuItem onClick={() => onUpdateStatus(order, 'completed')}>
-                        완료 처리
+                        완료
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem
-                      onClick={() => onUpdateStatus(order, 'canceled')}
-                      className="text-red-600"
-                    >
-                      주문 취소
-                    </DropdownMenuItem>
+                    {order.status !== 'completed' && order.status !== 'cancelled' && (
+                      <DropdownMenuItem
+                        onClick={() => onUpdateStatus(order, 'cancelled')}
+                        className="text-red-600"
+                      >
+                        주문 취소
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
@@ -4221,7 +4334,7 @@ export function TimeSettingDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white rounded-xl p-6 shadow-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>시간제 판매 설정</DialogTitle>
@@ -4456,7 +4569,7 @@ export function Modal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={sizeClasses[size]}>
+      <DialogContent className={sizeClasses[size] + ' bg-white'}>
         <DialogHeader>
           <DialogTitle className="text-[#333]">{title}</DialogTitle>
           {description && (
@@ -4563,10 +4676,10 @@ export interface StatCardProps {
 
 export function StatCard({ title, value, icon: Icon, trend, subtitle, loading, variant = 'default' }: StatCardProps) {
   const variantColors = {
-    default: 'bg-[#D61C1C]/10 text-[#D61C1C]',
-    success: 'bg-green-500/10 text-green-600',
-    info: 'bg-blue-500/10 text-blue-600',
-    warning: 'bg-amber-500/10 text-amber-600',
+    default: 'bg-white text-[#D61C1C]',
+    success: 'bg-white text-green-600',
+    info: 'bg-white text-blue-600',
+    warning: 'bg-white text-amber-600',
   };
 
   if (loading) {

@@ -1,6 +1,6 @@
 # Config & Utils - Full Source Code
 
-**Generated**: 2025-11-15-2002  
+**Generated**: 2025-11-21-1308  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -41,7 +41,7 @@ export const DEBUG = ENV === 'development';
 let envWarningShown = false;
 
 // 환경 변수 안전 접근 헬퍼 (Figma Make 환경 호환)
-const getEnv = (key: string, defaultValue: string = '', required: boolean = false): string => {
+export const getEnv = (key: string, defaultValue: string = '', required: boolean = false): string => {
   try {
     // import.meta 안전 체크 (Figma Make 등 특수 환경 대응)
     if (typeof import.meta === 'undefined' || !import.meta.env) {
@@ -72,10 +72,9 @@ const getEnv = (key: string, defaultValue: string = '', required: boolean = fals
   }
 };
 
-// Firebase 사용 여부 (개발 중에는 false, 배포 시 true)
-// 기존: export const USE_FIREBASE = getEnv('VITE_USE_FIREBASE') === 'true';
-// 임시: Phase1 QA용 Mock 강제 모드
-export const USE_FIREBASE = false; // TODO: Phase2에서 env 기반으로 되돌리기
+// Phase 1/2: 강제 Mock 모드 (LocalStorage)
+// TODO: Phase 3에서 실제 Firebase 연동 시 ENV 기반으로 전환
+export const USE_FIREBASE = false;
 
 // 디버그 로그 추가
 if (typeof window !== 'undefined') {
@@ -122,15 +121,17 @@ export const FEATURE_FLAGS = {
   delivery: getEnv('VITE_DELIVERY_ENABLED', ENV === 'development' ? 'true' : 'false') === 'true',
   deliveryProvider: getEnv('VITE_DELIVERY_PROVIDER', 'mock'),
   deliveryWebhookSecret: getEnv('VITE_DELIVERY_WEBHOOK_SECRET', 'change_me'),
-  
   // 고객 지원 채팅 기능 (개발 환경에서는 기본 활성화)
   support: getEnv('VITE_SUPPORT_ENABLED', ENV === 'development' ? 'true' : 'false') === 'true',
-  
   // 포인트 리워드 시스템 (개발 환경에서는 기본 활성화)
   points: getEnv('VITE_POINTS_ENABLED', ENV === 'development' ? 'true' : 'false') === 'true',
   pointsRate: parseFloat(getEnv('VITE_POINTS_RATE', '0.03')),
   pointsMinUse: parseInt(getEnv('VITE_POINTS_MIN_USE', '1000'), 10),
   pointsExpireDays: parseInt(getEnv('VITE_POINTS_EXPIRE_DAYS', '365'), 10),
+  // 온라인 결제 기능 (Phase 3)
+  // v0.9.0에서는 강제로 false (env 기본값도 false)
+  onlinePayment: getEnv('VITE_ONLINE_PAYMENT_ENABLED', 'false') === 'true',
+  onlinePaymentProvider: getEnv('VITE_ONLINE_PAYMENT_PROVIDER', 'none'),
 };
 
 // 로깅 유틸
@@ -143,6 +144,18 @@ export function log(...args: any[]) {
 export function logError(...args: any[]) {
   console.error('[App Error]', ...args);
 }
+
+// (중복 export 제거)
+export default {
+  ENV,
+  DEBUG,
+  USE_FIREBASE,
+  FIREBASE_CONFIG,
+  FEATURE_FLAGS,
+  log,
+  logError,
+  getEnv,
+};
 
 ```
 
@@ -176,7 +189,7 @@ export function logError(...args: any[]) {
     },
     build: {
       target: 'esnext',
-      outDir: 'build',
+      outDir: 'dist',
     },
     server: {
       port: 3000,
@@ -237,14 +250,15 @@ export default {
 
 ```json
 {
-      "name": "brand-report-overview",
-      "version": "0.1.0",
+      "name": "hyunpoong-kal",
+      "version": "0.9.0",
       "private": true,
+      "description": "현풍닭칼국수 PWA - 매장/포장 주문 전용 웹앱 (v0.9.0, 비결제 Mock 모드)",
       "type": "module",
       "dependencies": {
             "@axe-core/playwright": "*",
             "@google-cloud/storage": "*",
-            "@playwright/test": "*",
+            "@playwright/test": "^1.56.1",
             "@radix-ui/react-accordion": "*",
             "@radix-ui/react-alert-dialog": "*",
             "@radix-ui/react-aspect-ratio": "*",
@@ -287,6 +301,7 @@ export default {
             "pages": "*",
             "path": "*",
             "pdfkit": "*",
+            "playwright": "^1.56.1",
             "react": "^18.3.1",
             "react-day-picker": "*",
             "react-dom": "^18.3.1",
@@ -295,27 +310,30 @@ export default {
             "react-router-dom": "*",
             "recharts": "*",
             "sonner": "^2.0.3",
-      "tailwind-merge": "*",
-      "vaul": "*"
+            "tailwind-merge": "*",
+            "vaul": "*"
       },
       "devDependencies": {
-      "@tailwindcss/postcss": "^4.0.0",
-      "@types/node": "^20.10.0",
-      "@vitejs/plugin-react-swc": "^3.10.2",
-      "autoprefixer": "^10.4.20",
-      "postcss": "^8.4.47",
-      "tailwindcss": "^3.4.14",
-      "vite": "6.3.5"
+            "@tailwindcss/postcss": "^4.0.0",
+            "@types/node": "^20.10.0",
+            "@vitejs/plugin-react-swc": "^3.10.2",
+            "autoprefixer": "^10.4.20",
+            "postcss": "^8.4.47",
+            "tailwindcss": "^3.4.14",
+            "vite": "6.3.5"
       },
       "scripts": {
             "dev": "vite",
             "build": "vite build",
+            "preview": "vite preview",
+            "analyze:dist": "npm run build && node scripts/print-dist-size.cjs",
             "test:e2e": "playwright test -c src/playwright.config.ts",
             "test:e2e:admin": "playwright test -c src/playwright.config.ts --project=chromium --grep @admin",
             "test:e2e:admin:routes": "playwright test -c src/playwright.config.ts admin-routes.spec.ts --project=chromium",
             "test:e2e:admin:settings": "playwright test -c src/playwright.config.ts admin-settings.spec.ts --project=chromium",
             "test:e2e:ui": "playwright test -c src/playwright.config.ts --ui",
-            "test:e2e:report": "playwright show-report"
+            "test:e2e:report": "playwright show-report",
+            "test:e2e:orderflow": "playwright test -c src/playwright.config.ts src/e2e/order-flow.spec.ts --project=chromium --grep @orderflow"
       }
 }
 

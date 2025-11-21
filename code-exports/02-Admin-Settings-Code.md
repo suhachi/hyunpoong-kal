@@ -1,6 +1,6 @@
 # Admin Settings - Full Source Code
 
-**Generated**: 2025-11-15-2002  
+**Generated**: 2025-11-21-1308  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -75,7 +75,7 @@ export function AdminSettingsCenter() {
   }
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-settings-page-root" className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -118,23 +118,23 @@ export function AdminSettingsCenter() {
       {/* 탭 메뉴 */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="payment" className="gap-2">
+          <TabsTrigger value="payment" className="gap-2" data-testid="admin-settings-tab-trigger-payment">
             <CreditCard className="w-4 h-4" />
             <span className="hidden sm:inline">결제</span>
           </TabsTrigger>
-          <TabsTrigger value="delivery" className="gap-2">
+          <TabsTrigger value="delivery" className="gap-2" data-testid="admin-settings-tab-trigger-delivery">
             <Truck className="w-4 h-4" />
             <span className="hidden sm:inline">배달대행</span>
           </TabsTrigger>
-          <TabsTrigger value="maps" className="gap-2">
+          <TabsTrigger value="maps" className="gap-2" data-testid="admin-settings-tab-trigger-maps">
             <Map className="w-4 h-4" />
             <span className="hidden sm:inline">지도/지오</span>
           </TabsTrigger>
-          <TabsTrigger value="fcm" className="gap-2">
+          <TabsTrigger value="fcm" className="gap-2" data-testid="admin-settings-tab-trigger-fcm">
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">알림/FCM</span>
           </TabsTrigger>
-          <TabsTrigger value="operations" className="gap-2">
+          <TabsTrigger value="operations" className="gap-2" data-testid="admin-settings-tab-trigger-operations">
             <Shield className="w-4 h-4" />
             <span className="hidden sm:inline">운영/보안</span>
           </TabsTrigger>
@@ -234,7 +234,7 @@ export function PaymentTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-settings-payment-tab" className="space-y-6">
       {/* 결제 연동 상태 안내 */}
       <Alert>
         <AlertCircle className="w-4 h-4" />
@@ -628,7 +628,7 @@ export function DeliveryTab() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div data-testid="admin-settings-delivery-tab" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* 좌측: 상태 패널 */}
       <div className="lg:col-span-1 space-y-4">
         <Card>
@@ -874,11 +874,12 @@ import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { Separator } from '../../../components/ui/separator';
 import { CheckCircle2, XCircle, AlertCircle, Copy, Download, Map as MapIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { getEnv } from '../../../config/env';
 
 export function MapsTab() {
   // 환경 변수 확인 (Figma Make 호환)
-  const kakaoKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_KAKAO_MAP_KEY : '';
-  const googleKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY : '';
+  const kakaoKey = getEnv('VITE_KAKAO_MAP_KEY');
+  const googleKey = getEnv('VITE_GOOGLE_MAPS_API_KEY');
 
   // .env 템플릿 생성
   const generateEnvTemplate = () => {
@@ -901,7 +902,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div data-testid="admin-settings-maps-tab" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* 좌측: 상태 패널 */}
       <div className="lg:col-span-1 space-y-4">
         <Card>
@@ -1146,7 +1147,7 @@ export function FCMTab() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div data-testid="admin-settings-fcm-tab" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* 좌측: 상태 패널 */}
       <div className="lg:col-span-1 space-y-4">
         <Card>
@@ -1443,7 +1444,7 @@ export function OperationsTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-settings-operations-tab" className="space-y-6">
       {/* 포인트 기능 토글 */}
       <Card>
         <CardHeader>

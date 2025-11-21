@@ -1,6 +1,6 @@
 # Main & Routes - Full Source Code
 
-**Generated**: 2025-11-15-2002  
+**Generated**: 2025-11-21-1308  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -118,6 +118,7 @@ import { AdminSupport } from './pages/admin/Support';
 import { AdminDelivery } from './pages/admin/Delivery';
 import { AdminPromotions } from './pages/admin/Promotions';
 import { AdminPoints } from './pages/admin/Points';
+import { AdminNotices } from './pages/admin/Notices';
 
 // 개발 도구
 import { DevTools } from './pages/DevTools';
@@ -157,7 +158,8 @@ export default function App() {
               {/* 장바구니 & 주문 */}
               <Route path="cart" element={<Cart />} />
               <Route path="checkout" element={<Checkout />} />
-              <Route path="orders/:orderId" element={<OrderTracking />} />
+              {/* 주문 추적: 테스트 및 문서에서 /order/:orderId 사용 */}
+              <Route path="order/:orderId" element={<OrderTracking />} />
               <Route path="order-history" element={<OrderHistory />} />
               
               {/* 리뷰 */}
@@ -204,6 +206,9 @@ export default function App() {
               
               {/* 메뉴 관리 */}
               <Route path="menus" element={<AdminMenus />} />
+              
+              {/* 게시판 관리 */}
+              <Route path="notices" element={<AdminNotices />} />
               
               {/* 리뷰 관리 */}
               <Route path="reviews" element={<AdminReviews />} />
@@ -429,19 +434,30 @@ export default function App() {
 
 ```html
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Brand Report Overview</title>
-    </head>
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>현풍닭칼국수 - 주문 & 포장 웹앱</title>
+    <meta
+      name="description"
+      content="현풍닭칼국수 공식 주문/포장 전용 PWA입니다. 모바일 홈 화면에 설치해서 빠르게 주문해 보세요."
+    />
+    <meta name="theme-color" content="#B62020" />
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
+    <!-- TODO: manifest / 아이콘 파일은 추후 Phase에서 실제 파일 생성 후 경로 확정 -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
   
 ```
 
