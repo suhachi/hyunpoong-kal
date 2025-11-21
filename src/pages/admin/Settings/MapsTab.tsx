@@ -92,12 +92,22 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
 
       {/* 우측: 설정 가이드 */}
       <div className="lg:col-span-2 space-y-6">
+        {/* 상단 안내 */}
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            <strong>🔐 보안 및 복제 편의를 위해</strong> 지도 API 키는 화면에서 직접 입력하지 않고<br />
+            <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일과 복사 스크립트로만 관리합니다.<br />
+            아래 안내에 따라 Kakao/Google 콘솔에서 키를 발급한 뒤, 환경변수에 추가해 주세요.
+          </AlertDescription>
+        </Alert>
+
         {/* Kakao Maps */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <MapIcon className="w-5 h-5 text-[#FEE500]" />
-              <CardTitle>Kakao Maps API</CardTitle>
+              <CardTitle>Kakao Maps API (.env로 설정)</CardTitle>
             </div>
             <CardDescription>
               Kakao 지도 및 지오코딩 서비스
@@ -107,7 +117,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-[#2E1C10]">1. API 키 발급</h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
-                Kakao Developers에서 REST API 키를 발급받으세요.
+                Kakao Developers 콘솔에서 <strong>JavaScript 키</strong>를 발급받으세요.
               </p>
               <Button
                 variant="outline"
@@ -130,7 +140,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
                   http://localhost:5173
                 </code>
                 <code className="block p-2 bg-gray-50 rounded">
-                  https://hp-kal.web.app
+                  https://{'{배포 도메인}'}
                 </code>
               </div>
             </div>
@@ -138,10 +148,16 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
             <Separator />
 
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">3. .env.local 설정</h4>
-              <code className="block p-2 bg-gray-50 rounded text-xs">
-                VITE_KAKAO_MAP_KEY=YOUR_REST_API_KEY
+              <h4 className="text-sm font-medium text-[#2E1C10]">3. 프로젝트 루트의 <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에 아래와 같이 추가</h4>
+              <p className="text-xs text-[#2E1C10]/60 mb-2">
+                이 화면에서는 API 키를 직접 저장하지 않습니다. 아래 환경변수에만 키를 넣어야 합니다.
+              </p>
+              <code className="block p-3 bg-gray-50 rounded text-xs font-mono">
+                VITE_KAKAO_MAP_KEY=발급받은_JAVASCRIPT_KEY
               </code>
+              <p className="text-xs text-[#2E1C10]/60 mt-2">
+                저장 후 <code className="bg-gray-100 px-1 py-0.5 rounded">npm run build && firebase deploy</code> 로 다시 배포하세요.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -161,7 +177,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-[#2E1C10]">1. API 키 발급</h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
-                Google Cloud Console에서 API 키를 발급받으세요.
+                Google Cloud Console에서 <strong>브라우저 키(Browser Key)</strong>를 발급받으세요.
               </p>
               <Button
                 variant="outline"
@@ -182,17 +198,23 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               <ul className="text-xs text-[#2E1C10]/70 space-y-1 list-disc list-inside">
                 <li>Maps JavaScript API</li>
                 <li>Geocoding API</li>
-                <li>Places API</li>
+                <li>Places API (선택)</li>
               </ul>
             </div>
 
             <Separator />
 
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">3. .env.local 설정</h4>
-              <code className="block p-2 bg-gray-50 rounded text-xs">
-                VITE_GOOGLE_MAPS_API_KEY=YOUR_API_KEY
+              <h4 className="text-sm font-medium text-[#2E1C10]">3. 프로젝트 루트의 <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에 아래와 같이 추가</h4>
+              <p className="text-xs text-[#2E1C10]/60 mb-2">
+                이 화면에서는 API 키를 직접 저장하지 않습니다. 아래 환경변수에만 키를 넣어야 합니다.
+              </p>
+              <code className="block p-3 bg-gray-50 rounded text-xs font-mono">
+                VITE_GOOGLE_MAPS_API_KEY=발급받은_BROWSER_KEY
               </code>
+              <p className="text-xs text-[#2E1C10]/60 mt-2">
+                저장 후 <code className="bg-gray-100 px-1 py-0.5 rounded">npm run build && firebase deploy</code> 로 다시 배포하세요.
+              </p>
             </div>
           </CardContent>
         </Card>

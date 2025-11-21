@@ -44,7 +44,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock 사용자 데이터 (개발용)
+// 개발/테스트용 Mock 계정 (실운영 시 Firebase Auth 계정으로 대체 예정)
 const MOCK_USERS = {
   'admin@hyunpoongkalguksu.com': {
     uid: 'admin-001',

@@ -162,191 +162,45 @@ export function AdminSupport() {
 
   // Mock 데이터 로드
   async function loadSessionsMock() {
-    const sessionsData = localStorage.getItem('chat_sessions') || '{}';
-    let sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
-    
-    // 첫 실행 시 샘플 데이터 생성
-    if (Object.keys(sessionsObj).length === 0) {
-      sessionsObj = createSampleSessions();
-      localStorage.setItem('chat_sessions', JSON.stringify(sessionsObj));
+    if (typeof window === 'undefined') {
+      setSessions([]);
+      return;
     }
-    
-    const sessionsList = Object.values(sessionsObj);
-    
-    sessionsList.sort((a, b) => {
-      const aHasUnread = hasUnreadMessagesMock(a.id);
-      const bHasUnread = hasUnreadMessagesMock(b.id);
-      
-      if (aHasUnread && !bHasUnread) return -1;
-      if (!aHasUnread && bHasUnread) return 1;
-      
-      return b.lastAt - a.lastAt;
-    });
 
-    setSessions(sessionsList);
-  }
-  
-  // 샘플 세션 생성 (첫 실행 시)
-  function createSampleSessions(): Record<string, ChatSession> {
-    const now = Date.now();
-    const sessions: Record<string, ChatSession> = {};
-    
-    // 세션 1: 미응답 (긴급)
-    const session1: ChatSession = {
-      id: 'session_001',
-      userId: 'user_kim',
-      userName: '김민수',
-      userPhone: '010-1234-5678',
-      open: true,
-      lastMessage: '배달이 너무 늦어요. 확인 부탁드립니다.',
-      lastAt: now - 5 * 60 * 1000, // 5분 전
-      createdAt: now - 10 * 60 * 1000,
-      updatedAt: now - 5 * 60 * 1000,
-    };
-    sessions[session1.id] = session1;
-    
-    // 메시지 생성
-    const messages1: ChatMessage[] = [
-      {
-        id: 'msg_001',
-        sessionId: session1.id,
-        from: 'user',
-        type: 'text',
-        text: '안녕하세요, 주문한 음식이 언제 도착하나요?',
-        at: now - 10 * 60 * 1000,
-        readByAdmin: false,
-      },
-      {
-        id: 'msg_002',
-        sessionId: session1.id,
-        from: 'user',
-        type: 'text',
-        text: '배달이 너무 늦어요. 확인 부탁드립니다.',
-        at: now - 5 * 60 * 1000,
-        readByAdmin: false,
-      },
-    ];
-    localStorage.setItem(`chat_messages_${session1.id}`, JSON.stringify(messages1));
-    
-    // 세션 2: 진행 중
-    const session2: ChatSession = {
-      id: 'session_002',
-      userId: 'user_park',
-      userName: '박지영',
-      userPhone: '010-9876-5432',
-      open: true,
-      lastMessage: '네, 확인했습니다. 감사합니다!',
-      lastAt: now - 30 * 60 * 1000, // 30분 전
-      createdAt: now - 60 * 60 * 1000,
-      updatedAt: now - 30 * 60 * 1000,
-      assignedTo: 'admin_001',
-    };
-    sessions[session2.id] = session2;
-    
-    const messages2: ChatMessage[] = [
-      {
-        id: 'msg_003',
-        sessionId: session2.id,
-        from: 'user',
-        type: 'text',
-        text: '메뉴 변경이 가능한가요?',
-        at: now - 60 * 60 * 1000,
-        readByAdmin: true,
-      },
-      {
-        id: 'msg_004',
-        sessionId: session2.id,
-        from: 'admin',
-        type: 'text',
-        text: '네, 가능합니다. 어떤 메뉴로 변경하시겠어요?',
-        at: now - 55 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_005',
-        sessionId: session2.id,
-        from: 'user',
-        type: 'text',
-        text: '칼국수를 특칼국수로 변경하고 싶습니다.',
-        at: now - 50 * 60 * 1000,
-        readByAdmin: true,
-      },
-      {
-        id: 'msg_006',
-        sessionId: session2.id,
-        from: 'admin',
-        type: 'text',
-        text: '변경 완료했습니다. 곧 준비해드리겠습니다.',
-        at: now - 45 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_007',
-        sessionId: session2.id,
-        from: 'user',
-        type: 'text',
-        text: '네, 확인했습니다. 감사합니다!',
-        at: now - 30 * 60 * 1000,
-        readByAdmin: true,
-      },
-    ];
-    localStorage.setItem(`chat_messages_${session2.id}`, JSON.stringify(messages2));
-    
-    // 세션 3: 완료
-    const session3: ChatSession = {
-      id: 'session_003',
-      userId: 'user_lee',
-      userName: '이철수',
-      open: false,
-      lastMessage: '문제 해결되었습니다. 감사합니다!',
-      lastAt: now - 2 * 60 * 60 * 1000, // 2시간 전
-      createdAt: now - 3 * 60 * 60 * 1000,
-      updatedAt: now - 2 * 60 * 60 * 1000,
-      assignedTo: 'admin_001',
-    };
-    sessions[session3.id] = session3;
-    
-    const messages3: ChatMessage[] = [
-      {
-        id: 'msg_008',
-        sessionId: session3.id,
-        from: 'user',
-        type: 'text',
-        text: '결제가 안되는데 도와주세요.',
-        at: now - 3 * 60 * 60 * 1000,
-        readByAdmin: true,
-      },
-      {
-        id: 'msg_009',
-        sessionId: session3.id,
-        from: 'admin',
-        type: 'text',
-        text: '확인해보겠습니다. 잠시만 기다려주세요.',
-        at: now - 2.5 * 60 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_010',
-        sessionId: session3.id,
-        from: 'admin',
-        type: 'text',
-        text: '카드 정보를 다시 입력해보시겠어요?',
-        at: now - 2.3 * 60 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_011',
-        sessionId: session3.id,
-        from: 'user',
-        type: 'text',
-        text: '문제 해결되었습니다. 감사합니다!',
-        at: now - 2 * 60 * 60 * 1000,
-        readByAdmin: true,
-      },
-    ];
-    localStorage.setItem(`chat_messages_${session3.id}`, JSON.stringify(messages3));
-    
-    return sessions;
+    try {
+      const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+      
+      // localStorage가 비어있으면 빈 배열 반환 (샘플 데이터 생성 제거)
+      if (!sessionsData || sessionsData === '{}') {
+        setSessions([]);
+        return;
+      }
+
+      const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
+      const sessionsList = Object.values(sessionsObj);
+      
+      // 안전성 체크: 배열이 아니면 빈 배열 반환
+      if (!Array.isArray(sessionsList)) {
+        console.warn('[Support] Invalid sessions data format, resetting to empty');
+        setSessions([]);
+        return;
+      }
+      
+      sessionsList.sort((a, b) => {
+        const aHasUnread = hasUnreadMessagesMock(a.id);
+        const bHasUnread = hasUnreadMessagesMock(b.id);
+        
+        if (aHasUnread && !bHasUnread) return -1;
+        if (!aHasUnread && bHasUnread) return 1;
+        
+        return b.lastAt - a.lastAt;
+      });
+
+      setSessions(sessionsList);
+    } catch (error) {
+      console.error('[Support] Failed to parse sessions from storage', error);
+      setSessions([]);
+    }
   }
 
   // Mock: 미응답 체크

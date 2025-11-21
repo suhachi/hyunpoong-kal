@@ -177,14 +177,14 @@ export interface DeployScript {
  * 진단 결과
  */
 export interface DiagnosticResult {
-  category: string;
+  category?: string;
   checks: DiagnosticCheck[];
-  overall: 'pass' | 'warning' | 'fail';
+  overall: 'pass' | 'warning' | 'fail' | 'info';
 }
 
 export interface DiagnosticCheck {
   name: string;
-  status: 'pass' | 'warning' | 'fail';
+  status: 'pass' | 'warning' | 'fail' | 'info';
   message: string;
   details?: string;
 }

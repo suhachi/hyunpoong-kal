@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, memo, useCallback } from 'react';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import { ChevronRight, CloudSun, Star, Settings, Gift, Ticket } from 'lucide-react';
+import { ChevronRight, CloudSun, Star, Gift, Ticket } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { FEATURE_FLAGS } from '../../config/env';
 import { DEFAULT_MENU_IMAGE } from '../../config/ui';
@@ -36,12 +36,6 @@ export function Home() {
     };
     loadData();
   }, []);
-
-  // 개발자 전용: 관리자 권한으로 전환
-  const handleAdminAccess = useCallback((path: string) => {
-    localStorage.setItem('mockRole', 'owner');
-    navigate(path);
-  }, [navigate]);
 
   // 추천 메뉴 클릭 핸들러
   const handleMenuClick = useCallback((menuId: string) => {
@@ -142,38 +136,14 @@ export function Home() {
             </Link>
           </div>
           
-          <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer" onClick={() => navigate('/review/1')}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="w-4 h-4 fill-[#F37021] text-[#F37021]" />
-                ))}
-              </div>
-              <span className="text-sm text-[#2E1C10]/60">김고객 님</span>
-            </div>
-            <p className="text-sm text-[#2E1C10] mb-3">
-              칼국수 진짜 맛있어요! 국물이 진하고 면발도 쫄깃해요. 닭고기도 부드럽고 양도 푸짐합니다.
+          {/* 초기 상태: 아직 리뷰가 없을 때 */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm">
+            <p className="text-sm text-[#2E1C10] mb-1">
+              아직 등록된 리뷰가 없습니다.
             </p>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="aspect-square rounded-lg overflow-hidden">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800"
-                  alt="리뷰 사진"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="aspect-square rounded-lg overflow-hidden">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800"
-                  alt="리뷰 사진"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-            </div>
+            <p className="text-xs text-[#2E1C10]/60">
+              첫 리뷰를 남겨주시면 더 많은 손님들이 참고할 수 있어요.
+            </p>
           </div>
         </section>
         
@@ -232,48 +202,6 @@ export function Home() {
             메뉴 보기
           </Button>
         </Link>
-        
-        {/* 개발자 전용: 관리자 페이지 바로가기 */}
-        {/* TODO: 배포 전 삭제 필요 */}
-        <div className="mt-4 p-4 bg-gray-100 rounded-2xl border-2 border-dashed border-gray-300">
-          <p className="text-xs text-gray-500 mb-2 text-center">개발자 전용</p>
-          <Button 
-            variant="outline"
-            size="sm"
-            className="w-full border-gray-400 text-gray-700 hover:bg-gray-200 mb-2"
-            onClick={() => navigate('/dev')}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            🔧 디버그 페이지
-          </Button>
-          <Button 
-            variant="outline"
-            size="sm"
-            className="w-full border-gray-400 text-gray-700 hover:bg-gray-200"
-            onClick={() => handleAdminAccess('/admin')}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            관리자 대시보드
-          </Button>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <Button 
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => handleAdminAccess('/admin/orders')}
-            >
-              주문 관리
-            </Button>
-            <Button 
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => handleAdminAccess('/admin/reviews')}
-            >
-              리뷰 관리
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
