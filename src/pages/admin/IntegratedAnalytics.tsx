@@ -107,6 +107,20 @@ export function IntegratedAnalytics() {
     }
   };
 
+  // 데이터 존재 여부 확인
+  const hasData = report && (
+    report.kpi.totalOrders > 0 ||
+    report.kpi.totalSales > 0 ||
+    report.hourlyAnalysis.length > 0 ||
+    report.dayOfWeekAnalysis.length > 0 ||
+    report.topMenus.length > 0 ||
+    report.couponEffectiveness.length > 0 ||
+    (report.pointsEffectiveness.totalEarned > 0 || report.pointsEffectiveness.totalSpent > 0) ||
+    report.reviewAnalysis.totalReviews > 0 ||
+    report.deliveryPerformance.totalDeliveries > 0 ||
+    report.notificationEffectiveness.totalSent > 0
+  );
+
   if (loading || !report) {
     return (
       <div className="space-y-6">
@@ -121,6 +135,44 @@ export function IntegratedAnalytics() {
             <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  // 빈 상태 UI
+  if (!hasData) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl text-[#333] mb-2">통합 분석</h1>
+            <p className="text-[#8B7355]">종합 성과 분석 및 인사이트</p>
+          </div>
+          <div className="flex gap-2">
+            <Tabs value={period} onValueChange={(value: any) => setPeriod(value)}>
+              <TabsList>
+                <TabsTrigger value="weekly">주간</TabsTrigger>
+                <TabsTrigger value="monthly">월간</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Button variant="outline" size="sm" onClick={loadReport}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              새로고침
+            </Button>
+          </div>
+        </div>
+
+        <Card className="bg-white">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <TrendingUp className="w-16 h-16 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-[#333] mb-2">
+              아직 통합 리포트 데이터가 없습니다
+            </h3>
+            <p className="text-sm text-gray-500 text-center max-w-md">
+              실제 주문, 리뷰, 쿠폰, 포인트 데이터가 쌓이면 자동으로 리포트가 생성됩니다.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -155,7 +207,7 @@ export function IntegratedAnalytics() {
 
       {/* KPI 요약 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#D61C1C]" />
@@ -170,7 +222,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <Users className="w-4 h-4 text-[#F37021]" />
@@ -185,7 +237,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <Star className="w-4 h-4 text-[#C7A45A]" />
@@ -200,7 +252,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <Gift className="w-4 h-4 text-[#D61C1C]" />
@@ -218,7 +270,7 @@ export function IntegratedAnalytics() {
 
       {/* 인사이트 및 제안 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-[#F37021]" />
@@ -237,7 +289,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <div className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-[#C7A45A]" />
@@ -271,7 +323,7 @@ export function IntegratedAnalytics() {
 
         {/* 시간대별 분석 */}
         <TabsContent value="hourly" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">시간대별 주문 분석</h3>
             </CardHeader>
@@ -295,7 +347,7 @@ export function IntegratedAnalytics() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">요일별 매출</h3>
             </CardHeader>
@@ -322,7 +374,7 @@ export function IntegratedAnalytics() {
 
         {/* 메뉴 성과 */}
         <TabsContent value="menu" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">메뉴별 성과</h3>
             </CardHeader>
@@ -352,7 +404,7 @@ export function IntegratedAnalytics() {
 
         {/* 쿠폰 효과 */}
         <TabsContent value="coupon" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">쿠폰 효과 분석</h3>
             </CardHeader>
@@ -387,7 +439,7 @@ export function IntegratedAnalytics() {
 
         {/* 포인트 */}
         <TabsContent value="points" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">포인트 효과 분석</h3>
             </CardHeader>
@@ -419,7 +471,7 @@ export function IntegratedAnalytics() {
 
         {/* 리뷰 */}
         <TabsContent value="review" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">리뷰 분석</h3>
             </CardHeader>
@@ -459,7 +511,7 @@ export function IntegratedAnalytics() {
 
         {/* 배달 */}
         <TabsContent value="delivery" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Truck className="w-5 h-5 text-[#D61C1C]" />
@@ -487,7 +539,7 @@ export function IntegratedAnalytics() {
 
         {/* 알림 */}
         <TabsContent value="notification" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-[#F37021]" />

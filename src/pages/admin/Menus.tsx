@@ -467,7 +467,7 @@ export function AdminMenus() {
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>메뉴 삭제</AlertDialogTitle>
             <AlertDialogDescription>
