@@ -1,4 +1,4 @@
-import { useState, useMemo, memo, useCallback } from 'react';
+import { useState, useMemo, memo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from '../../components/ui/input';
@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/ta
 import { Badge } from '../../components/ui/badge';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { DEFAULT_MENU_IMAGE } from '../../config/ui';
-import menusData from '../../data/menus.json';
+import { getMenus } from '../../lib/admin/menus.api';
 import type { Menu, MenuCategory } from '../../types/menu';
 import { formatPrice } from '../../lib/utils';
 
@@ -37,10 +37,24 @@ const badgeLabels = {
 export function MenuList() {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory>('noodle');
   const [searchQuery, setSearchQuery] = useState('');
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // JSON 데이터를 배열로 변환
-  const menus = useMemo(() => {
-    return Array.isArray(menusData) ? (menusData as Menu[]) : [];
+  // localStorage에 저장된 메뉴 데이터를 가져옴 (변경사항 반영)
+  useEffect(() => {
+    const loadMenus = async () => {
+      try {
+        setLoading(true);
+        const loadedMenus = await getMenus({});
+        setMenus(loadedMenus);
+      } catch (error) {
+        console.error('Failed to load menus:', error);
+        setMenus([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadMenus();
   }, []);
   
   const filteredMenus = useMemo(() => {
@@ -89,7 +103,11 @@ export function MenuList() {
         {/* 메뉴 리스트 */}
         {categories.map((cat) => (
           <TabsContent key={cat.value} value={cat.value} className="px-4 mt-0">
-            {filteredMenus.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12 text-[#2E1C10]/60">
+                로딩 중...
+              </div>
+            ) : filteredMenus.length === 0 ? (
               <div className="text-center py-12 text-[#2E1C10]/60">
                 검색 결과가 없습니다
               </div>

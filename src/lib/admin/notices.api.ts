@@ -8,21 +8,8 @@ import { Notice, NoticeFilters } from '../../types/notice';
 
 const USE_FIREBASE = false;
 
-// Mock 데이터
-let mockNotices: Notice[] = [
-  {
-    id: 'notice-001',
-    title: '사진 리뷰 쓰고 3,000원 쿠폰 받으세요!',
-    content: '사진과 함께 리뷰를 남겨주시면 다음 주문에 사용 가능한 쿠폰을 드립니다.',
-    type: 'event',
-    isActive: true,
-    priority: 1,
-    createdAt: new Date('2024-10-28'),
-    updatedAt: new Date('2024-10-28'),
-    createdBy: 'admin-001',
-    createdByName: '관리자',
-  },
-];
+// 샘플 데이터 제거: 초기 상태에서는 공지 없음
+let mockNotices: Notice[] = [];
 
 /**
  * 공지사항 목록 조회

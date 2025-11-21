@@ -19,7 +19,7 @@ import { ensureFcmToken, FCM_TOKEN_KEY } from './lib/fcm';
 
 // Layout (레이아웃은 즉시 로드)
 import { AppLayout } from './components/app/AppLayout';
-const AdminLayout = lazy(() => import('./pages/admin/_layout/AdminLayout'));
+const AdminLayout = lazy(() => import('./pages/admin/_layout/AdminLayout').then(m => ({ default: m.AdminLayout })));
 
 // 고객 앱 페이지 (lazy load)
 const Home = lazy(() => import('./pages/app/Home').then(m => ({ default: m.Home })));
