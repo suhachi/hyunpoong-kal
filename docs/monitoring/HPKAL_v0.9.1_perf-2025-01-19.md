@@ -1,129 +1,153 @@
 # HPKAL v0.9.1 모바일 성능 로그 (2025-01-19)
 
+> 이 문서는 v0.9.1에서 진행된 모바일 성능 최적화(작업 1~3)를 기준으로  
+> **Before(최적화 전)** / **After(코드 스플리팅 + UI 최적화 후)** 측정값을 함께 기록하기 위한 문서입니다.
+
+## 0. 스냅샷 정의
+
+- **Snapshot A (Before):** 작업 1~3 적용 **전** 상태
+  - 기준 브랜치: `release/hpkal-v0.9.0` 또는 `feat/hpkal-mobile-perf-20250119-baseline`
+  - 상태: 최적화 전 베이스라인
+
+- **Snapshot B (After):** 작업 1~3 적용 **후** 상태
+  - 기준 브랜치: `feat/hpkal-mobile-perf-20250119-step3-ui-opt`
+  - 상태: 코드 스플리팅 + 이미지/렌더링 최적화 완료
+
+---
+
 ## 1. 환경 정보
 
-- 앱 버전: v0.9.1 (모바일 성능 패치 사전/후 비교용)
-- 브랜치: feat/hpkal-mobile-perf-20250119-baseline
+### 1-1. Snapshot A (Before)
+
+- 앱 버전: v0.9.1 (최적화 전)
+- 브랜치: (측정 시점 브랜치)
 - 빌드 커맨드: `npm run build`
-- 테스트 기기: (예: Galaxy S23 / iPhone 14 Pro 등, 실제 측정 시 내가 기입)
+- 테스트 기기: (예: Galaxy S23 / iPhone 14 Pro 등, 실제 측정 시 기입)
 - 네트워크: (예: Wi-Fi / LTE)
 
-## 2. 측정 지표 (Lighthouse – 모바일 모드)
+### 1-2. Snapshot B (After)
 
-> 아래 값들은 "기본 상태(최적화 전)" 기준으로 채운다.
-
-### 홈 페이지 (/)
-
-- First Contentful Paint (FCP): 측정 전
-- Largest Contentful Paint (LCP): 측정 전
-- Time to Interactive (TTI): 측정 전
-- Total Blocking Time (TBT): 측정 전
-- Cumulative Layout Shift (CLS): 측정 전
-- **Lighthouse Performance Score:** 측정 전
-
-**상위 5개 문제 항목:**
-1. (측정 후 업데이트)
-2. (측정 후 업데이트)
-3. (측정 후 업데이트)
-4. (측정 후 업데이트)
-5. (측정 후 업데이트)
-
-### 메뉴 리스트 페이지 (/menu)
-
-- First Contentful Paint (FCP): 측정 전
-- Largest Contentful Paint (LCP): 측정 전
-- Time to Interactive (TTI): 측정 전
-- Total Blocking Time (TBT): 측정 전
-- Cumulative Layout Shift (CLS): 측정 전
-- **Lighthouse Performance Score:** 측정 전
-
-**상위 5개 문제 항목:**
-1. (측정 후 업데이트)
-2. (측정 후 업데이트)
-3. (측정 후 업데이트)
-4. (측정 후 업데이트)
-5. (측정 후 업데이트)
-
-### 주문내역 페이지 (/order-history)
-
-- First Contentful Paint (FCP): 측정 전
-- Largest Contentful Paint (LCP): 측정 전
-- Time to Interactive (TTI): 측정 전
-- Total Blocking Time (TBT): 측정 전
-- Cumulative Layout Shift (CLS): 측정 전
-- **Lighthouse Performance Score:** 측정 전
-
-**상위 5개 문제 항목:**
-1. (측정 후 업데이트)
-2. (측정 후 업데이트)
-3. (측정 후 업데이트)
-4. (측정 후 업데이트)
-5. (측정 후 업데이트)
-
----
-
-## 3. 번들 크기/빌드 아웃풋
-
+- 앱 버전: v0.9.1 (코드 스플리팅 + UI 최적화 적용 후)
+- 브랜치: `feat/hpkal-mobile-perf-20250119-step3-ui-opt`
 - 빌드 커맨드: `npm run build`
-- 분석 커맨드: `npm run analyze:dist`
-- dist 디렉터리 총 크기: (빌드 후 기입)
-
-### 주요 JS 번들 파일
-
-```
-dist/                     (빌드 전)
-├─ assets/
-│  ├─ index-xxxxx.js      (빌드 전)
-│  ├─ vendor-xxxxx.js     (빌드 전)
-│  └─ ...
-└─ index.html             (빌드 전)
-```
-
-> 빌드 후 `npm run analyze:dist` 실행 결과를 여기에 복사하여 기록
+- 테스트 기기: (예: Galaxy S23 / iPhone 14 Pro 등, 실제 측정 시 기입)
+- 네트워크: (예: Wi-Fi / LTE)
 
 ---
 
-## 4. 체감 속도 메모 (수동 기록용)
+## 2. Lighthouse 측정 지표 (모바일)
 
-### 홈(/)
+| Snapshot | 페이지              | FCP   | LCP   | TTI   | TBT   | CLS   | Performance Score | 비고 |
+|----------|---------------------|-------|-------|-------|-------|-------|-------------------|------|
+| A        | /                   |       |       |       |       |       |                   |      |
+| A        | /menu               |       |       |       |       |       |                   |      |
+| A        | /order-history      |       |       |       |       |       |                   |      |
+| B        | /                   |       |       |       |       |       |                   |      |
+| B        | /menu               |       |       |       |       |       |                   |      |
+| B        | /order-history      |       |       |       |       |       |                   |      |
 
+> 실제 측정 후 위 표를 채운다.
+
+### 2-1. Snapshot A (Before) – 주요 이슈
+
+#### 홈 페이지 (/)
+- (측정 후 업데이트)
+
+#### 메뉴 리스트 페이지 (/menu)
+- (측정 후 업데이트)
+
+#### 주문내역 페이지 (/order-history)
+- (측정 후 업데이트)
+
+### 2-2. Snapshot B (After) – 주요 이슈
+
+#### 홈 페이지 (/)
+- (측정 후 업데이트)
+
+#### 메뉴 리스트 페이지 (/menu)
+- (측정 후 업데이트)
+
+#### 주문내역 페이지 (/order-history)
+- (측정 후 업데이트)
+
+---
+
+## 3. 번들 크기 / 빌드 아웃풋
+
+### 3-1. 요약 비교
+
+| Snapshot | dist 전체 크기 | 메인 번들 크기 | JS 파일 합계 | CSS 파일 합계 | 비고 |
+|----------|----------------|----------------|--------------|---------------|------|
+| A        |                |                |              |               |      |
+| B        | 1.79 MB        | 679.80 KB      | 1.69 MB      | 90.58 KB      | 코드 스플리팅 + UI 최적화 후 실제 값 |
+
+### 3-2. Snapshot 별 상세 기록
+
+#### Snapshot A (Before)
+
+```text
+(여기에 npm run analyze:dist 결과를 그대로 붙여넣기)
+```
+
+#### Snapshot B (After)
+
+```text
+📦 dist 전체 크기: 1.79 MB
+📊 JS 파일 총합: 1.69 MB (122개 파일)
+📊 CSS 파일 총합: 90.58 KB (1개 파일)
+
+주요 청크:
+- index-4syR-BqK.js: 679.80 KB (메인 번들)
+- BarChart-DM1s9Gms.js: 337.99 KB (차트 라이브러리)
+- Home-CPoi0xg8.js: 8.25 KB
+- MenuList-CJj0Dw4Q.js: 4.05 KB
+- MenuDetail-DfjsQnro.js: 6.75 KB
+- Cart-CfXLdtaF.js: 11.49 KB
+
+(전체 analyze:dist 출력 결과를 여기에 붙여넣기)
+```
+
+---
+
+## 4. 체감 속도 메모
+
+### 4-1. Snapshot A (Before)
+
+#### 홈 페이지 (/)
 - 첫 진입 체감 시간: (예: 체감 3~4초)
 - 관찰 메모:
   - (예: "홈 첫 로딩 시 상단 배너/추천 메뉴 이미지가 늦게 뜨면서 스크롤이 끊김")
 
-### 메뉴 리스트(/menu)
-
+#### 메뉴 리스트 페이지 (/menu)
 - 진입 체감 시간: (측정 후 기입)
 - 관찰 메모:
   - (예: "메뉴 리스트 스크롤 시 프레임 드랍 느낌 있음")
 
-### 주문내역(/order-history)
+#### 주문내역 페이지 (/order-history)
+- 진입 체감 시간: (측정 후 기입)
+- 관찰 메모:
+  - (측정 후 기입)
 
+### 4-2. Snapshot B (After)
+
+#### 홈 페이지 (/)
+- 첫 진입 체감 시간: (측정 후 기입)
+- 관찰 메모:
+  - (측정 후 기입)
+
+#### 메뉴 리스트 페이지 (/menu)
+- 진입 체감 시간: (측정 후 기입)
+- 관찰 메모:
+  - (측정 후 기입)
+
+#### 주문내역 페이지 (/order-history)
 - 진입 체감 시간: (측정 후 기입)
 - 관찰 메모:
   - (측정 후 기입)
 
 ---
 
-## 5. 다음 단계 계획 (v0.9.1 성능 패치)
-
-### 작업 2: Admin/차트 라우트 코드 스플리팅 (초기 번들 다이어트)
-- [ ] App.tsx에서 `/admin/**` 라우트 lazy-load 적용
-- [ ] 차트 관련 코드 (recharts 등) lazy-load 적용
-- [ ] 고객앱 진입 시 관리/차트 코드 분리
-
-### 작업 3: 고객앱 이미지 + 렌더링 최적화 1차
-- [ ] Home/MenuList/MenuDetail/Cart 이미지 `loading="lazy"` 적용
-- [ ] 메뉴/추천 카드 React.memo 적용
-- [ ] 최소한의 useCallback 적용
-
-### 작업 4: 2차 측정 (동일 방식으로 Lighthouse/번들 크기 비교)
-- [ ] 작업 2, 3 완료 후 동일 방식으로 재측정
-- [ ] 개선 전/후 비교 분석
-
----
-
-## 6. 측정 방법 가이드
+## 5. 측정 방법 가이드
 
 ### Lighthouse 측정 방법
 
@@ -151,5 +175,4 @@ npm run analyze:dist
 
 **작성일:** 2025-01-19  
 **작성자:** AI Assistant  
-**상태:** 베이스라인 측정 준비 완료
-
+**상태:** Before/After 비교 구조 준비 완료 - 실제 측정값 입력 대기
