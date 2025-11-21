@@ -39,6 +39,7 @@ const Coupons = lazy(() => import('./pages/app/Coupons').then(m => ({ default: m
 const Notifications = lazy(() => import('./pages/app/Notifications').then(m => ({ default: m.Notifications })));
 const NotificationSettings = lazy(() => import('./pages/app/NotificationSettings').then(m => ({ default: m.NotificationSettings })));
 const Support = lazy(() => import('./pages/app/Support').then(m => ({ default: m.Support })));
+const InstallGuide = lazy(() => import('./pages/app/InstallGuide').then(m => ({ default: m.InstallGuide })));
 
 // 관리자 페이지 (lazy load - Admin 영역 전체 분리)
 const Dashboard = lazy(() => import('./pages/admin/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -126,6 +127,11 @@ export default function App() {
                 ======================================== */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+
+            {/* ========================================
+                설치 안내 페이지 (레이아웃 없음)
+                ======================================== */}
+            <Route path="/install" element={<InstallGuide />} />
 
             {/* ========================================
                 관리자 라우트 (AdminLayout + ProtectedRoute)

@@ -51,6 +51,7 @@
             "path": "*",
             "pdfkit": "*",
             "playwright": "^1.56.1",
+            "qrcode.react": "^4.2.0",
             "react": "^18.3.1",
             "react-day-picker": "*",
             "react-dom": "^18.3.1",
