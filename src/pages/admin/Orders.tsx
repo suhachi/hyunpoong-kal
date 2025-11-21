@@ -492,7 +492,7 @@ export function AdminOrders() {
           }
         }}
       >
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>주문 취소</DialogTitle>
             <DialogDescription>

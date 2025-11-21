@@ -289,7 +289,7 @@ export function AdminPoints() {
 
       {/* 포인트 조정 다이얼로그 */}
       <Dialog open={adjustDialog} onOpenChange={setAdjustDialog}>
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>포인트 조정</DialogTitle>
             <DialogDescription>

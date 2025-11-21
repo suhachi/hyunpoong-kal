@@ -351,7 +351,7 @@ export function AdminNotices() {
 
       {/* 생성 다이얼로그 */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>공지사항 등록</DialogTitle>
             <DialogDescription>
@@ -435,7 +435,7 @@ export function AdminNotices() {
 
       {/* 편집 다이얼로그 */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>공지사항 수정</DialogTitle>
             <DialogDescription>
@@ -519,7 +519,7 @@ export function AdminNotices() {
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>공지사항 삭제</AlertDialogTitle>
             <AlertDialogDescription>

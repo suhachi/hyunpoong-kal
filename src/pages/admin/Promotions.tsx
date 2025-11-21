@@ -187,7 +187,7 @@ export function AdminPromotions() {
 
       {/* 발급 다이얼로그 */}
       <Dialog open={issueDialogOpen} onOpenChange={setIssueDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
             <DialogTitle>쿠폰 발급</DialogTitle>
             <DialogDescription>
