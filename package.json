@@ -81,6 +81,7 @@
             "build": "vite build",
             "preview": "vite preview",
             "analyze:dist": "npm run build && node scripts/print-dist-size.cjs",
+            "create:store": "tsx scripts/create-independent-store.ts",
             "test:e2e": "playwright test -c src/playwright.config.ts",
             "test:e2e:admin": "playwright test -c src/playwright.config.ts --project=chromium --grep @admin",
             "test:e2e:admin:routes": "playwright test -c src/playwright.config.ts admin-routes.spec.ts --project=chromium",
