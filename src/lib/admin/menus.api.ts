@@ -230,7 +230,9 @@ export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
   // Firebase 모드: Firestore stores/{storeId}/menus에서 조회
   try {
     const storeId = getStoreId();
+    console.log('[getMenus] storeId:', storeId);
     const colRef = storeMenusCollection(storeId);
+    console.log('[getMenus] collection path:', colRef.path);
 
     const constraints: any[] = [];
 
@@ -253,8 +255,10 @@ export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
     // createdAt로 보조 정렬
     constraints.push(orderBy('createdAt', 'asc'));
 
+    console.log('[getMenus] query constraints:', constraints.length);
     const q = query(colRef, ...constraints);
     const snapshot = await getDocs(q);
+    console.log('[getMenus] snapshot size:', snapshot.size);
     const menus: Menu[] = [];
 
     snapshot.forEach((docSnap) => {
@@ -279,9 +283,14 @@ export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
       filtered = filtered.filter(m => getMenuStatus(m) === 'available');
     }
 
+    console.log('[getMenus] filtered menus count:', filtered.length);
     return filtered;
   } catch (error) {
-    console.error('Failed to fetch menus from Firestore:', error);
+    console.error('[getMenus] Failed to fetch menus from Firestore:', error);
+    if (error instanceof Error) {
+      console.error('[getMenus] Error message:', error.message);
+      console.error('[getMenus] Error stack:', error.stack);
+    }
     return [];
   }
 }
