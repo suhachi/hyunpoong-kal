@@ -5,17 +5,32 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { User, ShoppingBag, Ticket, Gift, Bell, MessageSquare, LogOut, Settings } from "lucide-react";
 import { toast } from 'sonner';
+import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
 
 export function My() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
+
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   // 로그아웃 처리
   const handleSignOut = async () => {

@@ -56,9 +56,18 @@ export const getEnv = (key: string, defaultValue: string = '', required: boolean
   }
 };
 
-// Phase 1/2: 강제 Mock 모드 (LocalStorage)
-// TODO: Phase 3에서 실제 Firebase 연동 시 ENV 기반으로 전환
-export const USE_FIREBASE = false;
+// v1.0: Firebase 모드 플래그 (환경 변수 기반)
+// VITE_USE_FIREBASE 환경 변수를 읽어서 boolean으로 변환
+// 기본값: false (Mock 모드)
+// true: Firebase 실연동 모드
+// false: Mock 모드 (localStorage)
+export const USE_FIREBASE = (() => {
+  const raw = getEnv('VITE_USE_FIREBASE', 'false');
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  // 기본값: false (Mock 모드)
+  return false;
+})();
 
 // 디버그 로그 추가
 if (typeof window !== 'undefined') {

@@ -2,12 +2,31 @@
  * 관리자 메뉴 관리 API
  * USE_FIREBASE=false: Mock 데이터 반환
  * USE_FIREBASE=true: Firestore 연동
+ * v1.0 STEP 4: Firestore stores/{storeId}/menus 구조로 전환
  */
 
 import { Menu, MenuFilters, MenuLog, MenuStatus } from '../../types/menu';
 import menusData from '../../data/menus.json';
-
-const USE_FIREBASE = false;
+import { USE_FIREBASE, getEnv } from '../../config/env';
+import {
+  type MenuDoc,
+  storeMenusCollection,
+  storeMenuDocRef,
+} from '../firebase/firestore-schema';
+import {
+  addDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  serverTimestamp,
+  type Timestamp,
+} from 'firebase/firestore';
+import { db } from '../firebase';
 
 // Mock 데이터 (menus.json 기반)
 // localStorage에서 저장된 데이터를 먼저 확인, 없으면 menus.json 사용
@@ -43,6 +62,88 @@ const saveMenusToStorage = () => {
 // Mock 로그
 let mockMenuLogs: MenuLog[] = [];
 
+// ============================================================================
+// Menu ↔ MenuDoc 매퍼 함수
+// ============================================================================
+
+/**
+ * 도메인 Menu → Firestore MenuDoc 변환 (작성용)
+ */
+function buildMenuDocFromEntity(params: {
+  storeId: string;
+  menuId: string;
+  menu: Menu;
+}): Omit<MenuDoc, 'createdAt' | 'updatedAt'> {
+  const { storeId, menuId, menu } = params;
+
+  return {
+    menuId,
+    storeId,
+    category: menu.category,
+    name: menu.name,
+    price: menu.price,
+    description: menu.description || '',
+    imageUrl: menu.image || '', // Menu.image → MenuDoc.imageUrl
+    imagePath: '', // Storage 경로는 업로드 시 설정
+    badges: menu.badges || [],
+    options: menu.options,
+    optionGroups: menu.optionGroups?.map(og => og.id) || [],
+    allergens: menu.allergens || [],
+    origin: menu.origin || '',
+    isAvailable: menu.isAvailable ?? true,
+    availableHours: menu.availableHours,
+    order: typeof menu.order === 'number' ? menu.order : 0,
+  };
+}
+
+/**
+ * Firestore MenuDoc → 도메인 Menu 변환 (읽기용)
+ */
+function buildMenuFromDoc(docData: MenuDoc): Menu {
+  // Timestamp → string 변환 헬퍼 (Order 매퍼와 동일한 패턴)
+  const toDateOrString = (ts: Timestamp | undefined): string | undefined => {
+    if (!ts) return undefined;
+    if (typeof ts === 'string') return ts;
+    if (typeof ts.toDate === 'function') {
+      return ts.toDate().toISOString();
+    }
+    // Mock 모드 호환: { seconds, nanoseconds } 형태
+    if ((ts as any).seconds && typeof (ts as any).seconds === 'number') {
+      return new Date((ts as any).seconds * 1000).toISOString();
+    }
+    return undefined;
+  };
+
+  return {
+    menuId: docData.menuId,
+    category: docData.category,
+    name: docData.name,
+    price: docData.price,
+    description: docData.description,
+    image: docData.imageUrl || '', // MenuDoc.imageUrl → Menu.image
+    badges: docData.badges || [],
+    options: docData.options,
+    optionGroups: [], // TODO: optionGroups ID 배열을 실제 OptionGroup 객체로 변환 (STEP 5~7)
+    allergens: docData.allergens || [],
+    origin: docData.origin || '',
+    isAvailable: docData.isAvailable,
+    availableHours: docData.availableHours,
+    order: docData.order,
+    // createdAt, updatedAt는 Menu 타입에 없지만 필요시 추가 가능
+  };
+}
+
+/**
+ * storeId 가져오기 헬퍼
+ */
+function getStoreId(): string {
+  return getEnv('VITE_STORE_ID', 'hyunpoong_main');
+}
+
+// ============================================================================
+// Mock 모드 함수 (기존 로직 보전)
+// ============================================================================
+
 /**
  * 메뉴 현재 상태 계산 (시간제 고려)
  */
@@ -71,15 +172,9 @@ export function getMenuStatus(menu: Menu): MenuStatus {
 }
 
 /**
- * 메뉴 목록 조회 (필터/정렬)
+ * Mock 모드: 메뉴 목록 조회
  */
-export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
-  // Mock 동작
+async function getMenusMock(filters: MenuFilters = {}): Promise<Menu[]> {
   await new Promise(resolve => setTimeout(resolve, 300));
 
   let filtered = [...mockMenus];
@@ -125,31 +220,115 @@ export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
 }
 
 /**
- * 메뉴 단건 조회
+ * 메뉴 목록 조회 (필터/정렬)
  */
-export async function getMenuById(menuId: string): Promise<Menu | null> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
+export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
+  if (!USE_FIREBASE) {
+    return await getMenusMock(filters);
   }
 
+  // Firebase 모드: Firestore stores/{storeId}/menus에서 조회
+  try {
+    const storeId = getStoreId();
+    const colRef = storeMenusCollection(storeId);
+
+    const constraints: any[] = [];
+
+    // 카테고리 필터
+    if (filters.category && filters.category !== 'all') {
+      constraints.push(where('category', '==', filters.category));
+    }
+
+    // 정렬: 기본적으로 order 필드로 정렬
+    if (filters.sortBy === 'order' || !filters.sortBy) {
+      constraints.push(orderBy('order', 'asc'));
+    } else if (filters.sortBy === 'name') {
+      constraints.push(orderBy('name', 'asc'));
+    } else if (filters.sortBy === 'price-asc') {
+      constraints.push(orderBy('price', 'asc'));
+    } else if (filters.sortBy === 'price-desc') {
+      constraints.push(orderBy('price', 'desc'));
+    }
+
+    // createdAt로 보조 정렬
+    constraints.push(orderBy('createdAt', 'asc'));
+
+    const q = query(colRef, ...constraints);
+    const snapshot = await getDocs(q);
+    const menus: Menu[] = [];
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data() as MenuDoc;
+      data.menuId = data.menuId || docSnap.id;
+      menus.push(buildMenuFromDoc(data));
+    });
+
+    // 클라이언트 측 필터링 (검색, availableOnly)
+    let filtered = menus;
+
+    if (filters.search) {
+      const search = filters.search.toLowerCase();
+      filtered = filtered.filter(m => 
+        m.name.toLowerCase().includes(search) ||
+        m.description.toLowerCase().includes(search) ||
+        m.badges.some(b => b.toLowerCase().includes(search))
+      );
+    }
+
+    if (filters.availableOnly) {
+      filtered = filtered.filter(m => getMenuStatus(m) === 'available');
+    }
+
+    return filtered;
+  } catch (error) {
+    console.error('Failed to fetch menus from Firestore:', error);
+    return [];
+  }
+}
+
+/**
+ * Mock 모드: 메뉴 단건 조회
+ */
+async function getMenuByIdMock(menuId: string): Promise<Menu | null> {
   await new Promise(resolve => setTimeout(resolve, 200));
   return mockMenus.find(m => m.menuId === menuId) || null;
 }
 
 /**
- * 메뉴 품절/판매 토글
+ * 메뉴 단건 조회
  */
-export async function toggleMenuAvailability(
+export async function getMenuById(menuId: string): Promise<Menu | null> {
+  if (!USE_FIREBASE) {
+    return await getMenuByIdMock(menuId);
+  }
+
+  // Firebase 모드: Firestore stores/{storeId}/menus/{menuId}에서 조회
+  try {
+    const storeId = getStoreId();
+    const ref = storeMenuDocRef(storeId, menuId);
+    const snapshot = await getDoc(ref);
+    
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    const data = snapshot.data() as MenuDoc;
+    data.menuId = data.menuId || snapshot.id;
+    return buildMenuFromDoc(data);
+  } catch (error) {
+    console.error('Failed to fetch menu from Firestore:', error);
+    return null;
+  }
+}
+
+/**
+ * Mock 모드: 메뉴 품절/판매 토글
+ */
+async function toggleMenuAvailabilityMock(
   menuId: string,
   by: string,
   byName: string
 ): Promise<Menu> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 400));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
@@ -182,19 +361,56 @@ export async function toggleMenuAvailability(
 }
 
 /**
- * 메뉴 시간제 설정
+ * 메뉴 품절/판매 토글
  */
-export async function updateMenuAvailableHours(
+export async function toggleMenuAvailability(
+  menuId: string,
+  by: string,
+  byName: string
+): Promise<Menu> {
+  if (!USE_FIREBASE) {
+    return await toggleMenuAvailabilityMock(menuId, by, byName);
+  }
+
+  // Firebase 모드: Firestore stores/{storeId}/menus/{menuId} 업데이트
+  try {
+    const storeId = getStoreId();
+    const ref = storeMenuDocRef(storeId, menuId);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+      throw new Error('메뉴를 찾을 수 없습니다.');
+    }
+
+    const prev = snapshot.data() as MenuDoc;
+    const newValue = !prev.isAvailable;
+
+    await updateDoc(ref, {
+      isAvailable: newValue,
+      updatedAt: serverTimestamp(),
+    });
+
+    // 업데이트된 문서 읽기
+    const afterSnap = await getDoc(ref);
+    const afterData = afterSnap.data() as MenuDoc;
+    afterData.menuId = afterData.menuId || afterSnap.id;
+
+    return buildMenuFromDoc(afterData);
+  } catch (error) {
+    console.error('Failed to toggle menu availability in Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * Mock 모드: 메뉴 시간제 설정
+ */
+async function updateMenuAvailableHoursMock(
   menuId: string,
   availableHours: { start: string; end: string } | null,
   by: string,
   byName: string
 ): Promise<Menu> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 400));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
@@ -225,20 +441,55 @@ export async function updateMenuAvailableHours(
 }
 
 /**
- * 메뉴 수정 (메뉴명/카테고리/가격/설명/이미지)
+ * 메뉴 시간제 설정
  */
-export async function updateMenu(
+export async function updateMenuAvailableHours(
+  menuId: string,
+  availableHours: { start: string; end: string } | null,
+  by: string,
+  byName: string
+): Promise<Menu> {
+  if (!USE_FIREBASE) {
+    return await updateMenuAvailableHoursMock(menuId, availableHours, by, byName);
+  }
+
+  // Firebase 모드: Firestore stores/{storeId}/menus/{menuId} 업데이트
+  try {
+    const storeId = getStoreId();
+    const ref = storeMenuDocRef(storeId, menuId);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+      throw new Error('메뉴를 찾을 수 없습니다.');
+    }
+
+    await updateDoc(ref, {
+      availableHours: availableHours || null,
+      updatedAt: serverTimestamp(),
+    });
+
+    // 업데이트된 문서 읽기
+    const afterSnap = await getDoc(ref);
+    const afterData = afterSnap.data() as MenuDoc;
+    afterData.menuId = afterData.menuId || afterSnap.id;
+
+    return buildMenuFromDoc(afterData);
+  } catch (error) {
+    console.error('Failed to update menu available hours in Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * Mock 모드: 메뉴 수정
+ */
+async function updateMenuMock(
   menuId: string,
   updates: Partial<Pick<Menu, 'name' | 'category' | 'price' | 'description' | 'image'>>,
   by: string,
   byName: string,
   reason?: string
 ): Promise<Menu> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 500));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
@@ -270,6 +521,57 @@ export async function updateMenu(
   saveMenusToStorage();
 
   return menu;
+}
+
+/**
+ * 메뉴 수정 (메뉴명/카테고리/가격/설명/이미지)
+ */
+export async function updateMenu(
+  menuId: string,
+  updates: Partial<Pick<Menu, 'name' | 'category' | 'price' | 'description' | 'image'>>,
+  by: string,
+  byName: string,
+  reason?: string
+): Promise<Menu> {
+  if (!USE_FIREBASE) {
+    return await updateMenuMock(menuId, updates, by, byName, reason);
+  }
+
+  // Firebase 모드: Firestore stores/{storeId}/menus/{menuId} 업데이트
+  try {
+    const storeId = getStoreId();
+    const ref = storeMenuDocRef(storeId, menuId);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+      throw new Error('메뉴를 찾을 수 없습니다.');
+    }
+
+    const prev = snapshot.data() as MenuDoc;
+
+    // 업데이트할 필드만 골라서 업데이트
+    const updateData: any = {
+      updatedAt: serverTimestamp(),
+    };
+
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.category !== undefined) updateData.category = updates.category;
+    if (updates.price !== undefined) updateData.price = updates.price;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.image !== undefined) updateData.imageUrl = updates.image; // Menu.image → MenuDoc.imageUrl
+
+    await updateDoc(ref, updateData);
+
+    // 업데이트된 문서 읽기
+    const afterSnap = await getDoc(ref);
+    const afterData = afterSnap.data() as MenuDoc;
+    afterData.menuId = afterData.menuId || afterSnap.id;
+
+    return buildMenuFromDoc(afterData);
+  } catch (error) {
+    console.error('Failed to update menu in Firestore:', error);
+    throw error;
+  }
 }
 
 /**
@@ -327,18 +629,13 @@ export async function getMenuStats(): Promise<MenuStats> {
 }
 
 /**
- * 메뉴 생성
+ * Mock 모드: 메뉴 생성
  */
-export async function createMenu(
+async function createMenuMock(
   menuData: Partial<Menu>,
   by: string,
   byName: string
 ): Promise<Menu> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 500));
 
   // 중복 확인 (같은 이름 + 카테고리)
@@ -360,7 +657,7 @@ export async function createMenu(
   // 새 메뉴 생성
   const newMenu: Menu = {
     menuId,
-    category: menuData.category || 'main',
+    category: menuData.category || 'noodle',
     name: menuData.name || '',
     price: menuData.price || 0,
     description: menuData.description || '',
@@ -396,18 +693,86 @@ export async function createMenu(
 }
 
 /**
- * 메뉴 삭제 (Undo용)
+ * 메뉴 생성
  */
-export async function deleteMenu(
+export async function createMenu(
+  menuData: Partial<Menu>,
+  by: string,
+  byName: string
+): Promise<Menu> {
+  if (!USE_FIREBASE) {
+    return await createMenuMock(menuData, by, byName);
+  }
+
+  // Firebase 모드: Firestore stores/{storeId}/menus에 문서 생성
+  try {
+    const storeId = getStoreId();
+    const colRef = storeMenusCollection(storeId);
+
+    // 중복 확인 (같은 이름 + 카테고리)
+    const existingMenus = await getMenus({ category: menuData.category as any });
+    const duplicate = existingMenus.find(
+      m => m.name === menuData.name && m.category === menuData.category
+    );
+
+    if (duplicate) {
+      throw new Error('동일한 이름과 카테고리의 메뉴가 이미 존재합니다');
+    }
+
+    // Menu 엔티티 생성 (임시 menuId)
+    const tempMenuId = `menu-${Date.now()}`;
+    const menu: Menu = {
+      menuId: tempMenuId,
+      category: menuData.category || 'noodle',
+      name: menuData.name || '',
+      price: menuData.price || 0,
+      description: menuData.description || '',
+      image: menuData.image || '',
+      badges: menuData.badges || [],
+      options: menuData.options,
+      allergens: menuData.allergens || [],
+      origin: menuData.origin || '-',
+      isAvailable: menuData.isAvailable !== false,
+      order: menuData.order || existingMenus.length + 1,
+    };
+
+    // MenuDoc 생성
+    const menuDocData = buildMenuDocFromEntity({
+      storeId,
+      menuId: '', // addDoc 시점에는 id 없음
+      menu,
+    });
+
+    const docRef = await addDoc(colRef, {
+      ...menuDocData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    // 생성된 문서 읽기
+    const snapshot = await getDoc(docRef);
+    if (!snapshot.exists()) {
+      throw new Error('메뉴 생성 후 데이터를 읽을 수 없습니다.');
+    }
+
+    const data = snapshot.data() as MenuDoc;
+    data.menuId = snapshot.id;
+
+    return buildMenuFromDoc(data);
+  } catch (error) {
+    console.error('Failed to create menu in Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * Mock 모드: 메뉴 삭제
+ */
+async function deleteMenuMock(
   menuId: string,
   by: string,
   byName: string
 ): Promise<void> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 300));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
@@ -432,4 +797,27 @@ export async function deleteMenu(
 
   // 변경사항을 localStorage에 저장
   saveMenusToStorage();
+}
+
+/**
+ * 메뉴 삭제 (Undo용)
+ */
+export async function deleteMenu(
+  menuId: string,
+  by: string,
+  byName: string
+): Promise<void> {
+  if (!USE_FIREBASE) {
+    return await deleteMenuMock(menuId, by, byName);
+  }
+
+  // Firebase 모드: Firestore stores/{storeId}/menus/{menuId} 삭제
+  try {
+    const storeId = getStoreId();
+    const ref = storeMenuDocRef(storeId, menuId);
+    await deleteDoc(ref);
+  } catch (error) {
+    console.error('Failed to delete menu from Firestore:', error);
+    throw error;
+  }
 }
