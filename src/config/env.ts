@@ -84,6 +84,11 @@ export const APP_CONFIG = {
   ceo: '석경선/배종수(공동대표)',
 };
 
+// v1.0: Store ID (환경 변수 기반)
+// VITE_STORE_ID 환경 변수를 읽어서 사용
+// 기본값: 'hyunpoong_main'
+export const STORE_ID = getEnv('VITE_STORE_ID', 'hyunpoong_main');
+
 // Firebase 설정 (Firebase 사용 시)
 export const FIREBASE_CONFIG = {
   apiKey: getEnv('VITE_FIREBASE_API_KEY'),

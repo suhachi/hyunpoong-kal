@@ -1,5 +1,7 @@
 ﻿import { useEffect, useState } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { Phone, CheckCircle2, Clock, Loader2, XCircle, AlertCircle, Receipt, Download, MapPin, Navigation, Gift } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Alert, AlertDescription } from '../../components/ui/alert';
@@ -88,6 +90,20 @@ export function OrderTracking() {
   const { orderId } = useParams<{ orderId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+
+  // 인증 체크
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const [order, setOrder] = useState<LocalOrder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,8 +124,7 @@ export function OrderTracking() {
   // 포인트 적립 처리 여부
   const [pointsProcessed, setPointsProcessed] = useState(false);
 
-  // Mock UID (실제로는 Auth에서 가져옴)
-  const uid = 'user_001';
+  const uid = user.uid;
 
   const result = searchParams.get('result');
   const resultMsg = searchParams.get('msg');

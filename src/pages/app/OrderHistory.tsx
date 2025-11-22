@@ -4,12 +4,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Skeleton } from '../../components/ui/skeleton';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { 
   ShoppingBag, 
   ChevronRight, 
@@ -24,6 +26,7 @@ import { getOrdersByUser, filterOrdersByStatus, getReviewableOrders } from '../.
 import type { Order, OrderStatus } from '../../types/order';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { formatPrice } from '../../lib/utils';
+import { toast } from 'sonner';
 
 type FilterStatus = OrderStatus | 'all' | 'reviewable';
 
@@ -48,29 +51,48 @@ const extendedStatusConfig: Record<string, { label: string; variant: 'default' |
 
 export function OrderHistory() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterStatus>('all');
 
-  // Mock 사용자 ID (실제로는 Auth에서 가져옴)
-  const userId = 'user-001';
+  // 인증 체크
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const userId = user.uid;
 
   useEffect(() => {
-    loadOrders();
-  }, []);
+    if (user) {
+      loadOrders();
+    }
+  }, [user]);
 
   useEffect(() => {
     applyFilter();
   }, [filter, orders]);
 
   async function loadOrders() {
+    if (!user) return;
+
     try {
       setLoading(true);
       const data = await getOrdersByUser(userId);
       setOrders(data);
     } catch (error) {
       console.error('주문 목록 로딩 실패:', error);
+      toast.error('주문 내역을 불러오는데 실패했습니다. 다시 시도해주세요.');
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -245,9 +267,20 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
   const isCanceled = order.status === 'canceled';
   const canReview = isCompleted && !hasReview;
 
-  // 대표 이미지 (첫 번째 아이템)
-  const firstItem = order.items[0];
-  const totalItems = order.items.length;
+  // 대표 이미지 (첫 번째 아이템) - 안전한 배열 접근
+  const firstItem = order.items?.[0];
+  const totalItems = order.items?.length || 0;
+
+  // items가 비어있는 경우 처리
+  if (!firstItem || totalItems === 0) {
+    return (
+      <Card className="rounded-2xl border-[#E5DDD5]">
+        <CardContent className="p-4 text-center text-gray-500">
+          주문 항목이 없습니다
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Link to={`/order/${order.orderId}`}>

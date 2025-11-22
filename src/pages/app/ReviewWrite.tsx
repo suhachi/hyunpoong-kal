@@ -1,5 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { Star, Upload, X, Image as ImageIcon, Loader2, Gift } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
@@ -32,8 +34,22 @@ export function ReviewWrite() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Mock UID (실제로는 Auth에서 가져옴)
-  const uid = 'user_001';
+  const { user, loading: authLoading } = useAuth();
+
+  // 인증 체크
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const uid = user.uid;
 
   const [formData, setFormData] = useState<ReviewFormData>({
     rating: 0,

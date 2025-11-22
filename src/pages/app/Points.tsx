@@ -4,37 +4,59 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { ArrowLeft, Gift, TrendingUp, TrendingDown, Clock, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Separator } from '../../components/ui/separator';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Skeleton } from '../../components/ui/skeleton';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { getPointsHistory, POINTS_POLICY } from '../../lib/points.api';
 import { FEATURE_FLAGS } from '../../config/env';
 import type { PointsHistory, PointsLedger } from '../../types/points';
 import { formatDateTime } from '../../lib/utils';
+import { toast } from 'sonner';
 
 export function Points() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [history, setHistory] = useState<PointsHistory | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock UID (실제로는 Auth에서 가져옴)
-  const uid = 'user_001';
+  // 인증 체크
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#FBF9F6] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const uid = user.uid;
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    if (user) {
+      loadHistory();
+    }
+  }, [user]);
 
   async function loadHistory() {
+    if (!user) return;
+
     try {
       setLoading(true);
       const data = await getPointsHistory(uid);
       setHistory(data);
     } catch (error) {
       console.error('Failed to load points history:', error);
+      toast.error('포인트 내역을 불러오는데 실패했습니다. 다시 시도해주세요.');
+      setHistory(null);
     } finally {
       setLoading(false);
     }

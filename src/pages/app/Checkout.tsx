@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { CreditCard, Wallet, HandCoins, Loader2, AlertCircle, Gift, Smartphone } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
@@ -9,6 +10,7 @@ import { Checkbox } from '../../components/ui/checkbox';
 import { Separator } from '../../components/ui/separator';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Switch } from '../../components/ui/switch';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { useCart } from '../../contexts/CartContext';
 import { toast } from 'sonner';
 import { getPointsBalance, spendPoints, POINTS_POLICY } from '../../lib/points.api';
@@ -20,6 +22,7 @@ import { formatPrice } from '../../lib/utils';
 
 export function Checkout() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const {
     items,
     deliveryType,
@@ -30,6 +33,19 @@ export function Checkout() {
     getDeliveryFee,
     clearCart,
   } = useCart();
+
+  // 인증 체크
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   // 주문 완료 플래그 (리다이렉트 방지용)
   const isOrderCompleting = useRef(false);
@@ -62,26 +78,27 @@ export function Checkout() {
 
   // 포인트 잔액 로드
   useEffect(() => {
-    if (FEATURE_FLAGS.points) {
+    if (FEATURE_FLAGS.points && user) {
       loadPointsBalance();
     }
-  }, []);
+  }, [user]);
 
   // 배달/포장 변경 시 결제 수단 초기화
   useEffect(() => {
     setPaymentMethod('meet_card');
   }, [deliveryType]);
 
-  // Mock UID (실제로는 Auth에서 가져옴)
-  // NOTE: OrderHistory 등 고객 영역은 'user-001' 형식을 사용하므로 일치시킴
-  const uid = 'user-001';
+  const uid = user.uid;
 
   async function loadPointsBalance() {
+    if (!user) return;
+
     try {
       const balance = await getPointsBalance(uid);
       setPointsBalance(balance);
     } catch (error) {
       console.error('Failed to load points balance:', error);
+      toast.error('포인트 잔액을 불러오는데 실패했습니다.');
     }
   }
 

@@ -437,6 +437,63 @@ export function isValidOrderDoc(doc: Partial<OrderDoc>): doc is OrderDoc {
 }
 
 /**
+ * OrderDoc을 Order 도메인 타입으로 변환
+ * v1.0 STEP 3: 주문 흐름 Firebase 전환
+ */
+import type { Order } from '../../types/order';
+
+export function buildOrderFromDoc(orderId: string, doc: OrderDoc): Order {
+  return {
+    orderId,
+    userId: doc.userId,
+    storeId: doc.storeId,
+    items: doc.items.map(item => ({
+      menuId: item.menuId,
+      menuName: item.menuName,
+      menuImage: item.menuImage,
+      quantity: item.quantity,
+      options: item.options,
+      price: item.price,
+      subtotal: item.subtotal,
+    })),
+    subtotal: doc.subtotal,
+    discount: doc.discount,
+    couponId: doc.couponId,
+    deliveryFee: doc.deliveryFee,
+    finalAmount: doc.finalAmount,
+    deliveryType: doc.deliveryType,
+    deliveryAddress: doc.deliveryAddress,
+    phone: doc.phone,
+    email: doc.email,
+    requests: doc.requests,
+    status: doc.status,
+    payment: {
+      method: doc.payment.method,
+      status: doc.payment.status,
+      tid: doc.payment.tid,
+      authToken: doc.payment.authToken,
+      cardName: doc.payment.cardName,
+      cardNum: doc.payment.cardNum,
+      amount: doc.payment.amount,
+      paidAt: doc.payment.paidAt,
+      canceledAt: doc.payment.canceledAt,
+      cancelReason: doc.payment.cancelReason,
+    },
+    timeline: {
+      pending: doc.timeline.pending,
+      accepted: doc.timeline.accepted,
+      preparing: doc.timeline.cooking, // OrderDoc은 cooking, Order는 preparing
+      completed: doc.timeline.completed,
+      canceled: doc.timeline.canceled,
+    },
+    cashReceipt: doc.cashReceipt,
+    taxInvoice: doc.taxInvoice,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
+
+/**
  * MenuDoc이 유효한지 확인
  * TODO: STEP 3에서 실제 검증 로직 구현
  */

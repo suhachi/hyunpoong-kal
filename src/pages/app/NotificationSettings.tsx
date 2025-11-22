@@ -4,7 +4,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { Card, CardContent, CardHeader, CardDescription } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
@@ -28,8 +30,22 @@ export function NotificationSettings() {
   const [settings, setSettings] = useState<NotificationSettings | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
   
-  // Mock user ID (실제로는 인증된 사용자 ID 사용)
-  const userId = 'mock-user-1';
+  const { user, loading: authLoading } = useAuth();
+
+  // 인증 체크
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const userId = user.uid;
 
   useEffect(() => {
     loadSettings();
