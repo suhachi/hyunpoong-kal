@@ -40,11 +40,13 @@ export function Cart() {
   const {
     items,
     deliveryType,
+    deliveryAddress,
     requests,
     couponDiscount,
     removeItem,
     updateQuantity,
     setDeliveryType,
+    setDeliveryAddress,
     setRequests,
     getSubtotal,
     getDeliveryFee,
@@ -166,6 +168,53 @@ export function Cart() {
         </div>
 
         <Separator />
+
+        {/* 배달 주소 입력 (배달 시만) */}
+        {deliveryType === 'delivery' && (
+          <div>
+            <h2 className="text-[#2E1C10] mb-3">배달 주소</h2>
+            {deliveryAddress ? (
+              <div className="bg-white rounded-xl p-4 border border-[#2E1C10]/10 space-y-2">
+                <p className="text-sm text-[#2E1C10]">{deliveryAddress.address}</p>
+                {deliveryAddress.detail && (
+                  <p className="text-sm text-[#2E1C10]/60">{deliveryAddress.detail}</p>
+                )}
+                {deliveryAddress.lat && deliveryAddress.lng && (
+                  <p className="text-xs text-[#2E1C10]/40 mt-2">
+                    📍 지도 미리보기는 준비 중입니다.
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => setDeliveryAddress(undefined as any)}
+                >
+                  주소 변경
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="주소를 입력하세요 (예: 서울시 강남구 테헤란로 123)"
+                  className="w-full px-4 py-2 border border-[#2E1C10]/20 rounded-lg text-sm"
+                  onBlur={(e) => {
+                    if (e.target.value.trim()) {
+                      setDeliveryAddress({
+                        address: e.target.value.trim(),
+                        detail: '',
+                      });
+                    }
+                  }}
+                />
+                <p className="text-xs text-[#2E1C10]/60">
+                  주소 검색 기능은 준비 중입니다. 주소를 직접 입력해주세요.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 배달/포장 선택 */}
         <div data-testid="cart.method">

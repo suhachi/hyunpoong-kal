@@ -10,10 +10,7 @@ import { db } from './firebase';
 import {
   storeCouponsCollection,
   storeCouponDocRef,
-  userCouponsCollection,
-  userCouponDocRef,
   type CouponDoc,
-  type UserCouponDoc,
 } from './firebase/firestore-schema';
 import {
   getDoc,
@@ -278,31 +275,18 @@ export async function getCoupons(
     return await getCouponsMock(uid, filters);
   }
 
-  // Firebase 모드: userCoupons 컬렉션에서 사용자별 쿠폰 조회
+  // Firebase 모드: 현재는 쿠폰 템플릿만 조회 (사용자별 발급 쿠폰은 별도 컬렉션 필요)
+  // TODO: 향후 userCoupons/{userId}/coupons 서브컬렉션 추가 고려
   try {
-    const userCouponColRef = userCouponsCollection(uid);
-    const q = query(
-      userCouponColRef,
-      orderBy('issuedAt', 'desc')
-    );
+    const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
+    const q = query(colRef, where('isActive', '==', true), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
     const coupons: Coupon[] = snapshot.docs.map((docSnap) => {
-      const data = docSnap.data() as UserCouponDoc;
-      return {
-        id: data.couponId,
-        uid: data.userId,
-        type: data.type,
-        amount: data.amount,
-        minSpend: data.minSpend,
-        issuedAt: timestampToMs(data.issuedAt),
-        expiresAt: timestampToMs(data.expiresAt),
-        used: data.used,
-        usedAt: data.usedAt ? timestampToMs(data.usedAt) : undefined,
-        orderId: data.orderId,
-        title: data.title,
-        description: data.description,
-      };
+      const data = docSnap.data() as CouponDoc;
+      const couponId = data.couponId || docSnap.id;
+      return buildCouponFromDoc({ ...data, couponId });
     });
 
     // 클라이언트 측 필터링
@@ -334,40 +318,29 @@ export async function getAvailableCoupons(
     return await getAvailableCouponsMock(uid, orderAmount);
   }
 
-  // Firebase 모드: userCoupons 컬렉션에서 사용 가능한 쿠폰만 조회
+  // Firebase 모드: 활성 쿠폰 중 사용 가능한 것만 조회
   try {
-    const userCouponColRef = userCouponsCollection(uid);
+    const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
     const now = new Date();
-    const nowMs = now.getTime();
-    
     const q = query(
-      userCouponColRef,
-      where('used', '==', false),
-      orderBy('issuedAt', 'desc')
+      colRef,
+      where('isActive', '==', true),
+      where('validFrom', '<=', now as any),
+      where('validUntil', '>=', now as any)
     );
     const snapshot = await getDocs(q);
 
     const coupons: Coupon[] = snapshot.docs
       .map((docSnap) => {
-        const data = docSnap.data() as UserCouponDoc;
-        return {
-          id: data.couponId,
-          uid: data.userId,
-          type: data.type,
-          amount: data.amount,
-          minSpend: data.minSpend,
-          issuedAt: timestampToMs(data.issuedAt),
-          expiresAt: timestampToMs(data.expiresAt),
-          used: data.used,
-          title: data.title,
-          description: data.description,
-        };
+        const data = docSnap.data() as CouponDoc;
+        const couponId = data.couponId || docSnap.id;
+        return buildCouponFromDoc({ ...data, couponId });
       })
       .filter(c => {
-        // 유효기간 체크
-        if (nowMs > c.expiresAt) return false;
         // 최소 주문 금액 체크
-        return orderAmount >= c.minSpend;
+        const minSpend = c.minSpend || 0;
+        return orderAmount >= minSpend;
       });
 
     return coupons;
@@ -428,57 +401,40 @@ export async function useCoupon(
     return await useCouponMock(couponId, orderId);
   }
 
-  // Firebase 모드: userCoupons 컬렉션에서 쿠폰 사용 처리
-  if (!uid) {
-    throw new Error('Firebase 모드에서는 uid가 필수입니다');
-  }
-
+  // Firebase 모드: 쿠폰 사용 횟수 증가
   try {
-    const ref = userCouponDocRef(uid, couponId);
+    const storeId = getStoreId();
+    const ref = storeCouponDocRef(storeId, couponId);
     const snapshot = await getDoc(ref);
 
     if (!snapshot.exists()) {
       throw new Error('쿠폰을 찾을 수 없습니다');
     }
 
-    const data = snapshot.data() as UserCouponDoc;
+    const data = snapshot.data() as CouponDoc;
 
     // 유효성 체크
     const now = new Date();
-    const nowMs = now.getTime();
-    const expiresAtMs = timestampToMs(data.expiresAt);
+    const validFrom = timestampToMs(data.validFrom);
+    const validUntil = timestampToMs(data.validUntil);
+    const nowTs = now.getTime();
 
-    if (data.used) {
-      throw new Error('이미 사용된 쿠폰입니다');
+    if (!data.isActive || nowTs < validFrom || nowTs > validUntil) {
+      throw new Error('만료되었거나 비활성화된 쿠폰입니다');
     }
 
-    if (nowMs > expiresAtMs) {
-      throw new Error('만료된 쿠폰입니다');
+    if (data.usageLimit && data.usageCount >= data.usageLimit) {
+      throw new Error('쿠폰 사용 횟수가 초과되었습니다');
     }
 
-    // 쿠폰 사용 처리
+    // 사용 횟수 증가
     await updateDoc(ref, {
-      used: true,
-      usedAt: serverTimestamp(),
-      orderId,
+      usageCount: data.usageCount + 1,
       updatedAt: serverTimestamp(),
     });
 
-    const updatedData = (await getDoc(ref)).data() as UserCouponDoc;
-    return {
-      id: updatedData.couponId,
-      uid: updatedData.userId,
-      type: updatedData.type,
-      amount: updatedData.amount,
-      minSpend: updatedData.minSpend,
-      issuedAt: timestampToMs(updatedData.issuedAt),
-      expiresAt: timestampToMs(updatedData.expiresAt),
-      used: updatedData.used,
-      usedAt: updatedData.usedAt ? timestampToMs(updatedData.usedAt) : undefined,
-      orderId: updatedData.orderId,
-      title: updatedData.title,
-      description: updatedData.description,
-    };
+    const updatedData = (await getDoc(ref)).data() as CouponDoc;
+    return buildCouponFromDoc({ ...updatedData, couponId });
   } catch (error) {
     console.error('Failed to use coupon in Firestore:', error);
     throw error;
@@ -497,91 +453,43 @@ export async function issueCoupon(
     return await issueCouponMock(issue, by, byName);
   }
 
-  // Firebase 모드: targetUsers 기반 개별 쿠폰 발급
+  // Firebase 모드: 쿠폰 템플릿 생성
+  // TODO: 향후 userCoupons/{userId}/coupons 서브컬렉션에 사용자별 발급 쿠폰 생성
   try {
     const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
     const now = new Date();
     const validUntil = new Date(now.getTime() + issue.expiryDays * 24 * 60 * 60 * 1000);
-    
-    // targetUsers가 없으면 전체 대상 템플릿만 생성 (기존 로직 유지)
-    if (!issue.targetUsers || issue.targetUsers.length === 0) {
-      const colRef = storeCouponsCollection(storeId);
-      const code = `COUPON-${Date.now().toString(36).toUpperCase()}`;
 
-      const couponDocData = buildCouponDocFromEntity({
-        storeId,
-        couponId: '',
-        code,
-        name: issue.title,
-        type: 'fixed',
-        value: issue.amount,
-        minOrderAmount: issue.minSpend,
-        validFrom: now,
-        validUntil,
-        isActive: true,
-        usageLimit: issue.issueLimit,
-        userLimit: issue.targetUsers?.length,
-      });
+    // 쿠폰 코드 생성 (간단한 랜덤 코드)
+    const code = `COUPON-${Date.now().toString(36).toUpperCase()}`;
 
-      const docRef = await addDoc(colRef, {
-        ...couponDocData,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+    const couponDocData = buildCouponDocFromEntity({
+      storeId,
+      couponId: '', // addDoc 시점에는 id 없음
+      code,
+      name: issue.title,
+      type: 'fixed', // CouponIssue의 type을 매핑 필요 (현재는 fixed로 가정)
+      value: issue.amount,
+      minOrderAmount: issue.minSpend,
+      validFrom: now,
+      validUntil,
+      isActive: true,
+      usageLimit: issue.issueLimit,
+      userLimit: issue.targetUsers?.length,
+    });
 
-      const snapshot = await getDoc(docRef);
-      const data = snapshot.data() as CouponDoc;
-      const couponId = snapshot.id;
+    const docRef = await addDoc(colRef, {
+      ...couponDocData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
 
-      return [buildCouponFromDoc({ ...data, couponId })];
-    }
+    const snapshot = await getDoc(docRef);
+    const data = snapshot.data() as CouponDoc;
+    const couponId = snapshot.id;
 
-    // targetUsers가 있으면 개별 사용자에게 쿠폰 발급
-    const issuedCoupons: Coupon[] = [];
-    const targetUsers = issue.targetUsers.slice(0, issue.issueLimit || issue.targetUsers.length);
-
-    for (const userId of targetUsers) {
-      const userCouponId = `coupon-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      const userCouponColRef = userCouponsCollection(userId);
-      
-      const userCouponDoc: Omit<UserCouponDoc, 'createdAt' | 'updatedAt'> = {
-        couponId: userCouponId,
-        userId,
-        storeId,
-        type: issue.type,
-        amount: issue.amount,
-        minSpend: issue.minSpend,
-        issuedAt: now as any,
-        expiresAt: validUntil as any,
-        used: false,
-        title: issue.title,
-        description: issue.description,
-        issuedBy: by,
-        issuedByName: byName,
-      };
-
-      await addDoc(userCouponColRef, {
-        ...userCouponDoc,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      // Coupon 타입으로 변환하여 반환
-      issuedCoupons.push({
-        id: userCouponId,
-        uid: userId,
-        type: issue.type,
-        amount: issue.amount,
-        minSpend: issue.minSpend,
-        issuedAt: now.getTime(),
-        expiresAt: validUntil.getTime(),
-        used: false,
-        title: issue.title,
-        description: issue.description,
-      });
-    }
-
-    return issuedCoupons;
+    return [buildCouponFromDoc({ ...data, couponId })];
   } catch (error) {
     console.error('Failed to issue coupon in Firestore:', error);
     throw error;

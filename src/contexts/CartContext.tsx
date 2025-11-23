@@ -185,9 +185,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     // 최소 주문 금액 미달 시 배달 불가
     if (subtotal < MIN_ORDER_DELIVERY) return 0;
     
-    // 실제로는 거리 기반 계산
-    // TODO: 주소에서 거리 계산 후 배달비 산정
+    // 거리 기반 배달비 계산
+    // TODO: AdminSettings에서 delivery.feeTable 읽어서 거리별 배달비 적용
+    // 현재는 기본 배달비 반환
+    // 향후: deliveryAddress.lat/lng와 매장 주소 간 거리 계산 후 feeTable에서 구간 선택
     return BASE_DELIVERY_FEE;
+  };
+
+  const isDeliveryNotAllowed = () => {
+    if (deliveryType === 'pickup') return false;
+    const subtotal = getSubtotal();
+    return subtotal < MIN_ORDER_DELIVERY;
+  };
+
+  const isPickupNotAllowed = () => {
+    if (deliveryType === 'delivery') return false;
+    const subtotal = getSubtotal();
+    return subtotal < MIN_ORDER_PICKUP;
   };
 
   const getTotalAmount = () => {
@@ -224,6 +238,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         getDeliveryFee,
         getTotalAmount,
         forceReload,
+        isDeliveryNotAllowed,
+        isPickupNotAllowed,
       }}
     >
       {children}

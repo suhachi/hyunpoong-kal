@@ -382,64 +382,6 @@ export function storeCouponDocRef(
 }
 
 /**
- * 사용자 쿠폰 문서 타입
- * 컬렉션: userCoupons/{userId}/coupons/{couponId}
- */
-export interface UserCouponDoc {
-  couponId: string;
-  userId: string;
-  storeId: string;
-  type: 'photo_review' | 'welcome' | 'event' | 'compensation' | 'admin';
-  amount: number;
-  minSpend: number;
-  issuedAt: Timestamp;
-  expiresAt: Timestamp;
-  used: boolean;
-  usedAt?: Timestamp;
-  orderId?: string;
-  title?: string;
-  description?: string;
-  issuedBy?: string;
-  issuedByName?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/**
- * 사용자 쿠폰 컬렉션 참조
- * @param userId 사용자 ID
- * @param dbInstance Firestore 인스턴스 (기본값: db)
- */
-export function userCouponsCollection(
-  userId: string,
-  dbInstance: Firestore = db,
-): CollectionReference<UserCouponDoc> {
-  return collection(
-    dbInstance,
-    'userCoupons',
-    userId,
-    'coupons',
-  ) as CollectionReference<UserCouponDoc>;
-}
-
-/**
- * 사용자 쿠폰 문서 참조
- * @param userId 사용자 ID
- * @param couponId 쿠폰 ID
- * @param dbInstance Firestore 인스턴스 (기본값: db)
- */
-export function userCouponDocRef(
-  userId: string,
-  couponId: string,
-  dbInstance: Firestore = db,
-): DocumentReference<UserCouponDoc> {
-  return doc(
-    userCouponsCollection(userId, dbInstance),
-    couponId,
-  ) as DocumentReference<UserCouponDoc>;
-}
-
-/**
  * 매장 리뷰 컬렉션 참조
  * @param storeId 매장 ID
  * @param dbInstance Firestore 인스턴스 (기본값: db)

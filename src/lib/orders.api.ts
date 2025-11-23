@@ -16,6 +16,23 @@ import type { Order, OrderStatus } from '../types/order';
  * @returns 생성된 주문 객체
  */
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
+  // 유효성 검사
+  if (!payload.deliveryType || (payload.deliveryType !== 'delivery' && payload.deliveryType !== 'pickup')) {
+    throw new Error('주문 방식이 올바르지 않습니다.');
+  }
+  if (!payload.items || payload.items.length === 0) {
+    throw new Error('주문할 메뉴가 없습니다.');
+  }
+  if (payload.deliveryType === 'delivery' && !payload.deliveryAddress) {
+    throw new Error('배달 주소를 입력해주세요.');
+  }
+  if (!payload.phone || payload.phone.trim() === '') {
+    throw new Error('전화번호를 입력해주세요.');
+  }
+  if (payload.finalAmount <= 0) {
+    throw new Error('주문 금액이 올바르지 않습니다.');
+  }
+
   if (!USE_FIREBASE) {
     // Mock 모드: localStorage 기반 repository 사용
     return await ordersRepository.createOrder(payload);

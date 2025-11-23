@@ -34,13 +34,11 @@ import {
   type OrderSortField,
   type OrderSortDirection,
 } from '../../lib/admin/orders.api';
-import { Search, SlidersHorizontal, ArrowUpDown, Ticket } from 'lucide-react';
+import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOrdersFallback } from '../../lib/fallback';
 import { getOrderStatusLabelForAdmin } from '../../lib/orders.utils';
 import { formatPrice } from '../../lib/utils';
-import { issueCoupon, type CouponIssue } from '../../lib/coupons.api';
-import { getCurrentUser } from '../../lib/auth';
 
 // 주문 상태 탭 정의
 type OrderStatusTab = 'all' | 'pending' | 'accepted' | 'cooking' | 'completed' | 'cancelled';
@@ -75,23 +73,6 @@ export function AdminOrders() {
     order: Order | null;
   }>({ open: false, order: null });
   const [cancelReason, setCancelReason] = useState('');
-
-  // 쿠폰 발급 다이얼로그
-  const [couponDialog, setCouponDialog] = useState<{
-    open: boolean;
-    order: Order | null;
-  }>({ open: false, order: null });
-  const [issuingCoupon, setIssuingCoupon] = useState(false);
-  const [couponForm, setCouponForm] = useState<CouponIssue>({
-    type: 'compensation',
-    title: '',
-    description: '',
-    amount: 3000,
-    minSpend: 0,
-    expiryDays: 30,
-    issueLimit: 1,
-    targetUsers: [],
-  });
 
   // 새 주문 알림
   const [newOrderAlert, setNewOrderAlert] = useState<{
@@ -556,164 +537,6 @@ export function AdminOrders() {
               disabled={!cancelReason.trim()}
             >
               주문 취소
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* 쿠폰 발급 다이얼로그 */}
-      <Dialog
-        open={couponDialog.open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCouponDialog({ open: false, order: null });
-            setCouponForm({
-              type: 'compensation',
-              title: '',
-              description: '',
-              amount: 3000,
-              minSpend: 0,
-              expiryDays: 30,
-              issueLimit: 1,
-              targetUsers: [],
-            });
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-md bg-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Ticket className="w-5 h-5 text-[#D61C1C]" />
-              보상 쿠폰 발급
-            </DialogTitle>
-            <DialogDescription>
-              주문번호: {couponDialog.order?.orderId}
-              <br />
-              고객에게 보상 쿠폰을 발급합니다.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>쿠폰 제목</Label>
-              <Input
-                value={couponForm.title}
-                onChange={(e) => setCouponForm({ ...couponForm, title: e.target.value })}
-                placeholder="예: 보상 쿠폰 (주문 #12345)"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>설명</Label>
-              <Textarea
-                value={couponForm.description}
-                onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
-                placeholder="쿠폰 설명을 입력하세요"
-                rows={2}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>할인 금액 (원)</Label>
-                <Input
-                  type="number"
-                  value={couponForm.amount}
-                  onChange={(e) => setCouponForm({ ...couponForm, amount: Number(e.target.value) })}
-                  min="1000"
-                  step="1000"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>최소 주문 (원)</Label>
-                <Input
-                  type="number"
-                  value={couponForm.minSpend}
-                  onChange={(e) => setCouponForm({ ...couponForm, minSpend: Number(e.target.value) })}
-                  min="0"
-                  step="1000"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>유효 기간 (일)</Label>
-              <Input
-                type="number"
-                value={couponForm.expiryDays}
-                onChange={(e) => setCouponForm({ ...couponForm, expiryDays: Number(e.target.value) })}
-                min="1"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setCouponDialog({ open: false, order: null });
-                setCouponForm({
-                  type: 'compensation',
-                  title: '',
-                  description: '',
-                  amount: 3000,
-                  minSpend: 0,
-                  expiryDays: 30,
-                  issueLimit: 1,
-                  targetUsers: [],
-                });
-              }}
-              disabled={issuingCoupon}
-            >
-              취소
-            </Button>
-            <Button
-              onClick={async () => {
-                if (!couponDialog.order || !couponForm.title.trim() || !couponForm.description.trim()) {
-                  toast.error('제목과 설명을 입력하세요');
-                  return;
-                }
-
-                const user = getCurrentUser();
-                if (!user) {
-                  toast.error('로그인이 필요합니다');
-                  return;
-                }
-
-                setIssuingCoupon(true);
-                try {
-                  const issued = await issueCoupon(
-                    {
-                      ...couponForm,
-                      targetUsers: [couponDialog.order.userId],
-                    },
-                    user.uid,
-                    user.name
-                  );
-                  
-                  toast.success(`쿠폰 ${issued.length}장을 발급했습니다`);
-                  setCouponDialog({ open: false, order: null });
-                  setCouponForm({
-                    type: 'compensation',
-                    title: '',
-                    description: '',
-                    amount: 3000,
-                    minSpend: 0,
-                    expiryDays: 30,
-                    issueLimit: 1,
-                    targetUsers: [],
-                  });
-                } catch (error: any) {
-                  console.error('Failed to issue coupon:', error);
-                  toast.error(error.message || '쿠폰 발급에 실패했습니다');
-                } finally {
-                  setIssuingCoupon(false);
-                }
-              }}
-              disabled={issuingCoupon}
-              className="bg-[#D61C1C] hover:bg-[#B81515] text-white"
-            >
-              {issuingCoupon ? '발급 중...' : '발급하기'}
             </Button>
           </DialogFooter>
         </DialogContent>
