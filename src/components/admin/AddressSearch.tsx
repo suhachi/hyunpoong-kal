@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Search, Loader2 } from 'lucide-react';
+import { loadGoogleMaps } from '../../lib/googleMaps';
 import { loadKakaoMaps } from '../../lib/kakaoMaps';
 import { toast } from 'sonner';
 
@@ -23,22 +24,34 @@ export function AddressSearch({
 }: AddressSearchProps) {
   const [searchQuery, setSearchQuery] = useState(value);
   const [searching, setSearching] = useState(false);
-  const [kakaoReady, setKakaoReady] = useState(false);
+  const [mapsReady, setMapsReady] = useState(false);
+  const [mapProvider, setMapProvider] = useState<'google' | 'kakao' | null>(null);
 
   // value 변경 시 searchQuery 동기화
   useEffect(() => {
     setSearchQuery(value);
   }, [value]);
 
-  // 카카오맵 로드 확인
+  // 지도 API 로드 확인 (구글맵 우선)
   useEffect(() => {
-    loadKakaoMaps()
+    loadGoogleMaps()
       .then(() => {
-        setKakaoReady(true);
+        setMapsReady(true);
+        setMapProvider('google');
+      })
+      .catch(() => {
+        // 구글맵 실패 시 카카오맵 시도
+        return loadKakaoMaps();
+      })
+      .then((kakao) => {
+        if (kakao) {
+          setMapsReady(true);
+          setMapProvider('kakao');
+        }
       })
       .catch(() => {
         // 키가 없어도 주소 입력은 가능하도록
-        setKakaoReady(false);
+        setMapsReady(false);
       });
   }, []);
 
@@ -117,9 +130,9 @@ export function AddressSearch({
           )}
         </Button>
       </div>
-      {!kakaoReady && (
+      {!mapsReady && (
         <p className="text-xs text-[#8B7355]">
-          주소 검색 기능을 사용하려면 카카오맵 키가 필요합니다. 주소를 직접 입력할 수 있습니다.
+          주소 검색 기능을 사용하려면 구글맵 또는 카카오맵 키가 필요합니다. 주소를 직접 입력할 수 있습니다.
         </p>
       )}
     </div>
