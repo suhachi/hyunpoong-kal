@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-11-22-2149  
+**Generated**: 2025-11-23-2014  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -11,6 +11,182 @@
 Complete source code of reusable components.
 
 ---
+## src\components\admin\AddressSearch.tsx
+
+```tsx
+/**
+ * 주소 검색 컴포넌트 (구글맵/카카오맵 주소 검색 API 사용)
+ * KS컴퍼니 (사업자번호: 553-17-00098)
+ */
+
+import { useState, useEffect } from 'react';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Search, Loader2 } from 'lucide-react';
+import { loadGoogleMaps } from '../../lib/googleMaps';
+import { loadKakaoMaps } from '../../lib/kakaoMaps';
+import { toast } from 'sonner';
+
+type AddressSearchProps = {
+  value: string;
+  onChange: (address: string, lat?: number, lng?: number) => void;
+  placeholder?: string;
+};
+
+export function AddressSearch({
+  value,
+  onChange,
+  placeholder = '주소를 검색하세요 (예: 대구광역시 달성군 현풍면)',
+}: AddressSearchProps) {
+  const [searchQuery, setSearchQuery] = useState(value);
+  const [searching, setSearching] = useState(false);
+  const [mapsReady, setMapsReady] = useState(false);
+  const [currentProvider, setCurrentProvider] = useState<'google' | 'kakao' | null>(null);
+
+  // value 변경 시 searchQuery 동기화
+  useEffect(() => {
+    setSearchQuery(value);
+  }, [value]);
+
+  // 지도 API 로드 확인 (구글맵 우선)
+  useEffect(() => {
+    loadGoogleMaps()
+      .then(() => {
+        setMapsReady(true);
+        setCurrentProvider('google');
+      })
+      .catch(() => {
+        // 구글맵 실패 시 카카오맵 시도
+        return loadKakaoMaps();
+      })
+      .then((kakao) => {
+        if (kakao) {
+          setMapsReady(true);
+          setCurrentProvider('kakao');
+        }
+      })
+      .catch(() => {
+        // 키가 없어도 주소 입력은 가능하도록
+        setMapsReady(false);
+      });
+  }, []);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      toast.error('주소를 입력해주세요');
+      return;
+    }
+
+    if (!mapsReady) {
+      // 지도 API 키가 없으면 주소만 저장
+      onChange(searchQuery.trim());
+      return;
+    }
+
+    setSearching(true);
+    try {
+      if (currentProvider === 'google' && window.google && window.google.maps) {
+        // 구글맵 Geocoding API 사용
+        const geocoder = new window.google.maps.Geocoder();
+        
+        geocoder.geocode({ address: searchQuery.trim() }, (results: any[], status: any) => {
+          setSearching(false);
+          
+          if (status === window.google.maps.GeocoderStatus.OK && results && results.length > 0) {
+            const firstResult = results[0];
+            const location = firstResult.geometry.location;
+            const lat = location.lat();
+            const lng = location.lng();
+            const address = firstResult.formatted_address;
+            
+            onChange(address, lat, lng);
+            toast.success('주소를 찾았습니다');
+          } else {
+            toast.error('주소를 찾을 수 없습니다');
+            onChange(searchQuery.trim()); // 주소만 저장
+          }
+        });
+      } else if (currentProvider === 'kakao' && window.kakao && window.kakao.maps && window.kakao.maps.services) {
+        // 카카오맵 주소 검색 API 사용
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        
+        geocoder.addressSearch(searchQuery.trim(), (result: any[], status: any) => {
+          setSearching(false);
+          
+          if (status === window.kakao.maps.services.Status.OK) {
+            if (result.length > 0) {
+              const firstResult = result[0];
+              const lat = parseFloat(firstResult.y);
+              const lng = parseFloat(firstResult.x);
+              const address = firstResult.address_name;
+              
+              onChange(address, lat, lng);
+              toast.success('주소를 찾았습니다');
+            } else {
+              toast.error('주소를 찾을 수 없습니다');
+              onChange(searchQuery.trim()); // 주소만 저장
+            }
+          } else {
+            toast.error('주소 검색에 실패했습니다');
+            onChange(searchQuery.trim()); // 주소만 저장
+          }
+        });
+      } else {
+        toast.error('지도 서비스를 사용할 수 없습니다');
+        onChange(searchQuery.trim());
+        setSearching(false);
+      }
+    } catch (error) {
+      console.error('[AddressSearch] Search failed:', error);
+      setSearching(false);
+      toast.error('주소 검색 중 오류가 발생했습니다');
+      onChange(searchQuery.trim()); // 주소만 저장
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <Input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder={placeholder}
+          className="bg-gray-50 flex-1"
+          disabled={searching}
+        />
+        <Button
+          type="button"
+          onClick={handleSearch}
+          disabled={searching || !searchQuery.trim()}
+          className="bg-[#D61C1C] hover:bg-[#B81515]"
+        >
+          {searching ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Search className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
+      {!mapsReady && (
+        <p className="text-xs text-[#8B7355]">
+          주소 검색 기능을 사용하려면 구글맵 또는 카카오맵 키가 필요합니다. 주소를 직접 입력할 수 있습니다.
+        </p>
+      )}
+    </div>
+  );
+}
+
+```
+
+---
+
 ## src\components\admin\BusinessHoursForm.tsx
 
 ```tsx
@@ -901,9 +1077,11 @@ import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Plus, X, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Plus, X, Upload, Image as ImageIcon, Trash2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '../../lib/utils';
+import { uploadMenuImage, validateImageFile } from '../../lib/storage';
+import { USE_FIREBASE } from '../../config/env';
 
 interface MenuCreateDialogProps {
   open: boolean;
@@ -927,7 +1105,6 @@ export function MenuCreateDialog({
   const [isAvailable, setIsAvailable] = useState(true);
 
   // 이미지
-  const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -962,29 +1139,44 @@ export function MenuCreateDialog({
     );
   };
 
-  // 이미지 URL 설정
-  const handleImageUrlChange = (url: string) => {
-    setImageUrl(url);
-    setImagePreview(url);
-    setImageFile(null);
-  };
-
   // 이미지 파일 선택 핸들러
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // 파일 검증
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        toast.error(validation.error || '이미지 파일 검증에 실패했습니다.');
+        e.target.value = ''; // 파일 선택 초기화
+        return;
+      }
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
-      setImageUrl('');
     }
   };
 
-  // 이미지 업로드 함수 (Firebase Storage 연동 필요, 여기선 mock)
+  // 이미지 업로드 함수
   const uploadImage = async (file: File): Promise<string> => {
-    // TODO: 실제 Firebase Storage 업로드 구현 필요
-    // 예시: await uploadToFirebase(file)
-    // 여기선 임시로 local preview URL 반환
-    return URL.createObjectURL(file);
+    // 파일 검증
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      throw new Error(validation.error || '이미지 파일 검증에 실패했습니다.');
+    }
+
+    if (USE_FIREBASE) {
+      // Firebase Storage에 업로드
+      try {
+        const result = await uploadMenuImage(file);
+        console.log('[MenuCreateDialog] Image uploaded to Firebase Storage:', result.path);
+        return result.url;
+      } catch (error: any) {
+        console.error('[MenuCreateDialog] Firebase Storage upload failed:', error);
+        throw new Error(error.message || '이미지 업로드에 실패했습니다.');
+      }
+    } else {
+      // Mock 모드: 임시 blob URL 반환
+      return URL.createObjectURL(file);
+    }
   };
 
   // 옵션 그룹 선택/해제
@@ -1006,7 +1198,6 @@ export function MenuCreateDialog({
     setAllergens('');
     setOrigin('');
     setIsAvailable(true);
-    setImageUrl('');
     setImagePreview('');
     setImageFile(null);
     setSelectedOptionGroupIds([]);
@@ -1014,44 +1205,79 @@ export function MenuCreateDialog({
 
   // 저장 핸들러
   const handleSave = async () => {
+    console.log('[MenuCreateDialog] handleSave called');
     // 검증
     if (!name.trim()) {
+      console.log('[MenuCreateDialog] Validation failed: name is empty');
       toast.error('메뉴 이름을 입력하세요');
       return;
     }
     if (!price || parseFloat(price) < 0) {
+      console.log('[MenuCreateDialog] Validation failed: invalid price');
       toast.error('올바른 가격을 입력하세요');
       return;
     }
-    if (!imageUrl.trim() && !imageFile) {
-      toast.error('이미지 URL 또는 파일을 입력하세요');
+    if (!imageFile) {
+      console.log('[MenuCreateDialog] Validation failed: no image file');
+      toast.error('이미지 파일을 선택하세요');
       return;
     }
+    console.log('[MenuCreateDialog] Validation passed, starting save process');
     setLoading(true);
     try {
       const selectedGroups = availableOptionGroups.filter(group =>
         selectedOptionGroupIds.includes(group.id)
       );
-      let finalImageUrl = imageUrl.trim();
-      if (imageFile) {
-        finalImageUrl = await uploadImage(imageFile);
+      console.log('[MenuCreateDialog] Selected option groups:', selectedGroups.length);
+      // 이미지 파일 업로드
+      console.log('[MenuCreateDialog] Uploading image file...');
+      console.log('[MenuCreateDialog] USE_FIREBASE:', USE_FIREBASE);
+      let finalImageUrl: string;
+      if (USE_FIREBASE) {
+        try {
+          // Firebase 모드: 임시 ID로 업로드 (메뉴 생성 후 실제 ID로 업데이트 필요)
+          const tempMenuId = `temp-${Date.now()}`;
+          console.log('[MenuCreateDialog] Calling uploadMenuImage with tempMenuId:', tempMenuId);
+          const result = await uploadMenuImage(imageFile!, tempMenuId);
+          finalImageUrl = result.url;
+          console.log('[MenuCreateDialog] Image uploaded to Firebase Storage:', result.path);
+          console.log('[MenuCreateDialog] Firebase Storage URL:', finalImageUrl);
+        } catch (error: any) {
+          console.error('[MenuCreateDialog] Firebase Storage upload failed:', error);
+          toast.error('이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Mock 모드: blob URL 사용
+        console.log('[MenuCreateDialog] Mock mode: using blob URL');
+        finalImageUrl = await uploadImage(imageFile!);
       }
+      console.log('[MenuCreateDialog] Image uploaded, URL:', finalImageUrl);
+      // allergens를 string[]로 변환 (쉼표로 구분된 문자열을 배열로 변환)
+      const allergensArray = allergens.trim()
+        ? allergens.split(',').map(a => a.trim()).filter(a => a.length > 0)
+        : [];
       const menuData: Partial<Menu> = {
         name: name.trim(),
         category,
         price: parseFloat(price),
         description: description.trim(),
         badges: selectedBadges,
-        allergens: allergens.trim(),
+        allergens: allergensArray,
         origin: origin.trim() || '국내산',
         isAvailable,
         image: finalImageUrl,
         optionGroups: selectedGroups,
       };
+      console.log('[MenuCreateDialog] menuData prepared:', menuData);
+      console.log('[MenuCreateDialog] Calling onSave...');
       await onSave(menuData);
+      console.log('[MenuCreateDialog] onSave completed successfully');
       resetForm();
       onOpenChange(false);
     } catch (error: any) {
+      console.error('[MenuCreateDialog] Error in handleSave:', error);
       toast.error(error.message || '메뉴 등록에 실패했습니다');
     } finally {
       setLoading(false);
@@ -1061,7 +1287,7 @@ export function MenuCreateDialog({
   // --- JSX 반환 시작 ---
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-50">
         <DialogHeader>
           <DialogTitle>메뉴 등록</DialogTitle>
           <DialogDescription>
@@ -1070,28 +1296,19 @@ export function MenuCreateDialog({
         </DialogHeader>
         <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
           <div className="space-y-6">
-            {/* 이미지 등록 (URL 또는 파일) */}
+            {/* 이미지 파일 업로드 */}
             <div>
-              <Label htmlFor="imageUrl">이미지 URL</Label>
-              <Input
-                id="imageUrl"
-                type="url"
-                placeholder="https://example.com/image.jpg"
-                value={imageUrl}
-                onChange={e => handleImageUrlChange(e.target.value)}
-                disabled={!!imageFile}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                권장: 1600px, WebP 형식, 3MB 이하
-              </p>
-              <Label htmlFor="imageFile" className="mt-2">이미지 파일 업로드</Label>
+              <Label htmlFor="imageFile">이미지 파일 *</Label>
               <Input
                 id="imageFile"
                 type="file"
                 accept="image/*"
                 onChange={handleImageFileChange}
-                disabled={!!imageUrl}
+                required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                권장: 1600px, WebP 형식, 3MB 이하
+              </p>
               {/* 이미지 미리보기 */}
               {imagePreview && (
                 <div className="mt-3 relative">
@@ -1101,6 +1318,7 @@ export function MenuCreateDialog({
                     className="w-full h-48 object-cover rounded-lg"
                     onError={() => {
                       setImagePreview('');
+                      setImageFile(null);
                       toast.error('이미지를 불러올 수 없습니다');
                     }}
                   />
@@ -1110,7 +1328,6 @@ export function MenuCreateDialog({
                     className="absolute top-2 right-2"
                     onClick={() => {
                       setImagePreview('');
-                      setImageUrl('');
                       setImageFile(null);
                     }}
                   >
@@ -1118,6 +1335,18 @@ export function MenuCreateDialog({
                   </Button>
                 </div>
               )}
+            </div>
+            {/* 메뉴 이름 */}
+            <div>
+              <Label htmlFor="name">메뉴 이름 *</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="예: 닭칼국수"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+              />
             </div>
             {/* 카테고리 */}
             <div>
@@ -1162,16 +1391,31 @@ export function MenuCreateDialog({
             <div>
               <Label>배지</Label>
               <div className="flex flex-wrap gap-2 mt-2">
-                {Object.entries(BADGE_LABELS).map(([key, label]) => (
-                  <Badge
-                    key={key}
-                    variant={selectedBadges.includes(key as MenuBadge) ? 'default' : 'outline'}
-                    className="cursor-pointer"
-                    onClick={() => handleToggleBadge(key as MenuBadge)}
-                  >
-                    {label}
-                  </Badge>
-                ))}
+                {Object.entries(BADGE_LABELS).map(([key, label]) => {
+                  const isSelected = selectedBadges.includes(key as MenuBadge);
+                  const badgeKey = key as MenuBadge;
+                  // 배지별 색상 정의
+                  const badgeColors: Record<MenuBadge, { selected: string; unselected: string }> = {
+                    best: { selected: 'bg-red-500 text-white border-red-500', unselected: 'bg-red-50 text-red-600 border-red-200' },
+                    signature: { selected: 'bg-purple-500 text-white border-purple-500', unselected: 'bg-purple-50 text-purple-600 border-purple-200' },
+                    spicy: { selected: 'bg-orange-500 text-white border-orange-500', unselected: 'bg-orange-50 text-orange-600 border-orange-200' },
+                    cold: { selected: 'bg-blue-500 text-white border-blue-500', unselected: 'bg-blue-50 text-blue-600 border-blue-200' },
+                    seasonal: { selected: 'bg-green-500 text-white border-green-500', unselected: 'bg-green-50 text-green-600 border-green-200' },
+                  };
+                  const colors = badgeColors[badgeKey];
+                  return (
+                    <Badge
+                      key={key}
+                      variant={isSelected ? 'default' : 'outline'}
+                      className={`cursor-pointer border-2 transition-colors ${
+                        isSelected ? colors.selected : colors.unselected
+                      }`}
+                      onClick={() => handleToggleBadge(badgeKey)}
+                    >
+                      {label}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
             {/* 옵션 그룹 등 기타 필드 추가 필요시 여기에 */}
@@ -1404,7 +1648,7 @@ export function MenuCSVImport({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-xl p-8 shadow-lg">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto !bg-gray-50 rounded-xl p-8 shadow-lg">
         <DialogHeader>
           <DialogTitle>CSV 일괄 등록</DialogTitle>
           <DialogDescription>
@@ -1570,6 +1814,10 @@ import {
 } from '../ui/select';
 import { formatPrice } from '../../lib/utils';
 import { toast } from 'sonner';
+import { Checkbox } from '../ui/checkbox';
+import { Clock } from 'lucide-react';
+import { uploadMenuImage, validateImageFile, deleteImageFromStorage } from '../../lib/storage';
+import { USE_FIREBASE } from '../../config/env';
 
 interface MenuEditDialogProps {
   menu: Menu | null;
@@ -1594,6 +1842,11 @@ export function MenuEditDialog({
   const [imageUrl, setImageUrl] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // 시간제 판매 설정
+  const [timeLimitEnabled, setTimeLimitEnabled] = useState(false);
+  const [timeLimitStart, setTimeLimitStart] = useState('11:00');
+  const [timeLimitEnd, setTimeLimitEnd] = useState('14:00');
 
   // 다이얼로그 열릴 때 또는 menu가 변경될 때 초기값 설정
   useEffect(() => {
@@ -1605,6 +1858,16 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl(menu.image || '');
       setImageFile(null);
+      // 시간제 판매 설정 초기화
+      if (menu.availableHours) {
+        setTimeLimitEnabled(true);
+        setTimeLimitStart(menu.availableHours.start);
+        setTimeLimitEnd(menu.availableHours.end);
+      } else {
+        setTimeLimitEnabled(false);
+        setTimeLimitStart('11:00');
+        setTimeLimitEnd('14:00');
+      }
       // 파일 입력 필드 리셋
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -1618,6 +1881,9 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl('');
       setImageFile(null);
+      setTimeLimitEnabled(false);
+      setTimeLimitStart('11:00');
+      setTimeLimitEnd('14:00');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -1642,22 +1908,38 @@ export function MenuEditDialog({
     }
   };
 
-  // 이미지 업로드 함수 (Firebase Storage 연동 필요, 여기선 mock)
+  // 이미지 업로드 함수
   const uploadImage = async (file: File): Promise<string> => {
-    // TODO: 실제 Firebase Storage 업로드 구현 필요
-    // 예시: await uploadToFirebase(file)
-    // Mock 환경에서는 Base64로 변환하여 저장 (새로고침해도 유지됨)
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        resolve(base64String);
-      };
-      reader.onerror = () => {
-        reject(new Error('이미지 읽기에 실패했습니다'));
-      };
-      reader.readAsDataURL(file);
-    });
+    // 파일 검증
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      throw new Error(validation.error || '이미지 파일 검증에 실패했습니다.');
+    }
+
+    if (USE_FIREBASE && menu?.menuId) {
+      // Firebase Storage에 업로드 (기존 이미지 삭제는 나중에 처리)
+      try {
+        const result = await uploadMenuImage(file, menu.menuId);
+        console.log('[MenuEditDialog] Image uploaded to Firebase Storage:', result.path);
+        return result.url;
+      } catch (error: any) {
+        console.error('[MenuEditDialog] Firebase Storage upload failed:', error);
+        throw new Error(error.message || '이미지 업로드에 실패했습니다.');
+      }
+    } else {
+      // Mock 모드 또는 menuId가 없는 경우: Base64로 변환
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result as string;
+          resolve(base64String);
+        };
+        reader.onerror = () => {
+          reject(new Error('이미지 읽기에 실패했습니다'));
+        };
+        reader.readAsDataURL(file);
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1667,7 +1949,7 @@ export function MenuEditDialog({
       return;
     }
 
-    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string } = {};
+    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null } = {};
 
     // 메뉴명 변경
     if (name.trim() !== menu.name) {
@@ -1707,6 +1989,19 @@ export function MenuEditDialog({
       updates.image = imageUrl;
     }
 
+    // 시간제 판매 설정 변경 감지
+    const currentHours = menu.availableHours;
+    const newHours = timeLimitEnabled ? { start: timeLimitStart, end: timeLimitEnd } : null;
+    const hoursChanged = 
+      (currentHours?.start !== newHours?.start) ||
+      (currentHours?.end !== newHours?.end) ||
+      (currentHours && !newHours) ||
+      (!currentHours && newHours);
+    
+    if (hoursChanged) {
+      updates.availableHours = newHours;
+    }
+
     if (Object.keys(updates).length === 0) {
       return;
     }
@@ -1726,7 +2021,7 @@ export function MenuEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white rounded-xl p-6 shadow-lg">
+      <DialogContent className="sm:max-w-md !bg-gray-50 rounded-xl p-6 shadow-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>메뉴 수정</DialogTitle>
@@ -1829,6 +2124,51 @@ export function MenuEditDialog({
               <p className="text-xs text-gray-500 text-right">
                 {description.length}/200자
               </p>
+            </div>
+
+            {/* 시간제 판매 설정 */}
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <Label className="text-base font-medium">시간제 판매 설정</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="timeLimitEnabled"
+                  checked={timeLimitEnabled}
+                  onCheckedChange={(checked) => setTimeLimitEnabled(checked as boolean)}
+                />
+                <Label htmlFor="timeLimitEnabled" className="cursor-pointer">
+                  시간제 판매 사용
+                </Label>
+              </div>
+              {timeLimitEnabled && (
+                <div className="grid grid-cols-2 gap-4 pl-6">
+                  <div>
+                    <Label htmlFor="timeLimitStart">시작 시간</Label>
+                    <Input
+                      id="timeLimitStart"
+                      type="time"
+                      value={timeLimitStart}
+                      onChange={e => setTimeLimitStart(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="timeLimitEnd">종료 시간</Label>
+                    <Input
+                      id="timeLimitEnd"
+                      type="time"
+                      value={timeLimitEnd}
+                      onChange={e => setTimeLimitEnd(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+              {timeLimitEnabled && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-800">
+                  💡 <strong>{timeLimitStart} ~ {timeLimitEnd}</strong> 시간대에만 주문이 가능합니다.
+                </div>
+              )}
             </div>
 
             {/* 변경 사유 */}
@@ -2561,7 +2901,7 @@ export function OptionGroupsManagement() {
 
       {/* 옵션 그룹 생성/수정 다이얼로그 */}
       <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
-        <DialogContent>
+        <DialogContent className="!bg-gray-50">
           <DialogHeader>
             <DialogTitle>
               {editingGroup ? '옵션 그룹 수정' : '옵션 그룹 추가'}
@@ -2635,7 +2975,7 @@ export function OptionGroupsManagement() {
 
       {/* 옵션 항목 추가/수정 다이얼로그 */}
       <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
-        <DialogContent>
+        <DialogContent className="!bg-gray-50">
           <DialogHeader>
             <DialogTitle>
               {editingItem ? '옵션 수정' : '옵션 추가'}
@@ -2885,7 +3225,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg bg-white">
+      <SheetContent className="w-full sm:max-w-lg !bg-gray-50">
         <SheetHeader>
           <SheetTitle>주문 상세</SheetTitle>
           <SheetDescription>{order.orderId}</SheetDescription>
@@ -4261,6 +4601,214 @@ function formatDate(timestamp: number): string {
 
 ---
 
+## src\components\admin\StoreLocationPicker.tsx
+
+```tsx
+/**
+ * 가게 위치 선택 컴포넌트 (관리자용)
+ * 지도에서 클릭하여 가게 위치를 선택할 수 있습니다.
+ * KS컴퍼니 (사업자번호: 553-17-00098)
+ */
+
+import { useEffect, useRef, useState } from 'react';
+import { loadGoogleMaps } from '../../lib/googleMaps';
+import { loadKakaoMaps } from '../../lib/kakaoMaps';
+import { MapPin } from 'lucide-react';
+
+type StoreLocationPickerProps = {
+  lat?: number | null;
+  lng?: number | null;
+  addressText?: string;
+  onChange: (value: { lat: number; lng: number }) => void;
+};
+
+export function StoreLocationPicker({
+  lat,
+  lng,
+  addressText,
+  onChange,
+}: StoreLocationPickerProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    let map: any = null;
+    let marker: any = null;
+
+    // 구글맵 우선 시도
+    loadGoogleMaps()
+      .then((google) => {
+        if (!isMounted || !containerRef.current) return;
+
+        // 기본 좌표: 서울 시청 (37.5665, 126.9780)
+        const defaultLat = 37.5665;
+        const defaultLng = 126.9780;
+
+        const center = new google.maps.LatLng(
+          lat ?? defaultLat,
+          lng ?? defaultLng
+        );
+
+        // 지도 생성
+        map = new google.maps.Map(containerRef.current, {
+          center,
+          zoom: 15,
+          mapTypeControl: false,
+          streetViewControl: false,
+        });
+
+        mapRef.current = map;
+
+        // 마커 생성
+        marker = new google.maps.Marker({
+          position: center,
+          map,
+          draggable: true,
+        });
+
+        markerRef.current = marker;
+
+        // 지도 클릭 이벤트
+        map.addListener('click', (event: any) => {
+          const clickedLatLng = event.latLng;
+          marker.setPosition(clickedLatLng);
+          
+          onChange({
+            lat: clickedLatLng.lat(),
+            lng: clickedLatLng.lng(),
+          });
+        });
+
+        // 마커 드래그 이벤트
+        marker.addListener('dragend', () => {
+          const position = marker.getPosition();
+          onChange({
+            lat: position.lat(),
+            lng: position.lng(),
+          });
+        });
+
+        setLoading(false);
+      })
+      .catch(() => {
+        // 구글맵 실패 시 카카오맵 시도
+        console.log('[StoreLocationPicker] Google Maps failed, trying Kakao Maps');
+        return loadKakaoMaps();
+      })
+      .then((kakao) => {
+        if (!isMounted || !containerRef.current || map) return; // 이미 구글맵이 로드되었으면 스킵
+
+        if (!kakao) return;
+
+        // 카카오맵 사용
+        const defaultLat = 37.5665;
+        const defaultLng = 126.9780;
+
+        const center = new kakao.maps.LatLng(
+          lat ?? defaultLat,
+          lng ?? defaultLng
+        );
+
+        map = new kakao.maps.Map(containerRef.current, {
+          center,
+          level: 3,
+        });
+
+        mapRef.current = map;
+
+        marker = new kakao.maps.Marker({
+          position: center,
+          map,
+        });
+
+        markerRef.current = marker;
+
+        kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
+          const clickedLatLng = mouseEvent.latLng;
+          marker.setPosition(clickedLatLng);
+          
+          onChange({
+            lat: clickedLatLng.getLat(),
+            lng: clickedLatLng.getLng(),
+          });
+        });
+
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('[StoreLocationPicker] Failed to load map', err);
+        setError('지도를 불러오지 못했습니다.');
+        setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // 초기 로드만
+
+  // lat/lng 변경 시 마커 위치 업데이트
+  useEffect(() => {
+    if (!mapRef.current || !markerRef.current) return;
+    if (lat == null || lng == null) return;
+
+    // 구글맵인지 카카오맵인지 확인
+    if (window.google && window.google.maps) {
+      const position = new window.google.maps.LatLng(lat, lng);
+      markerRef.current.setPosition(position);
+      mapRef.current.setCenter(position);
+    } else if (window.kakao && window.kakao.maps) {
+      const position = new window.kakao.maps.LatLng(lat, lng);
+      markerRef.current.setPosition(position);
+      mapRef.current.setCenter(position);
+    }
+  }, [lat, lng]);
+
+  return (
+    <div className="space-y-2">
+      {addressText && (
+        <p className="text-xs text-[#8B7355] mb-2">
+          <MapPin className="w-3 h-3 inline mr-1" />
+          주소: {addressText}
+        </p>
+      )}
+      
+      {loading && !error && (
+        <div className="flex items-center justify-center py-8 border rounded-md bg-gray-50">
+          <p className="text-sm text-[#8B7355]">지도를 불러오는 중입니다...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center justify-center py-8 border rounded-md bg-red-50">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          <p className="text-xs text-[#8B7355] mb-2">
+            지도를 클릭해서 가게 위치를 선택하세요.
+          </p>
+          <div
+            ref={containerRef}
+            className="w-full rounded-md border border-[#E5DDD5] overflow-hidden"
+            style={{ minHeight: 280 }}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+
+```
+
+---
+
 ## src\components\admin\TimeSettingDialog.tsx
 
 ```tsx
@@ -4334,7 +4882,7 @@ export function TimeSettingDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white rounded-xl p-6 shadow-lg">
+      <DialogContent className="sm:max-w-md !bg-gray-50 rounded-xl p-6 shadow-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>시간제 판매 설정</DialogTitle>
@@ -4569,7 +5117,7 @@ export function Modal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={sizeClasses[size] + ' bg-white'}>
+      <DialogContent className={sizeClasses[size] + ' !bg-gray-50'}>
         <DialogHeader>
           <DialogTitle className="text-[#333]">{title}</DialogTitle>
           {description && (

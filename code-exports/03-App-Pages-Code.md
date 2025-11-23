@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-11-22-2149  
+**Generated**: 2025-11-23-2014  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -1530,17 +1530,26 @@ export function Coupons() {
  */
 
 import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
-import { User, ShoppingBag, Ticket, Gift, Bell, MessageSquare, LogOut, Settings } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { User, ShoppingBag, Ticket, Gift, Bell, MessageSquare, LogOut, Settings, Store, Phone, MapPin, Clock, Loader2 } from "lucide-react";
 import { toast } from 'sonner';
 import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
+import { getDoc } from "firebase/firestore";
+import { storeDocRef, type StoreDoc } from "../../lib/firebase/firestore-schema";
+import { STORE_ID } from "../../config/env";
+import { StoreLocationMap } from "../../components/common/StoreLocationMap";
 
 export function My() {
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const [showStoreInfo, setShowStoreInfo] = useState(false);
+  const [storeInfo, setStoreInfo] = useState<StoreDoc | null>(null);
+  const [loadingStoreInfo, setLoadingStoreInfo] = useState(false);
 
   // 로딩 중
   if (loading) {
@@ -1571,6 +1580,33 @@ export function My() {
   const userName = user?.displayName || "사용자";
   const userEmail = user?.email || "";
   const recentOrdersCount = 12; // TODO: 실제 주문 수로 대체
+
+  // 가게 정보 로드
+  const loadStoreInfo = async () => {
+    setLoadingStoreInfo(true);
+    try {
+      const docRef = storeDocRef(STORE_ID);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data() as StoreDoc;
+        setStoreInfo(data);
+      } else {
+        toast.error('가게 정보를 찾을 수 없습니다');
+      }
+    } catch (error: any) {
+      console.error('[My] Failed to load store info:', error);
+      toast.error('가게 정보를 불러오는데 실패했습니다');
+    } finally {
+      setLoadingStoreInfo(false);
+    }
+  };
+
+  const handleStoreInfoClick = () => {
+    if (!showStoreInfo) {
+      loadStoreInfo();
+    }
+    setShowStoreInfo(true);
+  };
 
   return (
     <div className="p-4 space-y-6 pb-24">
@@ -1710,22 +1746,44 @@ export function My() {
           </Card>
         </Link>
 
-        {/* 1:1 문의 */}
-        <Link to="/support" className="block col-span-2">
-          <Card className="rounded-2xl hover:shadow-md transition-all hover:scale-[1.02] border-[#E5DDD5]">
+        {/* 가게 정보 */}
+        <button
+          onClick={handleStoreInfoClick}
+          className="block text-left"
+        >
+          <Card className="rounded-2xl hover:shadow-md transition-all hover:scale-[1.02] border-[#E5DDD5] h-full">
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-green-600" />
-                </div>
-                <div>
-                  <CardTitle className="text-[#2E1C10]">1:1 문의</CardTitle>
-                  <p className="text-sm text-[#8B7355] mt-1">
-                    고객센터 채팅 · FAQ · 운영시간 안내
-                  </p>
-                </div>
+              <div className="w-12 h-12 rounded-full bg-[#D61C1C]/10 flex items-center justify-center mb-2">
+                <Store className="w-6 h-6 text-[#D61C1C]" />
               </div>
+              <CardTitle className="text-[#2E1C10]">가게 정보</CardTitle>
             </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-sm text-[#8B7355]">
+                가게 위치 및 연락처
+                <br />
+                영업시간 확인
+              </p>
+            </CardContent>
+          </Card>
+        </button>
+
+        {/* 1:1 문의 */}
+        <Link to="/support" className="block">
+          <Card className="rounded-2xl hover:shadow-md transition-all hover:scale-[1.02] border-[#E5DDD5] h-full">
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mb-2">
+                <MessageSquare className="w-6 h-6 text-green-600" />
+              </div>
+              <CardTitle className="text-[#2E1C10]">1:1 문의</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-sm text-[#8B7355]">
+                고객센터 채팅
+                <br />
+                FAQ · 운영시간 안내
+              </p>
+            </CardContent>
           </Card>
         </Link>
       </div>
@@ -1740,6 +1798,113 @@ export function My() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 가게 정보 모달 */}
+      <Dialog open={showStoreInfo} onOpenChange={setShowStoreInfo}>
+        <DialogContent className="max-w-md bg-gray-50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Store className="w-5 h-5 text-[#D61C1C]" />
+              가게 정보
+            </DialogTitle>
+          </DialogHeader>
+          
+          {loadingStoreInfo ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-[#D61C1C]" />
+            </div>
+          ) : storeInfo ? (
+            <div className="space-y-4">
+              {/* 가게 이름 */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#2E1C10] mb-2">
+                  {storeInfo.name || '가게 이름'}
+                </h3>
+              </div>
+
+              {/* 전화번호 */}
+              {storeInfo.phone && (
+                <div className="flex items-start gap-3">
+                  <Phone className="w-5 h-5 text-[#D61C1C] mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm text-[#8B7355] mb-1">전화번호</p>
+                    <a
+                      href={`tel:${storeInfo.phone}`}
+                      className="text-[#2E1C10] font-medium hover:text-[#D61C1C] transition-colors"
+                    >
+                      {storeInfo.phone}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* 주소 */}
+              {storeInfo.address?.full && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-[#D61C1C] mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm text-[#8B7355] mb-1">주소</p>
+                    <p className="text-[#2E1C10]">
+                      {storeInfo.address.full}
+                      {storeInfo.address.detail && (
+                        <span className="block text-sm text-[#8B7355] mt-1">
+                          {storeInfo.address.detail}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* 영업시간 */}
+              {storeInfo.businessHours && (
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-[#D61C1C] mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm text-[#8B7355] mb-1">영업시간</p>
+                    <p className="text-[#2E1C10]">
+                      {storeInfo.businessHours.open} - {storeInfo.businessHours.close}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`w-2 h-2 rounded-full ${
+                        storeInfo.isOpen ? 'bg-green-500' : 'bg-gray-400'
+                      }`} />
+                      <span className="text-sm text-[#8B7355]">
+                        {storeInfo.isOpen ? '영업 중' : '영업 종료'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 배달 정보 */}
+              {storeInfo.deliveryAvailable && (
+                <div className="pt-3 border-t border-[#E5DDD5]">
+                  <p className="text-sm text-[#8B7355] mb-2">배달 정보</p>
+                  <div className="space-y-1 text-sm text-[#2E1C10]">
+                    <p>최소 주문 금액: {storeInfo.minOrderAmount?.toLocaleString() || 0}원</p>
+                    <p>기본 배달비: {storeInfo.deliveryFee?.toLocaleString() || 0}원</p>
+                  </div>
+                </div>
+              )}
+
+              {/* 가게 위치 */}
+              <div className="pt-3 border-t border-[#E5DDD5]">
+                <p className="text-sm text-[#8B7355] mb-3 font-medium">가게 위치</p>
+                <StoreLocationMap
+                  lat={storeInfo.address?.lat}
+                  lng={storeInfo.address?.lng}
+                  height={200}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-[#8B7355]">가게 정보를 불러올 수 없습니다</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
