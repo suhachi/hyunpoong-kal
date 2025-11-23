@@ -24,7 +24,7 @@ export function loadKakaoMaps(): Promise<typeof window.kakao> {
 
   kakaoMapsPromise = new Promise((resolve, reject) => {
     if (!KAKAO_MAP_APP_KEY) {
-      console.error('[loadKakaoMaps] Missing KAKAO_MAP_APP_KEY');
+      console.warn('[loadKakaoMaps] Missing KAKAO_MAP_APP_KEY - 지도 기능을 사용할 수 없습니다');
       reject(new Error('Kakao Map app key is not configured'));
       return;
     }

@@ -18,6 +18,7 @@ import { storeDocRef, type StoreDoc } from '../../../lib/firebase/firestore-sche
 import { STORE_ID } from '../../../config/env';
 import { useAuth } from '../../../contexts/AuthContext';
 import { StoreLocationPicker } from '../../../components/admin/StoreLocationPicker';
+import { AddressSearch } from '../../../components/admin/AddressSearch';
 
 export function StoreInfoTab() {
   const { user } = useAuth();
@@ -99,16 +100,26 @@ export function StoreInfoTab() {
     setSaving(true);
     try {
       const docRef = storeDocRef(STORE_ID);
+      
+      // address 객체 생성 (undefined 값 제거)
+      const addressData: any = {
+        full: storeInfo.address?.full?.trim() || '',
+        detail: storeInfo.address?.detail?.trim() || '',
+      };
+      
+      // lat/lng가 있을 때만 추가 (undefined 제거)
+      if (storeInfo.address?.lat != null) {
+        addressData.lat = storeInfo.address.lat;
+      }
+      if (storeInfo.address?.lng != null) {
+        addressData.lng = storeInfo.address.lng;
+      }
+      
       const updateData: Partial<StoreDoc> = {
         storeId: STORE_ID,
         name: storeInfo.name.trim(),
         phone: storeInfo.phone.trim(),
-        address: {
-          full: storeInfo.address?.full?.trim() || '',
-          detail: storeInfo.address?.detail?.trim() || '',
-          lat: storeInfo.address?.lat ?? undefined,
-          lng: storeInfo.address?.lng ?? undefined,
-        },
+        address: addressData,
         businessHours: storeInfo.businessHours || {
           open: '10:00',
           close: '22:00',
@@ -203,19 +214,20 @@ export function StoreInfoTab() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="store-address-full">주소 *</Label>
-            <Input
-              id="store-address-full"
+            <AddressSearch
               value={storeInfo.address?.full || ''}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                address: {
-                  ...storeInfo.address,
-                  full: e.target.value,
-                  detail: storeInfo.address?.detail || '',
-                },
-              })}
-              placeholder="대구광역시 달성군 현풍면"
-              className="bg-gray-50"
+              onChange={(address, lat, lng) => {
+                setStoreInfo({
+                  ...storeInfo,
+                  address: {
+                    full: address,
+                    detail: storeInfo.address?.detail || '',
+                    lat: lat ?? storeInfo.address?.lat,
+                    lng: lng ?? storeInfo.address?.lng,
+                  },
+                });
+              }}
+              placeholder="주소를 검색하세요 (예: 대구광역시 달성군 현풍면)"
             />
           </div>
 
