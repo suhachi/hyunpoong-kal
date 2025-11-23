@@ -18,6 +18,7 @@ import { storeDocRef, type StoreDoc } from '../../../lib/firebase/firestore-sche
 import { STORE_ID } from '../../../config/env';
 import { useAuth } from '../../../contexts/AuthContext';
 import { StoreLocationPicker } from '../../../components/admin/StoreLocationPicker';
+import { AddressSearch } from '../../../components/admin/AddressSearch';
 
 export function StoreInfoTab() {
   const { user } = useAuth();
@@ -203,19 +204,20 @@ export function StoreInfoTab() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="store-address-full">주소 *</Label>
-            <Input
-              id="store-address-full"
+            <AddressSearch
               value={storeInfo.address?.full || ''}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                address: {
-                  ...storeInfo.address,
-                  full: e.target.value,
-                  detail: storeInfo.address?.detail || '',
-                },
-              })}
-              placeholder="대구광역시 달성군 현풍면"
-              className="bg-gray-50"
+              onChange={(address, lat, lng) => {
+                setStoreInfo({
+                  ...storeInfo,
+                  address: {
+                    full: address,
+                    detail: storeInfo.address?.detail || '',
+                    lat: lat ?? storeInfo.address?.lat,
+                    lng: lng ?? storeInfo.address?.lng,
+                  },
+                });
+              }}
+              placeholder="주소를 검색하세요 (예: 대구광역시 달성군 현풍면)"
             />
           </div>
 
