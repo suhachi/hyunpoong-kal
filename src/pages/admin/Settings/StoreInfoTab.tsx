@@ -206,18 +206,27 @@ export function StoreInfoTab() {
             <Label htmlFor="store-address-full">주소 *</Label>
             <AddressSearch
               value={storeInfo.address?.full || ''}
-              onChange={(address, lat, lng) => {
+              onChange={(address) => setStoreInfo({
+                ...storeInfo,
+                address: {
+                  ...storeInfo.address,
+                  full: address,
+                  detail: storeInfo.address?.detail || '',
+                },
+              })}
+              onLocationFound={(lat, lng, fullAddress) => {
                 setStoreInfo({
                   ...storeInfo,
                   address: {
-                    full: address,
+                    ...storeInfo.address,
+                    full: fullAddress,
                     detail: storeInfo.address?.detail || '',
-                    lat: lat ?? storeInfo.address?.lat,
-                    lng: lng ?? storeInfo.address?.lng,
+                    lat,
+                    lng,
                   },
                 });
               }}
-              placeholder="주소를 검색하세요 (예: 대구광역시 달성군 현풍면)"
+              placeholder="대구광역시 달성군 현풍면"
             />
           </div>
 

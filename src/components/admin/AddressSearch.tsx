@@ -1,130 +1,96 @@
 /**
- * 주소 검색 컴포넌트 (구글맵/카카오맵 주소 검색 API 사용)
+ * 주소 검색 컴포넌트 (카카오맵 Geocoding API 사용)
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Search, Loader2 } from 'lucide-react';
-import { loadGoogleMaps } from '../../lib/googleMaps';
-import { loadKakaoMaps } from '../../lib/kakaoMaps';
+import { Search, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { KAKAO_MAP_APP_KEY } from '../../config/env';
 
 type AddressSearchProps = {
   value: string;
-  onChange: (address: string, lat?: number, lng?: number) => void;
+  onChange: (address: string) => void;
+  onLocationFound: (lat: number, lng: number, fullAddress: string) => void;
   placeholder?: string;
+  className?: string;
 };
 
 export function AddressSearch({
   value,
   onChange,
-  placeholder = '주소를 검색하세요 (예: 대구광역시 달성군 현풍면)',
+  onLocationFound,
+  placeholder = '주소를 입력하세요',
+  className = '',
 }: AddressSearchProps) {
-  const [searchQuery, setSearchQuery] = useState(value);
   const [searching, setSearching] = useState(false);
-  const [mapsReady, setMapsReady] = useState(false);
-  const [currentProvider, setCurrentProvider] = useState<'google' | 'kakao' | null>(null);
-
-  // value 변경 시 searchQuery 동기화
-  useEffect(() => {
-    setSearchQuery(value);
-  }, [value]);
-
-  // 지도 API 로드 확인 (구글맵 우선)
-  useEffect(() => {
-    loadGoogleMaps()
-      .then(() => {
-        setMapsReady(true);
-        setCurrentProvider('google');
-      })
-      .catch(() => {
-        // 구글맵 실패 시 카카오맵 시도
-        return loadKakaoMaps();
-      })
-      .then((kakao) => {
-        if (kakao) {
-          setMapsReady(true);
-          setCurrentProvider('kakao');
-        }
-      })
-      .catch(() => {
-        // 키가 없어도 주소 입력은 가능하도록
-        setMapsReady(false);
-      });
-  }, []);
+  const [searchSuccess, setSearchSuccess] = useState(false);
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) {
+    if (!value.trim()) {
       toast.error('주소를 입력해주세요');
       return;
     }
 
-    if (!mapsReady) {
-      // 지도 API 키가 없으면 주소만 저장
-      onChange(searchQuery.trim());
+    if (!KAKAO_MAP_APP_KEY) {
+      toast.error('카카오맵 API 키가 설정되지 않았습니다');
       return;
     }
 
     setSearching(true);
+    setSearchSuccess(false);
+
     try {
-      if (currentProvider === 'google' && window.google && window.google.maps) {
-        // 구글맵 Geocoding API 사용
-        const geocoder = new window.google.maps.Geocoder();
-        
-        geocoder.geocode({ address: searchQuery.trim() }, (results: any[], status: any) => {
-          setSearching(false);
-          
-          if (status === window.google.maps.GeocoderStatus.OK && results && results.length > 0) {
-            const firstResult = results[0];
-            const location = firstResult.geometry.location;
-            const lat = location.lat();
-            const lng = location.lng();
-            const address = firstResult.formatted_address;
-            
-            onChange(address, lat, lng);
-            toast.success('주소를 찾았습니다');
-          } else {
-            toast.error('주소를 찾을 수 없습니다');
-            onChange(searchQuery.trim()); // 주소만 저장
-          }
-        });
-      } else if (currentProvider === 'kakao' && window.kakao && window.kakao.maps && window.kakao.maps.services) {
-        // 카카오맵 주소 검색 API 사용
-        const geocoder = new window.kakao.maps.services.Geocoder();
-        
-        geocoder.addressSearch(searchQuery.trim(), (result: any[], status: any) => {
-          setSearching(false);
-          
-          if (status === window.kakao.maps.services.Status.OK) {
-            if (result.length > 0) {
-              const firstResult = result[0];
-              const lat = parseFloat(firstResult.y);
-              const lng = parseFloat(firstResult.x);
-              const address = firstResult.address_name;
-              
-              onChange(address, lat, lng);
-              toast.success('주소를 찾았습니다');
-            } else {
-              toast.error('주소를 찾을 수 없습니다');
-              onChange(searchQuery.trim()); // 주소만 저장
-            }
-          } else {
-            toast.error('주소 검색에 실패했습니다');
-            onChange(searchQuery.trim()); // 주소만 저장
-          }
-        });
-      } else {
-        toast.error('지도 서비스를 사용할 수 없습니다');
-        onChange(searchQuery.trim());
-        setSearching(false);
+      // 카카오맵 Geocoding API 호출
+      const response = await fetch(
+        `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(value)}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `KakaoAK ${KAKAO_MAP_APP_KEY}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    } catch (error) {
-      console.error('[AddressSearch] Search failed:', error);
+
+      const data = await response.json();
+
+      if (!data.documents || data.documents.length === 0) {
+        toast.error('주소를 찾을 수 없습니다');
+        setSearching(false);
+        return;
+      }
+
+      // 첫 번째 결과 사용
+      const result = data.documents[0];
+      const lat = parseFloat(result.y);
+      const lng = parseFloat(result.x);
+      const fullAddress = result.address_name || value;
+
+      // 좌표와 주소 전달
+      onLocationFound(lat, lng, fullAddress);
+      
+      // 주소 업데이트
+      onChange(fullAddress);
+
+      // 성공 알림
+      setSearchSuccess(true);
+      toast.success('주소를 찾았습니다');
+
+      // 3초 후 성공 표시 제거
+      setTimeout(() => {
+        setSearchSuccess(false);
+      }, 3000);
+    } catch (error: any) {
+      console.error('[AddressSearch] Failed to search address:', error);
+      toast.error('주소 검색에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
+    } finally {
       setSearching(false);
-      toast.error('주소 검색 중 오류가 발생했습니다');
-      onChange(searchQuery.trim()); // 주소만 저장
     }
   };
 
@@ -135,20 +101,28 @@ export function AddressSearch({
   };
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className}`}>
       <div className="flex gap-2">
-        <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder={placeholder}
-          className="bg-gray-50 flex-1"
-          disabled={searching}
-        />
+        <div className="flex-1 relative">
+          <Input
+            value={value}
+            onChange={(e) => {
+              onChange(e.target.value);
+              setSearchSuccess(false);
+            }}
+            onKeyPress={handleKeyPress}
+            placeholder={placeholder}
+            className="bg-gray-50 pr-10"
+          />
+          {searchSuccess && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+            </div>
+          )}
+        </div>
         <Button
-          type="button"
           onClick={handleSearch}
-          disabled={searching || !searchQuery.trim()}
+          disabled={searching || !value.trim()}
           className="bg-[#D61C1C] hover:bg-[#B81515]"
         >
           {searching ? (
@@ -158,9 +132,10 @@ export function AddressSearch({
           )}
         </Button>
       </div>
-      {!mapsReady && (
-        <p className="text-xs text-[#8B7355]">
-          주소 검색 기능을 사용하려면 구글맵 또는 카카오맵 키가 필요합니다. 주소를 직접 입력할 수 있습니다.
+      {searchSuccess && (
+        <p className="text-xs text-green-600 flex items-center gap-1">
+          <CheckCircle2 className="w-3 h-3" />
+          주소를 찾았습니다
         </p>
       )}
     </div>

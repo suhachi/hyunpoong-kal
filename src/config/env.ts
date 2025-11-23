@@ -89,10 +89,6 @@ export const APP_CONFIG = {
 // 기본값: 'hyunpoong_main'
 export const STORE_ID = getEnv('VITE_STORE_ID', 'hyunpoong_main');
 
-// Google Maps API
-// VITE_GOOGLE_MAP_API_KEY 환경 변수를 읽어서 사용
-export const GOOGLE_MAP_API_KEY = getEnv('VITE_GOOGLE_MAP_API_KEY', '');
-
 // Kakao Map JS SDK
 // VITE_KAKAO_MAP_APP_KEY 환경 변수를 읽어서 사용
 export const KAKAO_MAP_APP_KEY = getEnv('VITE_KAKAO_MAP_APP_KEY', '');

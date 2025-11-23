@@ -5,7 +5,6 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { loadGoogleMaps } from '../../lib/googleMaps';
 import { loadKakaoMaps } from '../../lib/kakaoMaps';
 import { MapPin } from 'lucide-react';
 
@@ -28,116 +27,57 @@ export function StoreLocationPicker({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 지도 초기 로드 및 lat/lng 변경 시 업데이트
   useEffect(() => {
     let isMounted = true;
-    let map: any = null;
-    let marker: any = null;
     let clickListener: any = null;
-    let dragListener: any = null;
 
-    // 구글맵 우선 시도
-    loadGoogleMaps()
-      .then((google) => {
+    // lat/lng가 없으면 지도 로드하지 않음
+    if (lat == null || lng == null) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    loadKakaoMaps()
+      .then((kakao) => {
         if (!isMounted || !containerRef.current) return;
 
-        // 기본 좌표: 서울 시청 (37.5665, 126.9780)
-        const defaultLat = 37.5665;
-        const defaultLng = 126.9780;
+        const center = new kakao.maps.LatLng(lat, lng);
 
-        const center = new google.maps.LatLng(
-          lat ?? defaultLat,
-          lng ?? defaultLng
-        );
+        // 지도가 이미 생성되어 있으면 중심만 이동
+        if (mapRef.current) {
+          mapRef.current.setCenter(center);
+          if (markerRef.current) {
+            markerRef.current.setPosition(center);
+          }
+          setLoading(false);
+          return;
+        }
 
         // 지도 생성
-        map = new google.maps.Map(containerRef.current, {
-          center,
-          zoom: 15,
-          mapTypeControl: false,
-          streetViewControl: false,
-        });
-
-        mapRef.current = map;
-
-        // 지도가 완전히 로드된 후 리사이즈 트리거
-        setTimeout(() => {
-          if (map && window.google && window.google.maps) {
-            window.google.maps.event.trigger(map, 'resize');
-          }
-        }, 100);
-
-        // 마커 생성
-        marker = new google.maps.Marker({
-          position: center,
-          map,
-          draggable: true,
-        });
-
-        markerRef.current = marker;
-
-        // 지도 클릭 이벤트
-        clickListener = map.addListener('click', (event: any) => {
-          if (!event.latLng) return;
-          const clickedLatLng = event.latLng;
-          marker.setPosition(clickedLatLng);
-          
-          console.log('[StoreLocationPicker] Map clicked:', clickedLatLng.lat(), clickedLatLng.lng());
-          onChange({
-            lat: clickedLatLng.lat(),
-            lng: clickedLatLng.lng(),
-          });
-        });
-
-        // 마커 드래그 이벤트
-        dragListener = marker.addListener('dragend', () => {
-          const position = marker.getPosition();
-          console.log('[StoreLocationPicker] Marker dragged:', position.lat(), position.lng());
-          onChange({
-            lat: position.lat(),
-            lng: position.lng(),
-          });
-        });
-
-        setLoading(false);
-      })
-      .catch(() => {
-        // 구글맵 실패 시 카카오맵 시도
-        console.log('[StoreLocationPicker] Google Maps failed, trying Kakao Maps');
-        return loadKakaoMaps();
-      })
-      .then((kakao) => {
-        if (!isMounted || !containerRef.current || map) return; // 이미 구글맵이 로드되었으면 스킵
-
-        if (!kakao) return;
-
-        // 카카오맵 사용
-        const defaultLat = 37.5665;
-        const defaultLng = 126.9780;
-
-        const center = new kakao.maps.LatLng(
-          lat ?? defaultLat,
-          lng ?? defaultLng
-        );
-
-        map = new kakao.maps.Map(containerRef.current, {
+        const map = new kakao.maps.Map(containerRef.current, {
           center,
           level: 3,
         });
 
         mapRef.current = map;
 
-        marker = new kakao.maps.Marker({
+        // 마커 생성
+        const marker = new kakao.maps.Marker({
           position: center,
           map,
         });
 
         markerRef.current = marker;
 
+        // 지도 클릭 이벤트
         clickListener = kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
           const clickedLatLng = mouseEvent.latLng;
           marker.setPosition(clickedLatLng);
           
-          console.log('[StoreLocationPicker] Map clicked:', clickedLatLng.getLat(), clickedLatLng.getLng());
           onChange({
             lat: clickedLatLng.getLat(),
             lng: clickedLatLng.getLng(),
@@ -154,39 +94,12 @@ export function StoreLocationPicker({
 
     return () => {
       isMounted = false;
-      // 이벤트 리스너 정리
-      if (clickListener && window.google && window.google.maps) {
-        window.google.maps.event.removeListener(clickListener);
-      }
-      if (dragListener && window.google && window.google.maps) {
-        window.google.maps.event.removeListener(dragListener);
-      }
       if (clickListener && window.kakao && window.kakao.maps) {
         window.kakao.maps.event.removeListener(clickListener);
       }
     };
-  }, []); // 초기 로드만
+  }, [lat, lng, onChange]); // lat/lng 변경 시 재로드
 
-  // lat/lng 변경 시 마커 위치 업데이트
-  useEffect(() => {
-    if (!mapRef.current || !markerRef.current) return;
-    if (lat == null || lng == null) return;
-
-    console.log('[StoreLocationPicker] Updating marker position:', lat, lng);
-
-    // 구글맵인지 카카오맵인지 확인
-    if (window.google && window.google.maps) {
-      const position = new window.google.maps.LatLng(lat, lng);
-      markerRef.current.setPosition(position);
-      mapRef.current.setCenter(position);
-      mapRef.current.setZoom(15);
-    } else if (window.kakao && window.kakao.maps) {
-      const position = new window.kakao.maps.LatLng(lat, lng);
-      markerRef.current.setPosition(position);
-      mapRef.current.setCenter(position);
-      mapRef.current.setLevel(3);
-    }
-  }, [lat, lng]);
 
   return (
     <div className="space-y-2">
@@ -223,7 +136,7 @@ export function StoreLocationPicker({
         </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && lat != null && lng != null && (
         <>
           <p className="text-xs text-[#8B7355] mb-2">
             지도를 클릭해서 가게 위치를 선택하세요.
@@ -238,6 +151,14 @@ export function StoreLocationPicker({
             }}
           />
         </>
+      )}
+
+      {!loading && !error && (lat == null || lng == null) && (
+        <div className="flex items-center justify-center py-8 border rounded-md bg-gray-50">
+          <p className="text-sm text-[#8B7355]">
+            주소를 검색하면 지도가 표시됩니다.
+          </p>
+        </div>
       )}
     </div>
   );
