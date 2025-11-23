@@ -17,6 +17,7 @@ import { db } from '../../../lib/firebase';
 import { storeDocRef, type StoreDoc } from '../../../lib/firebase/firestore-schema';
 import { STORE_ID } from '../../../config/env';
 import { useAuth } from '../../../contexts/AuthContext';
+import { StoreLocationPicker } from '../../../components/admin/StoreLocationPicker';
 
 export function StoreInfoTab() {
   const { user } = useAuth();
@@ -105,8 +106,8 @@ export function StoreInfoTab() {
         address: {
           full: storeInfo.address?.full?.trim() || '',
           detail: storeInfo.address?.detail?.trim() || '',
-          lat: storeInfo.address?.lat,
-          lng: storeInfo.address?.lng,
+          lat: storeInfo.address?.lat ?? undefined,
+          lng: storeInfo.address?.lng ?? undefined,
         },
         businessHours: storeInfo.businessHours || {
           open: '10:00',
@@ -229,6 +230,8 @@ export function StoreInfoTab() {
                   ...storeInfo.address,
                   full: storeInfo.address?.full || '',
                   detail: e.target.value,
+                  lat: storeInfo.address?.lat,
+                  lng: storeInfo.address?.lng,
                 },
               })}
               placeholder="상세 주소를 입력하세요"
@@ -361,6 +364,33 @@ export function StoreInfoTab() {
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* 위치(지도) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>위치(지도)</CardTitle>
+          <CardDescription>
+            주소 입력 후 지도를 클릭해서 가게 위치를 지정해 주세요. 지정된 위치는 고객 앱에서 지도에 표시됩니다.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StoreLocationPicker
+            lat={storeInfo.address?.lat}
+            lng={storeInfo.address?.lng}
+            addressText={storeInfo.address?.full}
+            onChange={(value) => setStoreInfo({
+              ...storeInfo,
+              address: {
+                ...storeInfo.address,
+                full: storeInfo.address?.full || '',
+                detail: storeInfo.address?.detail || '',
+                lat: value.lat,
+                lng: value.lng,
+              },
+            })}
+          />
         </CardContent>
       </Card>
 

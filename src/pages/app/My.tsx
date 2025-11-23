@@ -18,6 +18,7 @@ import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
 import { getDoc } from "firebase/firestore";
 import { storeDocRef, type StoreDoc } from "../../lib/firebase/firestore-schema";
 import { STORE_ID } from "../../config/env";
+import { StoreLocationMap } from "../../components/common/StoreLocationMap";
 
 export function My() {
   const { user, signOut, loading } = useAuth();
@@ -362,6 +363,16 @@ export function My() {
                   </div>
                 </div>
               )}
+
+              {/* 가게 위치 */}
+              <div className="pt-3 border-t border-[#E5DDD5]">
+                <p className="text-sm text-[#8B7355] mb-3 font-medium">가게 위치</p>
+                <StoreLocationMap
+                  lat={storeInfo.address?.lat}
+                  lng={storeInfo.address?.lng}
+                  height={200}
+                />
+              </div>
             </div>
           ) : (
             <div className="text-center py-8">
