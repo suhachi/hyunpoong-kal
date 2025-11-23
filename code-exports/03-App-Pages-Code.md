@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-11-21-1308  
+**Generated**: 2025-11-22-2149  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -15,12 +15,13 @@ Complete source code of 9 user-facing pages.
 
 ```tsx
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import { ChevronRight, CloudSun, Star, Settings, Gift, Ticket } from 'lucide-react';
+import { ChevronRight, CloudSun, Star, Gift, Ticket } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { FEATURE_FLAGS } from '../../config/env';
+import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import { formatPrice } from '../../lib/utils';
 import { getMenus } from '../../lib/admin/menus.api';
 import { getActiveNotices } from '../../lib/admin/notices.api';
@@ -52,11 +53,11 @@ export function Home() {
     loadData();
   }, []);
 
-  // 개발자 전용: 관리자 권한으로 전환
-  const handleAdminAccess = (path: string) => {
-    localStorage.setItem('mockRole', 'owner');
-    navigate(path);
-  };
+  // 추천 메뉴 클릭 핸들러
+  const handleMenuClick = useCallback((menuId: string) => {
+    navigate(`/menu/${menuId}`);
+  }, [navigate]);
+
   return (
     <div className="space-y-6">
       {/* 히어로 섹션 */}
@@ -132,7 +133,7 @@ export function Home() {
               <RecommendCard
                 key={menu.menuId}
                 menu={menu}
-                onClick={() => navigate(`/menu/${menu.menuId}`)}
+                onClick={() => handleMenuClick(menu.menuId)}
               />
             ))}
           </div>
@@ -151,34 +152,14 @@ export function Home() {
             </Link>
           </div>
           
-          <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer" onClick={() => navigate('/review/1')}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="w-4 h-4 fill-[#F37021] text-[#F37021]" />
-                ))}
-              </div>
-              <span className="text-sm text-[#2E1C10]/60">김고객 님</span>
-            </div>
-            <p className="text-sm text-[#2E1C10] mb-3">
-              칼국수 진짜 맛있어요! 국물이 진하고 면발도 쫄깃해요. 닭고기도 부드럽고 양도 푸짐합니다.
+          {/* 초기 상태: 아직 리뷰가 없을 때 */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm">
+            <p className="text-sm text-[#2E1C10] mb-1">
+              아직 등록된 리뷰가 없습니다.
             </p>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="aspect-square rounded-lg overflow-hidden">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800"
-                  alt="리뷰 사진"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-lg overflow-hidden">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800"
-                  alt="리뷰 사진"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
+            <p className="text-xs text-[#2E1C10]/60">
+              첫 리뷰를 남겨주시면 더 많은 손님들이 참고할 수 있어요.
+            </p>
           </div>
         </section>
         
@@ -237,48 +218,6 @@ export function Home() {
             메뉴 보기
           </Button>
         </Link>
-        
-        {/* 개발자 전용: 관리자 페이지 바로가기 */}
-        {/* TODO: 배포 전 삭제 필요 */}
-        <div className="mt-4 p-4 bg-gray-100 rounded-2xl border-2 border-dashed border-gray-300">
-          <p className="text-xs text-gray-500 mb-2 text-center">개발자 전용</p>
-          <Button 
-            variant="outline"
-            size="sm"
-            className="w-full border-gray-400 text-gray-700 hover:bg-gray-200 mb-2"
-            onClick={() => navigate('/dev')}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            🔧 디버그 페이지
-          </Button>
-          <Button 
-            variant="outline"
-            size="sm"
-            className="w-full border-gray-400 text-gray-700 hover:bg-gray-200"
-            onClick={() => handleAdminAccess('/admin')}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            관리자 대시보드
-          </Button>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <Button 
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => handleAdminAccess('/admin/orders')}
-            >
-              주문 관리
-            </Button>
-            <Button 
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => handleAdminAccess('/admin/reviews')}
-            >
-              리뷰 관리
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -289,7 +228,7 @@ interface RecommendCardProps {
   onClick: () => void;
 }
 
-function RecommendCard({ menu, onClick }: RecommendCardProps) {
+const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
   const badgeLabels: Record<string, string> = {
     best: '베스트',
     signature: '시그니처',
@@ -307,9 +246,11 @@ function RecommendCard({ menu, onClick }: RecommendCardProps) {
     >
       <div className="aspect-square bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 overflow-hidden">
         <ImageWithFallback
-          src={menu.image}
+          src={menu.image || DEFAULT_MENU_IMAGE}
           alt={menu.name}
           className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
       </div>
       <div className="p-3">
@@ -329,7 +270,9 @@ function RecommendCard({ menu, onClick }: RecommendCardProps) {
       </div>
     </div>
   );
-}
+};
+
+const RecommendCard = memo(RecommendCardBase);
 
 ```
 
@@ -338,14 +281,15 @@ function RecommendCard({ menu, onClick }: RecommendCardProps) {
 ## src\pages\app\MenuList.tsx
 
 ```tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { Badge } from '../../components/ui/badge';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import menusData from '../../data/menus.json';
+import { DEFAULT_MENU_IMAGE } from '../../config/ui';
+import { getMenus } from '../../lib/admin/menus.api';
 import type { Menu, MenuCategory } from '../../types/menu';
 import { formatPrice } from '../../lib/utils';
 
@@ -376,10 +320,24 @@ const badgeLabels = {
 export function MenuList() {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory>('noodle');
   const [searchQuery, setSearchQuery] = useState('');
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // JSON 데이터를 배열로 변환
-  const menus = useMemo(() => {
-    return Array.isArray(menusData) ? (menusData as Menu[]) : [];
+  // localStorage에 저장된 메뉴 데이터를 가져옴 (변경사항 반영)
+  useEffect(() => {
+    const loadMenus = async () => {
+      try {
+        setLoading(true);
+        const loadedMenus = await getMenus({});
+        setMenus(loadedMenus);
+      } catch (error) {
+        console.error('Failed to load menus:', error);
+        setMenus([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadMenus();
   }, []);
   
   const filteredMenus = useMemo(() => {
@@ -428,7 +386,11 @@ export function MenuList() {
         {/* 메뉴 리스트 */}
         {categories.map((cat) => (
           <TabsContent key={cat.value} value={cat.value} className="px-4 mt-0">
-            {filteredMenus.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12 text-[#2E1C10]/60">
+                로딩 중...
+              </div>
+            ) : filteredMenus.length === 0 ? (
               <div className="text-center py-12 text-[#2E1C10]/60">
                 검색 결과가 없습니다
               </div>
@@ -450,7 +412,7 @@ interface MenuCardProps {
   menu: Menu;
 }
 
-function MenuCard({ menu }: MenuCardProps) {
+const MenuCardBase = ({ menu }: MenuCardProps) => {
   return (
     <Link to={`/menu/${menu.menuId}`} data-testid="menu-list.item.link">
       <div
@@ -462,17 +424,13 @@ function MenuCard({ menu }: MenuCardProps) {
         <div className="flex gap-4 p-4">
           {/* 메뉴 이미지 */}
           <div className="relative flex-shrink-0 w-24 h-24 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
-            {menu.image ? (
-              <ImageWithFallback
-                src={menu.image}
-                alt={menu.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-4xl">🍜</span>
-              </div>
-            )}
+            <ImageWithFallback
+              src={menu.image || DEFAULT_MENU_IMAGE}
+              alt={menu.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
             {!menu.isAvailable && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                 <Badge className="bg-gray-600 text-white">품절</Badge>
@@ -528,7 +486,9 @@ function MenuCard({ menu }: MenuCardProps) {
       </div>
     </Link>
   );
-}
+};
+
+const MenuCard = memo(MenuCardBase);
 
 ```
 
@@ -547,6 +507,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Separator } from '../../components/ui/separator';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
+import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import { useCart } from '../../contexts/CartContext';
 import { UpsellSection } from '../../components/app/UpsellSection';
 import { PriceBreakdown } from '../../components/shared/PriceBreakdown';
@@ -860,17 +821,13 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
       <div className="flex gap-4">
         {/* 메뉴 이미지 */}
         <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-[#F9F6F3] to-[#C7A45A]/20 rounded-xl overflow-hidden">
-          {imageUrl ? (
-            <ImageWithFallback
-              src={imageUrl}
-              alt={item.menuName}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-3xl">🍜</span>
-            </div>
-          )}
+          <ImageWithFallback
+            src={imageUrl || DEFAULT_MENU_IMAGE}
+            alt={item.menuName}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
 
         {/* 메뉴 정보 */}
@@ -945,12 +902,14 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
  */
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Skeleton } from '../../components/ui/skeleton';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { 
   ShoppingBag, 
   ChevronRight, 
@@ -965,6 +924,7 @@ import { getOrdersByUser, filterOrdersByStatus, getReviewableOrders } from '../.
 import type { Order, OrderStatus } from '../../types/order';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { formatPrice } from '../../lib/utils';
+import { toast } from 'sonner';
 
 type FilterStatus = OrderStatus | 'all' | 'reviewable';
 
@@ -989,29 +949,48 @@ const extendedStatusConfig: Record<string, { label: string; variant: 'default' |
 
 export function OrderHistory() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterStatus>('all');
 
-  // Mock 사용자 ID (실제로는 Auth에서 가져옴)
-  const userId = 'user-001';
+  // 인증 체크
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const userId = user.uid;
 
   useEffect(() => {
-    loadOrders();
-  }, []);
+    if (user) {
+      loadOrders();
+    }
+  }, [user]);
 
   useEffect(() => {
     applyFilter();
   }, [filter, orders]);
 
   async function loadOrders() {
+    if (!user) return;
+
     try {
       setLoading(true);
       const data = await getOrdersByUser(userId);
       setOrders(data);
     } catch (error) {
       console.error('주문 목록 로딩 실패:', error);
+      toast.error('주문 내역을 불러오는데 실패했습니다. 다시 시도해주세요.');
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -1186,9 +1165,20 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
   const isCanceled = order.status === 'canceled';
   const canReview = isCompleted && !hasReview;
 
-  // 대표 이미지 (첫 번째 아이템)
-  const firstItem = order.items[0];
-  const totalItems = order.items.length;
+  // 대표 이미지 (첫 번째 아이템) - 안전한 배열 접근
+  const firstItem = order.items?.[0];
+  const totalItems = order.items?.length || 0;
+
+  // items가 비어있는 경우 처리
+  if (!firstItem || totalItems === 0) {
+    return (
+      <Card className="rounded-2xl border-[#E5DDD5]">
+        <CardContent className="p-4 text-center text-gray-500">
+          주문 항목이 없습니다
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Link to={`/order/${order.orderId}`}>
@@ -1539,17 +1529,32 @@ export function Coupons() {
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { User, ShoppingBag, Ticket, Gift, Bell, MessageSquare, LogOut, Settings } from "lucide-react";
 import { toast } from 'sonner';
+import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
 
 export function My() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
+
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   // 로그아웃 처리
   const handleSignOut = async () => {

@@ -1,6 +1,6 @@
 # Admin Pages - Full Source Code
 
-**Generated**: 2025-11-21-1308  
+**Generated**: 2025-11-22-2149  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -672,7 +672,7 @@ export function AdminOrders() {
           }
         }}
       >
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>주문 취소</DialogTitle>
             <DialogDescription>
@@ -1201,7 +1201,7 @@ export function AdminMenus() {
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>메뉴 삭제</AlertDialogTitle>
             <AlertDialogDescription>
@@ -1966,6 +1966,20 @@ export function IntegratedAnalytics() {
     }
   };
 
+  // 데이터 존재 여부 확인
+  const hasData = report && (
+    report.kpi.totalOrders > 0 ||
+    report.kpi.totalSales > 0 ||
+    report.hourlyAnalysis.length > 0 ||
+    report.dayOfWeekAnalysis.length > 0 ||
+    report.topMenus.length > 0 ||
+    report.couponEffectiveness.length > 0 ||
+    (report.pointsEffectiveness.totalEarned > 0 || report.pointsEffectiveness.totalSpent > 0) ||
+    report.reviewAnalysis.totalReviews > 0 ||
+    report.deliveryPerformance.totalDeliveries > 0 ||
+    report.notificationEffectiveness.totalSent > 0
+  );
+
   if (loading || !report) {
     return (
       <div className="space-y-6">
@@ -1980,6 +1994,44 @@ export function IntegratedAnalytics() {
             <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  // 빈 상태 UI
+  if (!hasData) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl text-[#333] mb-2">통합 분석</h1>
+            <p className="text-[#8B7355]">종합 성과 분석 및 인사이트</p>
+          </div>
+          <div className="flex gap-2">
+            <Tabs value={period} onValueChange={(value: any) => setPeriod(value)}>
+              <TabsList>
+                <TabsTrigger value="weekly">주간</TabsTrigger>
+                <TabsTrigger value="monthly">월간</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Button variant="outline" size="sm" onClick={loadReport}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              새로고침
+            </Button>
+          </div>
+        </div>
+
+        <Card className="bg-white">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <TrendingUp className="w-16 h-16 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-[#333] mb-2">
+              아직 통합 리포트 데이터가 없습니다
+            </h3>
+            <p className="text-sm text-gray-500 text-center max-w-md">
+              실제 주문, 리뷰, 쿠폰, 포인트 데이터가 쌓이면 자동으로 리포트가 생성됩니다.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -2014,7 +2066,7 @@ export function IntegratedAnalytics() {
 
       {/* KPI 요약 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#D61C1C]" />
@@ -2029,7 +2081,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <Users className="w-4 h-4 text-[#F37021]" />
@@ -2044,7 +2096,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <Star className="w-4 h-4 text-[#C7A45A]" />
@@ -2059,7 +2111,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <Gift className="w-4 h-4 text-[#D61C1C]" />
@@ -2077,7 +2129,7 @@ export function IntegratedAnalytics() {
 
       {/* 인사이트 및 제안 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-[#F37021]" />
@@ -2096,7 +2148,7 @@ export function IntegratedAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <div className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-[#C7A45A]" />
@@ -2130,7 +2182,7 @@ export function IntegratedAnalytics() {
 
         {/* 시간대별 분석 */}
         <TabsContent value="hourly" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">시간대별 주문 분석</h3>
             </CardHeader>
@@ -2154,7 +2206,7 @@ export function IntegratedAnalytics() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">요일별 매출</h3>
             </CardHeader>
@@ -2181,7 +2233,7 @@ export function IntegratedAnalytics() {
 
         {/* 메뉴 성과 */}
         <TabsContent value="menu" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">메뉴별 성과</h3>
             </CardHeader>
@@ -2211,7 +2263,7 @@ export function IntegratedAnalytics() {
 
         {/* 쿠폰 효과 */}
         <TabsContent value="coupon" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">쿠폰 효과 분석</h3>
             </CardHeader>
@@ -2246,7 +2298,7 @@ export function IntegratedAnalytics() {
 
         {/* 포인트 */}
         <TabsContent value="points" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">포인트 효과 분석</h3>
             </CardHeader>
@@ -2278,7 +2330,7 @@ export function IntegratedAnalytics() {
 
         {/* 리뷰 */}
         <TabsContent value="review" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <h3 className="text-sm">리뷰 분석</h3>
             </CardHeader>
@@ -2318,7 +2370,7 @@ export function IntegratedAnalytics() {
 
         {/* 배달 */}
         <TabsContent value="delivery" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Truck className="w-5 h-5 text-[#D61C1C]" />
@@ -2346,7 +2398,7 @@ export function IntegratedAnalytics() {
 
         {/* 알림 */}
         <TabsContent value="notification" className="space-y-4">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-[#F37021]" />
@@ -2970,7 +3022,7 @@ export function AdminPromotions() {
 
       {/* 발급 다이얼로그 */}
       <Dialog open={issueDialogOpen} onOpenChange={setIssueDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
             <DialogTitle>쿠폰 발급</DialogTitle>
             <DialogDescription>
@@ -3381,7 +3433,7 @@ export function AdminPoints() {
 
       {/* 포인트 조정 다이얼로그 */}
       <Dialog open={adjustDialog} onOpenChange={setAdjustDialog}>
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>포인트 조정</DialogTitle>
             <DialogDescription>
@@ -3625,191 +3677,45 @@ export function AdminSupport() {
 
   // Mock 데이터 로드
   async function loadSessionsMock() {
-    const sessionsData = localStorage.getItem('chat_sessions') || '{}';
-    let sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
-    
-    // 첫 실행 시 샘플 데이터 생성
-    if (Object.keys(sessionsObj).length === 0) {
-      sessionsObj = createSampleSessions();
-      localStorage.setItem('chat_sessions', JSON.stringify(sessionsObj));
+    if (typeof window === 'undefined') {
+      setSessions([]);
+      return;
     }
-    
-    const sessionsList = Object.values(sessionsObj);
-    
-    sessionsList.sort((a, b) => {
-      const aHasUnread = hasUnreadMessagesMock(a.id);
-      const bHasUnread = hasUnreadMessagesMock(b.id);
-      
-      if (aHasUnread && !bHasUnread) return -1;
-      if (!aHasUnread && bHasUnread) return 1;
-      
-      return b.lastAt - a.lastAt;
-    });
 
-    setSessions(sessionsList);
-  }
-  
-  // 샘플 세션 생성 (첫 실행 시)
-  function createSampleSessions(): Record<string, ChatSession> {
-    const now = Date.now();
-    const sessions: Record<string, ChatSession> = {};
-    
-    // 세션 1: 미응답 (긴급)
-    const session1: ChatSession = {
-      id: 'session_001',
-      userId: 'user_kim',
-      userName: '김민수',
-      userPhone: '010-1234-5678',
-      open: true,
-      lastMessage: '배달이 너무 늦어요. 확인 부탁드립니다.',
-      lastAt: now - 5 * 60 * 1000, // 5분 전
-      createdAt: now - 10 * 60 * 1000,
-      updatedAt: now - 5 * 60 * 1000,
-    };
-    sessions[session1.id] = session1;
-    
-    // 메시지 생성
-    const messages1: ChatMessage[] = [
-      {
-        id: 'msg_001',
-        sessionId: session1.id,
-        from: 'user',
-        type: 'text',
-        text: '안녕하세요, 주문한 음식이 언제 도착하나요?',
-        at: now - 10 * 60 * 1000,
-        readByAdmin: false,
-      },
-      {
-        id: 'msg_002',
-        sessionId: session1.id,
-        from: 'user',
-        type: 'text',
-        text: '배달이 너무 늦어요. 확인 부탁드립니다.',
-        at: now - 5 * 60 * 1000,
-        readByAdmin: false,
-      },
-    ];
-    localStorage.setItem(`chat_messages_${session1.id}`, JSON.stringify(messages1));
-    
-    // 세션 2: 진행 중
-    const session2: ChatSession = {
-      id: 'session_002',
-      userId: 'user_park',
-      userName: '박지영',
-      userPhone: '010-9876-5432',
-      open: true,
-      lastMessage: '네, 확인했습니다. 감사합니다!',
-      lastAt: now - 30 * 60 * 1000, // 30분 전
-      createdAt: now - 60 * 60 * 1000,
-      updatedAt: now - 30 * 60 * 1000,
-      assignedTo: 'admin_001',
-    };
-    sessions[session2.id] = session2;
-    
-    const messages2: ChatMessage[] = [
-      {
-        id: 'msg_003',
-        sessionId: session2.id,
-        from: 'user',
-        type: 'text',
-        text: '메뉴 변경이 가능한가요?',
-        at: now - 60 * 60 * 1000,
-        readByAdmin: true,
-      },
-      {
-        id: 'msg_004',
-        sessionId: session2.id,
-        from: 'admin',
-        type: 'text',
-        text: '네, 가능합니다. 어떤 메뉴로 변경하시겠어요?',
-        at: now - 55 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_005',
-        sessionId: session2.id,
-        from: 'user',
-        type: 'text',
-        text: '칼국수를 특칼국수로 변경하고 싶습니다.',
-        at: now - 50 * 60 * 1000,
-        readByAdmin: true,
-      },
-      {
-        id: 'msg_006',
-        sessionId: session2.id,
-        from: 'admin',
-        type: 'text',
-        text: '변경 완료했습니다. 곧 준비해드리겠습니다.',
-        at: now - 45 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_007',
-        sessionId: session2.id,
-        from: 'user',
-        type: 'text',
-        text: '네, 확인했습니다. 감사합니다!',
-        at: now - 30 * 60 * 1000,
-        readByAdmin: true,
-      },
-    ];
-    localStorage.setItem(`chat_messages_${session2.id}`, JSON.stringify(messages2));
-    
-    // 세션 3: 완료
-    const session3: ChatSession = {
-      id: 'session_003',
-      userId: 'user_lee',
-      userName: '이철수',
-      open: false,
-      lastMessage: '문제 해결되었습니다. 감사합니다!',
-      lastAt: now - 2 * 60 * 60 * 1000, // 2시간 전
-      createdAt: now - 3 * 60 * 60 * 1000,
-      updatedAt: now - 2 * 60 * 60 * 1000,
-      assignedTo: 'admin_001',
-    };
-    sessions[session3.id] = session3;
-    
-    const messages3: ChatMessage[] = [
-      {
-        id: 'msg_008',
-        sessionId: session3.id,
-        from: 'user',
-        type: 'text',
-        text: '결제가 안되는데 도와주세요.',
-        at: now - 3 * 60 * 60 * 1000,
-        readByAdmin: true,
-      },
-      {
-        id: 'msg_009',
-        sessionId: session3.id,
-        from: 'admin',
-        type: 'text',
-        text: '확인해보겠습니다. 잠시만 기다려주세요.',
-        at: now - 2.5 * 60 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_010',
-        sessionId: session3.id,
-        from: 'admin',
-        type: 'text',
-        text: '카드 정보를 다시 입력해보시겠어요?',
-        at: now - 2.3 * 60 * 60 * 1000,
-        readByUser: true,
-      },
-      {
-        id: 'msg_011',
-        sessionId: session3.id,
-        from: 'user',
-        type: 'text',
-        text: '문제 해결되었습니다. 감사합니다!',
-        at: now - 2 * 60 * 60 * 1000,
-        readByAdmin: true,
-      },
-    ];
-    localStorage.setItem(`chat_messages_${session3.id}`, JSON.stringify(messages3));
-    
-    return sessions;
+    try {
+      const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+      
+      // localStorage가 비어있으면 빈 배열 반환 (샘플 데이터 생성 제거)
+      if (!sessionsData || sessionsData === '{}') {
+        setSessions([]);
+        return;
+      }
+
+      const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
+      const sessionsList = Object.values(sessionsObj);
+      
+      // 안전성 체크: 배열이 아니면 빈 배열 반환
+      if (!Array.isArray(sessionsList)) {
+        console.warn('[Support] Invalid sessions data format, resetting to empty');
+        setSessions([]);
+        return;
+      }
+      
+      sessionsList.sort((a, b) => {
+        const aHasUnread = hasUnreadMessagesMock(a.id);
+        const bHasUnread = hasUnreadMessagesMock(b.id);
+        
+        if (aHasUnread && !bHasUnread) return -1;
+        if (!aHasUnread && bHasUnread) return 1;
+        
+        return b.lastAt - a.lastAt;
+      });
+
+      setSessions(sessionsList);
+    } catch (error) {
+      console.error('[Support] Failed to parse sessions from storage', error);
+      setSessions([]);
+    }
   }
 
   // Mock: 미응답 체크

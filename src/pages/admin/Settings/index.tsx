@@ -6,17 +6,18 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
-import { Settings, CreditCard, Truck, Map, Bell, Shield } from 'lucide-react';
+import { Settings, CreditCard, Truck, Map, Bell, Shield, Store } from 'lucide-react';
 import { getCurrentUser } from '../../../lib/auth';
 import { PaymentTab } from './PaymentTab';
 import { DeliveryTab } from './DeliveryTab';
 import { MapsTab } from './MapsTab';
 import { FCMTab } from './FCMTab';
 import { OperationsTab } from './OperationsTab';
+import { StoreInfoTab } from './StoreInfoTab';
 
 export function AdminSettingsCenter() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabFromUrl = searchParams.get('tab') || 'payment';
+  const tabFromUrl = searchParams.get('tab') || 'storeInfo';
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   // 사용자 정보 가져오기 (동기)
@@ -101,7 +102,11 @@ export function AdminSettingsCenter() {
 
       {/* 탭 메뉴 */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="storeInfo" className="gap-2" data-testid="admin-settings-tab-trigger-storeinfo">
+            <Store className="w-4 h-4" />
+            <span className="hidden sm:inline">가게 정보</span>
+          </TabsTrigger>
           <TabsTrigger value="payment" className="gap-2" data-testid="admin-settings-tab-trigger-payment">
             <CreditCard className="w-4 h-4" />
             <span className="hidden sm:inline">결제</span>
@@ -123,6 +128,11 @@ export function AdminSettingsCenter() {
             <span className="hidden sm:inline">운영/보안</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* 가게 정보 탭 */}
+        <TabsContent value="storeInfo">
+          <StoreInfoTab />
+        </TabsContent>
 
         {/* 결제 탭 */}
         <TabsContent value="payment">

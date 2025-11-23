@@ -1,6 +1,6 @@
 # Admin Settings - Full Source Code
 
-**Generated**: 2025-11-21-1308  
+**Generated**: 2025-11-22-2149  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -956,12 +956,22 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
 
       {/* 우측: 설정 가이드 */}
       <div className="lg:col-span-2 space-y-6">
+        {/* 상단 안내 */}
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            <strong>🔐 보안 및 복제 편의를 위해</strong> 지도 API 키는 화면에서 직접 입력하지 않고<br />
+            <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일과 복사 스크립트로만 관리합니다.<br />
+            아래 안내에 따라 Kakao/Google 콘솔에서 키를 발급한 뒤, 환경변수에 추가해 주세요.
+          </AlertDescription>
+        </Alert>
+
         {/* Kakao Maps */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <MapIcon className="w-5 h-5 text-[#FEE500]" />
-              <CardTitle>Kakao Maps API</CardTitle>
+              <CardTitle>Kakao Maps API (.env로 설정)</CardTitle>
             </div>
             <CardDescription>
               Kakao 지도 및 지오코딩 서비스
@@ -971,7 +981,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-[#2E1C10]">1. API 키 발급</h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
-                Kakao Developers에서 REST API 키를 발급받으세요.
+                Kakao Developers 콘솔에서 <strong>JavaScript 키</strong>를 발급받으세요.
               </p>
               <Button
                 variant="outline"
@@ -994,7 +1004,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
                   http://localhost:5173
                 </code>
                 <code className="block p-2 bg-gray-50 rounded">
-                  https://hp-kal.web.app
+                  https://{'{배포 도메인}'}
                 </code>
               </div>
             </div>
@@ -1002,10 +1012,16 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
             <Separator />
 
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">3. .env.local 설정</h4>
-              <code className="block p-2 bg-gray-50 rounded text-xs">
-                VITE_KAKAO_MAP_KEY=YOUR_REST_API_KEY
+              <h4 className="text-sm font-medium text-[#2E1C10]">3. 프로젝트 루트의 <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에 아래와 같이 추가</h4>
+              <p className="text-xs text-[#2E1C10]/60 mb-2">
+                이 화면에서는 API 키를 직접 저장하지 않습니다. 아래 환경변수에만 키를 넣어야 합니다.
+              </p>
+              <code className="block p-3 bg-gray-50 rounded text-xs font-mono">
+                VITE_KAKAO_MAP_KEY=발급받은_JAVASCRIPT_KEY
               </code>
+              <p className="text-xs text-[#2E1C10]/60 mt-2">
+                저장 후 <code className="bg-gray-100 px-1 py-0.5 rounded">npm run build && firebase deploy</code> 로 다시 배포하세요.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -1025,7 +1041,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-[#2E1C10]">1. API 키 발급</h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
-                Google Cloud Console에서 API 키를 발급받으세요.
+                Google Cloud Console에서 <strong>브라우저 키(Browser Key)</strong>를 발급받으세요.
               </p>
               <Button
                 variant="outline"
@@ -1046,17 +1062,23 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               <ul className="text-xs text-[#2E1C10]/70 space-y-1 list-disc list-inside">
                 <li>Maps JavaScript API</li>
                 <li>Geocoding API</li>
-                <li>Places API</li>
+                <li>Places API (선택)</li>
               </ul>
             </div>
 
             <Separator />
 
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">3. .env.local 설정</h4>
-              <code className="block p-2 bg-gray-50 rounded text-xs">
-                VITE_GOOGLE_MAPS_API_KEY=YOUR_API_KEY
+              <h4 className="text-sm font-medium text-[#2E1C10]">3. 프로젝트 루트의 <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에 아래와 같이 추가</h4>
+              <p className="text-xs text-[#2E1C10]/60 mb-2">
+                이 화면에서는 API 키를 직접 저장하지 않습니다. 아래 환경변수에만 키를 넣어야 합니다.
+              </p>
+              <code className="block p-3 bg-gray-50 rounded text-xs font-mono">
+                VITE_GOOGLE_MAPS_API_KEY=발급받은_BROWSER_KEY
               </code>
+              <p className="text-xs text-[#2E1C10]/60 mt-2">
+                저장 후 <code className="bg-gray-100 px-1 py-0.5 rounded">npm run build && firebase deploy</code> 로 다시 배포하세요.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -1106,6 +1128,7 @@ import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from '
 import { toast } from 'sonner';
 import { runFCMDiagnostics } from '../../../lib/admin/settingsCenter.api';
 import type { DiagnosticResult } from '../../../types/adminSettings';
+import { USE_FIREBASE } from '../../../config/env';
 
 export function FCMTab() {
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult | null>(null);
@@ -1113,6 +1136,37 @@ export function FCMTab() {
 
   // 진단 실행
   const runDiagnostics = async () => {
+    // Mock 모드 전용: 경고 대신 정보 상태만 설정
+    if (!USE_FIREBASE) {
+      setRunning(true);
+      try {
+        // Mock 모드용 정보 결과 생성
+        const mockResult: DiagnosticResult = {
+          overall: 'info',
+          checks: [
+            {
+              name: 'Mock 모드',
+              status: 'info',
+              message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+            },
+            {
+              name: '실서비스 전환',
+              status: 'info',
+              message: '실서비스 전환 후 Firebase 연결 및 FCM 설정을 진행해 주세요.',
+            },
+          ],
+        };
+        setDiagnostics(mockResult);
+        // Mock 모드에서는 toast를 띄우지 않음
+      } catch (error) {
+        console.error('Mock diagnostics failed:', error);
+      } finally {
+        setRunning(false);
+      }
+      return;
+    }
+
+    // 실서비스 모드: 기존 진단 로직 실행
     setRunning(true);
     try {
       const result = await runFCMDiagnostics();
@@ -1134,6 +1188,24 @@ export function FCMTab() {
   };
 
   useEffect(() => {
+    // Mock 모드에서는 자동 진단 실행하지 않음 (사용자가 버튼을 눌러야만 실행)
+    if (!USE_FIREBASE) {
+      // Mock 모드용 정보 결과만 설정
+      const mockResult: DiagnosticResult = {
+        overall: 'info',
+        checks: [
+          {
+            name: 'Mock 모드',
+            status: 'info',
+            message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+          },
+        ],
+      };
+      setDiagnostics(mockResult);
+      return;
+    }
+    
+    // 실서비스 모드에서만 자동 진단 실행
     runDiagnostics();
   }, []);
 
@@ -1160,6 +1232,11 @@ export function FCMTab() {
               <span className="text-sm text-[#2E1C10]/80">전체 상태</span>
               {!diagnostics ? (
                 <Badge variant="outline">확인 중...</Badge>
+              ) : diagnostics.overall === 'info' ? (
+                <Badge className="bg-blue-500 gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  정보
+                </Badge>
               ) : diagnostics.overall === 'pass' ? (
                 <Badge className="bg-green-500 gap-1">
                   <CheckCircle2 className="w-3 h-3" />
@@ -1186,7 +1263,9 @@ export function FCMTab() {
                 <span className="text-xs font-medium text-[#2E1C10]/60">진단 결과</span>
                 {diagnostics.checks.map((check, index) => (
                   <div key={index} className="flex items-start gap-2 text-xs">
-                    {check.status === 'pass' ? (
+                    {check.status === 'info' ? (
+                      <AlertCircle className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
+                    ) : check.status === 'pass' ? (
                       <CheckCircle2 className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
                     ) : check.status === 'warning' ? (
                       <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
@@ -1220,6 +1299,18 @@ export function FCMTab() {
 
       {/* 우측: 설정 가이드 */}
       <div className="lg:col-span-2 space-y-6">
+        {/* Mock 모드 안내 배너 */}
+        {!USE_FIREBASE && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-sm text-blue-900">
+              <strong>⚙️ 현재 이 프로젝트는 Mock 모드(USE_FIREBASE=false)입니다.</strong><br />
+              테스트 환경에서는 FCM 푸시를 사용하지 않으며, 아래 경고/진단 결과는 무시해도 됩니다.<br />
+              실서비스 전환 시 Firebase 연결 후 FCM 설정(서버 키, VAPID 키, Service Worker)을 완료해 주세요.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* 1. Firebase Cloud Messaging */}
         <Card>
           <CardHeader>

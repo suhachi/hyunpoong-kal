@@ -25,6 +25,10 @@ import {
 } from '../ui/select';
 import { formatPrice } from '../../lib/utils';
 import { toast } from 'sonner';
+import { Checkbox } from '../ui/checkbox';
+import { Clock } from 'lucide-react';
+import { uploadMenuImage, validateImageFile, deleteImageFromStorage } from '../../lib/storage';
+import { USE_FIREBASE } from '../../config/env';
 
 interface MenuEditDialogProps {
   menu: Menu | null;
@@ -49,6 +53,11 @@ export function MenuEditDialog({
   const [imageUrl, setImageUrl] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // 시간제 판매 설정
+  const [timeLimitEnabled, setTimeLimitEnabled] = useState(false);
+  const [timeLimitStart, setTimeLimitStart] = useState('11:00');
+  const [timeLimitEnd, setTimeLimitEnd] = useState('14:00');
 
   // 다이얼로그 열릴 때 또는 menu가 변경될 때 초기값 설정
   useEffect(() => {
@@ -60,6 +69,16 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl(menu.image || '');
       setImageFile(null);
+      // 시간제 판매 설정 초기화
+      if (menu.availableHours) {
+        setTimeLimitEnabled(true);
+        setTimeLimitStart(menu.availableHours.start);
+        setTimeLimitEnd(menu.availableHours.end);
+      } else {
+        setTimeLimitEnabled(false);
+        setTimeLimitStart('11:00');
+        setTimeLimitEnd('14:00');
+      }
       // 파일 입력 필드 리셋
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -73,6 +92,9 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl('');
       setImageFile(null);
+      setTimeLimitEnabled(false);
+      setTimeLimitStart('11:00');
+      setTimeLimitEnd('14:00');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -97,22 +119,38 @@ export function MenuEditDialog({
     }
   };
 
-  // 이미지 업로드 함수 (Firebase Storage 연동 필요, 여기선 mock)
+  // 이미지 업로드 함수
   const uploadImage = async (file: File): Promise<string> => {
-    // TODO: 실제 Firebase Storage 업로드 구현 필요
-    // 예시: await uploadToFirebase(file)
-    // Mock 환경에서는 Base64로 변환하여 저장 (새로고침해도 유지됨)
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        resolve(base64String);
-      };
-      reader.onerror = () => {
-        reject(new Error('이미지 읽기에 실패했습니다'));
-      };
-      reader.readAsDataURL(file);
-    });
+    // 파일 검증
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      throw new Error(validation.error || '이미지 파일 검증에 실패했습니다.');
+    }
+
+    if (USE_FIREBASE && menu?.menuId) {
+      // Firebase Storage에 업로드 (기존 이미지 삭제는 나중에 처리)
+      try {
+        const result = await uploadMenuImage(file, menu.menuId);
+        console.log('[MenuEditDialog] Image uploaded to Firebase Storage:', result.path);
+        return result.url;
+      } catch (error: any) {
+        console.error('[MenuEditDialog] Firebase Storage upload failed:', error);
+        throw new Error(error.message || '이미지 업로드에 실패했습니다.');
+      }
+    } else {
+      // Mock 모드 또는 menuId가 없는 경우: Base64로 변환
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result as string;
+          resolve(base64String);
+        };
+        reader.onerror = () => {
+          reject(new Error('이미지 읽기에 실패했습니다'));
+        };
+        reader.readAsDataURL(file);
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,7 +160,7 @@ export function MenuEditDialog({
       return;
     }
 
-    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string } = {};
+    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null } = {};
 
     // 메뉴명 변경
     if (name.trim() !== menu.name) {
@@ -162,6 +200,19 @@ export function MenuEditDialog({
       updates.image = imageUrl;
     }
 
+    // 시간제 판매 설정 변경 감지
+    const currentHours = menu.availableHours;
+    const newHours = timeLimitEnabled ? { start: timeLimitStart, end: timeLimitEnd } : null;
+    const hoursChanged = 
+      (currentHours?.start !== newHours?.start) ||
+      (currentHours?.end !== newHours?.end) ||
+      (currentHours && !newHours) ||
+      (!currentHours && newHours);
+    
+    if (hoursChanged) {
+      updates.availableHours = newHours;
+    }
+
     if (Object.keys(updates).length === 0) {
       return;
     }
@@ -181,7 +232,7 @@ export function MenuEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white rounded-xl p-6 shadow-lg">
+      <DialogContent className="sm:max-w-md !bg-gray-50 rounded-xl p-6 shadow-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>메뉴 수정</DialogTitle>
@@ -284,6 +335,51 @@ export function MenuEditDialog({
               <p className="text-xs text-gray-500 text-right">
                 {description.length}/200자
               </p>
+            </div>
+
+            {/* 시간제 판매 설정 */}
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <Label className="text-base font-medium">시간제 판매 설정</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="timeLimitEnabled"
+                  checked={timeLimitEnabled}
+                  onCheckedChange={(checked) => setTimeLimitEnabled(checked as boolean)}
+                />
+                <Label htmlFor="timeLimitEnabled" className="cursor-pointer">
+                  시간제 판매 사용
+                </Label>
+              </div>
+              {timeLimitEnabled && (
+                <div className="grid grid-cols-2 gap-4 pl-6">
+                  <div>
+                    <Label htmlFor="timeLimitStart">시작 시간</Label>
+                    <Input
+                      id="timeLimitStart"
+                      type="time"
+                      value={timeLimitStart}
+                      onChange={e => setTimeLimitStart(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="timeLimitEnd">종료 시간</Label>
+                    <Input
+                      id="timeLimitEnd"
+                      type="time"
+                      value={timeLimitEnd}
+                      onChange={e => setTimeLimitEnd(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+              {timeLimitEnabled && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-800">
+                  💡 <strong>{timeLimitStart} ~ {timeLimitEnd}</strong> 시간대에만 주문이 가능합니다.
+                </div>
+              )}
             </div>
 
             {/* 변경 사유 */}

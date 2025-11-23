@@ -16,7 +16,7 @@ import {
   createMenu,
   deleteMenu,
 } from '../../lib/admin/menus.api';
-import { getCurrentUser } from '../../lib/auth';
+import { useAuth } from '../../contexts/AuthContext';
 import { MenuTable } from '../../components/admin/MenuTable';
 import { MenuEditDialog } from '../../components/admin/MenuEditDialog';
 import { MenuCreateDialog } from '../../components/admin/MenuCreateDialog';
@@ -79,7 +79,7 @@ export function AdminMenus() {
   // Undo 관련
   const [lastCreatedMenuId, setLastCreatedMenuId] = useState<string | null>(null);
 
-  const user = getCurrentUser();
+  const { user } = useAuth();
 
   // 데이터 로드
   const loadData = async () => {
@@ -109,7 +109,7 @@ export function AdminMenus() {
 
     setActionLoading(true);
     try {
-      const updated = await toggleMenuAvailability(menuId, user.uid, user.name);
+      const updated = await toggleMenuAvailability(menuId, user.uid, user.displayName || '관리자');
       
       // UI 즉시 반영
       setMenus(prev => 
@@ -137,25 +137,44 @@ export function AdminMenus() {
   };
 
   const handleSaveEdit = async (
-    updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string },
+    updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null },
     reason: string
   ) => {
     if (!user || !editingMenu) return;
 
     setActionLoading(true);
     try {
-      const updated = await updateMenu(
-        editingMenu.menuId,
-        updates,
-        user.uid,
-        user.name,
-        reason
-      );
+      // availableHours가 있으면 별도로 업데이트
+      if ('availableHours' in updates) {
+        await updateMenuAvailableHours(
+          editingMenu.menuId,
+          updates.availableHours || null,
+          user.uid,
+          user.name || '관리자'
+        );
+        // availableHours를 updates에서 제거
+        const { availableHours, ...menuUpdates } = updates;
+        if (Object.keys(menuUpdates).length > 0) {
+          await updateMenu(
+            editingMenu.menuId,
+            menuUpdates,
+            user.uid,
+            user.name || '관리자',
+            reason
+          );
+        }
+      } else {
+        await updateMenu(
+          editingMenu.menuId,
+          updates,
+          user.uid,
+          user.name || '관리자',
+          reason
+        );
+      }
 
-      // UI 즉시 반영
-      setMenus(prev =>
-        prev.map(m => m.menuId === editingMenu.menuId ? updated : m)
-      );
+      // 데이터 다시 로드하여 최신 상태 반영
+      await loadData();
 
       toast.success('메뉴 정보를 수정했습니다');
       setEditingMenu(null);
@@ -211,25 +230,38 @@ export function AdminMenus() {
 
   // 메뉴 생성
   const handleCreateMenu = async (menuData: Partial<Menu>) => {
-    if (!user) return;
+    console.log('[handleCreateMenu] Called with menuData:', menuData);
+    if (!user) {
+      console.error('[handleCreateMenu] No user found');
+      return;
+    }
+    console.log('[handleCreateMenu] User:', user.uid, user.displayName);
 
-    const newMenu = await createMenu(menuData, user.uid, user.displayName || '관리자');
+    try {
+      console.log('[handleCreateMenu] Calling createMenu...');
+      const newMenu = await createMenu(menuData, user.uid, user.displayName || '관리자');
+      console.log('[handleCreateMenu] createMenu returned:', newMenu);
 
-    // UI 즉시 반영 (최상단 추가)
-    setMenus(prev => [newMenu, ...prev]);
-    setLastCreatedMenuId(newMenu.menuId);
+      // UI 즉시 반영 (최상단 추가)
+      setMenus(prev => [newMenu, ...prev]);
+      setLastCreatedMenuId(newMenu.menuId);
 
-    // 통계 갱신
-    loadData();
+      // 통계 갱신
+      loadData();
 
-    // Undo 토스트 (5초)
-    toast.success('메뉴가 등록되었습니다', {
-      duration: 5000,
-      action: {
-        label: '취소',
-        onClick: () => handleUndoCreate(newMenu.menuId),
-      },
-    });
+      // Undo 토스트 (5초)
+      toast.success('메뉴가 등록되었습니다', {
+        duration: 5000,
+        action: {
+          label: '취소',
+          onClick: () => handleUndoCreate(newMenu.menuId),
+        },
+      });
+    } catch (error: any) {
+      // 에러 메시지는 createMenu에서 이미 명확하게 설정됨
+      console.error('[handleCreateMenu] Menu creation failed:', error);
+      toast.error(error.message || '메뉴 등록에 실패했습니다');
+    }
   };
 
   // 생성 취소 (Undo)

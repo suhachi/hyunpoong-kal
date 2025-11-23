@@ -1,6 +1,6 @@
 # Lib APIs - Full Source Code
 
-**Generated**: 2025-11-21-1308  
+**Generated**: 2025-11-22-2149  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -14,73 +14,119 @@ Complete source code of Firebase API layer and external API integrations.
 ## src\lib\firebase.ts
 
 ```typescript
-import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
-import { getStorage, type FirebaseStorage } from 'firebase/storage';
-import { getAnalytics, type Analytics } from 'firebase/analytics';
-import { FIREBASE_CONFIG, USE_FIREBASE } from '../config/env';
+import { initializeApp } from "firebase/app";
 
-// Firebase 설정
+import { getAnalytics, isSupported as isAnalyticsSupported } from "firebase/analytics";
+
+import { getAuth } from "firebase/auth";
+
+import { getFirestore } from "firebase/firestore";
+
+import { getStorage } from "firebase/storage";
+
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
+
+
+
 const firebaseConfig = {
-  apiKey: FIREBASE_CONFIG.apiKey || "YOUR_API_KEY",
-  authDomain: FIREBASE_CONFIG.authDomain || "your-project.firebaseapp.com",
-  projectId: FIREBASE_CONFIG.projectId || "your-project",
-  storageBucket: FIREBASE_CONFIG.storageBucket || "your-project.appspot.com",
-  messagingSenderId: FIREBASE_CONFIG.messagingSenderId || "123456789",
-  appId: FIREBASE_CONFIG.appId || "1:123456789:web:abcdef",
-  measurementId: FIREBASE_CONFIG.measurementId || "G-XXXXXXXXXX"
+
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+
 };
 
-// Firebase 초기화 (USE_FIREBASE가 true일 때만)
-let app: FirebaseApp | null = null;
-let authInstance: Auth | null = null;
-let firestoreDb: Firestore | null = null;
-let storageInstance: FirebaseStorage | null = null;
-let analyticsInstance: Analytics | null = null;
 
-if (USE_FIREBASE) {
-  // eslint-disable-next-line no-console
-  console.log('[Firebase] 초기화 시작 (USE_FIREBASE=true)');
+
+export const app = initializeApp(firebaseConfig);
+
+
+
+// Analytics (지원 브라우저에서만)
+
+export let analytics: any = null;
+
+isAnalyticsSupported().then((supported) => {
+
+  if (supported) analytics = getAnalytics(app);
+
+});
+
+
+
+// Services
+
+export const auth = getAuth(app);
+
+export const db = getFirestore(app);
+
+export const storage = getStorage(app);
+
+
+
+// FCM
+
+export const messaging = (() => {
+
   try {
-    app = initializeApp(firebaseConfig);
-    authInstance = getAuth(app);
-    firestoreDb = getFirestore(app);
-    storageInstance = getStorage(app);
-    analyticsInstance = typeof window !== 'undefined' ? getAnalytics(app) : null;
-    // eslint-disable-next-line no-console
-    console.log('[Firebase] 초기화 완료');
-  } catch (error) {
-    console.error('[Firebase] 초기화 실패:', error);
+
+    return getMessaging(app);
+
+  } catch {
+
+    return null;
+
   }
-} else {
-  // eslint-disable-next-line no-console
-  console.log('[Firebase] SKIP init: USE_FIREBASE=false (Mock 모드)');
+
+})();
+
+
+
+export async function requestFcmToken() {
+
+  if (!messaging) return null;
+
+
+
+  try {
+
+    const token = await getToken(messaging, {
+
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+
+    });
+
+    return token;
+
+  } catch (err) {
+
+    console.error("FCM token error:", err);
+
+    return null;
+
+  }
+
 }
 
-// Mock Firestore (개발용)
-const mockDb = {
-  collection: () => ({
-    doc: () => ({
-      get: () => Promise.resolve({ exists: false, data: () => null }),
-      set: () => Promise.resolve(),
-      update: () => Promise.resolve(),
-      delete: () => Promise.resolve(),
-    }),
-    add: () => Promise.resolve({ id: 'mock-id' }),
-    get: () => Promise.resolve({ docs: [], empty: true }),
-    where: () => mockDb.collection(),
-    orderBy: () => mockDb.collection(),
-    limit: () => mockDb.collection(),
-  }),
-} as any;
 
-// Export (null일 경우 mock 반환)
-export const auth = authInstance;
-export const storage = storageInstance;
-export const analytics = analyticsInstance;
-export const db = USE_FIREBASE && firestoreDb ? firestoreDb : mockDb;
-export default app;
+
+export function onForegroundMessage(handler: (payload: any) => void) {
+
+  if (!messaging) return;
+
+  onMessage(messaging, handler);
+
+}
 
 ```
 
@@ -356,27 +402,45 @@ export function calculateOrderStatistics(orders: Order[]): OrderStatistics {
  * 쿠폰 API
  * USE_FIREBASE=false: Mock 데이터 반환
  * USE_FIREBASE=true: Firestore 연동
+ * v1.0 STEP 5: Firebase 전환
  */
 
-import { USE_FIREBASE } from '../config/env';
+import { USE_FIREBASE, getEnv } from '../config/env';
+import { db } from './firebase';
+import {
+  storeCouponsCollection,
+  storeCouponDocRef,
+  type CouponDoc,
+} from './firebase/firestore-schema';
+import {
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  serverTimestamp,
+  type Timestamp,
+} from 'firebase/firestore';
 import type { Coupon, CouponFilters, CouponStats, CouponIssue } from '../types/coupon';
 import { getCouponStatus } from '../types/coupon';
+
+// ============================================================================
+// Mock 모드 함수 (기존 로직 보전)
+// ============================================================================
 
 // Mock 데이터 (샘플 데이터 제거)
 let mockCoupons: Coupon[] = [];
 
 /**
- * 사용자 쿠폰 목록 조회
+ * Mock 모드: 쿠폰 목록 조회
  */
-export async function getCoupons(
+async function getCouponsMock(
   uid: string,
   filters: CouponFilters = {}
 ): Promise<Coupon[]> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 300));
 
   let filtered = mockCoupons.filter(c => c.uid === uid);
@@ -410,17 +474,12 @@ export async function getCoupons(
 }
 
 /**
- * 사용 가능한 쿠폰만 조회 (결제 시)
+ * Mock 모드: 사용 가능한 쿠폰만 조회
  */
-export async function getAvailableCoupons(
+async function getAvailableCouponsMock(
   uid: string,
   orderAmount: number
 ): Promise<Coupon[]> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 300));
 
   return mockCoupons.filter(c =>
@@ -432,17 +491,12 @@ export async function getAvailableCoupons(
 }
 
 /**
- * 쿠폰 사용
+ * Mock 모드: 쿠폰 사용
  */
-export async function useCoupon(
+async function useCouponMock(
   couponId: string,
   orderId: string
 ): Promise<Coupon> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 400));
 
   const coupon = mockCoupons.find(c => c.id === couponId);
@@ -466,22 +520,16 @@ export async function useCoupon(
 }
 
 /**
- * 쿠폰 발급 (관리자)
+ * Mock 모드: 쿠폰 발급
  */
-export async function issueCoupon(
+async function issueCouponMock(
   issue: CouponIssue,
   by: string,
   byName: string
 ): Promise<Coupon[]> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    // TODO: Functions로 발급 처리
-    throw new Error('Firebase not configured');
-  }
-
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  const targetUsers = issue.targetUsers || ['user-001']; // Mock: 기본 사용자
+  const targetUsers = issue.targetUsers || ['user-001'];
   const expiresAt = Date.now() + issue.expiryDays * 24 * 60 * 60 * 1000;
 
   const issued: Coupon[] = targetUsers.slice(0, issue.issueLimit || 999).map((uid, index) => {
@@ -505,14 +553,9 @@ export async function issueCoupon(
 }
 
 /**
- * 쿠폰 통계 (관리자)
+ * Mock 모드: 쿠폰 통계
  */
-export async function getCouponStats(): Promise<CouponStats> {
-  if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
-  }
-
+async function getCouponStatsMock(): Promise<CouponStats> {
   await new Promise(resolve => setTimeout(resolve, 200));
 
   const stats: CouponStats = {
@@ -526,15 +569,9 @@ export async function getCouponStats(): Promise<CouponStats> {
 }
 
 /**
- * 만료 처리 (스케줄러용)
+ * Mock 모드: 만료 처리
  */
-export async function expireCoupons(): Promise<number> {
-  if (USE_FIREBASE) {
-    // TODO: Cloud Functions Scheduler
-    // TODO: 매일 04:00 실행
-    throw new Error('Firebase not configured');
-  }
-
+async function expireCouponsMock(): Promise<number> {
   await new Promise(resolve => setTimeout(resolve, 300));
 
   const expiredCount = mockCoupons.filter(
@@ -542,6 +579,402 @@ export async function expireCoupons(): Promise<number> {
   ).length;
 
   return expiredCount;
+}
+
+// ============================================================================
+// Firebase 구현
+// ============================================================================
+
+/**
+ * storeId 가져오기 헬퍼
+ */
+function getStoreId(): string {
+  return getEnv('VITE_STORE_ID', 'hyunpoong_main');
+}
+
+/**
+ * Timestamp → number (milliseconds) 변환
+ */
+function timestampToMs(ts: Timestamp | undefined): number {
+  if (!ts) return Date.now();
+  if (typeof ts === 'string') return Date.parse(ts);
+  if (typeof ts.toDate === 'function') return ts.toDate().getTime();
+  if ((ts as any).seconds && typeof (ts as any).seconds === 'number') {
+    return (ts as any).seconds * 1000;
+  }
+  return Date.now();
+}
+
+/**
+ * CouponDoc → Coupon 변환
+ */
+function buildCouponFromDoc(doc: CouponDoc & { couponId: string }): Coupon {
+  // CouponDoc의 type은 'percentage' | 'fixed'이지만,
+  // 도메인 Coupon의 type은 'photo_review' | 'welcome' | 'event' | 'compensation' | 'admin'
+  // 현재는 쿠폰 코드 기반 시스템이므로, CouponDoc의 name/description을 활용
+  // TODO: 향후 CouponDoc에 도메인 type 필드 추가 고려
+  
+  return {
+    id: doc.couponId,
+    uid: '', // CouponDoc에는 userId가 없음 (쿠폰 템플릿이므로)
+    type: 'admin', // 기본값 (실제로는 쿠폰 발급 시 설정)
+    amount: doc.type === 'fixed' ? doc.value : 0, // percentage는 계산 필요
+    minSpend: doc.minOrderAmount || 0,
+    issuedAt: timestampToMs(doc.createdAt),
+    expiresAt: timestampToMs(doc.validUntil),
+    used: false, // 쿠폰 템플릿은 사용 여부가 없음
+    title: doc.name,
+    description: doc.code,
+  };
+}
+
+/**
+ * Coupon → CouponDoc 변환 (생성용)
+ */
+function buildCouponDocFromEntity(params: {
+  storeId: string;
+  couponId: string;
+  code: string;
+  name: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  minOrderAmount?: number;
+  maxDiscountAmount?: number;
+  validFrom: Date;
+  validUntil: Date;
+  isActive: boolean;
+  usageLimit?: number;
+  userLimit?: number;
+}): Omit<CouponDoc, 'createdAt' | 'updatedAt'> {
+  return {
+    couponId: params.couponId,
+    storeId: params.storeId,
+    code: params.code,
+    name: params.name,
+    type: params.type,
+    value: params.value,
+    minOrderAmount: params.minOrderAmount,
+    maxDiscountAmount: params.maxDiscountAmount,
+    validFrom: params.validFrom as any,
+    validUntil: params.validUntil as any,
+    isActive: params.isActive,
+    usageLimit: params.usageLimit,
+    usageCount: 0,
+    userLimit: params.userLimit,
+  };
+}
+
+/**
+ * 사용자 쿠폰 목록 조회
+ */
+export async function getCoupons(
+  uid: string,
+  filters: CouponFilters = {}
+): Promise<Coupon[]> {
+  if (!USE_FIREBASE) {
+    return await getCouponsMock(uid, filters);
+  }
+
+  // Firebase 모드: 현재는 쿠폰 템플릿만 조회 (사용자별 발급 쿠폰은 별도 컬렉션 필요)
+  // TODO: 향후 userCoupons/{userId}/coupons 서브컬렉션 추가 고려
+  try {
+    const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
+    const q = query(colRef, where('isActive', '==', true), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+
+    const coupons: Coupon[] = snapshot.docs.map((docSnap) => {
+      const data = docSnap.data() as CouponDoc;
+      const couponId = data.couponId || docSnap.id;
+      return buildCouponFromDoc({ ...data, couponId });
+    });
+
+    // 클라이언트 측 필터링
+    let filtered = coupons;
+
+    if (filters.status) {
+      filtered = filtered.filter(c => getCouponStatus(c) === filters.status);
+    }
+
+    if (filters.type) {
+      filtered = filtered.filter(c => c.type === filters.type);
+    }
+
+    return filtered;
+  } catch (error) {
+    console.error('Failed to fetch coupons from Firestore:', error);
+    return [];
+  }
+}
+
+/**
+ * 사용 가능한 쿠폰만 조회 (결제 시)
+ */
+export async function getAvailableCoupons(
+  uid: string,
+  orderAmount: number
+): Promise<Coupon[]> {
+  if (!USE_FIREBASE) {
+    return await getAvailableCouponsMock(uid, orderAmount);
+  }
+
+  // Firebase 모드: 활성 쿠폰 중 사용 가능한 것만 조회
+  try {
+    const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
+    const now = new Date();
+    const q = query(
+      colRef,
+      where('isActive', '==', true),
+      where('validFrom', '<=', now as any),
+      where('validUntil', '>=', now as any)
+    );
+    const snapshot = await getDocs(q);
+
+    const coupons: Coupon[] = snapshot.docs
+      .map((docSnap) => {
+        const data = docSnap.data() as CouponDoc;
+        const couponId = data.couponId || docSnap.id;
+        return buildCouponFromDoc({ ...data, couponId });
+      })
+      .filter(c => {
+        // 최소 주문 금액 체크
+        const minSpend = c.minSpend || 0;
+        return orderAmount >= minSpend;
+      });
+
+    return coupons;
+  } catch (error) {
+    console.error('Failed to fetch available coupons from Firestore:', error);
+    return [];
+  }
+}
+
+/**
+ * 쿠폰 코드로 쿠폰 찾기 + 유효성 체크
+ */
+async function firebaseFindCouponByCode(params: {
+  storeId: string;
+  code: string;
+  userId?: string;
+  now?: Date;
+}): Promise<Coupon | null> {
+  const { storeId, code, userId, now = new Date() } = params;
+  const colRef = storeCouponsCollection(storeId);
+  const q = query(colRef, where('code', '==', code.toUpperCase()));
+  const snap = await getDocs(q);
+  
+  if (snap.empty) return null;
+
+  const docSnap = snap.docs[0];
+  const data = docSnap.data() as CouponDoc;
+  const couponId = data.couponId || docSnap.id;
+  const coupon = buildCouponFromDoc({ ...data, couponId });
+
+  // 유효기간/활성 여부 체크
+  const nowTs = now.getTime();
+  const validFrom = timestampToMs(data.validFrom);
+  const validUntil = timestampToMs(data.validUntil);
+  
+  if (!data.isActive || nowTs < validFrom || nowTs > validUntil) {
+    return null;
+  }
+
+  // 사용 횟수 제한 체크
+  if (data.usageLimit && data.usageCount >= data.usageLimit) {
+    return null;
+  }
+
+  // TODO: userLimit / 사용자별 사용 이력 연동은 후속 STEP에서 확장
+
+  return coupon;
+}
+
+/**
+ * 쿠폰 사용
+ */
+export async function useCoupon(
+  couponId: string,
+  orderId: string
+): Promise<Coupon> {
+  if (!USE_FIREBASE) {
+    return await useCouponMock(couponId, orderId);
+  }
+
+  // Firebase 모드: 쿠폰 사용 횟수 증가
+  try {
+    const storeId = getStoreId();
+    const ref = storeCouponDocRef(storeId, couponId);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+      throw new Error('쿠폰을 찾을 수 없습니다');
+    }
+
+    const data = snapshot.data() as CouponDoc;
+
+    // 유효성 체크
+    const now = new Date();
+    const validFrom = timestampToMs(data.validFrom);
+    const validUntil = timestampToMs(data.validUntil);
+    const nowTs = now.getTime();
+
+    if (!data.isActive || nowTs < validFrom || nowTs > validUntil) {
+      throw new Error('만료되었거나 비활성화된 쿠폰입니다');
+    }
+
+    if (data.usageLimit && data.usageCount >= data.usageLimit) {
+      throw new Error('쿠폰 사용 횟수가 초과되었습니다');
+    }
+
+    // 사용 횟수 증가
+    await updateDoc(ref, {
+      usageCount: data.usageCount + 1,
+      updatedAt: serverTimestamp(),
+    });
+
+    const updatedData = (await getDoc(ref)).data() as CouponDoc;
+    return buildCouponFromDoc({ ...updatedData, couponId });
+  } catch (error) {
+    console.error('Failed to use coupon in Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * 쿠폰 발급 (관리자)
+ */
+export async function issueCoupon(
+  issue: CouponIssue,
+  by: string,
+  byName: string
+): Promise<Coupon[]> {
+  if (!USE_FIREBASE) {
+    return await issueCouponMock(issue, by, byName);
+  }
+
+  // Firebase 모드: 쿠폰 템플릿 생성
+  // TODO: 향후 userCoupons/{userId}/coupons 서브컬렉션에 사용자별 발급 쿠폰 생성
+  try {
+    const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
+    const now = new Date();
+    const validUntil = new Date(now.getTime() + issue.expiryDays * 24 * 60 * 60 * 1000);
+
+    // 쿠폰 코드 생성 (간단한 랜덤 코드)
+    const code = `COUPON-${Date.now().toString(36).toUpperCase()}`;
+
+    const couponDocData = buildCouponDocFromEntity({
+      storeId,
+      couponId: '', // addDoc 시점에는 id 없음
+      code,
+      name: issue.title,
+      type: 'fixed', // CouponIssue의 type을 매핑 필요 (현재는 fixed로 가정)
+      value: issue.amount,
+      minOrderAmount: issue.minSpend,
+      validFrom: now,
+      validUntil,
+      isActive: true,
+      usageLimit: issue.issueLimit,
+      userLimit: issue.targetUsers?.length,
+    });
+
+    const docRef = await addDoc(colRef, {
+      ...couponDocData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    const snapshot = await getDoc(docRef);
+    const data = snapshot.data() as CouponDoc;
+    const couponId = snapshot.id;
+
+    return [buildCouponFromDoc({ ...data, couponId })];
+  } catch (error) {
+    console.error('Failed to issue coupon in Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * 쿠폰 통계 (관리자)
+ */
+export async function getCouponStats(): Promise<CouponStats> {
+  if (!USE_FIREBASE) {
+    return await getCouponStatsMock();
+  }
+
+  // Firebase 모드: Firestore에서 집계
+  try {
+    const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
+    const snapshot = await getDocs(colRef);
+
+    const coupons = snapshot.docs.map(docSnap => {
+      const data = docSnap.data() as CouponDoc;
+      return buildCouponFromDoc({ ...data, couponId: docSnap.id });
+    });
+
+    const stats: CouponStats = {
+      totalIssued: coupons.length,
+      totalUsed: coupons.filter(c => c.used).length,
+      totalAmount: coupons.filter(c => c.used).reduce((sum, c) => sum + c.amount, 0),
+      expiredCount: coupons.filter(c => !c.used && Date.now() > c.expiresAt).length,
+    };
+
+    return stats;
+  } catch (error) {
+    console.error('Failed to fetch coupon stats from Firestore:', error);
+    return {
+      totalIssued: 0,
+      totalUsed: 0,
+      totalAmount: 0,
+      expiredCount: 0,
+    };
+  }
+}
+
+/**
+ * 만료 처리 (스케줄러용)
+ * TODO: Cloud Functions Scheduler로 매일 04:00 실행 예정
+ */
+export async function expireCoupons(): Promise<number> {
+  if (!USE_FIREBASE) {
+    return await expireCouponsMock();
+  }
+
+  // Firebase 모드: 만료된 쿠폰 비활성화
+  try {
+    const storeId = getStoreId();
+    const colRef = storeCouponsCollection(storeId);
+    const now = new Date();
+    const q = query(
+      colRef,
+      where('isActive', '==', true),
+      where('validUntil', '<', now as any)
+    );
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      return 0;
+    }
+
+    // 배치 업데이트
+    const batch = snapshot.docs.map(docSnap => {
+      const ref = storeCouponDocRef(storeId, docSnap.id);
+      return updateDoc(ref, {
+        isActive: false,
+        updatedAt: serverTimestamp(),
+      });
+    });
+
+    await Promise.all(batch);
+
+    return snapshot.size;
+  } catch (error) {
+    console.error('Failed to expire coupons in Firestore:', error);
+    return 0;
+  }
 }
 
 ```
@@ -554,11 +987,34 @@ export async function expireCoupons(): Promise<number> {
 /**
  * 포인트 리워드 시스템 API
  * Phase 3-3: Points System
+ * v1.0 STEP 5: Firebase 전환 + 트랜잭션 구현
  * 
  * Mock/Firebase 전환 가능
  */
 
-import { USE_FIREBASE, FEATURE_FLAGS } from '../config/env';
+import { USE_FIREBASE, FEATURE_FLAGS, getEnv } from '../config/env';
+import { db } from './firebase';
+import {
+  pointsBalanceDocRef,
+  storePointsTransactionsCollection,
+  storePointsTransactionDocRef,
+  type PointsBalanceDoc,
+  type PointsTransactionDoc,
+  type PointsTransactionType,
+} from './firebase/firestore-schema';
+import {
+  getDoc,
+  setDoc,
+  runTransaction,
+  serverTimestamp,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  doc,
+  type Timestamp,
+} from 'firebase/firestore';
 import type {
   PointsLedger,
   PointsBalance,
@@ -566,7 +1022,6 @@ import type {
   EarnPointsParams,
   SpendPointsParams,
   PointsPolicy,
-  PointsTransactionType,
 } from '../types/points';
 
 /**
@@ -856,48 +1311,420 @@ async function mockGetAllBalances(): Promise<
 }
 
 // ============================================================================
-// Firebase 구현 (TODO)
+// Firebase 구현
 // ============================================================================
 
+/**
+ * storeId 가져오기 헬퍼
+ */
+function getStoreId(): string {
+  return getEnv('VITE_STORE_ID', 'hyunpoong_main');
+}
+
+/**
+ * Timestamp → number (milliseconds) 변환
+ */
+function timestampToMs(ts: Timestamp | undefined): number {
+  if (!ts) return Date.now();
+  if (typeof ts === 'string') return Date.parse(ts);
+  if (typeof ts.toDate === 'function') return ts.toDate().getTime();
+  if ((ts as any).seconds && typeof (ts as any).seconds === 'number') {
+    return (ts as any).seconds * 1000;
+  }
+  return Date.now();
+}
+
+/**
+ * PointsTransactionDoc → PointsLedger 변환
+ */
+function buildPointsLedgerFromDoc(doc: PointsTransactionDoc, docId: string): PointsLedger {
+  return {
+    id: docId,
+    uid: doc.userId,
+    type: doc.type,
+    amount: doc.amount,
+    ref: doc.ref,
+    note: doc.note || '',
+    at: timestampToMs(doc.at),
+    expiresAt: doc.expiresAt ? timestampToMs(doc.expiresAt) : undefined,
+  };
+}
+
+/**
+ * Firebase: 포인트 적립
+ */
 async function firebaseEarnPoints(params: EarnPointsParams): Promise<PointsLedger> {
-  // TODO: Firestore에 원장 추가 및 잔액 업데이트
-  throw new Error('Firebase points not implemented yet');
+  const { uid, amount, ref, note } = params;
+  const storeId = getStoreId();
+
+  if (amount <= 0) {
+    throw new Error('적립 포인트는 0보다 커야 합니다');
+  }
+
+  // 만료일 계산
+  const expiresAt = calculateExpiryDate();
+  const expiresAtTimestamp = new Date(expiresAt) as any;
+
+  await runTransaction(db, async (tx) => {
+    const balanceRef = pointsBalanceDocRef(uid);
+    const balanceSnap = await tx.get(balanceRef);
+
+    const now = serverTimestamp();
+    let prev: PointsBalanceDoc | null = null;
+
+    if (balanceSnap.exists()) {
+      prev = balanceSnap.data() as PointsBalanceDoc;
+    }
+
+    const nextBalance: PointsBalanceDoc = {
+      userId: uid,
+      balance: (prev?.balance ?? 0) + amount,
+      totalEarned: (prev?.totalEarned ?? 0) + amount,
+      totalSpent: prev?.totalSpent ?? 0,
+      totalExpired: prev?.totalExpired ?? 0,
+      updatedAt: now as any,
+    };
+
+    tx.set(balanceRef, nextBalance);
+
+    // 포인트 거래 문서 생성
+    const txCol = storePointsTransactionsCollection(storeId);
+    const txDocRef = doc(txCol);
+    const txDoc: PointsTransactionDoc = {
+      txId: txDocRef.id,
+      storeId,
+      userId: uid,
+      type: 'earn',
+      amount,
+      ref: {
+        kind: ref.kind === 'order' ? 'order' : ref.kind === 'review' ? 'review' : 'admin',
+        id: ref.id,
+      },
+      note: note || '',
+      expiresAt: expiresAtTimestamp,
+      at: now as any,
+    };
+
+    tx.set(txDocRef, txDoc);
+  });
+
+  // 생성된 거래 문서 읽기 (트랜잭션 완료 후)
+  const txCol = storePointsTransactionsCollection(storeId);
+  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const snapshot = await getDocs(q);
+  const latestDoc = snapshot.docs[0];
+  
+  if (!latestDoc) {
+    throw new Error('포인트 적립 후 거래 내역을 읽을 수 없습니다');
+  }
+
+  return buildPointsLedgerFromDoc(latestDoc.data() as PointsTransactionDoc, latestDoc.id);
 }
 
+/**
+ * Firebase: 포인트 사용
+ */
 async function firebaseSpendPoints(params: SpendPointsParams): Promise<PointsLedger> {
-  // TODO: Firestore에서 트랜잭션으로 처리
-  throw new Error('Firebase points not implemented yet');
+  const { uid, amount, ref, note } = params;
+  const storeId = getStoreId();
+
+  if (amount <= 0) {
+    throw new Error('사용 포인트는 0보다 커야 합니다');
+  }
+
+  // 최소 사용 금액 체크
+  if (amount < POINTS_POLICY.minUse) {
+    throw new Error(`최소 ${POINTS_POLICY.minUse.toLocaleString()}P부터 사용 가능합니다`);
+  }
+
+  await runTransaction(db, async (tx) => {
+    const balanceRef = pointsBalanceDocRef(uid);
+    const balanceSnap = await tx.get(balanceRef);
+
+    if (!balanceSnap.exists()) {
+      throw new Error('포인트 잔액이 부족합니다.');
+    }
+
+    const prev = balanceSnap.data() as PointsBalanceDoc;
+    const current = prev.balance ?? 0;
+
+    if (current < amount) {
+      throw new Error('포인트 잔액이 부족합니다.');
+    }
+
+    const now = serverTimestamp();
+
+    const nextBalance: PointsBalanceDoc = {
+      userId: uid,
+      balance: current - amount,
+      totalEarned: prev.totalEarned ?? 0,
+      totalSpent: (prev.totalSpent ?? 0) + amount,
+      totalExpired: prev.totalExpired ?? 0,
+      updatedAt: now as any,
+    };
+
+    tx.set(balanceRef, nextBalance);
+
+    // 포인트 거래 문서 생성
+    const txCol = storePointsTransactionsCollection(storeId);
+    const txDocRef = doc(txCol);
+    const txDoc: PointsTransactionDoc = {
+      txId: txDocRef.id,
+      storeId,
+      userId: uid,
+      type: 'spend',
+      amount: -amount,
+      ref: {
+        kind: ref.kind === 'order' ? 'order' : ref.kind === 'review' ? 'review' : 'admin',
+        id: ref.id,
+      },
+      note: note || '',
+      at: now as any,
+    };
+
+    tx.set(txDocRef, txDoc);
+  });
+
+  // 생성된 거래 문서 읽기
+  const txCol = storePointsTransactionsCollection(storeId);
+  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const snapshot = await getDocs(q);
+  const latestDoc = snapshot.docs[0];
+  
+  if (!latestDoc) {
+    throw new Error('포인트 사용 후 거래 내역을 읽을 수 없습니다');
+  }
+
+  return buildPointsLedgerFromDoc(latestDoc.data() as PointsTransactionDoc, latestDoc.id);
 }
 
+/**
+ * Firebase: 포인트 잔액 조회
+ */
 async function firebaseGetBalance(uid: string): Promise<number> {
-  // TODO: Firestore에서 잔액 조회
-  throw new Error('Firebase points not implemented yet');
+  const balanceRef = pointsBalanceDocRef(uid);
+  const snap = await getDoc(balanceRef);
+  
+  if (!snap.exists()) {
+    return 0;
+  }
+  
+  const data = snap.data() as PointsBalanceDoc;
+  return data.balance ?? 0;
 }
 
+/**
+ * Firebase: 포인트 내역 조회
+ */
 async function firebaseGetHistory(uid: string): Promise<PointsHistory> {
-  // TODO: Firestore에서 원장 조회
-  throw new Error('Firebase points not implemented yet');
+  const storeId = getStoreId();
+  const txCol = storePointsTransactionsCollection(storeId);
+  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const snapshot = await getDocs(q);
+
+  const ledger: PointsLedger[] = snapshot.docs.map((docSnap) => {
+    const data = docSnap.data() as PointsTransactionDoc;
+    return buildPointsLedgerFromDoc(data, docSnap.id);
+  });
+
+  const balance = await firebaseGetBalance(uid);
+
+  // 만료 예정 포인트 계산
+  const now = Date.now();
+  const expiringMap = new Map<number, number>();
+
+  ledger
+    .filter((entry) => entry.type === 'earn' && entry.expiresAt && entry.expiresAt > now)
+    .forEach((entry) => {
+      if (entry.expiresAt) {
+        const existing = expiringMap.get(entry.expiresAt) || 0;
+        expiringMap.set(entry.expiresAt, existing + entry.amount);
+      }
+    });
+
+  const expiringPoints = Array.from(expiringMap.entries())
+    .map(([expiresAt, amount]) => ({ amount, expiresAt }))
+    .sort((a, b) => a.expiresAt - b.expiresAt);
+
+  return {
+    ledger,
+    balance,
+    expiringPoints,
+  };
 }
 
+/**
+ * Firebase: 만료된 포인트 처리
+ * TODO: Cloud Functions 스케줄러로 이동 예정
+ */
 async function firebaseExpirePoints(): Promise<void> {
-  // TODO: Cloud Function으로 스케줄링
-  throw new Error('Firebase points not implemented yet');
+  const storeId = getStoreId();
+  const txCol = storePointsTransactionsCollection(storeId);
+  const now = Date.now();
+
+  // 만료 대상 찾기 (earn 타입이고 expiresAt이 지난 것)
+  const q = query(
+    txCol,
+    where('type', '==', 'earn'),
+    where('expiresAt', '<=', new Date(now) as any)
+  );
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return;
+  }
+
+  // 사용자별로 그룹화하여 만료 처리
+  const userExpireMap = new Map<string, number>();
+
+  snapshot.docs.forEach((docSnap) => {
+    const data = docSnap.data() as PointsTransactionDoc;
+    const userId = data.userId;
+    const amount = Math.abs(data.amount);
+    const existing = userExpireMap.get(userId) || 0;
+    userExpireMap.set(userId, existing + amount);
+  });
+
+  // 각 사용자별로 만료 트랜잭션 실행
+  for (const [userId, totalExpireAmount] of userExpireMap.entries()) {
+    await runTransaction(db, async (tx) => {
+      const balanceRef = pointsBalanceDocRef(userId);
+      const balanceSnap = await tx.get(balanceRef);
+
+      if (!balanceSnap.exists()) {
+        return; // 잔액이 없으면 스킵
+      }
+
+      const prev = balanceSnap.data() as PointsBalanceDoc;
+      const current = prev.balance ?? 0;
+      const actualExpireAmount = Math.min(current, totalExpireAmount);
+
+      if (actualExpireAmount <= 0) {
+        return;
+      }
+
+      const now = serverTimestamp();
+
+      const nextBalance: PointsBalanceDoc = {
+        userId,
+        balance: current - actualExpireAmount,
+        totalEarned: prev.totalEarned ?? 0,
+        totalSpent: prev.totalSpent ?? 0,
+        totalExpired: (prev.totalExpired ?? 0) + actualExpireAmount,
+        updatedAt: now as any,
+      };
+
+      tx.set(balanceRef, nextBalance);
+
+      // 만료 거래 문서 생성
+      const txDocRef = doc(txCol);
+      const txDoc: PointsTransactionDoc = {
+        txId: txDocRef.id,
+        storeId,
+        userId,
+        type: 'expire',
+        amount: -actualExpireAmount,
+        ref: {
+          kind: 'admin',
+          id: 'expire_batch',
+        },
+        note: '포인트 만료',
+        at: now as any,
+      };
+
+      tx.set(txDocRef, txDoc);
+    });
+  }
 }
 
+/**
+ * Firebase: 관리자 포인트 조정
+ */
 async function firebaseAdjustPoints(
   uid: string,
   amount: number,
   note: string
 ): Promise<PointsLedger> {
-  // TODO: Firestore에 관리자 조정 기록
-  throw new Error('Firebase points not implemented yet');
+  const storeId = getStoreId();
+
+  await runTransaction(db, async (tx) => {
+    const balanceRef = pointsBalanceDocRef(uid);
+    const balanceSnap = await tx.get(balanceRef);
+
+    const now = serverTimestamp();
+    let prev: PointsBalanceDoc | null = null;
+
+    if (balanceSnap.exists()) {
+      prev = balanceSnap.data() as PointsBalanceDoc;
+    }
+
+    const nextBalance: PointsBalanceDoc = {
+      userId: uid,
+      balance: (prev?.balance ?? 0) + amount,
+      totalEarned: amount > 0 ? (prev?.totalEarned ?? 0) + amount : (prev?.totalEarned ?? 0),
+      totalSpent: amount < 0 ? (prev?.totalSpent ?? 0) - amount : (prev?.totalSpent ?? 0),
+      totalExpired: prev?.totalExpired ?? 0,
+      updatedAt: now as any,
+    };
+
+    tx.set(balanceRef, nextBalance);
+
+    // 포인트 거래 문서 생성
+    const txCol = storePointsTransactionsCollection(storeId);
+    const txDocRef = doc(txCol);
+    const expiresAt = amount > 0 ? (new Date(calculateExpiryDate()) as any) : undefined;
+    const txDoc: PointsTransactionDoc = {
+      txId: txDocRef.id,
+      storeId,
+      userId: uid,
+      type: 'adjust',
+      amount,
+      ref: {
+        kind: 'admin',
+        id: 'admin_adjust',
+      },
+      note,
+      expiresAt,
+      at: now as any,
+    };
+
+    tx.set(txDocRef, txDoc);
+  });
+
+  // 생성된 거래 문서 읽기
+  const txCol = storePointsTransactionsCollection(storeId);
+  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const snapshot = await getDocs(q);
+  const latestDoc = snapshot.docs[0];
+  
+  if (!latestDoc) {
+    throw new Error('포인트 조정 후 거래 내역을 읽을 수 없습니다');
+  }
+
+  return buildPointsLedgerFromDoc(latestDoc.data() as PointsTransactionDoc, latestDoc.id);
 }
 
+/**
+ * Firebase: 모든 사용자 포인트 조회 (관리자)
+ */
 async function firebaseGetAllBalances(): Promise<
   Array<PointsBalance & { phone?: string; name?: string }>
 > {
-  // TODO: Firestore에서 모든 잔액 조회
-  throw new Error('Firebase points not implemented yet');
+  // TODO: users 컬렉션과 조인하여 phone/name 가져오기
+  // 현재는 pointsBalances만 조회
+  const balancesRef = collection(db, 'pointsBalances');
+  const snapshot = await getDocs(balancesRef);
+
+  return snapshot.docs.map((docSnap) => {
+    const data = docSnap.data() as PointsBalanceDoc;
+    return {
+      uid: data.userId,
+      balance: data.balance,
+      updatedAt: timestampToMs(data.updatedAt),
+      phone: undefined, // TODO: users 컬렉션에서 조인
+      name: undefined, // TODO: users 컬렉션에서 조인
+    };
+  });
 }
 
 // ============================================================================
@@ -1002,6 +1829,32 @@ export function calculateEarnPoints(orderAmount: number): number {
 export function calculateReviewPoints(hasPhoto: boolean): number {
   return hasPhoto ? POINTS_POLICY.reviewPhotoBonus : POINTS_POLICY.reviewTextBonus;
 }
+
+// ============================================================================
+// v1.0 포인트/트랜잭션 설계 요약
+// ============================================================================
+/**
+ * v1.0 포인트/트랜잭션 설계 요약
+ *
+ * - 주문 완료 시:
+ *   - source: Cloud Functions onUpdate(orders/{orderId}) 또는 클라이언트
+ *   - 조건: status가 'completed'로 변경되는 순간
+ *   - 동작:
+ *     - earnPoints({ userId, storeId, amount, refKind: 'order', refId: orderId, note: '주문 적립' })
+ *
+ * - 주문 취소 시:
+ *   - status가 'cancelled'로 변경되는 순간
+ *   - 동작:
+ *     - 필요 시 spendPoints 또는 별도 refundPoints 헬퍼로 환불 처리
+ *
+ * - 리뷰 작성 시:
+ *   - createReview 성공 이후
+ *   - 동작:
+ *     - earnPoints({ userId, storeId, amount: REVIEW_BONUS, refKind: 'review', refId: reviewId, note: '리뷰 작성 적립' })
+ *
+ * 실제 트리거/호출 위치:
+ * - v1.0 STEP 7: Cloud Functions에서 onUpdate/onCreate 트리거로 연결 예정
+ */
 
 ```
 

@@ -1,6 +1,6 @@
 # Config & Utils - Full Source Code
 
-**Generated**: 2025-11-21-1308  
+**Generated**: 2025-11-22-2149  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -72,9 +72,18 @@ export const getEnv = (key: string, defaultValue: string = '', required: boolean
   }
 };
 
-// Phase 1/2: 강제 Mock 모드 (LocalStorage)
-// TODO: Phase 3에서 실제 Firebase 연동 시 ENV 기반으로 전환
-export const USE_FIREBASE = false;
+// v1.0: Firebase 모드 플래그 (환경 변수 기반)
+// VITE_USE_FIREBASE 환경 변수를 읽어서 boolean으로 변환
+// 기본값: false (Mock 모드)
+// true: Firebase 실연동 모드
+// false: Mock 모드 (localStorage)
+export const USE_FIREBASE = (() => {
+  const raw = getEnv('VITE_USE_FIREBASE', 'false');
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  // 기본값: false (Mock 모드)
+  return false;
+})();
 
 // 디버그 로그 추가
 if (typeof window !== 'undefined') {
@@ -90,6 +99,11 @@ export const APP_CONFIG = {
   bizNo: '553-17-00098',
   ceo: '석경선/배종수(공동대표)',
 };
+
+// v1.0: Store ID (환경 변수 기반)
+// VITE_STORE_ID 환경 변수를 읽어서 사용
+// 기본값: 'hyunpoong_main'
+export const STORE_ID = getEnv('VITE_STORE_ID', 'hyunpoong_main');
 
 // Firebase 설정 (Firebase 사용 시)
 export const FIREBASE_CONFIG = {
@@ -302,6 +316,7 @@ export default {
             "path": "*",
             "pdfkit": "*",
             "playwright": "^1.56.1",
+            "qrcode.react": "^4.2.0",
             "react": "^18.3.1",
             "react-day-picker": "*",
             "react-dom": "^18.3.1",
@@ -333,7 +348,10 @@ export default {
             "test:e2e:admin:settings": "playwright test -c src/playwright.config.ts admin-settings.spec.ts --project=chromium",
             "test:e2e:ui": "playwright test -c src/playwright.config.ts --ui",
             "test:e2e:report": "playwright show-report",
-            "test:e2e:orderflow": "playwright test -c src/playwright.config.ts src/e2e/order-flow.spec.ts --project=chromium --grep @orderflow"
+            "test:e2e:orderflow": "playwright test -c src/playwright.config.ts src/e2e/order-flow.spec.ts --project=chromium --grep @orderflow",
+            "functions:build": "cd src/functions && npm run build",
+            "functions:deploy": "cd src/functions && npm run deploy",
+            "functions:serve": "cd src/functions && npm run serve"
       }
 }
 

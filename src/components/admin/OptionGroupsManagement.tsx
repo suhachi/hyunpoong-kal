@@ -372,7 +372,7 @@ export function OptionGroupsManagement() {
 
       {/* 옵션 그룹 생성/수정 다이얼로그 */}
       <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
-        <DialogContent>
+        <DialogContent className="!bg-gray-50">
           <DialogHeader>
             <DialogTitle>
               {editingGroup ? '옵션 그룹 수정' : '옵션 그룹 추가'}
@@ -446,7 +446,7 @@ export function OptionGroupsManagement() {
 
       {/* 옵션 항목 추가/수정 다이얼로그 */}
       <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
-        <DialogContent>
+        <DialogContent className="!bg-gray-50">
           <DialogHeader>
             <DialogTitle>
               {editingItem ? '옵션 수정' : '옵션 추가'}

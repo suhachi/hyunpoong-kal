@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-21-1308  
+**Generated**: 2025-11-22-2149  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -60,7 +60,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock 사용자 데이터 (개발용)
+// 개발/테스트용 Mock 계정 (실운영 시 Firebase Auth 계정으로 대체 예정)
 const MOCK_USERS = {
   'admin@hyunpoongkalguksu.com': {
     uid: 'admin-001',
@@ -177,12 +177,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
       const userData = userDoc.data();
 
+      // 관리자 이메일 주소에 대한 기본 역할 설정
+      const adminEmails = ['admin@hyunpoongkalguksu.com'];
+      let role: UserRole = (userData?.role as UserRole) || 'customer';
+      if (!userData?.role && adminEmails.includes(firebaseUser.email || '')) {
+        role = 'owner';
+      }
+
       const authUser: AuthUser = {
         uid: firebaseUser.uid,
         email: firebaseUser.email || email,
         displayName: firebaseUser.displayName || '사용자',
         photoURL: firebaseUser.photoURL || undefined,
-        role: userData?.role || 'customer',
+        role,
         storeId: userData?.storeId,
         createdAt: userData?.createdAt?.toDate(),
       };
@@ -214,6 +221,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDocRef = doc(db, 'users', firebaseUser.uid);
       const userDoc = await getDoc(userDocRef);
 
+      // 관리자 이메일 주소에 대한 기본 역할 설정
+      const adminEmails = ['admin@hyunpoongkalguksu.com'];
+      const defaultRole = adminEmails.includes(firebaseUser.email || '') ? 'owner' : 'customer';
+
       let authUser: AuthUser;
 
       if (!userDoc.exists()) {
@@ -223,7 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '사용자',
           photoURL: firebaseUser.photoURL || undefined,
-          role: 'customer',
+          role: defaultRole,
           createdAt: new Date(),
         };
 
@@ -236,16 +247,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         // 기존 사용자
         const userData = userDoc.data();
+        let role: UserRole = (userData?.role as UserRole) || defaultRole;
+        if (!userData?.role && adminEmails.includes(firebaseUser.email || '')) {
+          role = 'owner';
+        }
+        
         authUser = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '사용자',
           photoURL: firebaseUser.photoURL || undefined,
-          role: userData?.role || 'customer',
+          role,
           storeId: userData?.storeId,
           createdAt: userData?.createdAt?.toDate(),
         };
-        
+
         setUser(authUser);
       }
 

@@ -8,6 +8,7 @@
 import { Menu, MenuFilters, MenuLog, MenuStatus } from '../../types/menu';
 import menusData from '../../data/menus.json';
 import { USE_FIREBASE, getEnv } from '../../config/env';
+import { getOptionGroups, getOptionGroupById } from './optionGroups.api';
 import {
   type MenuDoc,
   storeMenusCollection,
@@ -26,6 +27,7 @@ import {
   serverTimestamp,
   type Timestamp,
 } from 'firebase/firestore';
+import type { FirebaseError } from 'firebase/app';
 import { db } from '../firebase';
 
 // Mock 데이터 (menus.json 기반)
@@ -76,7 +78,7 @@ function buildMenuDocFromEntity(params: {
 }): Omit<MenuDoc, 'createdAt' | 'updatedAt'> {
   const { storeId, menuId, menu } = params;
 
-  return {
+  const menuDoc: Omit<MenuDoc, 'createdAt' | 'updatedAt'> = {
     menuId,
     storeId,
     category: menu.category,
@@ -86,20 +88,30 @@ function buildMenuDocFromEntity(params: {
     imageUrl: menu.image || '', // Menu.image → MenuDoc.imageUrl
     imagePath: '', // Storage 경로는 업로드 시 설정
     badges: menu.badges || [],
-    options: menu.options,
     optionGroups: menu.optionGroups?.map(og => og.id) || [],
     allergens: menu.allergens || [],
     origin: menu.origin || '',
     isAvailable: menu.isAvailable ?? true,
-    availableHours: menu.availableHours,
     order: typeof menu.order === 'number' ? menu.order : 0,
   };
+
+  // options는 undefined인 경우 필드에서 제외 (Firestore는 undefined 허용 안 함)
+  if (menu.options !== undefined) {
+    menuDoc.options = menu.options;
+  }
+
+  // availableHours는 undefined인 경우 필드에서 제외 (Firestore는 undefined 허용 안 함)
+  if (menu.availableHours !== undefined) {
+    menuDoc.availableHours = menu.availableHours;
+  }
+
+  return menuDoc;
 }
 
 /**
  * Firestore MenuDoc → 도메인 Menu 변환 (읽기용)
  */
-function buildMenuFromDoc(docData: MenuDoc): Menu {
+async function buildMenuFromDoc(docData: MenuDoc): Promise<Menu> {
   // Timestamp → string 변환 헬퍼 (Order 매퍼와 동일한 패턴)
   const toDateOrString = (ts: Timestamp | undefined): string | undefined => {
     if (!ts) return undefined;
@@ -114,6 +126,22 @@ function buildMenuFromDoc(docData: MenuDoc): Menu {
     return undefined;
   };
 
+  // optionGroups ID 배열을 실제 OptionGroup 객체로 변환
+  let resolvedOptionGroups: Menu['optionGroups'] = [];
+  if (docData.optionGroups && docData.optionGroups.length > 0) {
+    try {
+      // 모든 옵션 그룹을 가져와서 ID로 매칭
+      const allOptionGroups = await getOptionGroups();
+      resolvedOptionGroups = docData.optionGroups
+        .map(id => allOptionGroups.find(og => og.id === id))
+        .filter((og): og is NonNullable<typeof og> => og !== undefined);
+    } catch (error) {
+      console.warn('[buildMenuFromDoc] Failed to resolve option groups:', error);
+      // 에러 발생 시 빈 배열 유지
+      resolvedOptionGroups = [];
+    }
+  }
+
   return {
     menuId: docData.menuId,
     category: docData.category,
@@ -123,7 +151,7 @@ function buildMenuFromDoc(docData: MenuDoc): Menu {
     image: docData.imageUrl || '', // MenuDoc.imageUrl → Menu.image
     badges: docData.badges || [],
     options: docData.options,
-    optionGroups: [], // TODO: optionGroups ID 배열을 실제 OptionGroup 객체로 변환 (STEP 5~7)
+    optionGroups: resolvedOptionGroups,
     allergens: docData.allergens || [],
     origin: docData.origin || '',
     isAvailable: docData.isAvailable,
@@ -261,11 +289,14 @@ export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
     console.log('[getMenus] snapshot size:', snapshot.size);
     const menus: Menu[] = [];
 
-    snapshot.forEach((docSnap) => {
+    // 모든 문서를 병렬로 처리
+    const menuPromises = snapshot.docs.map(async (docSnap) => {
       const data = docSnap.data() as MenuDoc;
       data.menuId = data.menuId || docSnap.id;
-      menus.push(buildMenuFromDoc(data));
+      return await buildMenuFromDoc(data);
     });
+    const resolvedMenus = await Promise.all(menuPromises);
+    menus.push(...resolvedMenus);
 
     // 클라이언트 측 필터링 (검색, availableOnly)
     let filtered = menus;
@@ -323,7 +354,7 @@ export async function getMenuById(menuId: string): Promise<Menu | null> {
 
     const data = snapshot.data() as MenuDoc;
     data.menuId = data.menuId || snapshot.id;
-    return buildMenuFromDoc(data);
+    return await buildMenuFromDoc(data);
   } catch (error) {
     console.error('Failed to fetch menu from Firestore:', error);
     return null;
@@ -404,7 +435,7 @@ export async function toggleMenuAvailability(
     const afterData = afterSnap.data() as MenuDoc;
     afterData.menuId = afterData.menuId || afterSnap.id;
 
-    return buildMenuFromDoc(afterData);
+    return await buildMenuFromDoc(afterData);
   } catch (error) {
     console.error('Failed to toggle menu availability in Firestore:', error);
     throw error;
@@ -482,7 +513,7 @@ export async function updateMenuAvailableHours(
     const afterData = afterSnap.data() as MenuDoc;
     afterData.menuId = afterData.menuId || afterSnap.id;
 
-    return buildMenuFromDoc(afterData);
+    return await buildMenuFromDoc(afterData);
   } catch (error) {
     console.error('Failed to update menu available hours in Firestore:', error);
     throw error;
@@ -576,7 +607,7 @@ export async function updateMenu(
     const afterData = afterSnap.data() as MenuDoc;
     afterData.menuId = afterData.menuId || afterSnap.id;
 
-    return buildMenuFromDoc(afterData);
+    return await buildMenuFromDoc(afterData);
   } catch (error) {
     console.error('Failed to update menu in Firestore:', error);
     throw error;
@@ -611,8 +642,38 @@ export interface MenuStats {
 
 export async function getMenuStats(): Promise<MenuStats> {
   if (USE_FIREBASE) {
-    // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
+    // Firestore에서 실제 메뉴 데이터를 가져와서 통계 계산
+    try {
+      const menus = await getMenus({});
+      const stats: MenuStats = {
+        total: menus.length,
+        available: 0,
+        soldout: 0,
+        timeLimited: 0,
+        byCategory: {},
+      };
+
+      menus.forEach(menu => {
+        const status = getMenuStatus(menu);
+        if (status === 'available') stats.available++;
+        else if (status === 'soldout') stats.soldout++;
+        else if (status === 'time-limited') stats.timeLimited++;
+
+        stats.byCategory[menu.category] = (stats.byCategory[menu.category] || 0) + 1;
+      });
+
+      return stats;
+    } catch (error) {
+      console.error('[getMenuStats] Failed to fetch menus for stats:', error);
+      // 에러 발생 시 빈 통계 반환
+      return {
+        total: 0,
+        available: 0,
+        soldout: 0,
+        timeLimited: 0,
+        byCategory: {},
+      };
+    }
   }
 
   await new Promise(resolve => setTimeout(resolve, 200));
@@ -716,6 +777,11 @@ export async function createMenu(
   // Firebase 모드: Firestore stores/{storeId}/menus에 문서 생성
   try {
     const storeId = getStoreId();
+    if (!storeId || storeId.trim() === '') {
+      throw new Error('STORE_ID가 설정되지 않았습니다. 환경 변수를 확인하세요.');
+    }
+    console.log('[createMenu] storeId:', storeId);
+    console.log('[createMenu] menuData:', menuData);
     const colRef = storeMenusCollection(storeId);
 
     // 중복 확인 (같은 이름 + 카테고리)
@@ -751,12 +817,15 @@ export async function createMenu(
       menuId: '', // addDoc 시점에는 id 없음
       menu,
     });
+    console.log('[createMenu] menuDocData:', menuDocData);
+    console.log('[createMenu] collection path:', colRef.path);
 
     const docRef = await addDoc(colRef, {
       ...menuDocData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    console.log('[createMenu] Document created with ID:', docRef.id);
 
     // 생성된 문서 읽기
     const snapshot = await getDoc(docRef);
@@ -767,9 +836,40 @@ export async function createMenu(
     const data = snapshot.data() as MenuDoc;
     data.menuId = snapshot.id;
 
-    return buildMenuFromDoc(data);
+    return await buildMenuFromDoc(data);
   } catch (error) {
-    console.error('Failed to create menu in Firestore:', error);
+    // Firestore 권한 에러를 명확히 표시
+    if (error && typeof error === 'object' && 'code' in error) {
+      const firebaseError = error as FirebaseError;
+      const errorCode = firebaseError.code;
+      
+      // 권한 관련 에러 코드 체크
+      if (
+        errorCode === 'permission-denied' ||
+        errorCode === 'unauthenticated' ||
+        errorCode === 'failed-precondition'
+      ) {
+        console.error('[createMenu] Firestore permission error:', {
+          code: errorCode,
+          message: firebaseError.message,
+          storeId: getStoreId(),
+          collectionPath: `stores/${getStoreId()}/menus`,
+        });
+        
+        // 사용자 친화적인 에러 메시지
+        const errorMessage = 
+          errorCode === 'permission-denied'
+            ? '메뉴 등록에 실패했습니다. Firestore Security Rules에서 stores/{storeId}/menus 쓰기 권한을 허용해야 합니다. 자세한 내용은 관리자에게 문의하세요.'
+            : errorCode === 'unauthenticated'
+            ? '메뉴 등록에 실패했습니다. 로그인이 필요합니다. 다시 로그인해주세요.'
+            : '메뉴 등록에 실패했습니다. Firestore 설정을 확인해주세요.';
+        
+        throw new Error(errorMessage);
+      }
+    }
+    
+    // 기타 에러는 그대로 전달
+    console.error('[createMenu] Failed to create menu in Firestore:', error);
     throw error;
   }
 }

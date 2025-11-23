@@ -80,7 +80,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg bg-white">
+      <SheetContent className="w-full sm:max-w-lg !bg-gray-50">
         <SheetHeader>
           <SheetTitle>주문 상세</SheetTitle>
           <SheetDescription>{order.orderId}</SheetDescription>

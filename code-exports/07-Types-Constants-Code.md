@@ -1,6 +1,6 @@
 # Types & Constants - Full Source Code
 
-**Generated**: 2025-11-21-1308  
+**Generated**: 2025-11-22-2149  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -193,14 +193,14 @@ export interface DeployScript {
  * 진단 결과
  */
 export interface DiagnosticResult {
-  category: string;
+  category?: string;
   checks: DiagnosticCheck[];
-  overall: 'pass' | 'warning' | 'fail';
+  overall: 'pass' | 'warning' | 'fail' | 'info';
 }
 
 export interface DiagnosticCheck {
   name: string;
-  status: 'pass' | 'warning' | 'fail';
+  status: 'pass' | 'warning' | 'fail' | 'info';
   message: string;
   details?: string;
 }
