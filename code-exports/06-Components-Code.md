@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-11-23-2014  
+**Generated**: 2025-11-23-2022  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -4638,6 +4638,8 @@ export function StoreLocationPicker({
     let isMounted = true;
     let map: any = null;
     let marker: any = null;
+    let clickListener: any = null;
+    let dragListener: any = null;
 
     // 구글맵 우선 시도
     loadGoogleMaps()
@@ -4673,10 +4675,12 @@ export function StoreLocationPicker({
         markerRef.current = marker;
 
         // 지도 클릭 이벤트
-        map.addListener('click', (event: any) => {
+        clickListener = map.addListener('click', (event: any) => {
+          if (!event.latLng) return;
           const clickedLatLng = event.latLng;
           marker.setPosition(clickedLatLng);
           
+          console.log('[StoreLocationPicker] Map clicked:', clickedLatLng.lat(), clickedLatLng.lng());
           onChange({
             lat: clickedLatLng.lat(),
             lng: clickedLatLng.lng(),
@@ -4684,8 +4688,9 @@ export function StoreLocationPicker({
         });
 
         // 마커 드래그 이벤트
-        marker.addListener('dragend', () => {
+        dragListener = marker.addListener('dragend', () => {
           const position = marker.getPosition();
+          console.log('[StoreLocationPicker] Marker dragged:', position.lat(), position.lng());
           onChange({
             lat: position.lat(),
             lng: position.lng(),
@@ -4727,10 +4732,11 @@ export function StoreLocationPicker({
 
         markerRef.current = marker;
 
-        kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
+        clickListener = kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
           const clickedLatLng = mouseEvent.latLng;
           marker.setPosition(clickedLatLng);
           
+          console.log('[StoreLocationPicker] Map clicked:', clickedLatLng.getLat(), clickedLatLng.getLng());
           onChange({
             lat: clickedLatLng.getLat(),
             lng: clickedLatLng.getLng(),
@@ -4747,6 +4753,16 @@ export function StoreLocationPicker({
 
     return () => {
       isMounted = false;
+      // 이벤트 리스너 정리
+      if (clickListener && window.google && window.google.maps) {
+        window.google.maps.event.removeListener(clickListener);
+      }
+      if (dragListener && window.google && window.google.maps) {
+        window.google.maps.event.removeListener(dragListener);
+      }
+      if (clickListener && window.kakao && window.kakao.maps) {
+        window.kakao.maps.event.removeListener(clickListener);
+      }
     };
   }, []); // 초기 로드만
 
@@ -4755,15 +4771,19 @@ export function StoreLocationPicker({
     if (!mapRef.current || !markerRef.current) return;
     if (lat == null || lng == null) return;
 
+    console.log('[StoreLocationPicker] Updating marker position:', lat, lng);
+
     // 구글맵인지 카카오맵인지 확인
     if (window.google && window.google.maps) {
       const position = new window.google.maps.LatLng(lat, lng);
       markerRef.current.setPosition(position);
       mapRef.current.setCenter(position);
+      mapRef.current.setZoom(15);
     } else if (window.kakao && window.kakao.maps) {
       const position = new window.kakao.maps.LatLng(lat, lng);
       markerRef.current.setPosition(position);
       mapRef.current.setCenter(position);
+      mapRef.current.setLevel(3);
     }
   }, [lat, lng]);
 

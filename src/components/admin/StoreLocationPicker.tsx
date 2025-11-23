@@ -59,6 +59,13 @@ export function StoreLocationPicker({
 
         mapRef.current = map;
 
+        // 지도가 완전히 로드된 후 리사이즈 트리거
+        setTimeout(() => {
+          if (map && window.google && window.google.maps) {
+            window.google.maps.event.trigger(map, 'resize');
+          }
+        }, 100);
+
         // 마커 생성
         marker = new google.maps.Marker({
           position: center,
@@ -191,13 +198,27 @@ export function StoreLocationPicker({
       )}
       
       {loading && !error && (
-        <div className="flex items-center justify-center py-8 border rounded-md bg-gray-50">
+        <div 
+          className="flex items-center justify-center border rounded-md bg-gray-50"
+          style={{ 
+            minHeight: '400px',
+            height: '400px',
+            width: '100%'
+          }}
+        >
           <p className="text-sm text-[#8B7355]">지도를 불러오는 중입니다...</p>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center justify-center py-8 border rounded-md bg-red-50">
+        <div 
+          className="flex items-center justify-center border rounded-md bg-red-50"
+          style={{ 
+            minHeight: '400px',
+            height: '400px',
+            width: '100%'
+          }}
+        >
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
@@ -210,7 +231,11 @@ export function StoreLocationPicker({
           <div
             ref={containerRef}
             className="w-full rounded-md border border-[#E5DDD5] overflow-hidden"
-            style={{ minHeight: 280 }}
+            style={{ 
+              minHeight: '400px',
+              height: '400px',
+              width: '100%'
+            }}
           />
         </>
       )}
