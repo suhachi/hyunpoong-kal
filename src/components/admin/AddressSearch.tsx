@@ -44,13 +44,18 @@ export function AddressSearch({
 
     try {
       // 카카오맵 Geocoding API 호출
+      // REST API 키 사용 (JavaScript 키와 다를 수 있음)
+      const restApiKey = KAKAO_MAP_APP_KEY; // 동일한 키 사용 (필요시 별도 환경 변수로 분리 가능)
+      
+      // 헤더를 명시적으로 Headers 객체로 생성하여 인코딩 문제 방지
+      const headers = new Headers();
+      headers.append('Authorization', `KakaoAK ${restApiKey}`);
+      
       const response = await fetch(
         `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(value)}`,
         {
           method: 'GET',
-          headers: {
-            Authorization: `KakaoAK ${KAKAO_MAP_APP_KEY}`,
-          },
+          headers: headers,
         }
       );
 

@@ -37,23 +37,30 @@ export function loadKakaoMaps(): Promise<typeof window.kakao> {
 
     // 스크립트 동적 로드
     const script = document.createElement('script');
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_APP_KEY}&autoload=false&libraries=services`;
+    // JavaScript 키 사용 (REST API 키와 다를 수 있음)
+    const jsKey = KAKAO_MAP_APP_KEY;
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(jsKey)}&autoload=false&libraries=services`;
     script.async = true;
     
     script.onload = () => {
-      if (!window.kakao) {
-        reject(new Error('Kakao object not found on window'));
-        return;
-      }
-      
-      // autoload=false이므로 수동으로 로드
-      window.kakao.maps.load(() => {
-        resolve(window.kakao!);
-      });
+      // 약간의 지연을 두고 kakao 객체 확인 (스크립트 로드 완료 대기)
+      setTimeout(() => {
+        if (!window.kakao) {
+          reject(new Error('Kakao object not found on window'));
+          return;
+        }
+        
+        // autoload=false이므로 수동으로 로드
+        window.kakao.maps.load(() => {
+          resolve(window.kakao!);
+        });
+      }, 100);
     };
 
     script.onerror = (err) => {
       console.error('[loadKakaoMaps] Failed to load script', err);
+      console.error('[loadKakaoMaps] Script URL:', script.src);
+      console.error('[loadKakaoMaps] API Key present:', !!KAKAO_MAP_APP_KEY);
       reject(new Error('Failed to load Kakao Maps script'));
     };
 
