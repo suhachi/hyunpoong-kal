@@ -40,7 +40,8 @@ export interface DailySales {
 export async function getKPIData(): Promise<KPIData> {
   if (USE_FIREBASE) {
     // TODO: Firestore aggregation
-    throw new Error('Firebase not configured');
+    // 임시로 빈 데이터 반환 (에러 대신)
+    console.warn('[Analytics] Firebase aggregation not implemented yet, returning empty data');
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -60,7 +61,7 @@ export async function getKPIData(): Promise<KPIData> {
 export async function getHourlyOrders(): Promise<HourlyOrders[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    throw new Error('Firebase not configured');
+    console.warn('[Analytics] Firebase query not implemented yet, returning empty data');
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -74,7 +75,7 @@ export async function getHourlyOrders(): Promise<HourlyOrders[]> {
 export async function getTopMenuSales(): Promise<MenuSales[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore aggregation
-    throw new Error('Firebase not configured');
+    console.warn('[Analytics] Firebase aggregation not implemented yet, returning empty data');
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -88,7 +89,7 @@ export async function getTopMenuSales(): Promise<MenuSales[]> {
 export async function getDailySales(): Promise<DailySales[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore aggregation
-    throw new Error('Firebase not configured');
+    console.warn('[Analytics] Firebase aggregation not implemented yet, returning empty data');
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));

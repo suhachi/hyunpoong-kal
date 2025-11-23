@@ -89,161 +89,170 @@ const EMPTY_NOTIFICATION_EFFECTIVENESS: NotificationEffectiveness = {
  * 통합 KPI 데이터 조회
  */
 export async function getIntegratedKPI(dateRange: DateRange): Promise<IntegratedKPI> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore aggregation
+    console.warn('[IntegratedAnalytics] Firebase aggregation not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting integrated KPI for range:', dateRange);
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 초기 상태: 모든 값 0
-    return EMPTY_INTEGRATED_KPI;
   }
-
-  // TODO: Firestore aggregation
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // 초기 상태: 모든 값 0
+  return EMPTY_INTEGRATED_KPI;
 }
 
 /**
  * 시간대별 분석
  */
 export async function getHourlyAnalysis(dateRange: DateRange): Promise<HourlyAnalysis[]> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting hourly analysis');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 빈 배열
-    return [];
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 빈 배열
+  return [];
 }
 
 /**
  * 요일별 분석
  */
 export async function getDayOfWeekAnalysis(dateRange: DateRange): Promise<DayOfWeekAnalysis[]> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting day of week analysis');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 빈 배열
-    return [];
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 빈 배열
+  return [];
 }
 
 /**
  * 메뉴별 성과
  */
 export async function getMenuPerformance(dateRange: DateRange): Promise<MenuPerformance[]> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting menu performance');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 빈 배열
-    return [];
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 빈 배열
+  return [];
 }
 
 /**
  * 고객 행동 분석
  */
 export async function getCustomerBehavior(dateRange: DateRange): Promise<CustomerBehavior[]> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting customer behavior');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 빈 배열
-    return [];
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 빈 배열
+  return [];
 }
 
 /**
  * 쿠폰 효과 분석
  */
 export async function getCouponEffectiveness(dateRange: DateRange): Promise<CouponEffectiveness[]> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting coupon effectiveness');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 빈 배열
-    return [];
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 빈 배열
+  return [];
 }
 
 /**
  * 포인트 효과 분석
  */
 export async function getPointsEffectiveness(dateRange: DateRange): Promise<PointsEffectiveness> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting points effectiveness');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 모든 값 0
-    return EMPTY_POINTS_EFFECTIVENESS;
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 모든 값 0
+  return EMPTY_POINTS_EFFECTIVENESS;
 }
 
 /**
  * 리뷰 분석
  */
 export async function getReviewAnalysis(dateRange: DateRange): Promise<ReviewAnalysis> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting review analysis');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 모든 값 0, 빈 배열
-    return EMPTY_REVIEW_ANALYSIS;
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 모든 값 0, 빈 배열
+  return EMPTY_REVIEW_ANALYSIS;
 }
 
 /**
  * 배달 성과
  */
 export async function getDeliveryPerformance(dateRange: DateRange): Promise<DeliveryPerformance> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting delivery performance');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 모든 값 0
-    return EMPTY_DELIVERY_PERFORMANCE;
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 모든 값 0
+  return EMPTY_DELIVERY_PERFORMANCE;
 }
 
 /**
  * 알림 효과
  */
 export async function getNotificationEffectiveness(dateRange: DateRange): Promise<NotificationEffectiveness> {
-  if (!USE_FIREBASE) {
+  if (USE_FIREBASE) {
+    // TODO: Firestore query
+    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+  } else {
     console.log('[Mock] Getting notification effectiveness');
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // 초기 상태: 모든 값 0, 빈 객체
-    return EMPTY_NOTIFICATION_EFFECTIVENESS;
   }
-
-  throw new Error('Firebase not implemented');
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // 초기 상태: 모든 값 0, 빈 객체
+  return EMPTY_NOTIFICATION_EFFECTIVENESS;
 }
 
 /**

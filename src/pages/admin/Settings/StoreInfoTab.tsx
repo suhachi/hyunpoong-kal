@@ -60,7 +60,6 @@ export function StoreInfoTab() {
         const data = docSnap.data() as StoreDoc;
         setStoreInfo({
           ...data,
-          // Timestamp를 Date로 변환하지 않고 그대로 유지 (Firestore가 자동 처리)
         });
       } else {
         // 문서가 없으면 기본값 유지

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
 import { Settings, CreditCard, Truck, Map, Bell, Shield, Store } from 'lucide-react';
-import { getCurrentUser } from '../../../lib/auth';
+import { useAuth } from '../../../contexts/AuthContext';
 import { PaymentTab } from './PaymentTab';
 import { DeliveryTab } from './DeliveryTab';
 import { MapsTab } from './MapsTab';
@@ -20,8 +20,8 @@ export function AdminSettingsCenter() {
   const tabFromUrl = searchParams.get('tab') || 'storeInfo';
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
-  // 사용자 정보 가져오기 (동기)
-  const user = getCurrentUser();
+  // 사용자 정보 가져오기 (AuthContext 사용)
+  const { user } = useAuth();
 
   // URL 쿼리 파라미터 동기화
   useEffect(() => {
