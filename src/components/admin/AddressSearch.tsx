@@ -1,5 +1,5 @@
 /**
- * 주소 검색 컴포넌트 (카카오맵 주소 검색 API 사용)
+ * 주소 검색 컴포넌트 (구글맵/카카오맵 주소 검색 API 사용)
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
@@ -7,8 +7,8 @@ import { useState, useEffect } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Search, Loader2 } from 'lucide-react';
-import { loadGoogleMaps } from '../../lib/googleMaps';
-import { loadKakaoMaps } from '../../lib/kakaoMaps';
+import { loadPrimaryMap, loadSecondaryMap } from '../../lib/maps';
+import { MAP_PROVIDER } from '../../config/env';
 import { toast } from 'sonner';
 
 type AddressSearchProps = {
@@ -25,28 +25,28 @@ export function AddressSearch({
   const [searchQuery, setSearchQuery] = useState(value);
   const [searching, setSearching] = useState(false);
   const [mapsReady, setMapsReady] = useState(false);
-  const [mapProvider, setMapProvider] = useState<'google' | 'kakao' | null>(null);
+  const [currentProvider, setCurrentProvider] = useState<'google' | 'kakao' | null>(null);
 
   // value 변경 시 searchQuery 동기화
   useEffect(() => {
     setSearchQuery(value);
   }, [value]);
 
-  // 지도 API 로드 확인 (구글맵 우선)
+  // 지도 API 로드 확인 (환경 변수에 따라 우선순위 결정)
   useEffect(() => {
-    loadGoogleMaps()
+    loadPrimaryMap()
       .then(() => {
         setMapsReady(true);
-        setMapProvider('google');
+        setCurrentProvider(MAP_PROVIDER);
       })
       .catch(() => {
-        // 구글맵 실패 시 카카오맵 시도
-        return loadKakaoMaps();
+        // 기본 지도 실패 시 보조 지도 시도
+        return loadSecondaryMap();
       })
-      .then((kakao) => {
-        if (kakao) {
+      .then((secondaryLib) => {
+        if (secondaryLib) {
           setMapsReady(true);
-          setMapProvider('kakao');
+          setCurrentProvider(MAP_PROVIDER === 'google' ? 'kakao' : 'google');
         }
       })
       .catch(() => {
@@ -61,25 +61,27 @@ export function AddressSearch({
       return;
     }
 
-    if (!kakaoReady) {
-      // 카카오맵 키가 없으면 주소만 저장
+    if (!mapsReady) {
+      // 지도 API 키가 없으면 주소만 저장
       onChange(searchQuery.trim());
       return;
     }
 
     setSearching(true);
     try {
-      const geocoder = new window.kakao.maps.services.Geocoder();
-      
-      geocoder.addressSearch(searchQuery.trim(), (result: any[], status: any) => {
-        setSearching(false);
+      if (currentProvider === 'google' && window.google && window.google.maps) {
+        // 구글맵 Geocoding API 사용
+        const geocoder = new window.google.maps.Geocoder();
         
-        if (status === window.kakao.maps.services.Status.OK) {
-          if (result.length > 0) {
-            const firstResult = result[0];
-            const lat = parseFloat(firstResult.y);
-            const lng = parseFloat(firstResult.x);
-            const address = firstResult.address_name;
+        geocoder.geocode({ address: searchQuery.trim() }, (results: any[], status: any) => {
+          setSearching(false);
+          
+          if (status === window.google.maps.GeocoderStatus.OK && results && results.length > 0) {
+            const firstResult = results[0];
+            const location = firstResult.geometry.location;
+            const lat = location.lat();
+            const lng = location.lng();
+            const address = firstResult.formatted_address;
             
             onChange(address, lat, lng);
             toast.success('주소를 찾았습니다');
@@ -87,11 +89,37 @@ export function AddressSearch({
             toast.error('주소를 찾을 수 없습니다');
             onChange(searchQuery.trim()); // 주소만 저장
           }
-        } else {
-          toast.error('주소 검색에 실패했습니다');
-          onChange(searchQuery.trim()); // 주소만 저장
-        }
-      });
+        });
+      } else if (currentProvider === 'kakao' && window.kakao && window.kakao.maps && window.kakao.maps.services) {
+        // 카카오맵 주소 검색 API 사용
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        
+        geocoder.addressSearch(searchQuery.trim(), (result: any[], status: any) => {
+          setSearching(false);
+          
+          if (status === window.kakao.maps.services.Status.OK) {
+            if (result.length > 0) {
+              const firstResult = result[0];
+              const lat = parseFloat(firstResult.y);
+              const lng = parseFloat(firstResult.x);
+              const address = firstResult.address_name;
+              
+              onChange(address, lat, lng);
+              toast.success('주소를 찾았습니다');
+            } else {
+              toast.error('주소를 찾을 수 없습니다');
+              onChange(searchQuery.trim()); // 주소만 저장
+            }
+          } else {
+            toast.error('주소 검색에 실패했습니다');
+            onChange(searchQuery.trim()); // 주소만 저장
+          }
+        });
+      } else {
+        toast.error('지도 서비스를 사용할 수 없습니다');
+        onChange(searchQuery.trim());
+        setSearching(false);
+      }
     } catch (error) {
       console.error('[AddressSearch] Search failed:', error);
       setSearching(false);
@@ -138,4 +166,3 @@ export function AddressSearch({
     </div>
   );
 }
-
