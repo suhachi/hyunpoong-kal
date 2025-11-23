@@ -32,8 +32,6 @@ export function Checkout() {
     getSubtotal,
     getDeliveryFee,
     clearCart,
-    isDeliveryNotAllowed,
-    isPickupNotAllowed,
   } = useCart();
 
   // 인증 체크
@@ -140,13 +138,12 @@ export function Checkout() {
 
   // 배달 시 주소 필수 확인
   // 만나서 결제(meet_card, meet_cash)는 배달 주소가 필요 없음
-  // 최소 주문 금액 체크
   const canProceed = agreeTerms && phone && (
     deliveryType === 'pickup' || 
     deliveryAddress || 
     paymentMethod === 'meet_card' || 
     paymentMethod === 'meet_cash'
-  ) && !deliveryNotAllowed && !pickupNotAllowed;
+  );
 
   const handlePayment = async () => {
     if (!canProceed) {
@@ -234,18 +231,11 @@ export function Checkout() {
       setTimeout(() => clearCart(), 100);
     } catch (error) {
       console.error('Payment error:', error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : '주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.';
-      toast.error(errorMessage, { duration: 5000 });
-      // 장바구니는 유지 (주문 실패 시 재시도 가능)
+      toast.error(error instanceof Error ? error.message : '결제 처리 중 오류가 발생했습니다');
     } finally {
       setIsProcessing(false);
     }
   };
-
-  const deliveryNotAllowed = isDeliveryNotAllowed();
-  const pickupNotAllowed = isPickupNotAllowed();
 
   return (
     <div className="pb-32" data-testid="checkout.page">
@@ -262,26 +252,6 @@ export function Checkout() {
               현재 이 앱은 실제 PG 연동 없이 Mock 기반 주문 생성만 지원합니다. (결제는 Phase 3 이후 연동 예정)
             </Alert>
         </div>
-
-        {/* 배달 불가 경고 */}
-        {deliveryNotAllowed && deliveryType === 'delivery' && (
-          <Alert variant="destructive" className="bg-red-50 border-red-200">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              ⚠️ 최소 주문금액 미달로 배달이 불가합니다. (최소 주문금액: {formatPrice(15000)})
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* 포장 불가 경고 */}
-        {pickupNotAllowed && deliveryType === 'pickup' && (
-          <Alert variant="destructive" className="bg-red-50 border-red-200">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              ⚠️ 최소 주문금액 미달로 포장 주문이 불가합니다. (최소 주문금액: {formatPrice(5000)})
-            </AlertDescription>
-          </Alert>
-        )}
 
         {/* 주문 요약 */}
         <div className="bg-white rounded-2xl p-4 space-y-3">

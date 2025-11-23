@@ -56,21 +56,8 @@ export function Login() {
       handleLoginSuccess(user.role);
     } catch (err: any) {
       console.error('로그인 실패:', err);
-      // Firebase 에러 코드를 한국어 메시지로 변환
-      let errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
-      if (err.code === 'auth/user-not-found') {
-        errorMessage = '등록되지 않은 이메일입니다.';
-      } else if (err.code === 'auth/wrong-password') {
-        errorMessage = '비밀번호가 올바르지 않습니다.';
-      } else if (err.code === 'auth/invalid-email') {
-        errorMessage = '이메일 형식이 올바르지 않습니다.';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setError(err.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
+      toast.error('로그인 실패');
     } finally {
       setLoading(false);
     }

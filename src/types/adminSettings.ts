@@ -45,8 +45,6 @@ export interface FunctionsHealthCheck {
 
 /**
  * NICEPAY 설정
- * @deprecated Phase 3에서 온라인 결제 연동 시 재구현 예정
- * 현재는 현장 결제(만나서 카드/현금)만 지원합니다.
  */
 export interface NicepaySettings {
   mode: 'test' | 'production';

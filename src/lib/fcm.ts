@@ -70,9 +70,18 @@ export async function requestNotificationPermission(
     // 로컬에도 저장 (개발 편의)
     localStorage.setItem(FCM_TOKEN_KEY, token);
 
-    // Firestore에 토큰 저장 (fcm.api.ts 사용)
-    const { saveFcmToken } = await import('./fcm.api');
-    await saveFcmToken(userId, token);
+    // Firestore에 토큰 저장
+    const { doc, setDoc } = await import('firebase/firestore');
+    const { db } = await import('./firebase');
+    await setDoc(
+      doc(db, `users/${userId}/meta/fcm`),
+      {
+        token,
+        platform: 'web',
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
 
     return token;
   } catch (error) {
@@ -126,15 +135,6 @@ export async function ensureFcmToken(): Promise<string | null> {
     const token = await getToken(messaging, { vapidKey });
     if (token) {
       localStorage.setItem(FCM_TOKEN_KEY, token);
-      // Firestore에 토큰 저장
-      const { getCurrentUser } = await import('./auth');
-      const currentUser = getCurrentUser();
-      if (currentUser) {
-        const { saveFcmToken } = await import('./fcm.api');
-        await saveFcmToken(currentUser.uid, token).catch((err) => {
-          console.warn('[FCM] Failed to save token to Firestore:', err);
-        });
-      }
       console.info('[FCM] Token stored:', token);
     }
     return token ?? null;

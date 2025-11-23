@@ -49,6 +49,4 @@ export interface CartContextType extends CartState {
   getDeliveryFee: () => number;
   getTotalAmount: () => number;
   forceReload: () => void;
-  isDeliveryNotAllowed: () => boolean;
-  isPickupNotAllowed: () => boolean;
 }

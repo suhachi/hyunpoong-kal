@@ -1,0 +1,4690 @@
+{
+  "config": {
+    "configFile": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\playwright.config.ts",
+    "rootDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/junit.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "D:/projectsing/hyun-poong/hyunpoong-kal/src/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 4,
+    "webServer": {
+      "command": "pnpm run dev",
+      "cwd": "D:\\projectsing\\hyun-poong\\hyunpoong-kal",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "accessibility.spec.ts",
+      "file": "accessibility.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "접근성 테스트",
+          "file": "accessibility.spec.ts",
+          "line": 9,
+          "column": 6,
+          "specs": [
+            {
+              "title": "홈 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-ae997cc8941d756c548f",
+              "file": "accessibility.spec.ts",
+              "line": 10,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-5ca8c27a5566edc2e96c",
+              "file": "accessibility.spec.ts",
+              "line": 20,
+              "column": 3
+            },
+            {
+              "title": "메뉴 목록 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-75aed7ffb9cf000b0e7d",
+              "file": "accessibility.spec.ts",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Tab 키로 이동",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-3538e1d41268adbc3dc0",
+              "file": "accessibility.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Enter 키로 링크 활성화",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-87c6c28a6ebd23859e98",
+              "file": "accessibility.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "이미지 alt 텍스트 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-5ea06948b33a06b459e9",
+              "file": "accessibility.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "색상 대비 - 텍스트 가독성",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-cce32e0248217d24ef38",
+              "file": "accessibility.spec.ts",
+              "line": 79,
+              "column": 3
+            },
+            {
+              "title": "폼 레이블 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-b7e488822b545b86e441",
+              "file": "accessibility.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "ARIA 속성 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-cb6128dafafec695c6cc",
+              "file": "accessibility.spec.ts",
+              "line": 110,
+              "column": 3
+            },
+            {
+              "title": "포커스 표시 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-29c743999a27c28ffdde",
+              "file": "accessibility.spec.ts",
+              "line": 117,
+              "column": 3
+            },
+            {
+              "title": "홈 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-e74ab3f3b7074736e724",
+              "file": "accessibility.spec.ts",
+              "line": 10,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-ebdb272af3d6d2e6341d",
+              "file": "accessibility.spec.ts",
+              "line": 20,
+              "column": 3
+            },
+            {
+              "title": "메뉴 목록 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-6685d20f9eae9ceef6b3",
+              "file": "accessibility.spec.ts",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Tab 키로 이동",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-d57cedfb293cfd62fcdd",
+              "file": "accessibility.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Enter 키로 링크 활성화",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-26ed876d5e855769149f",
+              "file": "accessibility.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "이미지 alt 텍스트 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-a6f6d2e45474d84923f0",
+              "file": "accessibility.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "색상 대비 - 텍스트 가독성",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-701612494771d31c10c4",
+              "file": "accessibility.spec.ts",
+              "line": 79,
+              "column": 3
+            },
+            {
+              "title": "폼 레이블 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-15b51b23f41448c93537",
+              "file": "accessibility.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "ARIA 속성 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-7c9b4d922a7111e4ae45",
+              "file": "accessibility.spec.ts",
+              "line": 110,
+              "column": 3
+            },
+            {
+              "title": "포커스 표시 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-b2091c065bd8025860e9",
+              "file": "accessibility.spec.ts",
+              "line": 117,
+              "column": 3
+            },
+            {
+              "title": "홈 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-85baca918df79cf498b0",
+              "file": "accessibility.spec.ts",
+              "line": 10,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-f58f7fe07ca11935b2ae",
+              "file": "accessibility.spec.ts",
+              "line": 20,
+              "column": 3
+            },
+            {
+              "title": "메뉴 목록 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-3ca3e98b5ba0b8dfd14c",
+              "file": "accessibility.spec.ts",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Tab 키로 이동",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-d26e4d7c0da935ff325c",
+              "file": "accessibility.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Enter 키로 링크 활성화",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-5479ffbed6e50e7c132d",
+              "file": "accessibility.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "이미지 alt 텍스트 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-0c7cff732e129b28fe3e",
+              "file": "accessibility.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "색상 대비 - 텍스트 가독성",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-42df9304a2013aacd205",
+              "file": "accessibility.spec.ts",
+              "line": 79,
+              "column": 3
+            },
+            {
+              "title": "폼 레이블 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-650bfdac57465f022e1c",
+              "file": "accessibility.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "ARIA 속성 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-cc5f1a2df3a6aa3c1fae",
+              "file": "accessibility.spec.ts",
+              "line": 110,
+              "column": 3
+            },
+            {
+              "title": "포커스 표시 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-edd15e3893d19704a1b1",
+              "file": "accessibility.spec.ts",
+              "line": 117,
+              "column": 3
+            },
+            {
+              "title": "홈 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-4fd02c54c26720d8d081",
+              "file": "accessibility.spec.ts",
+              "line": 10,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-d5ec5052e25b3ab066a6",
+              "file": "accessibility.spec.ts",
+              "line": 20,
+              "column": 3
+            },
+            {
+              "title": "메뉴 목록 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-17292f6f1f0cfe76851f",
+              "file": "accessibility.spec.ts",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Tab 키로 이동",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-36b8dbf64bacd5398bd8",
+              "file": "accessibility.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Enter 키로 링크 활성화",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-f4e96d720ebb7baa3d1f",
+              "file": "accessibility.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "이미지 alt 텍스트 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-f53959833982a4ec160f",
+              "file": "accessibility.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "색상 대비 - 텍스트 가독성",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-be6e3596aaaf76fbce3b",
+              "file": "accessibility.spec.ts",
+              "line": 79,
+              "column": 3
+            },
+            {
+              "title": "폼 레이블 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-694ea4975331946db233",
+              "file": "accessibility.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "ARIA 속성 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-f75a9686cc5ae6c2f25c",
+              "file": "accessibility.spec.ts",
+              "line": 110,
+              "column": 3
+            },
+            {
+              "title": "포커스 표시 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-7f8bb0ef240bcae91aa0",
+              "file": "accessibility.spec.ts",
+              "line": 117,
+              "column": 3
+            },
+            {
+              "title": "홈 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-ea59c35b7fbd92b430ef",
+              "file": "accessibility.spec.ts",
+              "line": 10,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-ec8b194e1a18acad49f1",
+              "file": "accessibility.spec.ts",
+              "line": 20,
+              "column": 3
+            },
+            {
+              "title": "메뉴 목록 페이지 접근성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-ad5c9e0c820173e58603",
+              "file": "accessibility.spec.ts",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Tab 키로 이동",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-eb36354937f02afe7e97",
+              "file": "accessibility.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "키보드 탐색 - Enter 키로 링크 활성화",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-994fa91efa702d1733c0",
+              "file": "accessibility.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "이미지 alt 텍스트 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-70fa2ca9b3b096bef047",
+              "file": "accessibility.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "색상 대비 - 텍스트 가독성",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-3d0296ce45fdd323369e",
+              "file": "accessibility.spec.ts",
+              "line": 79,
+              "column": 3
+            },
+            {
+              "title": "폼 레이블 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-00b08fcaa8e49c3c8775",
+              "file": "accessibility.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "ARIA 속성 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-39686cea2c0011462bdb",
+              "file": "accessibility.spec.ts",
+              "line": 110,
+              "column": 3
+            },
+            {
+              "title": "포커스 표시 확인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ddd864604af8a6a0198f-9cf5b1da233e72d6811d",
+              "file": "accessibility.spec.ts",
+              "line": 117,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "admin-routes.spec.ts",
+      "file": "admin-routes.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Admin Routes @admin",
+          "file": "admin-routes.spec.ts",
+          "line": 40,
+          "column": 6,
+          "specs": [
+            {
+              "title": "renders /admin (Dashboard) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-ff995e6dda3f0829cfb4",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/orders (Orders) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-1a7183bdb52c4d748f11",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/menus (Menus) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-6157c142bbfb3102911f",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/reviews (Reviews) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-3c2844eb26eec074e834",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/analytics (Analytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-76d79b73fd39d43f629c",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/integrated-analytics (IntegratedAnalytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-e2ae1123bca79fab0d79",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/delivery (Delivery) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-0051571c9eef910249d6",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/promotions (Promotions) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-9ccdc4cb2dbff21d7209",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/points (Points) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-a864d30c038f15c5f69b",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/support (Support) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-855806df97fe1dbaab99",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/settings (Settings) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-9ed8daf2c2e2162e2af7",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin (Dashboard) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-d1be764dbc48edbf6ef6",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/orders (Orders) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-ad96840e6b1681d352e3",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/menus (Menus) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-92a5b3004379333a25db",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/reviews (Reviews) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-fd6d65e795cb3c0ad976",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/analytics (Analytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-20a6918d9c36e01e9acb",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/integrated-analytics (IntegratedAnalytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-5f3d4ce3963ccc7d4295",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/delivery (Delivery) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-b54cb2e886aa41f1e81c",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/promotions (Promotions) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-af39e09eee72fbfddbcd",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/points (Points) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-f5f2406ac1bf46f63466",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/support (Support) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-31f4520c05aa8000bf19",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/settings (Settings) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-3fde2beead6c1a67a091",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin (Dashboard) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-cbb999ccddebc3c0cc65",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/orders (Orders) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-897935de54cc5343bad9",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/menus (Menus) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-463d52eb0867c0d87585",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/reviews (Reviews) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-00912a92108d656b1553",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/analytics (Analytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-4f9008f2b9422746e9c0",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/integrated-analytics (IntegratedAnalytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-6cf2a8fb27915defc6bd",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/delivery (Delivery) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-91134e3febbbd81e27ab",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/promotions (Promotions) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-a74f2c86ae556699fb36",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/points (Points) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-4669d0cad9ece9a7eb79",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/support (Support) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-e7900e314576f94cade9",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/settings (Settings) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-d669db1814f8183149dd",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin (Dashboard) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-b1c24b35ae9532b18781",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/orders (Orders) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-6a39c6e296c1eb2a0529",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/menus (Menus) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-25486805056c3a273a86",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/reviews (Reviews) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-fbb5a304cd89fa8428c5",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/analytics (Analytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-e9c9fb6375c4296a0319",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/integrated-analytics (IntegratedAnalytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-2bd2420b7b5565b6ee78",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/delivery (Delivery) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-8adcba9d5bbac5c9cf80",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/promotions (Promotions) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-047a37eb7c8ebb39c254",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/points (Points) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-aa38e706c55c23f2865d",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/support (Support) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-8e50a73e96741366ed15",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/settings (Settings) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-ab9b661138b575ccbbbb",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin (Dashboard) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-2955998a32481f03130d",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/orders (Orders) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-d15954294b6d3f40de1e",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/menus (Menus) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-cca5e7b88d8410ad4931",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/reviews (Reviews) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-7cbab0a2d4973115cea1",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/analytics (Analytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-a64d59aa96d9b671b1bc",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/integrated-analytics (IntegratedAnalytics) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-9d6fabf6f31e97df4b09",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/delivery (Delivery) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-61fa92ed445cf8ec9596",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/promotions (Promotions) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-daef8ccef10d98ba613b",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/points (Points) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-12b7e2574e2c7887905d",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/support (Support) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-204c6bdd213f1df2df56",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            },
+            {
+              "title": "renders /admin/settings (Settings) without console errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d298cb931137134f17b0-5e2712ea5ce6ac39907b",
+              "file": "admin-routes.spec.ts",
+              "line": 61,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "admin-settings.spec.ts",
+      "file": "admin-settings.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Admin Settings Pages @admin",
+          "file": "admin-settings.spec.ts",
+          "line": 25,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Settings page loads without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-2d2d68ac129c025fc68f",
+              "file": "admin-settings.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "Payment tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-08ea031165197ee15d22",
+              "file": "admin-settings.spec.ts",
+              "line": 57,
+              "column": 3
+            },
+            {
+              "title": "Delivery tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-cd52c7a860e7381fb611",
+              "file": "admin-settings.spec.ts",
+              "line": 75,
+              "column": 3
+            },
+            {
+              "title": "Maps tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-ad3d31b4d397afbdf26f",
+              "file": "admin-settings.spec.ts",
+              "line": 92,
+              "column": 3
+            },
+            {
+              "title": "FCM tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-e68cfa3f9945f029c0f1",
+              "file": "admin-settings.spec.ts",
+              "line": 109,
+              "column": 3
+            },
+            {
+              "title": "Operations tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-96ee3b6cd6b047b62ae8",
+              "file": "admin-settings.spec.ts",
+              "line": 126,
+              "column": 3
+            },
+            {
+              "title": "All tabs can be switched without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-70651f1d05f4bbcc8d3b",
+              "file": "admin-settings.spec.ts",
+              "line": 143,
+              "column": 3
+            },
+            {
+              "title": "Settings page loads without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-7c2bd30ef6457f2efd1f",
+              "file": "admin-settings.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "Payment tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-ca2bd9379ae9bc784ec8",
+              "file": "admin-settings.spec.ts",
+              "line": 57,
+              "column": 3
+            },
+            {
+              "title": "Delivery tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-f02b23d07e652f62a261",
+              "file": "admin-settings.spec.ts",
+              "line": 75,
+              "column": 3
+            },
+            {
+              "title": "Maps tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-2f2c4f8555491effe4be",
+              "file": "admin-settings.spec.ts",
+              "line": 92,
+              "column": 3
+            },
+            {
+              "title": "FCM tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-c40b91c92bfc67609c8c",
+              "file": "admin-settings.spec.ts",
+              "line": 109,
+              "column": 3
+            },
+            {
+              "title": "Operations tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-80d9166fa54953c9c2fb",
+              "file": "admin-settings.spec.ts",
+              "line": 126,
+              "column": 3
+            },
+            {
+              "title": "All tabs can be switched without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-5a081d19107c54b1acc7",
+              "file": "admin-settings.spec.ts",
+              "line": 143,
+              "column": 3
+            },
+            {
+              "title": "Settings page loads without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-02db84fcb88559f4d130",
+              "file": "admin-settings.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "Payment tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-3584cfe4554a727e6108",
+              "file": "admin-settings.spec.ts",
+              "line": 57,
+              "column": 3
+            },
+            {
+              "title": "Delivery tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-636ef992cdf56ac9c385",
+              "file": "admin-settings.spec.ts",
+              "line": 75,
+              "column": 3
+            },
+            {
+              "title": "Maps tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-dd2f6bca8badc97764c2",
+              "file": "admin-settings.spec.ts",
+              "line": 92,
+              "column": 3
+            },
+            {
+              "title": "FCM tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-dd2f42de5519c7ec8e79",
+              "file": "admin-settings.spec.ts",
+              "line": 109,
+              "column": 3
+            },
+            {
+              "title": "Operations tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-b3169fe34747950bf996",
+              "file": "admin-settings.spec.ts",
+              "line": 126,
+              "column": 3
+            },
+            {
+              "title": "All tabs can be switched without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-4dc406a16eb8684cf579",
+              "file": "admin-settings.spec.ts",
+              "line": 143,
+              "column": 3
+            },
+            {
+              "title": "Settings page loads without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-aada5be24f4f71fe9dd1",
+              "file": "admin-settings.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "Payment tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-926b32585271a7914681",
+              "file": "admin-settings.spec.ts",
+              "line": 57,
+              "column": 3
+            },
+            {
+              "title": "Delivery tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-9817410ee7eccf7313eb",
+              "file": "admin-settings.spec.ts",
+              "line": 75,
+              "column": 3
+            },
+            {
+              "title": "Maps tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-8680fc50079933e9d68e",
+              "file": "admin-settings.spec.ts",
+              "line": 92,
+              "column": 3
+            },
+            {
+              "title": "FCM tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-b3937640a690b966e7a3",
+              "file": "admin-settings.spec.ts",
+              "line": 109,
+              "column": 3
+            },
+            {
+              "title": "Operations tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-256ed1db4ac6411c0079",
+              "file": "admin-settings.spec.ts",
+              "line": 126,
+              "column": 3
+            },
+            {
+              "title": "All tabs can be switched without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-37eb4bee879a049026c9",
+              "file": "admin-settings.spec.ts",
+              "line": 143,
+              "column": 3
+            },
+            {
+              "title": "Settings page loads without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-52d48d18e2119365470c",
+              "file": "admin-settings.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "Payment tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-704f66cf184bc33098bf",
+              "file": "admin-settings.spec.ts",
+              "line": 57,
+              "column": 3
+            },
+            {
+              "title": "Delivery tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-37c8bbf42bf5cf37751a",
+              "file": "admin-settings.spec.ts",
+              "line": 75,
+              "column": 3
+            },
+            {
+              "title": "Maps tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-2f86308ae8fd073bf197",
+              "file": "admin-settings.spec.ts",
+              "line": 92,
+              "column": 3
+            },
+            {
+              "title": "FCM tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-488b83818a94167b9789",
+              "file": "admin-settings.spec.ts",
+              "line": 109,
+              "column": 3
+            },
+            {
+              "title": "Operations tab renders correctly",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-bbf207d13b79701a2e94",
+              "file": "admin-settings.spec.ts",
+              "line": 126,
+              "column": 3
+            },
+            {
+              "title": "All tabs can be switched without errors",
+              "ok": true,
+              "tags": [
+                "admin"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f375f71858043ffaa49e-dbdb3c61dd59197e8911",
+              "file": "admin-settings.spec.ts",
+              "line": 143,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "auth.spec.ts",
+      "file": "auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "인증 시스템",
+          "file": "auth.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "로그인 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-ea601306067712993dcd",
+              "file": "auth.spec.ts",
+              "line": 13,
+              "column": 3
+            },
+            {
+              "title": "Mock 계정으로 로그인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-b79195751ee72eced221",
+              "file": "auth.spec.ts",
+              "line": 36,
+              "column": 3
+            },
+            {
+              "title": "잘못된 로그인 정보로 에러 표시",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-4203b6440a161e0d0f91",
+              "file": "auth.spec.ts",
+              "line": 55,
+              "column": 3
+            },
+            {
+              "title": "회원가입 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-cc722ce7265204576ea7",
+              "file": "auth.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "회원가입 유효성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-61e2b17d2c8a79e8285f",
+              "file": "auth.spec.ts",
+              "line": 86,
+              "column": 3
+            },
+            {
+              "title": "보호된 페이지 접근 시 로그인 페이지로 리다이렉트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-0c1e2ff0270b8ca25da3",
+              "file": "auth.spec.ts",
+              "line": 106,
+              "column": 3
+            },
+            {
+              "title": "로그아웃",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-9b28769107a22ceac968",
+              "file": "auth.spec.ts",
+              "line": 114,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-1c4ad4dc14327b71416e",
+              "file": "auth.spec.ts",
+              "line": 13,
+              "column": 3
+            },
+            {
+              "title": "Mock 계정으로 로그인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-9aa48affee1c515e51ba",
+              "file": "auth.spec.ts",
+              "line": 36,
+              "column": 3
+            },
+            {
+              "title": "잘못된 로그인 정보로 에러 표시",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-9fe33d90c194da0899eb",
+              "file": "auth.spec.ts",
+              "line": 55,
+              "column": 3
+            },
+            {
+              "title": "회원가입 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-a6ea9b585dc06d2a89c6",
+              "file": "auth.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "회원가입 유효성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-4a5a837b866dd51768d2",
+              "file": "auth.spec.ts",
+              "line": 86,
+              "column": 3
+            },
+            {
+              "title": "보호된 페이지 접근 시 로그인 페이지로 리다이렉트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-0bb25e1da7949af1fdef",
+              "file": "auth.spec.ts",
+              "line": 106,
+              "column": 3
+            },
+            {
+              "title": "로그아웃",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-c65f07b55cb64bc57aac",
+              "file": "auth.spec.ts",
+              "line": 114,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-2b34be6f073de7711fc3",
+              "file": "auth.spec.ts",
+              "line": 13,
+              "column": 3
+            },
+            {
+              "title": "Mock 계정으로 로그인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-cb18ea75b2e3aa6a463c",
+              "file": "auth.spec.ts",
+              "line": 36,
+              "column": 3
+            },
+            {
+              "title": "잘못된 로그인 정보로 에러 표시",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-34ef97b1853b6512b00b",
+              "file": "auth.spec.ts",
+              "line": 55,
+              "column": 3
+            },
+            {
+              "title": "회원가입 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-aee5ff42e06b01cd4e5d",
+              "file": "auth.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "회원가입 유효성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-5f807391f2ba52bbac06",
+              "file": "auth.spec.ts",
+              "line": 86,
+              "column": 3
+            },
+            {
+              "title": "보호된 페이지 접근 시 로그인 페이지로 리다이렉트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-05a7e8f5936eb26fba07",
+              "file": "auth.spec.ts",
+              "line": 106,
+              "column": 3
+            },
+            {
+              "title": "로그아웃",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-ba517a27879cc8aefaaa",
+              "file": "auth.spec.ts",
+              "line": 114,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-b52369f252651b3efebc",
+              "file": "auth.spec.ts",
+              "line": 13,
+              "column": 3
+            },
+            {
+              "title": "Mock 계정으로 로그인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-c8c763075354218c4cee",
+              "file": "auth.spec.ts",
+              "line": 36,
+              "column": 3
+            },
+            {
+              "title": "잘못된 로그인 정보로 에러 표시",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-1595383a5db8373295e6",
+              "file": "auth.spec.ts",
+              "line": 55,
+              "column": 3
+            },
+            {
+              "title": "회원가입 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-91ce807343a3f4eee4e4",
+              "file": "auth.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "회원가입 유효성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-0dbb82c4842a8ab2ca26",
+              "file": "auth.spec.ts",
+              "line": 86,
+              "column": 3
+            },
+            {
+              "title": "보호된 페이지 접근 시 로그인 페이지로 리다이렉트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-790f8c572c032dc4c359",
+              "file": "auth.spec.ts",
+              "line": 106,
+              "column": 3
+            },
+            {
+              "title": "로그아웃",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-448e8553da8eb020139f",
+              "file": "auth.spec.ts",
+              "line": 114,
+              "column": 3
+            },
+            {
+              "title": "로그인 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-75845d4524301fe61d6b",
+              "file": "auth.spec.ts",
+              "line": 13,
+              "column": 3
+            },
+            {
+              "title": "Mock 계정으로 로그인",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-8e3b92514528dad3e888",
+              "file": "auth.spec.ts",
+              "line": 36,
+              "column": 3
+            },
+            {
+              "title": "잘못된 로그인 정보로 에러 표시",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-d1aa1a5447c653d36898",
+              "file": "auth.spec.ts",
+              "line": 55,
+              "column": 3
+            },
+            {
+              "title": "회원가입 페이지 접근",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-4300bce913c49a1372a7",
+              "file": "auth.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "회원가입 유효성 검사",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-d9f1f1e4903a1801c0ea",
+              "file": "auth.spec.ts",
+              "line": 86,
+              "column": 3
+            },
+            {
+              "title": "보호된 페이지 접근 시 로그인 페이지로 리다이렉트",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-e07d98b9acaf1d19809c",
+              "file": "auth.spec.ts",
+              "line": 106,
+              "column": 3
+            },
+            {
+              "title": "로그아웃",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-431163c1a6ac88598567",
+              "file": "auth.spec.ts",
+              "line": 114,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "menu-detail-nav.spec.ts",
+      "file": "menu-detail-nav.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "menu-detail navigation debug",
+          "file": "menu-detail-nav.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "menu first item navigates to detail page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b620b30840e342654f86-6cde5de2c270be3bf2f2",
+              "file": "menu-detail-nav.spec.ts",
+              "line": 7,
+              "column": 3
+            },
+            {
+              "title": "menu first item navigates to detail page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b620b30840e342654f86-cad8352ad7398a64bd03",
+              "file": "menu-detail-nav.spec.ts",
+              "line": 7,
+              "column": 3
+            },
+            {
+              "title": "menu first item navigates to detail page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b620b30840e342654f86-ae6f470cab042d2e5333",
+              "file": "menu-detail-nav.spec.ts",
+              "line": 7,
+              "column": 3
+            },
+            {
+              "title": "menu first item navigates to detail page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b620b30840e342654f86-31b996e9ba9619f30685",
+              "file": "menu-detail-nav.spec.ts",
+              "line": 7,
+              "column": 3
+            },
+            {
+              "title": "menu first item navigates to detail page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b620b30840e342654f86-4311da36c9132befafda",
+              "file": "menu-detail-nav.spec.ts",
+              "line": 7,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "order-flow.spec.ts",
+      "file": "order-flow.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Order flow skeleton (S02)",
+          "file": "order-flow.spec.ts",
+          "line": 72,
+          "column": 6,
+          "specs": [
+            {
+              "title": "스켈레톤 확인 (헬퍼 호출만 테스트)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-09f4eef7ea33d3dc327d",
+              "file": "order-flow.spec.ts",
+              "line": 73,
+              "column": 3
+            },
+            {
+              "title": "스켈레톤 확인 (헬퍼 호출만 테스트)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-424fbb01c6b7b7b83286",
+              "file": "order-flow.spec.ts",
+              "line": 73,
+              "column": 3
+            },
+            {
+              "title": "스켈레톤 확인 (헬퍼 호출만 테스트)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-9735943511d2a50bd07c",
+              "file": "order-flow.spec.ts",
+              "line": 73,
+              "column": 3
+            },
+            {
+              "title": "스켈레톤 확인 (헬퍼 호출만 테스트)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-f0c8a30b3fdf0199107c",
+              "file": "order-flow.spec.ts",
+              "line": 73,
+              "column": 3
+            },
+            {
+              "title": "스켈레톤 확인 (헬퍼 호출만 테스트)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-0f3812c4d4040a240996",
+              "file": "order-flow.spec.ts",
+              "line": 73,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Order flow (Mock, payment OFF)",
+          "file": "order-flow.spec.ts",
+          "line": 96,
+          "column": 15,
+          "specs": [
+            {
+              "title": "고객이 메뉴를 주문하면 주문내역에서 보인다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-2d9224c61c264f3e534d",
+              "file": "order-flow.spec.ts",
+              "line": 97,
+              "column": 3
+            },
+            {
+              "title": "고객 주문이 관리자 주문 목록에도 표시된다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-c46cbbec956c1c4d36ed",
+              "file": "order-flow.spec.ts",
+              "line": 169,
+              "column": 3
+            },
+            {
+              "title": "고객이 메뉴를 주문하면 주문내역에서 보인다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-b9dd319d55bfb4cf4906",
+              "file": "order-flow.spec.ts",
+              "line": 97,
+              "column": 3
+            },
+            {
+              "title": "고객 주문이 관리자 주문 목록에도 표시된다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-64a6a196ea804c5c259b",
+              "file": "order-flow.spec.ts",
+              "line": 169,
+              "column": 3
+            },
+            {
+              "title": "고객이 메뉴를 주문하면 주문내역에서 보인다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-5412e7ab1ba8bf97d177",
+              "file": "order-flow.spec.ts",
+              "line": 97,
+              "column": 3
+            },
+            {
+              "title": "고객 주문이 관리자 주문 목록에도 표시된다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-497f3531d75a52184ff7",
+              "file": "order-flow.spec.ts",
+              "line": 169,
+              "column": 3
+            },
+            {
+              "title": "고객이 메뉴를 주문하면 주문내역에서 보인다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-89a43b6a9140c0d28d86",
+              "file": "order-flow.spec.ts",
+              "line": 97,
+              "column": 3
+            },
+            {
+              "title": "고객 주문이 관리자 주문 목록에도 표시된다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-7ad8a557429e95f00d2b",
+              "file": "order-flow.spec.ts",
+              "line": 169,
+              "column": 3
+            },
+            {
+              "title": "고객이 메뉴를 주문하면 주문내역에서 보인다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-616a09bf5c5d0af112cc",
+              "file": "order-flow.spec.ts",
+              "line": 97,
+              "column": 3
+            },
+            {
+              "title": "고객 주문이 관리자 주문 목록에도 표시된다 (Mock, payment OFF)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 96,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-3fe1fe33e703b6e3538b",
+              "file": "order-flow.spec.ts",
+              "line": 169,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "주문 플로우 (기존 상세 테스트, S03에서 재활성화)",
+          "file": "order-flow.spec.ts",
+          "line": 275,
+          "column": 15,
+          "specs": [
+            {
+              "title": "placeholder",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 275,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-3b1ffd632ac85a5e6b42",
+              "file": "order-flow.spec.ts",
+              "line": 276,
+              "column": 3
+            },
+            {
+              "title": "placeholder",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 275,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-3a775be670c4e00ec8a7",
+              "file": "order-flow.spec.ts",
+              "line": 276,
+              "column": 3
+            },
+            {
+              "title": "placeholder",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 275,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-d0563602be4e82de1e22",
+              "file": "order-flow.spec.ts",
+              "line": 276,
+              "column": 3
+            },
+            {
+              "title": "placeholder",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 275,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-8e05d173bcec242bdad5",
+              "file": "order-flow.spec.ts",
+              "line": 276,
+              "column": 3
+            },
+            {
+              "title": "placeholder",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "D:\\projectsing\\hyun-poong\\hyunpoong-kal\\src\\e2e\\order-flow.spec.ts",
+                        "line": 275,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-a0bc598e32cb2d54ed1e",
+              "file": "order-flow.spec.ts",
+              "line": 276,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "@orderflow Firebase Order flow",
+          "file": "order-flow.spec.ts",
+          "line": 286,
+          "column": 6,
+          "specs": [
+            {
+              "title": "@orderflow 고객 주문이 완료되고 관리자에서 조회된다 (Firebase)",
+              "ok": true,
+              "tags": [
+                "orderflow",
+                "orderflow"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-cbe947096b38a50e74f1",
+              "file": "order-flow.spec.ts",
+              "line": 287,
+              "column": 3
+            },
+            {
+              "title": "@orderflow 고객 주문이 완료되고 관리자에서 조회된다 (Firebase)",
+              "ok": true,
+              "tags": [
+                "orderflow",
+                "orderflow"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-298d010691b2e0731ef1",
+              "file": "order-flow.spec.ts",
+              "line": 287,
+              "column": 3
+            },
+            {
+              "title": "@orderflow 고객 주문이 완료되고 관리자에서 조회된다 (Firebase)",
+              "ok": true,
+              "tags": [
+                "orderflow",
+                "orderflow"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-7ecfddffa0526e3d6819",
+              "file": "order-flow.spec.ts",
+              "line": 287,
+              "column": 3
+            },
+            {
+              "title": "@orderflow 고객 주문이 완료되고 관리자에서 조회된다 (Firebase)",
+              "ok": true,
+              "tags": [
+                "orderflow",
+                "orderflow"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-f68e5ad298b29a8e7b4d",
+              "file": "order-flow.spec.ts",
+              "line": 287,
+              "column": 3
+            },
+            {
+              "title": "@orderflow 고객 주문이 완료되고 관리자에서 조회된다 (Firebase)",
+              "ok": true,
+              "tags": [
+                "orderflow",
+                "orderflow"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b33061f5483ab26aabfe-fe53ac43b25aa0a5e5b6",
+              "file": "order-flow.spec.ts",
+              "line": 287,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-23T13:40:07.265Z",
+    "duration": 1140.6520000000019,
+    "expected": 0,
+    "skipped": 205,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
