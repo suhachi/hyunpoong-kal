@@ -10,6 +10,8 @@ import { Separator } from '../../../components/ui/separator';
 import { Shield, Terminal, Copy, FileText, Rocket, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { Switch } from '../../../components/ui/switch';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
 import { useEffect, useState } from 'react';
 import { getAdminSettings, saveAdminSettings } from '../../../lib/admin/settingsCenter.api';
 import type { AdminSettings } from '../../../types/adminSettings';
@@ -42,6 +44,25 @@ export function OperationsTab() {
       );
       setSettings(updated);
       toast.success(`포인트 기능이 ${enabled ? '활성화' : '비활성화'}되었습니다`);
+    } catch (e) {
+      toast.error('저장에 실패했습니다');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSavePointsSettings = async () => {
+    if (!settings) return;
+    const user = getCurrentUser();
+    try {
+      setSaving(true);
+      const updated = await saveAdminSettings(
+        { points: { ...settings.points } },
+        user?.uid || 'system',
+        user?.displayName || user?.email || 'system'
+      );
+      setSettings(updated);
+      toast.success('포인트 설정이 저장되었습니다');
     } catch (e) {
       toast.error('저장에 실패했습니다');
     } finally {
@@ -89,25 +110,96 @@ export function OperationsTab() {
             포인트 리워드 시스템 사용 여부를 제어합니다
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-[#2E1C10]">포인트 시스템 활성화</p>
-            <p className="text-xs text-[#2E1C10]/60">체크 해제 시 포인트 관리 페이지에서 안내가 표시됩니다</p>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#2E1C10]">포인트 시스템 활성화</p>
+              <p className="text-xs text-[#2E1C10]/60">체크 해제 시 포인트 관리 페이지에서 안내가 표시됩니다</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-[#2E1C10]/60">
+                {settings?.points?.enabled ? 'ON' : 'OFF'}
+              </span>
+              {settings ? (
+                <Switch
+                  className="border border-[#2E1C10]/20"
+                  checked={!!settings.points.enabled}
+                  onCheckedChange={handleTogglePoints}
+                  disabled={saving}
+                />
+              ) : (
+                <div className="h-[1.15rem] w-8 rounded-full bg-gray-200 animate-pulse" />
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-[#2E1C10]/60">
-              {settings?.points?.enabled ? 'ON' : 'OFF'}
-            </span>
-            {settings ? (
-              <Switch
-                className="border border-[#2E1C10]/20"
-                checked={!!settings.points.enabled}
-                onCheckedChange={handleTogglePoints}
-                disabled={saving}
-              />
-            ) : (
-              <div className="h-[1.15rem] w-8 rounded-full bg-gray-200 animate-pulse" />
-            )}
+
+          <Separator />
+
+          {/* 리뷰 보상 포인트 설정 */}
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium text-[#2E1C10] mb-2">리뷰 보상 포인트</h4>
+              <p className="text-xs text-[#2E1C10]/60 mb-4">
+                리뷰 작성 시 지급되는 포인트를 설정합니다
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="review-photo-bonus">사진 리뷰 보상 (P)</Label>
+                <Input
+                  id="review-photo-bonus"
+                  type="number"
+                  value={settings?.points?.reviewPhotoBonus ?? 200}
+                  onChange={(e) => {
+                    if (!settings) return;
+                    setSettings({
+                      ...settings,
+                      points: {
+                        ...settings.points,
+                        reviewPhotoBonus: Number(e.target.value),
+                      },
+                    });
+                  }}
+                  min="0"
+                  step="100"
+                  disabled={saving || !settings}
+                />
+                <p className="text-xs text-[#2E1C10]/60">
+                  사진이 포함된 리뷰 작성 시 지급
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="review-text-bonus">텍스트 리뷰 보상 (P)</Label>
+                <Input
+                  id="review-text-bonus"
+                  type="number"
+                  value={settings?.points?.reviewTextBonus ?? 100}
+                  onChange={(e) => {
+                    if (!settings) return;
+                    setSettings({
+                      ...settings,
+                      points: {
+                        ...settings.points,
+                        reviewTextBonus: Number(e.target.value),
+                      },
+                    });
+                  }}
+                  min="0"
+                  step="100"
+                  disabled={saving || !settings}
+                />
+                <p className="text-xs text-[#2E1C10]/60">
+                  텍스트만 작성한 리뷰 작성 시 지급
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleSavePointsSettings}
+              disabled={saving || !settings}
+              className="w-full bg-[#D61C1C] hover:bg-[#B81515] text-white"
+            >
+              {saving ? '저장 중...' : '포인트 설정 저장'}
+            </Button>
           </div>
         </CardContent>
       </Card>

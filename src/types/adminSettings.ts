@@ -94,6 +94,8 @@ export interface FCMSettings {
  */
 export interface PointsSettings {
   enabled: boolean;
+  reviewPhotoBonus?: number; // 사진 리뷰 보상 포인트 (기본값: 200)
+  reviewTextBonus?: number;  // 텍스트 리뷰 보상 포인트 (기본값: 100)
 }
 
 /**
@@ -216,6 +218,8 @@ export const DEFAULT_FCM_SETTINGS: FCMSettings = {
 
 export const DEFAULT_POINTS_SETTINGS: PointsSettings = {
   enabled: true,
+  reviewPhotoBonus: 200,
+  reviewTextBonus: 100,
 };
 
 export const DEFAULT_OPERATIONS_SETTINGS: OperationsSettings = {

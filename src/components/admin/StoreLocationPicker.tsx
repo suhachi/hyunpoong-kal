@@ -27,35 +27,21 @@ export function StoreLocationPicker({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 지도 초기 로드 및 lat/lng 변경 시 업데이트
   useEffect(() => {
     let isMounted = true;
-    let clickListener: any = null;
-
-    // lat/lng가 없으면 지도 로드하지 않음
-    if (lat == null || lng == null) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
 
     loadKakaoMaps()
       .then((kakao) => {
         if (!isMounted || !containerRef.current) return;
 
-        const center = new kakao.maps.LatLng(lat, lng);
+        // 기본 좌표: 서울 시청 (37.5665, 126.9780)
+        const defaultLat = 37.5665;
+        const defaultLng = 126.9780;
 
-        // 지도가 이미 생성되어 있으면 중심만 이동
-        if (mapRef.current) {
-          mapRef.current.setCenter(center);
-          if (markerRef.current) {
-            markerRef.current.setPosition(center);
-          }
-          setLoading(false);
-          return;
-        }
+        const center = new kakao.maps.LatLng(
+          lat ?? defaultLat,
+          lng ?? defaultLng
+        );
 
         // 지도 생성
         const map = new kakao.maps.Map(containerRef.current, {
@@ -74,7 +60,7 @@ export function StoreLocationPicker({
         markerRef.current = marker;
 
         // 지도 클릭 이벤트
-        clickListener = kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
+        kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
           const clickedLatLng = mouseEvent.latLng;
           marker.setPosition(clickedLatLng);
           
@@ -94,12 +80,18 @@ export function StoreLocationPicker({
 
     return () => {
       isMounted = false;
-      if (clickListener && window.kakao && window.kakao.maps) {
-        window.kakao.maps.event.removeListener(clickListener);
-      }
     };
-  }, [lat, lng, onChange]); // lat/lng 변경 시 재로드
+  }, []); // 초기 로드만
 
+  // lat/lng 변경 시 마커 위치 업데이트
+  useEffect(() => {
+    if (!mapRef.current || !markerRef.current || !window.kakao) return;
+    if (lat == null || lng == null) return;
+
+    const position = new window.kakao.maps.LatLng(lat, lng);
+    markerRef.current.setPosition(position);
+    mapRef.current.setCenter(position);
+  }, [lat, lng]);
 
   return (
     <div className="space-y-2">
@@ -111,32 +103,18 @@ export function StoreLocationPicker({
       )}
       
       {loading && !error && (
-        <div 
-          className="flex items-center justify-center border rounded-md bg-gray-50"
-          style={{ 
-            minHeight: '400px',
-            height: '400px',
-            width: '100%'
-          }}
-        >
+        <div className="flex items-center justify-center py-8 border rounded-md bg-gray-50">
           <p className="text-sm text-[#8B7355]">지도를 불러오는 중입니다...</p>
         </div>
       )}
 
       {error && (
-        <div 
-          className="flex items-center justify-center border rounded-md bg-red-50"
-          style={{ 
-            minHeight: '400px',
-            height: '400px',
-            width: '100%'
-          }}
-        >
+        <div className="flex items-center justify-center py-8 border rounded-md bg-red-50">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
-      {!loading && !error && lat != null && lng != null && (
+      {!loading && !error && (
         <>
           <p className="text-xs text-[#8B7355] mb-2">
             지도를 클릭해서 가게 위치를 선택하세요.
@@ -144,21 +122,9 @@ export function StoreLocationPicker({
           <div
             ref={containerRef}
             className="w-full rounded-md border border-[#E5DDD5] overflow-hidden"
-            style={{ 
-              minHeight: '400px',
-              height: '400px',
-              width: '100%'
-            }}
+            style={{ minHeight: 280 }}
           />
         </>
-      )}
-
-      {!loading && !error && (lat == null || lng == null) && (
-        <div className="flex items-center justify-center py-8 border rounded-md bg-gray-50">
-          <p className="text-sm text-[#8B7355]">
-            주소를 검색하면 지도가 표시됩니다.
-          </p>
-        </div>
       )}
     </div>
   );

@@ -233,9 +233,12 @@ export function ReviewWrite() {
       // 포인트 적립 (포인트 기능이 활성화된 경우)
       if (FEATURE_FLAGS.points) {
         try {
+          // Admin Settings에서 리뷰 보상 포인트 가져오기
+          const { getPointsPolicy } = await import('../../lib/points.api');
+          const policy = await getPointsPolicy();
           const pointsAmount = photoUrls.length > 0 
-            ? POINTS_POLICY.reviewPhotoBonus 
-            : POINTS_POLICY.reviewTextBonus;
+            ? policy.reviewPhotoBonus 
+            : policy.reviewTextBonus;
 
           await earnPoints({
             uid,

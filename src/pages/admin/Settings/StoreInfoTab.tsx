@@ -18,7 +18,6 @@ import { storeDocRef, type StoreDoc } from '../../../lib/firebase/firestore-sche
 import { STORE_ID } from '../../../config/env';
 import { useAuth } from '../../../contexts/AuthContext';
 import { StoreLocationPicker } from '../../../components/admin/StoreLocationPicker';
-import { AddressSearch } from '../../../components/admin/AddressSearch';
 
 export function StoreInfoTab() {
   const { user } = useAuth();
@@ -204,29 +203,19 @@ export function StoreInfoTab() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="store-address-full">주소 *</Label>
-            <AddressSearch
+            <Input
+              id="store-address-full"
               value={storeInfo.address?.full || ''}
-              onChange={(address) => setStoreInfo({
+              onChange={(e) => setStoreInfo({
                 ...storeInfo,
                 address: {
                   ...storeInfo.address,
-                  full: address,
+                  full: e.target.value,
                   detail: storeInfo.address?.detail || '',
                 },
               })}
-              onLocationFound={(lat, lng, fullAddress) => {
-                setStoreInfo({
-                  ...storeInfo,
-                  address: {
-                    ...storeInfo.address,
-                    full: fullAddress,
-                    detail: storeInfo.address?.detail || '',
-                    lat,
-                    lng,
-                  },
-                });
-              }}
               placeholder="대구광역시 달성군 현풍면"
+              className="bg-gray-50"
             />
           </div>
 

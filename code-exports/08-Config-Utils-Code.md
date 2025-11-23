@@ -1,6 +1,6 @@
 # Config & Utils - Full Source Code
 
-**Generated**: 2025-11-23-2022  
+**Generated**: 2025-11-23-2118  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -104,10 +104,6 @@ export const APP_CONFIG = {
 // VITE_STORE_ID 환경 변수를 읽어서 사용
 // 기본값: 'hyunpoong_main'
 export const STORE_ID = getEnv('VITE_STORE_ID', 'hyunpoong_main');
-
-// Google Maps API
-// VITE_GOOGLE_MAP_API_KEY 환경 변수를 읽어서 사용
-export const GOOGLE_MAP_API_KEY = getEnv('VITE_GOOGLE_MAP_API_KEY', '');
 
 // Kakao Map JS SDK
 // VITE_KAKAO_MAP_APP_KEY 환경 변수를 읽어서 사용

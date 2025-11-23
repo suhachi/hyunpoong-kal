@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-11-23-2022  
+**Generated**: 2025-11-23-2118  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -14,175 +14,7 @@ Complete source code of reusable components.
 ## src\components\admin\AddressSearch.tsx
 
 ```tsx
-/**
- * 주소 검색 컴포넌트 (구글맵/카카오맵 주소 검색 API 사용)
- * KS컴퍼니 (사업자번호: 553-17-00098)
- */
-
-import { useState, useEffect } from 'react';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Search, Loader2 } from 'lucide-react';
-import { loadGoogleMaps } from '../../lib/googleMaps';
-import { loadKakaoMaps } from '../../lib/kakaoMaps';
-import { toast } from 'sonner';
-
-type AddressSearchProps = {
-  value: string;
-  onChange: (address: string, lat?: number, lng?: number) => void;
-  placeholder?: string;
-};
-
-export function AddressSearch({
-  value,
-  onChange,
-  placeholder = '주소를 검색하세요 (예: 대구광역시 달성군 현풍면)',
-}: AddressSearchProps) {
-  const [searchQuery, setSearchQuery] = useState(value);
-  const [searching, setSearching] = useState(false);
-  const [mapsReady, setMapsReady] = useState(false);
-  const [currentProvider, setCurrentProvider] = useState<'google' | 'kakao' | null>(null);
-
-  // value 변경 시 searchQuery 동기화
-  useEffect(() => {
-    setSearchQuery(value);
-  }, [value]);
-
-  // 지도 API 로드 확인 (구글맵 우선)
-  useEffect(() => {
-    loadGoogleMaps()
-      .then(() => {
-        setMapsReady(true);
-        setCurrentProvider('google');
-      })
-      .catch(() => {
-        // 구글맵 실패 시 카카오맵 시도
-        return loadKakaoMaps();
-      })
-      .then((kakao) => {
-        if (kakao) {
-          setMapsReady(true);
-          setCurrentProvider('kakao');
-        }
-      })
-      .catch(() => {
-        // 키가 없어도 주소 입력은 가능하도록
-        setMapsReady(false);
-      });
-  }, []);
-
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      toast.error('주소를 입력해주세요');
-      return;
-    }
-
-    if (!mapsReady) {
-      // 지도 API 키가 없으면 주소만 저장
-      onChange(searchQuery.trim());
-      return;
-    }
-
-    setSearching(true);
-    try {
-      if (currentProvider === 'google' && window.google && window.google.maps) {
-        // 구글맵 Geocoding API 사용
-        const geocoder = new window.google.maps.Geocoder();
-        
-        geocoder.geocode({ address: searchQuery.trim() }, (results: any[], status: any) => {
-          setSearching(false);
-          
-          if (status === window.google.maps.GeocoderStatus.OK && results && results.length > 0) {
-            const firstResult = results[0];
-            const location = firstResult.geometry.location;
-            const lat = location.lat();
-            const lng = location.lng();
-            const address = firstResult.formatted_address;
-            
-            onChange(address, lat, lng);
-            toast.success('주소를 찾았습니다');
-          } else {
-            toast.error('주소를 찾을 수 없습니다');
-            onChange(searchQuery.trim()); // 주소만 저장
-          }
-        });
-      } else if (currentProvider === 'kakao' && window.kakao && window.kakao.maps && window.kakao.maps.services) {
-        // 카카오맵 주소 검색 API 사용
-        const geocoder = new window.kakao.maps.services.Geocoder();
-        
-        geocoder.addressSearch(searchQuery.trim(), (result: any[], status: any) => {
-          setSearching(false);
-          
-          if (status === window.kakao.maps.services.Status.OK) {
-            if (result.length > 0) {
-              const firstResult = result[0];
-              const lat = parseFloat(firstResult.y);
-              const lng = parseFloat(firstResult.x);
-              const address = firstResult.address_name;
-              
-              onChange(address, lat, lng);
-              toast.success('주소를 찾았습니다');
-            } else {
-              toast.error('주소를 찾을 수 없습니다');
-              onChange(searchQuery.trim()); // 주소만 저장
-            }
-          } else {
-            toast.error('주소 검색에 실패했습니다');
-            onChange(searchQuery.trim()); // 주소만 저장
-          }
-        });
-      } else {
-        toast.error('지도 서비스를 사용할 수 없습니다');
-        onChange(searchQuery.trim());
-        setSearching(false);
-      }
-    } catch (error) {
-      console.error('[AddressSearch] Search failed:', error);
-      setSearching(false);
-      toast.error('주소 검색 중 오류가 발생했습니다');
-      onChange(searchQuery.trim()); // 주소만 저장
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
-  return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
-        <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder={placeholder}
-          className="bg-gray-50 flex-1"
-          disabled={searching}
-        />
-        <Button
-          type="button"
-          onClick={handleSearch}
-          disabled={searching || !searchQuery.trim()}
-          className="bg-[#D61C1C] hover:bg-[#B81515]"
-        >
-          {searching ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Search className="w-4 h-4" />
-          )}
-        </Button>
-      </div>
-      {!mapsReady && (
-        <p className="text-xs text-[#8B7355]">
-          주소 검색 기능을 사용하려면 구글맵 또는 카카오맵 키가 필요합니다. 주소를 직접 입력할 수 있습니다.
-        </p>
-      )}
-    </div>
-  );
-}
-
+ 
 ```
 
 ---
@@ -4611,7 +4443,6 @@ function formatDate(timestamp: number): string {
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { loadGoogleMaps } from '../../lib/googleMaps';
 import { loadKakaoMaps } from '../../lib/kakaoMaps';
 import { MapPin } from 'lucide-react';
 
@@ -4636,80 +4467,12 @@ export function StoreLocationPicker({
 
   useEffect(() => {
     let isMounted = true;
-    let map: any = null;
-    let marker: any = null;
-    let clickListener: any = null;
-    let dragListener: any = null;
 
-    // 구글맵 우선 시도
-    loadGoogleMaps()
-      .then((google) => {
+    loadKakaoMaps()
+      .then((kakao) => {
         if (!isMounted || !containerRef.current) return;
 
         // 기본 좌표: 서울 시청 (37.5665, 126.9780)
-        const defaultLat = 37.5665;
-        const defaultLng = 126.9780;
-
-        const center = new google.maps.LatLng(
-          lat ?? defaultLat,
-          lng ?? defaultLng
-        );
-
-        // 지도 생성
-        map = new google.maps.Map(containerRef.current, {
-          center,
-          zoom: 15,
-          mapTypeControl: false,
-          streetViewControl: false,
-        });
-
-        mapRef.current = map;
-
-        // 마커 생성
-        marker = new google.maps.Marker({
-          position: center,
-          map,
-          draggable: true,
-        });
-
-        markerRef.current = marker;
-
-        // 지도 클릭 이벤트
-        clickListener = map.addListener('click', (event: any) => {
-          if (!event.latLng) return;
-          const clickedLatLng = event.latLng;
-          marker.setPosition(clickedLatLng);
-          
-          console.log('[StoreLocationPicker] Map clicked:', clickedLatLng.lat(), clickedLatLng.lng());
-          onChange({
-            lat: clickedLatLng.lat(),
-            lng: clickedLatLng.lng(),
-          });
-        });
-
-        // 마커 드래그 이벤트
-        dragListener = marker.addListener('dragend', () => {
-          const position = marker.getPosition();
-          console.log('[StoreLocationPicker] Marker dragged:', position.lat(), position.lng());
-          onChange({
-            lat: position.lat(),
-            lng: position.lng(),
-          });
-        });
-
-        setLoading(false);
-      })
-      .catch(() => {
-        // 구글맵 실패 시 카카오맵 시도
-        console.log('[StoreLocationPicker] Google Maps failed, trying Kakao Maps');
-        return loadKakaoMaps();
-      })
-      .then((kakao) => {
-        if (!isMounted || !containerRef.current || map) return; // 이미 구글맵이 로드되었으면 스킵
-
-        if (!kakao) return;
-
-        // 카카오맵 사용
         const defaultLat = 37.5665;
         const defaultLng = 126.9780;
 
@@ -4718,25 +4481,27 @@ export function StoreLocationPicker({
           lng ?? defaultLng
         );
 
-        map = new kakao.maps.Map(containerRef.current, {
+        // 지도 생성
+        const map = new kakao.maps.Map(containerRef.current, {
           center,
           level: 3,
         });
 
         mapRef.current = map;
 
-        marker = new kakao.maps.Marker({
+        // 마커 생성
+        const marker = new kakao.maps.Marker({
           position: center,
           map,
         });
 
         markerRef.current = marker;
 
-        clickListener = kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
+        // 지도 클릭 이벤트
+        kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
           const clickedLatLng = mouseEvent.latLng;
           marker.setPosition(clickedLatLng);
           
-          console.log('[StoreLocationPicker] Map clicked:', clickedLatLng.getLat(), clickedLatLng.getLng());
           onChange({
             lat: clickedLatLng.getLat(),
             lng: clickedLatLng.getLng(),
@@ -4753,38 +4518,17 @@ export function StoreLocationPicker({
 
     return () => {
       isMounted = false;
-      // 이벤트 리스너 정리
-      if (clickListener && window.google && window.google.maps) {
-        window.google.maps.event.removeListener(clickListener);
-      }
-      if (dragListener && window.google && window.google.maps) {
-        window.google.maps.event.removeListener(dragListener);
-      }
-      if (clickListener && window.kakao && window.kakao.maps) {
-        window.kakao.maps.event.removeListener(clickListener);
-      }
     };
   }, []); // 초기 로드만
 
   // lat/lng 변경 시 마커 위치 업데이트
   useEffect(() => {
-    if (!mapRef.current || !markerRef.current) return;
+    if (!mapRef.current || !markerRef.current || !window.kakao) return;
     if (lat == null || lng == null) return;
 
-    console.log('[StoreLocationPicker] Updating marker position:', lat, lng);
-
-    // 구글맵인지 카카오맵인지 확인
-    if (window.google && window.google.maps) {
-      const position = new window.google.maps.LatLng(lat, lng);
-      markerRef.current.setPosition(position);
-      mapRef.current.setCenter(position);
-      mapRef.current.setZoom(15);
-    } else if (window.kakao && window.kakao.maps) {
-      const position = new window.kakao.maps.LatLng(lat, lng);
-      markerRef.current.setPosition(position);
-      mapRef.current.setCenter(position);
-      mapRef.current.setLevel(3);
-    }
+    const position = new window.kakao.maps.LatLng(lat, lng);
+    markerRef.current.setPosition(position);
+    mapRef.current.setCenter(position);
   }, [lat, lng]);
 
   return (

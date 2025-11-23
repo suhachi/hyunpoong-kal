@@ -7,6 +7,7 @@
  */
 
 import { USE_FIREBASE, FEATURE_FLAGS, getEnv } from '../config/env';
+import { getAdminSettings } from './admin/settingsCenter.api';
 import { db } from './firebase';
 import {
   pointsBalanceDocRef,
@@ -40,7 +41,34 @@ import type {
 } from '../types/points';
 
 /**
- * 포인트 정책 (환경 변수 기반)
+ * 포인트 정책 (환경 변수 + Admin Settings 기반)
+ * Admin Settings에서 값을 읽고, 없으면 환경 변수/기본값 사용
+ */
+export async function getPointsPolicy(): Promise<PointsPolicy> {
+  try {
+    const settings = await getAdminSettings();
+    return {
+      earnRate: FEATURE_FLAGS.pointsRate,
+      minUse: FEATURE_FLAGS.pointsMinUse,
+      expireDays: FEATURE_FLAGS.pointsExpireDays,
+      reviewPhotoBonus: settings.points?.reviewPhotoBonus ?? 200,
+      reviewTextBonus: settings.points?.reviewTextBonus ?? 100,
+    };
+  } catch (error) {
+    console.warn('[getPointsPolicy] Failed to load admin settings, using defaults', error);
+    return {
+      earnRate: FEATURE_FLAGS.pointsRate,
+      minUse: FEATURE_FLAGS.pointsMinUse,
+      expireDays: FEATURE_FLAGS.pointsExpireDays,
+      reviewPhotoBonus: 200,
+      reviewTextBonus: 100,
+    };
+  }
+}
+
+/**
+ * 포인트 정책 (동기 버전, 캐시 사용)
+ * 주의: 이 값은 초기 로드 시점의 값이며, Admin Settings 변경 후에는 getPointsPolicy()를 사용해야 함
  */
 export const POINTS_POLICY: PointsPolicy = {
   earnRate: FEATURE_FLAGS.pointsRate,
@@ -841,8 +869,10 @@ export function calculateEarnPoints(orderAmount: number): number {
 /**
  * 리뷰 작성 시 적립 포인트 계산
  */
-export function calculateReviewPoints(hasPhoto: boolean): number {
-  return hasPhoto ? POINTS_POLICY.reviewPhotoBonus : POINTS_POLICY.reviewTextBonus;
+export async function calculateReviewPoints(hasPhoto: boolean): Promise<number> {
+  // Admin Settings에서 리뷰 보상 포인트 가져오기
+  const policy = await getPointsPolicy();
+  return hasPhoto ? policy.reviewPhotoBonus : policy.reviewTextBonus;
 }
 
 // ============================================================================

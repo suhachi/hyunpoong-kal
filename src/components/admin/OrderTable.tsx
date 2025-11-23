@@ -24,6 +24,7 @@ interface OrderTableProps {
   orders: Order[];
   onViewDetail: (order: Order) => void;
   onUpdateStatus: (order: Order, newStatus: OrderStatus) => void;
+  onIssueCoupon?: (order: Order) => void;
   isLoading?: boolean;
 }
 
@@ -41,7 +42,7 @@ const paymentMethodLabels: Record<string, string> = {
   on_site_cash: '만나서 현금',
 };
 
-export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: OrderTableProps) {
+export function OrderTable({ orders, onViewDetail, onUpdateStatus, onIssueCoupon, isLoading }: OrderTableProps) {
   // 날짜 포맷팅 (상대 시간 기반: '방금 전', 'n분 전' 등)
   const formatDate = (timestamp: any) => {
     return formatRelativeTime(timestamp);
@@ -234,6 +235,14 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                               주문 취소
                             </DropdownMenuItem>
                           </>
+                        )}
+                        {onIssueCoupon && (
+                          <DropdownMenuItem
+                            onClick={() => onIssueCoupon(order)}
+                            className="text-blue-600"
+                          >
+                            쿠폰 발급
+                          </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>

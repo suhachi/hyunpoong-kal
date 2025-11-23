@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Gift, TrendingUp, TrendingDown, Users, DollarSign, AlertCircle } from 'lucide-react';
+import { Gift, TrendingUp, TrendingDown, Users, DollarSign, AlertCircle, Ticket } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -37,6 +37,8 @@ import { toast } from 'sonner';
 import type { PointsBalance } from '../../types/points';
 import { formatPrice } from '../../lib/utils';
 import { getAdminSettings } from '../../lib/admin/settingsCenter.api';
+import { issueCoupon, type CouponIssue } from '../../lib/coupons.api';
+import { getCurrentUser } from '../../lib/auth';
 
 export function AdminPoints() {
   const [balances, setBalances] = useState<Array<PointsBalance & { phone?: string; name?: string }>>([]);
@@ -49,6 +51,20 @@ export function AdminPoints() {
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustNote, setAdjustNote] = useState('');
   const [adjusting, setAdjusting] = useState(false);
+
+  // 쿠폰 발급 다이얼로그
+  const [couponDialog, setCouponDialog] = useState(false);
+  const [issuingCoupon, setIssuingCoupon] = useState(false);
+  const [couponForm, setCouponForm] = useState<CouponIssue>({
+    type: 'admin',
+    title: '',
+    description: '',
+    amount: 2000,
+    minSpend: 0,
+    expiryDays: 30,
+    issueLimit: 1,
+    targetUsers: [],
+  });
 
   useEffect(() => {
     (async () => {
@@ -265,13 +281,37 @@ export function AdminPoints() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openAdjustDialog(balance)}
-                        >
-                          조정
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openAdjustDialog(balance)}
+                          >
+                            조정
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setCouponForm({
+                                type: 'admin',
+                                title: `개별 발급 쿠폰 (${balance.name || balance.uid})`,
+                                description: `${balance.name || balance.uid}님을 위한 개별 쿠폰입니다.`,
+                                amount: 2000,
+                                minSpend: 0,
+                                expiryDays: 30,
+                                issueLimit: 1,
+                                targetUsers: [balance.uid],
+                              });
+                              setSelectedUser(balance);
+                              setCouponDialog(true);
+                            }}
+                            className="text-blue-600"
+                          >
+                            <Ticket className="w-3 h-3 mr-1" />
+                            쿠폰
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -354,6 +394,159 @@ export function AdminPoints() {
               disabled={adjusting || !adjustAmount || !adjustNote}
             >
               {adjusting ? '처리 중...' : '조정하기'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 쿠폰 발급 다이얼로그 */}
+      <Dialog open={couponDialog} onOpenChange={setCouponDialog}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ticket className="w-5 h-5 text-[#D61C1C]" />
+              쿠폰 발급
+            </DialogTitle>
+            <DialogDescription>
+              사용자: {selectedUser?.name || selectedUser?.uid}
+              <br />
+              개별 쿠폰을 발급합니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="coupon-title">쿠폰 제목</Label>
+              <Input
+                id="coupon-title"
+                value={couponForm.title}
+                onChange={(e) => setCouponForm({ ...couponForm, title: e.target.value })}
+                placeholder="예: 개별 발급 쿠폰"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="coupon-description">설명</Label>
+              <Textarea
+                id="coupon-description"
+                value={couponForm.description}
+                onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
+                placeholder="쿠폰 설명을 입력하세요"
+                className="mt-1"
+                rows={2}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="coupon-amount">할인 금액 (원)</Label>
+                <Input
+                  id="coupon-amount"
+                  type="number"
+                  value={couponForm.amount}
+                  onChange={(e) => setCouponForm({ ...couponForm, amount: Number(e.target.value) })}
+                  min="1000"
+                  step="1000"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="coupon-min-spend">최소 주문 (원)</Label>
+                <Input
+                  id="coupon-min-spend"
+                  type="number"
+                  value={couponForm.minSpend}
+                  onChange={(e) => setCouponForm({ ...couponForm, minSpend: Number(e.target.value) })}
+                  min="0"
+                  step="1000"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="coupon-expiry">유효 기간 (일)</Label>
+              <Input
+                id="coupon-expiry"
+                type="number"
+                value={couponForm.expiryDays}
+                onChange={(e) => setCouponForm({ ...couponForm, expiryDays: Number(e.target.value) })}
+                min="1"
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCouponDialog(false);
+                setSelectedUser(null);
+                setCouponForm({
+                  type: 'admin',
+                  title: '',
+                  description: '',
+                  amount: 2000,
+                  minSpend: 0,
+                  expiryDays: 30,
+                  issueLimit: 1,
+                  targetUsers: [],
+                });
+              }}
+              disabled={issuingCoupon}
+            >
+              취소
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!selectedUser || !couponForm.title.trim() || !couponForm.description.trim()) {
+                  toast.error('제목과 설명을 입력하세요');
+                  return;
+                }
+
+                const user = getCurrentUser();
+                if (!user) {
+                  toast.error('로그인이 필요합니다');
+                  return;
+                }
+
+                setIssuingCoupon(true);
+                try {
+                  const issued = await issueCoupon(
+                    {
+                      ...couponForm,
+                      targetUsers: [selectedUser.uid],
+                    },
+                    user.uid,
+                    user.name
+                  );
+                  
+                  toast.success(`쿠폰 ${issued.length}장을 발급했습니다`);
+                  setCouponDialog(false);
+                  setSelectedUser(null);
+                  setCouponForm({
+                    type: 'admin',
+                    title: '',
+                    description: '',
+                    amount: 2000,
+                    minSpend: 0,
+                    expiryDays: 30,
+                    issueLimit: 1,
+                    targetUsers: [],
+                  });
+                } catch (error: any) {
+                  console.error('Failed to issue coupon:', error);
+                  toast.error(error.message || '쿠폰 발급에 실패했습니다');
+                } finally {
+                  setIssuingCoupon(false);
+                }
+              }}
+              disabled={issuingCoupon || !couponForm.title.trim() || !couponForm.description.trim()}
+              className="bg-[#D61C1C] hover:bg-[#B81515] text-white"
+            >
+              {issuingCoupon ? '발급 중...' : '발급하기'}
             </Button>
           </DialogFooter>
         </DialogContent>
