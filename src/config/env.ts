@@ -89,11 +89,6 @@ export const APP_CONFIG = {
 // 기본값: 'hyunpoong_main'
 export const STORE_ID = getEnv('VITE_STORE_ID', 'hyunpoong_main');
 
-// Map Provider 설정
-// VITE_MAP_PROVIDER 환경 변수를 읽어서 사용 (google | kakao)
-// 기본값: google (구글맵 우선)
-export const MAP_PROVIDER = getEnv('VITE_MAP_PROVIDER', 'google') as 'google' | 'kakao';
-
 // Google Maps API
 // VITE_GOOGLE_MAP_API_KEY 환경 변수를 읽어서 사용
 export const GOOGLE_MAP_API_KEY = getEnv('VITE_GOOGLE_MAP_API_KEY', '');

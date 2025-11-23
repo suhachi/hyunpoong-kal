@@ -5,7 +5,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { loadPrimaryMap, loadSecondaryMap } from '../../lib/maps';
+import { loadGoogleMaps } from '../../lib/googleMaps';
+import { loadKakaoMaps } from '../../lib/kakaoMaps';
 
 type StoreLocationMapProps = {
   lat?: number | null;
@@ -28,105 +29,58 @@ export function StoreLocationMap({ lat, lng, height = 220 }: StoreLocationMapPro
     setLoading(true);
     setError(null);
 
-    // 기본 지도 우선 시도
-    loadPrimaryMap()
-      .then((mapsLib) => {
+    // 구글맵 우선 시도
+    loadGoogleMaps()
+      .then((google) => {
         if (!isMounted || !containerRef.current) return;
 
-        const isGoogle = window.google && window.google.maps;
-        const isKakao = window.kakao && window.kakao.maps;
+        const center = new google.maps.LatLng(lat, lng);
 
-        if (isGoogle) {
-          const google = mapsLib as any;
-          const center = new google.maps.LatLng(lat, lng);
+        // 지도 생성
+        map = new google.maps.Map(containerRef.current, {
+          center,
+          zoom: 15,
+          mapTypeControl: false,
+          streetViewControl: false,
+        });
 
-          map = new google.maps.Map(containerRef.current, {
-            center,
-            zoom: 15,
-            mapTypeControl: false,
-            streetViewControl: false,
-          });
+        mapRef.current = map;
 
-          mapRef.current = map;
+        // 마커 생성
+        const marker = new google.maps.Marker({
+          position: center,
+          map,
+        });
 
-          const marker = new google.maps.Marker({
-            position: center,
-            map,
-          });
-
-          markerRef.current = marker;
-        } else if (isKakao) {
-          const kakao = mapsLib as any;
-          const center = new kakao.maps.LatLng(lat, lng);
-
-          map = new kakao.maps.Map(containerRef.current, {
-            center,
-            level: 3,
-          });
-
-          mapRef.current = map;
-
-          const marker = new kakao.maps.Marker({
-            position: center,
-            map,
-          });
-
-          markerRef.current = marker;
-        }
-
+        markerRef.current = marker;
         setLoading(false);
       })
       .catch(() => {
-        // 기본 지도 실패 시 보조 지도 시도
-        console.log('[StoreLocationMap] Primary map failed, trying secondary map');
-        return loadSecondaryMap();
+        // 구글맵 실패 시 카카오맵 시도
+        console.log('[StoreLocationMap] Google Maps failed, trying Kakao Maps');
+        return loadKakaoMaps();
       })
-      .then((mapsLib) => {
-        if (!isMounted || !containerRef.current || map) return; // 이미 지도가 로드되었으면 스킵
+      .then((kakao) => {
+        if (!isMounted || !containerRef.current || map) return; // 이미 구글맵이 로드되었으면 스킵
 
-        if (!mapsLib) return;
+        if (!kakao) return;
 
-        const isGoogle = window.google && window.google.maps;
-        const isKakao = window.kakao && window.kakao.maps;
+        // 카카오맵 사용
+        const center = new kakao.maps.LatLng(lat, lng);
 
-        if (isGoogle) {
-          const google = mapsLib as any;
-          const center = new google.maps.LatLng(lat, lng);
+        map = new kakao.maps.Map(containerRef.current, {
+          center,
+          level: 3,
+        });
 
-          map = new google.maps.Map(containerRef.current, {
-            center,
-            zoom: 15,
-            mapTypeControl: false,
-            streetViewControl: false,
-          });
+        mapRef.current = map;
 
-          mapRef.current = map;
+        const marker = new kakao.maps.Marker({
+          position: center,
+          map,
+        });
 
-          const marker = new google.maps.Marker({
-            position: center,
-            map,
-          });
-
-          markerRef.current = marker;
-        } else if (isKakao) {
-          const kakao = mapsLib as any;
-          const center = new kakao.maps.LatLng(lat, lng);
-
-          map = new kakao.maps.Map(containerRef.current, {
-            center,
-            level: 3,
-          });
-
-          mapRef.current = map;
-
-          const marker = new kakao.maps.Marker({
-            position: center,
-            map,
-          });
-
-          markerRef.current = marker;
-        }
-
+        markerRef.current = marker;
         setLoading(false);
       })
       .catch((err) => {

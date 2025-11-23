@@ -61,4 +61,3 @@ export function loadGoogleMaps(): Promise<typeof window.google> {
 
   return googleMapsPromise;
 }
-
