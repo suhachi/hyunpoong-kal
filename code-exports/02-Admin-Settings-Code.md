@@ -1,6 +1,6 @@
 # Admin Settings - Full Source Code
 
-**Generated**: 2025-11-25-1033  
+**Generated**: 2025-11-25-1927  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -37,7 +37,7 @@ export function AdminSettingsCenter() {
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   // 사용자 정보 가져오기 (AuthContext 사용)
-  const { user } = useAuth();
+  const { user, loading, initializing } = useAuth();
 
   // URL 쿼리 파라미터 동기화
   useEffect(() => {
@@ -53,8 +53,32 @@ export function AdminSettingsCenter() {
     setSearchParams({ tab: value });
   };
 
-  // 접근 권한 확인
-  if (!user || (user.role !== 'owner' && user.role !== 'admin')) {
+  // STEP-8-2: 초기 렌더 블로킹 제거 및 로딩 처리
+  // user가 없거나 initializing 중이면 로딩 표시 (즉시 차단하지 않음)
+  if (!user) {
+    // user가 없고 loading이 false면 권한 없음
+    // loading이 true면 아직 로딩 중
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <div className="animate-pulse">
+            <Shield className="w-16 h-16 text-[#2E1C10]/20 mx-auto" />
+          </div>
+          <div>
+            <h2 className="text-xl font-medium text-[#2E1C10] mb-2">
+              로딩 중...
+            </h2>
+            <p className="text-[#2E1C10]/60">
+              사용자 정보를 확인하는 중입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 접근 권한 확인 (user가 있는 경우에만)
+  if (user.role !== 'owner' && user.role !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center space-y-4">
@@ -67,7 +91,7 @@ export function AdminSettingsCenter() {
               설정 센터는 관리자 또는 소유자만 접근할 수 있습니다.
             </p>
             <p className="text-sm text-[#2E1C10]/40 mt-2">
-              현재 역할: {user?.role || '없음'}
+              현재 역할: {user.role || '없음'}
             </p>
           </div>
         </div>
@@ -583,11 +607,21 @@ export function DeliveryTab() {
     setLoading(true);
     try {
       const data = await getAdminSettings();
-      setSettings(data.delivery);
-      setOriginalSettings(data.delivery);
+      // null 체크: data가 없거나 delivery가 없으면 기본값 사용
+      if (data && data.delivery) {
+        setSettings(data.delivery);
+        setOriginalSettings(data.delivery);
+      } else {
+        // 기본값 사용
+        setSettings(DEFAULT_DELIVERY_SETTINGS);
+        setOriginalSettings(DEFAULT_DELIVERY_SETTINGS);
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
       toast.error('설정을 불러오는데 실패했습니다');
+      // 에러 발생 시 기본값 사용
+      setSettings(DEFAULT_DELIVERY_SETTINGS);
+      setOriginalSettings(DEFAULT_DELIVERY_SETTINGS);
     } finally {
       setLoading(false);
     }
@@ -1499,7 +1533,7 @@ export function OperationsTab() {
   }, []);
 
   const handleTogglePoints = async (enabled: boolean) => {
-    if (!settings) return;
+    if (!settings || !settings.points) return;
     const user = getCurrentUser();
     try {
       setSaving(true);
@@ -1511,6 +1545,7 @@ export function OperationsTab() {
       setSettings(updated);
       toast.success(`포인트 기능이 ${enabled ? '활성화' : '비활성화'}되었습니다`);
     } catch (e) {
+      console.error('Failed to toggle points:', e);
       toast.error('저장에 실패했습니다');
     } finally {
       setSaving(false);
@@ -1566,7 +1601,7 @@ export function OperationsTab() {
             <span className="text-sm text-[#2E1C10]/60">
               {settings?.points?.enabled ? 'ON' : 'OFF'}
             </span>
-            {settings ? (
+            {settings && settings.points ? (
               <Switch
                 className="border border-[#2E1C10]/20"
                 checked={!!settings.points.enabled}

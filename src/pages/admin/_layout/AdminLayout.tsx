@@ -21,6 +21,7 @@ import {
 import { Button } from '../../../components/ui/button';
 import { Credits } from '../../../components/shared/Credits';
 import { useAuth } from '../../../contexts/AuthContext';
+import { USE_FIREBASE } from '../../../config/env';
 import { mockLogout } from '../../../lib/auth';
 
 export function AdminLayout() {
@@ -33,23 +34,27 @@ export function AdminLayout() {
     navigate('/');
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F9F6F3]">
-        <div className="text-center text-[#8B7355]">로딩 중...</div>
-      </div>
-    );
-  }
+  // Mock 모드: loading/user 조건으로 차단하지 않음
+  if (USE_FIREBASE) {
+    // Firebase 모드: 기존 로직 그대로
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-[#F9F6F3]">
+          <div className="text-center text-[#8B7355]">로딩 중...</div>
+        </div>
+      );
+    }
 
-  if (!user) {
-    // 이 경우는 ProtectedRoute 설정이 잘못됐을 때만 발생해야 함
-    // 안전장치 정도로만 남겨두기
-    navigate('/dev', { replace: true });
-    return null;
+    if (!user) {
+      // 이 경우는 ProtectedRoute 설정이 잘못됐을 때만 발생해야 함
+      // 안전장치 정도로만 남겨두기
+      navigate('/dev', { replace: true });
+      return null;
+    }
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F6F3]">
+    <div className="min-h-screen bg-[#F9F6F3]" data-testid="admin-layout-root">
       {/* Top Bar (Mobile + Desktop) */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-[#E5DDD5]">
         <div className="flex items-center justify-between px-4 h-16">

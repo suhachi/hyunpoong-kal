@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-25-1033  
+**Generated**: 2025-11-25-1927  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -51,6 +51,7 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
+  initializing: boolean; // STEP-8-2: Mock 모드 초기화 상태
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<AuthUser>;
   signInWithGoogle: () => Promise<AuthUser>;
@@ -80,6 +81,8 @@ const MOCK_USERS = {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // STEP-8-2: Mock 모드 초기화 상태 (3회 mockUser 재확인 후 false)
+  const [initializing, setInitializing] = useState(true);
 
   // AuthResolver는 외부 파일로 이동 (동작 동일, 위치만 이동)
 
@@ -114,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const mockUser = loadMockUserFromStorage();
         if (mockUser) {
           setUser(mockUser);
+          console.log('[AuthContext] ✅ Mock 사용자 로드 성공:', mockUser);
         } else {
           console.warn('[AuthContext] ⚠️ mockUser가 없습니다');
         }
@@ -124,6 +128,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('[AuthContext] 🏁 초기화 완료, loading=false');
       }
     }
+  }, []);
+
+  // STEP-8-2: Mock 모드에서 3회 mockUser 재확인 후 initializing=false
+  useEffect(() => {
+    if (USE_FIREBASE) {
+      // Firebase 모드에서는 initializing 불필요
+      setInitializing(false);
+      return;
+    }
+
+    // Mock 모드: 3회 mockUser 재확인 (0ms, 100ms, 300ms)
+    let checkCount = 0;
+    const maxChecks = 3;
+    const delays = [0, 100, 300];
+
+    const checkMockUser = () => {
+      checkCount++;
+      const mockUser = loadMockUserFromStorage();
+      if (mockUser) {
+        setUser((prev) => {
+          // 이미 동일 uid면 업데이트 생략
+          if (prev?.uid === mockUser.uid) {
+            return prev;
+          }
+          console.log(`[AuthContext] 🔄 Mock 사용자 재확인 #${checkCount}:`, mockUser);
+          return mockUser;
+        });
+      }
+
+      // 3회 확인 완료 후 initializing=false
+      if (checkCount >= maxChecks) {
+        console.log('[AuthContext] 🏁 Mock 초기화 완료 (3회 확인)');
+        setInitializing(false);
+      }
+    };
+
+    // 각 지연 시간에 맞춰 확인
+    delays.forEach((delay) => {
+      setTimeout(checkMockUser, delay);
+    });
   }, []);
 
   // 이메일 회원가입
@@ -316,6 +360,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = {
     user,
     loading,
+    initializing,
     signUp,
     signIn,
     signInWithGoogle,

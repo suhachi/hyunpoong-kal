@@ -24,29 +24,19 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading, initializing } = useAuth();
   const location = useLocation();
-  const [mockDelayPassed, setMockDelayPassed] = useState(false);
   const isMock = !USE_FIREBASE;
 
-  // STEP-8-2: Mock 모드일 때 50~100ms 지연 후 role 체크
-  useEffect(() => {
-    if (isMock && !loading) {
-      // Mock 모드에서는 최소 1~3프레임 기다린 뒤 role 체크
-      const timer = setTimeout(() => {
-        setMockDelayPassed(true);
-      }, 100); // 100ms 지연
-      return () => clearTimeout(timer);
-    } else if (!isMock) {
-      // Firebase 모드에서는 즉시 통과
-      setMockDelayPassed(true);
-    }
-  }, [isMock, loading]);
+  // Mock 모드: 차단 로직 전부 무시하고 children을 통과
+  if (!USE_FIREBASE) {
+    console.log('🔒 ProtectedRoute: 🎭 Mock 모드 - 차단 없이 통과');
+    return <>{children}</>;
+  }
 
-  console.group('🔒 ProtectedRoute Debug');
+  // Firebase 모드: 기존 로직 그대로 유지
+  console.group('🔒 ProtectedRoute Debug (Firebase mode)');
   console.log('📍 pathname:', location.pathname);
   console.log('⏳ loading:', loading);
   console.log('⏳ initializing:', initializing);
-  console.log('🎭 isMock:', isMock);
-  console.log('⏰ mockDelayPassed:', mockDelayPassed);
   console.log('👤 user:', user);
   console.log('🎫 roles required:', roles);
   console.log('🔐 requireAuth:', requireAuth);
@@ -59,16 +49,6 @@ export function ProtectedRoute({
   // 로딩 중 또는 초기화 중
   if (loading || initializing) {
     console.log('🔒 ProtectedRoute: ⏳ Loading or Initializing...');
-    return (
-      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
-        <LoadingSkeleton />
-      </div>
-    );
-  }
-
-  // Mock 모드일 때 지연 시간이 지나지 않았으면 로딩 표시
-  if (isMock && !mockDelayPassed) {
-    console.log('🔒 ProtectedRoute: ⏳ Waiting for mock delay...');
     return (
       <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
         <LoadingSkeleton />
