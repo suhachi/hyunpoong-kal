@@ -47,8 +47,22 @@ export function getCurrentUser(): AuthUser | null {
     return null;
   }
 
-  // Mock: localStorage에서 역할 가져오기 (테스트용)
-  const mockRole = localStorage.getItem('mockRole') || 'owner'; // 기본값을 owner로 변경
+  // Mock: localStorage에서 mockUser를 먼저 확인 (E2E 테스트 대비)
+  try {
+    const mockUserData = localStorage.getItem('mockUser');
+    if (mockUserData) {
+      const parsed = JSON.parse(mockUserData) as AuthUser;
+      // 최소 필수 필드 검증
+      if (parsed?.uid && parsed?.email && parsed?.role) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.warn('[getCurrentUser] Failed to parse mockUser:', error);
+  }
+
+  // mockUser가 없으면 mockRole로 fallback (하위 호환성)
+  const mockRole = localStorage.getItem('mockRole') || 'owner';
   return mockRole === 'owner' || mockRole === 'admin' ? MOCK_ADMIN : MOCK_CUSTOMER;
 }
 

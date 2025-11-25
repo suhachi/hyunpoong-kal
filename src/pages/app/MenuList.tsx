@@ -104,11 +104,11 @@ export function MenuList() {
         {categories.map((cat) => (
           <TabsContent key={cat.value} value={cat.value} className="px-4 mt-0">
             {loading ? (
-              <div className="text-center py-12 text-[#2E1C10]/60">
+              <div className="text-center py-12 text-[#2E1C10]/80">
                 로딩 중...
               </div>
             ) : filteredMenus.length === 0 ? (
-              <div className="text-center py-12 text-[#2E1C10]/60">
+              <div className="text-center py-12 text-[#2E1C10]/80">
                 검색 결과가 없습니다
               </div>
             ) : (
@@ -183,7 +183,7 @@ const MenuCardBase = ({ menu }: MenuCardProps) => {
             )}
             
             {/* 설명 */}
-            <p className="text-sm text-[#2E1C10]/60 line-clamp-2 mb-2">
+            <p className="text-sm text-[#2E1C10]/80 line-clamp-2 mb-2">
               {menu.description}
             </p>
             

@@ -31,7 +31,7 @@ export function OperationsTab() {
   }, []);
 
   const handleTogglePoints = async (enabled: boolean) => {
-    if (!settings) return;
+    if (!settings || !settings.points) return;
     const user = getCurrentUser();
     try {
       setSaving(true);
@@ -43,6 +43,7 @@ export function OperationsTab() {
       setSettings(updated);
       toast.success(`포인트 기능이 ${enabled ? '활성화' : '비활성화'}되었습니다`);
     } catch (e) {
+      console.error('Failed to toggle points:', e);
       toast.error('저장에 실패했습니다');
     } finally {
       setSaving(false);
@@ -98,7 +99,7 @@ export function OperationsTab() {
             <span className="text-sm text-[#2E1C10]/60">
               {settings?.points?.enabled ? 'ON' : 'OFF'}
             </span>
-            {settings ? (
+            {settings && settings.points ? (
               <Switch
                 className="border border-[#2E1C10]/20"
                 checked={!!settings.points.enabled}

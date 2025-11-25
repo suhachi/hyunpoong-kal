@@ -41,11 +41,21 @@ export function DeliveryTab() {
     setLoading(true);
     try {
       const data = await getAdminSettings();
-      setSettings(data.delivery);
-      setOriginalSettings(data.delivery);
+      // null 체크: data가 없거나 delivery가 없으면 기본값 사용
+      if (data && data.delivery) {
+        setSettings(data.delivery);
+        setOriginalSettings(data.delivery);
+      } else {
+        // 기본값 사용
+        setSettings(DEFAULT_DELIVERY_SETTINGS);
+        setOriginalSettings(DEFAULT_DELIVERY_SETTINGS);
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
       toast.error('설정을 불러오는데 실패했습니다');
+      // 에러 발생 시 기본값 사용
+      setSettings(DEFAULT_DELIVERY_SETTINGS);
+      setOriginalSettings(DEFAULT_DELIVERY_SETTINGS);
     } finally {
       setLoading(false);
     }

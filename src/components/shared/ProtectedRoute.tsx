@@ -6,8 +6,10 @@
  */
 
 import { Navigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth, UserRole } from '../../contexts/AuthContext';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import { USE_FIREBASE } from '../../config/env';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -20,12 +22,31 @@ export function ProtectedRoute({
   roles,
   requireAuth = true 
 }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, initializing } = useAuth();
   const location = useLocation();
+  const [mockDelayPassed, setMockDelayPassed] = useState(false);
+  const isMock = !USE_FIREBASE;
+
+  // STEP-8-2: Mock 모드일 때 50~100ms 지연 후 role 체크
+  useEffect(() => {
+    if (isMock && !loading) {
+      // Mock 모드에서는 최소 1~3프레임 기다린 뒤 role 체크
+      const timer = setTimeout(() => {
+        setMockDelayPassed(true);
+      }, 100); // 100ms 지연
+      return () => clearTimeout(timer);
+    } else if (!isMock) {
+      // Firebase 모드에서는 즉시 통과
+      setMockDelayPassed(true);
+    }
+  }, [isMock, loading]);
 
   console.group('🔒 ProtectedRoute Debug');
   console.log('📍 pathname:', location.pathname);
   console.log('⏳ loading:', loading);
+  console.log('⏳ initializing:', initializing);
+  console.log('🎭 isMock:', isMock);
+  console.log('⏰ mockDelayPassed:', mockDelayPassed);
   console.log('👤 user:', user);
   console.log('🎫 roles required:', roles);
   console.log('🔐 requireAuth:', requireAuth);
@@ -35,9 +56,19 @@ export function ProtectedRoute({
   }
   console.groupEnd();
 
-  // 로딩 중
-  if (loading) {
-    console.log('🔒 ProtectedRoute: ⏳ Loading...');
+  // 로딩 중 또는 초기화 중
+  if (loading || initializing) {
+    console.log('🔒 ProtectedRoute: ⏳ Loading or Initializing...');
+    return (
+      <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  // Mock 모드일 때 지연 시간이 지나지 않았으면 로딩 표시
+  if (isMock && !mockDelayPassed) {
+    console.log('🔒 ProtectedRoute: ⏳ Waiting for mock delay...');
     return (
       <div className="min-h-screen bg-[#F9F6F3] flex items-center justify-center">
         <LoadingSkeleton />

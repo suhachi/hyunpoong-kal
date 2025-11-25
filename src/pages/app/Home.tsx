@@ -70,7 +70,7 @@ export function Home() {
           <span className="text-sm text-[#2E1C10]">
             영업중
           </span>
-          <span className="text-sm text-[#2E1C10]/60">
+          <span className="text-sm text-[#2E1C10]/80">
             10:00 - 22:00
           </span>
         </div>
@@ -141,7 +141,7 @@ export function Home() {
             <p className="text-sm text-[#2E1C10] mb-1">
               아직 등록된 리뷰가 없습니다.
             </p>
-            <p className="text-xs text-[#2E1C10]/60">
+            <p className="text-xs text-[#2E1C10]/80">
               첫 리뷰를 남겨주시면 더 많은 손님들이 참고할 수 있어요.
             </p>
           </div>
@@ -171,7 +171,7 @@ export function Home() {
                       <Badge variant="outline" className={typeColors[notice.type]}>
                         {typeLabels[notice.type]}
                       </Badge>
-                      <span className="text-xs text-[#2E1C10]/60">
+                      <span className="text-xs text-[#2E1C10]/80">
                         {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
                           year: 'numeric',
                           month: '2-digit',
@@ -182,7 +182,7 @@ export function Home() {
                     <h3 className="text-sm text-[#2E1C10] mb-1">
                       {notice.title}
                     </h3>
-                    <p className="text-sm text-[#2E1C10]/60">
+                    <p className="text-sm text-[#2E1C10]/80">
                       {notice.content}
                     </p>
                   </div>

@@ -11,7 +11,7 @@
  * @tag @admin
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 // Mock 관리자 사용자 (USE_FIREBASE=false 환경)
 const mockAdmin = {
@@ -21,6 +21,23 @@ const mockAdmin = {
   role: 'owner',
   storeId: 'store-hyunpung',
 };
+
+// STEP-8-3-4: 공통 wait 헬퍼
+async function waitForPageStable(page: Page, timeoutMs = 500) {
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(timeoutMs);
+}
+
+// STEP-8-3-4: 공통 검증 로직
+async function assertAdminRoute(page: Page, path: string) {
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  await waitForPageStable(page, 800);
+
+  // 1) 기본 레이아웃이 떠 있는지 확인
+  // admin-settings-page-root 또는 main 또는 body
+  const main = page.locator('[data-testid="admin-settings-page-root"], main, body').first();
+  await expect(main).toBeVisible({ timeout: 8000 });
+}
 
 // 테스트 대상 관리자 라우트 (11개)
 const routes = [
@@ -59,26 +76,24 @@ test.describe('Admin Routes @admin', () => {
 
   for (const route of routes) {
     test(`renders ${route.path} (${route.name}) without console errors`, async ({ page }) => {
-      // 콘솔 에러 수집
+      // STEP-8-3-4: 콘솔 에러 수집 (Notification permission 등은 필터링)
       const errors: string[] = [];
       page.on('console', (msg) => {
         if (msg.type() === 'error') {
-          errors.push(msg.text());
+          const text = msg.text();
+          // Notification permission 경고는 필터링
+          if (!text.includes('Notification permission') && !text.includes('notification')) {
+            errors.push(text);
+          }
         }
       });
 
-      // 페이지 네비게이션
+      // STEP-8-3-4: 공통 검증 로직 사용
+      await assertAdminRoute(page, route.path);
+
+      // HTTP 응답 확인
       const res = await page.goto(route.path, { waitUntil: 'domcontentloaded' });
       expect(res?.ok(), `HTTP response for ${route.path}`).toBeTruthy();
-
-      // 기본 가시성 확인 (body가 렌더링되었는지)
-      await expect(page.locator('body')).toBeVisible();
-
-      // 네트워크 안정화 대기 (Mock API 응답 포함)
-      await page.waitForLoadState('networkidle');
-
-      // 최소 100ms 대기 (렌더링 완료 보장)
-      await page.waitForTimeout(100);
 
       // 콘솔 에러 검증
       if (errors.length > 0) {

@@ -21,7 +21,7 @@ export function AdminSettingsCenter() {
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   // 사용자 정보 가져오기 (AuthContext 사용)
-  const { user } = useAuth();
+  const { user, loading, initializing } = useAuth();
 
   // URL 쿼리 파라미터 동기화
   useEffect(() => {
@@ -37,8 +37,32 @@ export function AdminSettingsCenter() {
     setSearchParams({ tab: value });
   };
 
-  // 접근 권한 확인
-  if (!user || (user.role !== 'owner' && user.role !== 'admin')) {
+  // STEP-8-2: 초기 렌더 블로킹 제거 및 로딩 처리
+  // user가 없거나 initializing 중이면 로딩 표시 (즉시 차단하지 않음)
+  if (!user) {
+    // user가 없고 loading이 false면 권한 없음
+    // loading이 true면 아직 로딩 중
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <div className="animate-pulse">
+            <Shield className="w-16 h-16 text-[#2E1C10]/20 mx-auto" />
+          </div>
+          <div>
+            <h2 className="text-xl font-medium text-[#2E1C10] mb-2">
+              로딩 중...
+            </h2>
+            <p className="text-[#2E1C10]/60">
+              사용자 정보를 확인하는 중입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 접근 권한 확인 (user가 있는 경우에만)
+  if (user.role !== 'owner' && user.role !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center space-y-4">
@@ -51,7 +75,7 @@ export function AdminSettingsCenter() {
               설정 센터는 관리자 또는 소유자만 접근할 수 있습니다.
             </p>
             <p className="text-sm text-[#2E1C10]/40 mt-2">
-              현재 역할: {user?.role || '없음'}
+              현재 역할: {user.role || '없음'}
             </p>
           </div>
         </div>
