@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-25-1927  
+**Generated**: 2025-11-27-1140  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -21,7 +21,7 @@ Complete source code of React Contexts (AuthContext, CartContext, etc.).
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useLayoutEffect, ReactNode } from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -81,8 +81,21 @@ const MOCK_USERS = {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  // STEP-8-2: Mock 모드 초기화 상태 (3회 mockUser 재확인 후 false)
-  const [initializing, setInitializing] = useState(true);
+  // Mock 모드에서는 initializing을 false로 시작 (ProtectedRoute 차단 방지)
+  const [initializing, setInitializing] = useState(USE_FIREBASE ? true : false);
+
+  // Mock 모드: useLayoutEffect로 즉시 mockUser 반영 (렌더링 전에 완료)
+  useLayoutEffect(() => {
+    if (!USE_FIREBASE) {
+      const mu = loadMockUserFromStorage();
+      setUser(mu || null);
+      setInitializing(false);
+      setLoading(false);
+      console.log('[AuthContext] 🎯 Mock 모드 즉시 초기화 완료:', mu ? 'user 있음' : 'user 없음');
+      return;
+    }
+    // Firebase 모드는 아래 useEffect에서 처리
+  }, []);
 
   // AuthResolver는 외부 파일로 이동 (동작 동일, 위치만 이동)
 
@@ -105,70 +118,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         } finally {
           setLoading(false);
+          setInitializing(false);
         }
       });
 
       return () => unsubscribe();
-    } else {
-      // Mock Auth
-      console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
-      console.log('[AuthContext] 🔍 Mock 모드 초기화 시작');
-      try {
-        const mockUser = loadMockUserFromStorage();
-        if (mockUser) {
-          setUser(mockUser);
-          console.log('[AuthContext] ✅ Mock 사용자 로드 성공:', mockUser);
-        } else {
-          console.warn('[AuthContext] ⚠️ mockUser가 없습니다');
-        }
-      } catch (error) {
-        console.error('[AuthContext] ❌ Mock 사용자 로드 실패:', error);
-      } finally {
-        setLoading(false);
-        console.log('[AuthContext] 🏁 초기화 완료, loading=false');
-      }
     }
+    // Mock 모드는 useLayoutEffect에서 이미 처리됨
   }, []);
 
-  // STEP-8-2: Mock 모드에서 3회 mockUser 재확인 후 initializing=false
-  useEffect(() => {
-    if (USE_FIREBASE) {
-      // Firebase 모드에서는 initializing 불필요
-      setInitializing(false);
-      return;
-    }
-
-    // Mock 모드: 3회 mockUser 재확인 (0ms, 100ms, 300ms)
-    let checkCount = 0;
-    const maxChecks = 3;
-    const delays = [0, 100, 300];
-
-    const checkMockUser = () => {
-      checkCount++;
-      const mockUser = loadMockUserFromStorage();
-      if (mockUser) {
-        setUser((prev) => {
-          // 이미 동일 uid면 업데이트 생략
-          if (prev?.uid === mockUser.uid) {
-            return prev;
-          }
-          console.log(`[AuthContext] 🔄 Mock 사용자 재확인 #${checkCount}:`, mockUser);
-          return mockUser;
-        });
-      }
-
-      // 3회 확인 완료 후 initializing=false
-      if (checkCount >= maxChecks) {
-        console.log('[AuthContext] 🏁 Mock 초기화 완료 (3회 확인)');
-        setInitializing(false);
-      }
-    };
-
-    // 각 지연 시간에 맞춰 확인
-    delays.forEach((delay) => {
-      setTimeout(checkMockUser, delay);
-    });
-  }, []);
+  // 기존 3회 재확인 로직 제거 (useLayoutEffect에서 즉시 처리)
 
   // 이메일 회원가입
   const signUp = async (email: string, password: string, displayName: string) => {

@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react';
+﻿import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingCart, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -10,7 +10,7 @@ import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import { useCart } from '../../contexts/CartContext';
 import { toast } from 'sonner';
-import menusData from '../../data/menus.json';
+import { getMenuById } from '../../lib/admin/menus.api';
 import type { Menu } from '../../types/menu';
 import { formatPrice } from '../../lib/utils';
 
@@ -35,12 +35,37 @@ export function MenuDetail() {
   const navigate = useNavigate();
   const { addItem } = useCart();
   
-  const menu = (menusData as Menu[]).find((m) => m.menuId === menuId);
-  
+  const [menu, setMenu] = useState<Menu | null>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedNoodle, setSelectedNoodle] = useState<string>('보통');
   const [selectedSpicy, setSelectedSpicy] = useState<string>('보통');
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
+
+  // 메뉴 데이터 로딩
+  useEffect(() => {
+    const loadMenu = async () => {
+      if (!menuId) {
+        setLoading(false);
+        setMenu(null);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        // getMenuById API 사용 (MenuList와 동일한 데이터 소스)
+        const foundMenu = await getMenuById(menuId);
+        setMenu(foundMenu);
+      } catch (error) {
+        console.error('[MenuDetail] Failed to load menu:', error);
+        setMenu(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMenu();
+  }, [menuId]);
   
   const optionPrices = useMemo(() => {
     if (!menu) return { noodle: 0, toppings: 0 };
@@ -70,6 +95,16 @@ export function MenuDetail() {
     return (menu.price + optionPrices.noodle + optionPrices.toppings) * quantity;
   }, [menu, optionPrices, quantity]);
   
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <p className="text-[#2E1C10]/60">메뉴 정보를 불러오는 중입니다...</p>
+      </div>
+    );
+  }
+  
+  // 메뉴를 찾을 수 없음
   if (!menu) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">

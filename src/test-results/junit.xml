@@ -1,0 +1,18 @@
+<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="0" time="9.424738">
+<testsuite name="admin-settings.spec.ts" timestamp="2025-11-26T13:33:43.561Z" hostname="chromium" tests="7" failures="0" skipped="0" time="24.817" errors="0">
+<testcase name="Admin Settings Pages @admin › Settings page loads without errors" classname="admin-settings.spec.ts" time="3.384">
+</testcase>
+<testcase name="Admin Settings Pages @admin › Payment tab renders correctly" classname="admin-settings.spec.ts" time="3.776">
+</testcase>
+<testcase name="Admin Settings Pages @admin › Delivery tab renders correctly" classname="admin-settings.spec.ts" time="3.548">
+</testcase>
+<testcase name="Admin Settings Pages @admin › Maps tab renders correctly" classname="admin-settings.spec.ts" time="3.965">
+</testcase>
+<testcase name="Admin Settings Pages @admin › FCM tab renders correctly" classname="admin-settings.spec.ts" time="3.409">
+</testcase>
+<testcase name="Admin Settings Pages @admin › Operations tab renders correctly" classname="admin-settings.spec.ts" time="3.056">
+</testcase>
+<testcase name="Admin Settings Pages @admin › All tabs can be switched without errors" classname="admin-settings.spec.ts" time="3.679">
+</testcase>
+</testsuite>
+</testsuites>

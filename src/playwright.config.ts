@@ -1,8 +1,4 @@
 import { defineConfig, devices } from '@playwright/test';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Playwright E2E 테스트 설정
@@ -54,11 +50,9 @@ export default defineConfig({
   webServer: process.env.PW_SKIP_WEBSERVER
     ? undefined
     : {
-        // Windows 환경에서 playwright가 pnpm script 실행 시 인식 문제 있어 'pnpm run dev' 명시
-        command: 'pnpm run dev',
-        cwd: path.resolve(__dirname, '..'),
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000,
+        command: 'npm run dev',
+        port: 3000,
+        timeout: 120000, // dev 서버 준비 시간 120초
+        reuseExistingServer: true, // 이미 실행 중이면 재사용
       },
 });
