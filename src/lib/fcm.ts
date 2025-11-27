@@ -99,6 +99,7 @@ export async function requestNotificationPermission(
 }
 
 // T2-9: FCM 토큰 발급 보장(모크 우선) + localStorage 저장
+// FCM 토큰 키는 이 상수 하나만 사용 (다른 파일에서 하드코딩 금지)
 export const FCM_TOKEN_KEY = 'hp_kal_fcm_token';
 
 export async function ensureFcmToken(): Promise<string | null> {

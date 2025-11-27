@@ -38,7 +38,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // 초기 마운트 + 이벤트 바인딩(useEffect 하나만 사용)
+  // 초기 마운트: localStorage에서 장바구니 데이터 로드 + 이벤트 바인딩
   useEffect(() => {
     loadFromStorage();
 
@@ -60,13 +60,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadFromStorage]);
 
-  // 장바구니 상태 변경 시 로컬 스토리지 저장 (초기 마운트 제외)
+  // 장바구니 상태 변경 시 로컬 스토리지 저장
+  // 초기 마운트 시에는 저장하지 않음 (loadFromStorage가 먼저 실행되도록)
   const isInitialMount = useRef(true);
   useEffect(() => {
-    // 초기 마운트 시에는 저장하지 않음 (loadFromStorage가 먼저 실행되도록)
+    // 초기 마운트 시에는 저장하지 않음
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;

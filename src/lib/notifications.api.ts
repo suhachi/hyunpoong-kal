@@ -177,6 +177,8 @@ export async function getNotifications(
     const { collection, query, where, orderBy, limit: firestoreLimit, getDocs } = await import('firebase/firestore');
     const { db } = await import('./firebase');
     
+    // TODO(Phase3): notifications 컬렉션 스키마 확정 후 헬퍼 함수 추가 필요
+    // 현재는 루트 'notifications' 컬렉션 사용 중
     const q = query(
       collection(db, 'notifications'),
       where('userId', '==', userId),
