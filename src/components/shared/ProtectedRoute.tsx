@@ -24,9 +24,11 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading, initializing } = useAuth();
   const location = useLocation();
+  const isMock = !USE_FIREBASE;
 
   // Mock 모드: 차단 로직 전부 무시하고 children을 통과
   if (!USE_FIREBASE) {
+    console.log('🔒 ProtectedRoute: 🎭 Mock 모드 - 차단 없이 통과');
     return <>{children}</>;
   }
 

@@ -727,7 +727,6 @@ async function firebaseGetAllBalances(): Promise<
 > {
   // TODO: users 컬렉션과 조인하여 phone/name 가져오기
   // 현재는 pointsBalances만 조회
-  // 스키마 헬퍼 사용: pointsBalances는 루트 컬렉션이므로 직접 사용 (스키마 정의 확인)
   const balancesRef = collection(db, 'pointsBalances');
   const snapshot = await getDocs(balancesRef);
 

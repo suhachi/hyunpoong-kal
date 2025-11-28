@@ -56,41 +56,17 @@ export const getEnv = (key: string, defaultValue: string = '', required: boolean
   }
 };
 
-// v1.1: Firebase 모드 플래그 (환경 변수 기반 + E2E 오버라이드 지원)
+// v1.0: Firebase 모드 플래그 (환경 변수 기반)
 // VITE_USE_FIREBASE 환경 변수를 읽어서 boolean으로 변환
 // 기본값: false (Mock 모드)
 // true: Firebase 실연동 모드
 // false: Mock 모드 (localStorage)
-// 
-// E2E 테스트 오버라이드:
-// window.__E2E_FORCE_USE_FIREBASE__가 설정되어 있으면 우선 사용
-// (E2E 테스트에서 Mock 모드 강제를 위해 사용)
-declare global {
-  interface Window {
-    __E2E_FORCE_USE_FIREBASE__?: boolean;
-  }
-}
-
-const RAW_USE_FIREBASE = (() => {
+export const USE_FIREBASE = (() => {
   const raw = getEnv('VITE_USE_FIREBASE', 'false');
   if (raw === 'true') return true;
   if (raw === 'false') return false;
   // 기본값: false (Mock 모드)
   return false;
-})();
-
-export const USE_FIREBASE = (() => {
-  // 브라우저 환경에서만 E2E 오버라이드 허용
-  if (typeof window !== 'undefined') {
-    const e2eOverride = window.__E2E_FORCE_USE_FIREBASE__;
-    if (typeof e2eOverride === 'boolean') {
-      if (DEBUG) {
-        console.log('[env.ts] 🔧 E2E Override detected → USE_FIREBASE =', e2eOverride);
-      }
-      return e2eOverride;
-    }
-  }
-  return RAW_USE_FIREBASE;
 })();
 
 // 디버그 로그 추가

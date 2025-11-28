@@ -114,11 +114,9 @@ export async function fetchOrders(
   }
 
   // Firebase 모드: Firestore 쿼리
-  // TODO(Phase3): admin/orders.api.ts도 storeOrdersCollection 헬퍼 사용으로 통일 필요
-  // 현재는 루트 'orders' 컬렉션 사용 중 (스키마와 불일치)
   try {
     let q = query(
-      collection(db, 'orders'), // TODO: storeOrdersCollection(storeId)로 교체 필요
+      collection(db, 'orders'),
       where('storeId', '==', storeId)
     );
 

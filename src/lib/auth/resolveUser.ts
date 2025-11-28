@@ -20,8 +20,6 @@ export function loadMockUserFromStorage(): AuthUser | null {
 }
 
 export async function resolveUserFromFirebaseUser(firebaseUser: FirebaseUser): Promise<AuthUser> {
-  // TODO(Phase3): users 컬렉션 스키마 확정 후 헬퍼 함수 추가 필요
-  // 현재는 루트 'users' 컬렉션 사용 중
   const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
   const userData = userDoc.data() as any | undefined;
 

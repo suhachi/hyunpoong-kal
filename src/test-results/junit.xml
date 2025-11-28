@@ -1,18 +1,18 @@
-<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="0" time="9.424738">
-<testsuite name="admin-settings.spec.ts" timestamp="2025-11-26T13:33:43.561Z" hostname="chromium" tests="7" failures="0" skipped="0" time="24.817" errors="0">
-<testcase name="Admin Settings Pages @admin › Settings page loads without errors" classname="admin-settings.spec.ts" time="3.384">
+<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="0" time="12.274974">
+<testsuite name="admin-settings.spec.ts" timestamp="2025-11-27T07:54:29.194Z" hostname="chromium" tests="7" failures="0" skipped="0" time="32.312" errors="0">
+<testcase name="Admin Settings Pages @admin › Settings page loads without errors" classname="admin-settings.spec.ts" time="6.274">
 </testcase>
-<testcase name="Admin Settings Pages @admin › Payment tab renders correctly" classname="admin-settings.spec.ts" time="3.776">
+<testcase name="Admin Settings Pages @admin › Payment tab renders correctly" classname="admin-settings.spec.ts" time="6.303">
 </testcase>
-<testcase name="Admin Settings Pages @admin › Delivery tab renders correctly" classname="admin-settings.spec.ts" time="3.548">
+<testcase name="Admin Settings Pages @admin › Delivery tab renders correctly" classname="admin-settings.spec.ts" time="5.991">
 </testcase>
-<testcase name="Admin Settings Pages @admin › Maps tab renders correctly" classname="admin-settings.spec.ts" time="3.965">
+<testcase name="Admin Settings Pages @admin › Maps tab renders correctly" classname="admin-settings.spec.ts" time="6.481">
 </testcase>
-<testcase name="Admin Settings Pages @admin › FCM tab renders correctly" classname="admin-settings.spec.ts" time="3.409">
+<testcase name="Admin Settings Pages @admin › FCM tab renders correctly" classname="admin-settings.spec.ts" time="1.711">
 </testcase>
-<testcase name="Admin Settings Pages @admin › Operations tab renders correctly" classname="admin-settings.spec.ts" time="3.056">
+<testcase name="Admin Settings Pages @admin › Operations tab renders correctly" classname="admin-settings.spec.ts" time="2.03">
 </testcase>
-<testcase name="Admin Settings Pages @admin › All tabs can be switched without errors" classname="admin-settings.spec.ts" time="3.679">
+<testcase name="Admin Settings Pages @admin › All tabs can be switched without errors" classname="admin-settings.spec.ts" time="3.522">
 </testcase>
 </testsuite>
 </testsuites>

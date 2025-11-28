@@ -71,25 +71,17 @@ export async function requestNotificationPermission(
     localStorage.setItem(FCM_TOKEN_KEY, token);
 
     // Firestore에 토큰 저장
-    // TODO(Phase3): users/{userId}/meta/fcm 경로 스키마 확정 후 구현
-    // 현재는 users 컬렉션이 스키마에 정의되어 있지 않으므로,
-    // Firebase 모드에서도 실제 Firestore 쓰기는 비활성화
-    // (Mock 모드는 localStorage만 사용)
-    if (USE_FIREBASE) {
-      // Phase 3에서 users 컬렉션 스키마 확정 후 활성화 예정
-      // const { doc, setDoc } = await import('firebase/firestore');
-      // const { db } = await import('./firebase');
-      // await setDoc(
-      //   doc(db, `users/${userId}/meta/fcm`),
-      //   {
-      //     token,
-      //     platform: 'web',
-      //     updatedAt: new Date(),
-      //   },
-      //   { merge: true }
-      // );
-      console.warn('[FCM] Firestore 저장은 Phase 3에서 users 스키마 확정 후 활성화 예정');
-    }
+    const { doc, setDoc } = await import('firebase/firestore');
+    const { db } = await import('./firebase');
+    await setDoc(
+      doc(db, `users/${userId}/meta/fcm`),
+      {
+        token,
+        platform: 'web',
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
 
     return token;
   } catch (error) {
@@ -99,7 +91,6 @@ export async function requestNotificationPermission(
 }
 
 // T2-9: FCM 토큰 발급 보장(모크 우선) + localStorage 저장
-// FCM 토큰 키는 이 상수 하나만 사용 (다른 파일에서 하드코딩 금지)
 export const FCM_TOKEN_KEY = 'hp_kal_fcm_token';
 
 export async function ensureFcmToken(): Promise<string | null> {
@@ -256,23 +247,15 @@ export async function saveNotificationSettings(
 
   try {
     const { doc, setDoc } = await import('firebase/firestore');
-    // TODO(Phase3): users/{userId}/settings/notifications 경로 스키마 확정 후 구현
-    // 현재는 users 컬렉션이 스키마에 정의되어 있지 않으므로,
-    // Firebase 모드에서도 실제 Firestore 쓰기는 비활성화
-    // (Mock 모드는 localStorage만 사용)
-    if (USE_FIREBASE) {
-      // Phase 3에서 users 컬렉션 스키마 확정 후 활성화 예정
-      // const { doc, setDoc } = await import('firebase/firestore');
-      // const { db } = await import('./firebase');
-      // await setDoc(
-      //   doc(db, `users/${userId}/settings/notifications`),
-      //   {
-      //     ...settings,
-      //     updatedAt: new Date(),
-      //   }
-      // );
-      console.warn('[FCM] Firestore 저장은 Phase 3에서 users 스키마 확정 후 활성화 예정');
-    }
+    const { db } = await import('./firebase');
+    
+    await setDoc(
+      doc(db, `users/${userId}/settings/notifications`),
+      {
+        ...settings,
+        updatedAt: new Date(),
+      }
+    );
   } catch (error) {
     console.error('Failed to save notification settings:', error);
     throw error;
@@ -307,37 +290,32 @@ export async function getNotificationSettings(
     };
   }
 
-  // TODO(Phase3): users/{userId}/settings/notifications 경로 스키마 확정 후 구현
-  // 현재는 users 컬렉션이 스키마에 정의되어 있지 않으므로,
-  // Firebase 모드에서도 실제 Firestore 읽기는 비활성화
-  // (Mock 모드는 localStorage만 사용)
-  if (USE_FIREBASE) {
-    // Phase 3에서 users 컬렉션 스키마 확정 후 활성화 예정
-    // try {
-    //   const { doc, getDoc } = await import('firebase/firestore');
-    //   const { db } = await import('./firebase');
-    //   const docSnap = await getDoc(doc(db, `users/${userId}/settings/notifications`));
-    //   if (docSnap.exists()) {
-    //     return docSnap.data() as NotificationSettings;
-    //   }
-    // } catch (error) {
-    //   console.error('Failed to fetch notification settings from Firestore:', error);
-    // }
-    console.warn('[FCM] Firestore 조회는 Phase 3에서 users 스키마 확정 후 활성화 예정');
+  try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    const { db } = await import('./firebase');
+    
+    const docSnap = await getDoc(doc(db, `users/${userId}/settings/notifications`));
+    
+    if (docSnap.exists()) {
+      return docSnap.data() as NotificationSettings;
+    }
+    
+    // 기본 설정 반환
+    return {
+      userId,
+      enabled: true,
+      orderUpdates: true,
+      promotions: true,
+      reviews: true,
+      points: true,
+      sound: true,
+      vibration: true,
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error('Failed to get notification settings:', error);
+    throw error;
   }
-  
-  // 기본 설정 반환 (Firebase 모드에서도 스키마 미확정 시)
-  return {
-    userId,
-    enabled: true,
-    orderUpdates: true,
-    promotions: true,
-    reviews: true,
-    points: true,
-    sound: true,
-    vibration: true,
-    updatedAt: new Date(),
-  };
 }
 
 /**

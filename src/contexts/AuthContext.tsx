@@ -75,47 +75,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(mu || null);
       setInitializing(false);
       setLoading(false);
-      if (DEBUG) {
-        console.log('[AuthContext] 🎯 Mock 모드 즉시 초기화 완료:', mu ? 'user 있음' : 'user 없음');
-      }
+      console.log('[AuthContext] 🎯 Mock 모드 즉시 초기화 완료:', mu ? 'user 있음' : 'user 없음');
       return;
     }
     // Firebase 모드는 아래 useEffect에서 처리
   }, []);
 
-  // Firebase 모드: Firebase Auth 리스너 설정
+  // AuthResolver는 외부 파일로 이동 (동작 동일, 위치만 이동)
+
   useEffect(() => {
-    // Mock 모드에서는 Firebase 관련 로직을 전혀 실행하지 않음
-    if (!USE_FIREBASE) {
-      return;
-    }
-
-    if (!auth) {
-      console.error('[AuthContext] Firebase auth가 초기화되지 않았습니다');
-      setLoading(false);
-      setInitializing(false);
-      return;
-    }
-
-    // Firebase Auth 리스너
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          const resolved = (await resolveUser(firebaseUser)) as AuthUser;
-          setUser(resolved);
-        } else {
+    // eslint-disable-next-line no-console
+    console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
+    
+    if (USE_FIREBASE && auth) {
+      // Firebase Auth 리스너
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        try {
+          if (firebaseUser) {
+            const resolved = (await resolveUser(firebaseUser)) as AuthUser;
+            setUser(resolved);
+          } else {
+            setUser(null);
+          }
+        } catch (error) {
+          console.error('[AuthContext] 사용자 정보 로드 실패:', error);
           setUser(null);
+        } finally {
+          setLoading(false);
+          setInitializing(false);
         }
-      } catch (error) {
-        console.error('[AuthContext] 사용자 정보 로드 실패:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-        setInitializing(false);
-      }
-    });
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }
+    // Mock 모드는 useLayoutEffect에서 이미 처리됨
   }, []);
 
   // 기존 3회 재확인 로직 제거 (useLayoutEffect에서 즉시 처리)

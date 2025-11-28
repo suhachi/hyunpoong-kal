@@ -34,13 +34,9 @@ export function AdminLayout() {
     navigate('/');
   }
 
-  // Mock 모드: user/auth 로직을 전혀 보지 않고 바로 렌더링
-  if (!USE_FIREBASE) {
-    // Mock 모드에서는 ProtectedRoute가 이미 통과시켰으므로
-    // 여기서는 추가 체크 없이 바로 레이아웃 렌더링
-    // (user는 있을 수도 없을 수도 있지만, Mock 모드에서는 무관)
-  } else {
-    // Firebase 모드: 실제 auth 상태 기반 리다이렉트
+  // Mock 모드: loading/user 조건으로 차단하지 않음
+  if (USE_FIREBASE) {
+    // Firebase 모드: 기존 로직 그대로
     if (loading) {
       return (
         <div className="flex items-center justify-center min-h-screen bg-[#F9F6F3]">
@@ -50,9 +46,9 @@ export function AdminLayout() {
     }
 
     if (!user) {
-      // ProtectedRoute가 이미 체크했지만, 안전장치로 한 번 더 확인
-      // Firebase 모드에서 user가 없으면 로그인 페이지로 리다이렉트
-      navigate('/login', { replace: true });
+      // 이 경우는 ProtectedRoute 설정이 잘못됐을 때만 발생해야 함
+      // 안전장치 정도로만 남겨두기
+      navigate('/dev', { replace: true });
       return null;
     }
   }

@@ -4,19 +4,11 @@
  */
 
 import { db, auth } from './firebase';
-import { USE_FIREBASE, getEnv } from '../config/env';
+import { USE_FIREBASE } from '../config/env';
 import { ordersRepository, type CreateOrderPayload } from './orders.repository';
-import { query, where, orderBy, getDocs, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { storeOrdersCollection, storeOrderDocRef } from './firebase/firestore-schema';
 import type { Order, OrderStatus } from '../types/order';
-
-/**
- * 매장 ID 가져오기 (환경 변수 기반)
- */
-function getStoreId(): string {
-  return getEnv('VITE_STORE_ID', 'hyunpoong_main');
-}
 
 /**
  * 주문 생성 (Firebase 또는 localStorage)
@@ -90,10 +82,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
       updatedAt: serverTimestamp(),
     };
 
-    // 스키마에 맞게 stores/{storeId}/orders 경로 사용
-    const storeId = getStoreId();
-    const ordersColRef = storeOrdersCollection(storeId);
-    const docRef = await addDoc(ordersColRef, orderData);
+    const docRef = await addDoc(collection(db, 'orders'), orderData);
 
     // 생성된 주문 객체 반환 (serverTimestamp는 실제 값으로 대체됨)
     const createdOrder: Order = {
@@ -151,11 +140,8 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
 
   // Firebase 모드: Firestore에서 조회
   try {
-    // 스키마에 맞게 stores/{storeId}/orders 경로 사용
-    const storeId = getStoreId();
-    const ordersColRef = storeOrdersCollection(storeId);
     const q = query(
-      ordersColRef,
+      collection(db, 'orders'),
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );
@@ -188,9 +174,8 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
 
   // Firebase 모드: Firestore에서 조회
   try {
-    // 스키마에 맞게 stores/{storeId}/orders/{orderId} 경로 사용
-    const storeId = getStoreId();
-    const docRef = storeOrderDocRef(storeId, orderId);
+    const { doc, getDoc } = await import('firebase/firestore');
+    const docRef = doc(db, 'orders', orderId);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {

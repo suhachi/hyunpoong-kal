@@ -16,7 +16,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
 import { ensureFcmToken, FCM_TOKEN_KEY } from './lib/fcm';
-// FCM 토큰 키는 fcm.ts의 FCM_TOKEN_KEY 상수 하나만 사용
 
 // Layout (레이아웃은 즉시 로드)
 import { AppLayout } from './components/app/AppLayout';
@@ -58,9 +57,6 @@ const AdminNotices = lazy(() => import('./pages/admin/Notices').then(m => ({ def
 
 // 개발 도구
 const DevTools = lazy(() => import('./pages/DevTools').then(m => ({ default: m.DevTools })));
-
-// 시스템 페이지
-const NotFound = lazy(() => import('./pages/system/NotFound').then(m => ({ default: m.NotFound })));
 
 // 로딩 폴백 컴포넌트
 const LoadingFallback = () => (
@@ -189,9 +185,9 @@ export default function App() {
             <Route path="/dev" element={<DevTools />} />
 
             {/* ========================================
-                404 - NotFound 페이지 표시
+                404 - 홈으로 리다이렉트
                 ======================================== */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
 
