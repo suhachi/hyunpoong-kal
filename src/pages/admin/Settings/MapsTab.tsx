@@ -26,7 +26,7 @@ VITE_KAKAO_MAP_KEY=${kakaoKey || 'YOUR_KAKAO_REST_API_KEY'}
 # Google Maps (https://console.cloud.google.com)
 VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
 `;
-    
+
     const blob = new Blob([template], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -137,7 +137,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               </p>
               <div className="space-y-1 text-xs">
                 <code className="block p-2 bg-gray-50 rounded">
-                  http://localhost:5173
+                  {typeof window !== 'undefined' ? window.location.origin : 'https://hyun-poong.web.app'}
                 </code>
                 <code className="block p-2 bg-gray-50 rounded">
                   https://{'{배포 도메인}'}

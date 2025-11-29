@@ -110,9 +110,9 @@ export function AdminMenus() {
     setActionLoading(true);
     try {
       const updated = await toggleMenuAvailability(menuId, user.uid, user.displayName || '관리자');
-      
+
       // UI 즉시 반영
-      setMenus(prev => 
+      setMenus(prev =>
         prev.map(m => m.menuId === menuId ? updated : m)
       );
 
@@ -230,17 +230,17 @@ export function AdminMenus() {
 
   // 메뉴 생성
   const handleCreateMenu = async (menuData: Partial<Menu>) => {
-    console.log('[handleCreateMenu] Called with menuData:', menuData);
+
     if (!user) {
       console.error('[handleCreateMenu] No user found');
       return;
     }
-    console.log('[handleCreateMenu] User:', user.uid, user.displayName);
+
 
     try {
-      console.log('[handleCreateMenu] Calling createMenu...');
+
       const newMenu = await createMenu(menuData, user.uid, user.displayName || '관리자');
-      console.log('[handleCreateMenu] createMenu returned:', newMenu);
+
 
       // UI 즉시 반영 (최상단 추가)
       setMenus(prev => [newMenu, ...prev]);

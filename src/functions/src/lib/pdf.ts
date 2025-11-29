@@ -40,10 +40,11 @@ export interface ReceiptData {
  * 영수증 PDF 생성
  */
 export async function generateReceiptPDF(data: ReceiptData): Promise<string> {
-  const projectId = process.env.GCLOUD_PROJECT || 'demo-project';
+  const projectId = process.env.GCLOUD_PROJECT || 'hyun-poong';
+  // ✅ 실제 버킷 이름 사용: hyun-poong.firebasestorage.app
   const bucketName = process.env.FUNCTIONS_EMULATOR
-    ? 'demo.appspot.com'
-    : `${projectId}.appspot.com`;
+    ? 'demo.firebasestorage.app'
+    : process.env.STORAGE_BUCKET_NAME || `${projectId}.firebasestorage.app`;
 
   const bucket = storage.bucket(bucketName);
   const filename = `receipts/${data.orderId}.pdf`;

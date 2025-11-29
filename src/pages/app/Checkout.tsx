@@ -139,9 +139,9 @@ export function Checkout() {
   // 배달 시 주소 필수 확인
   // 만나서 결제(meet_card, meet_cash)는 배달 주소가 필요 없음
   const canProceed = agreeTerms && phone && (
-    deliveryType === 'pickup' || 
-    deliveryAddress || 
-    paymentMethod === 'meet_card' || 
+    deliveryType === 'pickup' ||
+    deliveryAddress ||
+    paymentMethod === 'meet_card' ||
     paymentMethod === 'meet_cash'
   );
 
@@ -179,15 +179,15 @@ export function Checkout() {
         requests: requests || undefined,
         payment: {
           method: paymentMethod,
-          status: (paymentMethod === 'meet_card' || paymentMethod === 'meet_cash') 
-            ? 'pending' 
+          status: (paymentMethod === 'meet_card' || paymentMethod === 'meet_cash')
+            ? 'pending'
             : 'authorized',
           amount: totalAmount,
         },
       });
-      
+
       const orderId = newOrder.orderId;
-      
+
       // 2. 포인트 사용 처리
       if (usePoints && pointsToUse > 0) {
         try {
@@ -213,7 +213,7 @@ export function Checkout() {
       // 4. 성공 메시지 및 주문 트래킹으로 이동 (먼저 실행)
       if (paymentMethod === 'meet_card' || paymentMethod === 'meet_cash') {
         // 만나서 결제: 주문 접수만 완료
-        console.log('[debug] firing success toast: 주문이 접수되었습니다');
+
         toast.success(<span data-testid="toast.order.success">주문이 접수되었습니다</span>, { duration: 5000 });
         // 토스트 DOM 마운트 확보를 위한 짧은 지연
         await new Promise((r) => setTimeout(r, 75));
@@ -221,7 +221,7 @@ export function Checkout() {
       } else if (paymentMethod === 'app_card') {
         // 앱 결제: 실제 PG 연동 필요 (현재는 준비 중)
         // TODO: 실제 PG 결제 연동 구현 필요
-        console.log('[debug] firing success toast: 결제가 완료되었습니다');
+
         toast.success(<span data-testid="toast.payment.success">결제가 완료되었습니다</span>, { duration: 5000 });
         await new Promise((r) => setTimeout(r, 75));
         navigate(`/order/${orderId}?result=success`);
@@ -246,17 +246,17 @@ export function Checkout() {
             결제
           </h1>
           <p className="text-[#2E1C10]/60">
-              결제 정보를 입력해 주세요
-            </p>
-            <Alert className="mt-3">
-              현재 이 앱은 실제 PG 연동 없이 Mock 기반 주문 생성만 지원합니다. (결제는 Phase 3 이후 연동 예정)
-            </Alert>
+            결제 정보를 입력해 주세요
+          </p>
+          <Alert className="mt-3">
+            현재 이 앱은 실제 PG 연동 없이 Mock 기반 주문 생성만 지원합니다. (결제는 Phase 3 이후 연동 예정)
+          </Alert>
         </div>
 
         {/* 주문 요약 */}
         <div className="bg-white rounded-2xl p-4 space-y-3">
           <h2 className="text-[#2E1C10]">주문 요약</h2>
-          
+
           {/* 주문 아이템 목록 */}
           <div className="space-y-2">
             {items.slice(0, 3).map((item, index) => (
@@ -275,9 +275,9 @@ export function Checkout() {
               </p>
             )}
           </div>
-          
+
           <Separator />
-          
+
           {/* CheckoutSummary 컴포넌트 사용 (금액 변화 애니메이션) */}
           <CheckoutSummary
             subtotal={subtotal}
@@ -329,7 +329,7 @@ export function Checkout() {
                   </Button>
                 </div>
                 <p className="text-xs text-[#2E1C10]/60">
-                  최소 {POINTS_POLICY.minUse.toLocaleString()}P부터 사용 가능 • 
+                  최소 {POINTS_POLICY.minUse.toLocaleString()}P부터 사용 가능 •
                   최대 {Math.min(pointsBalance, baseTotal).toLocaleString()}P 사용 가능
                 </p>
                 {pointsToUse > 0 && (
@@ -347,7 +347,7 @@ export function Checkout() {
               <Alert className="border-orange-200 bg-orange-50">
                 <AlertCircle className="h-4 w-4 text-orange-600" />
                 <AlertDescription className="text-orange-800 text-sm">
-                  포인트가 {POINTS_POLICY.minUse.toLocaleString()}P 미만입니다. 
+                  포인트가 {POINTS_POLICY.minUse.toLocaleString()}P 미만입니다.
                   주문 후 포인트를 적립하세요!
                 </AlertDescription>
               </Alert>

@@ -18,12 +18,55 @@ export async function uploadImageToStorage(
 ): Promise<string> {
   try {
     console.log('[uploadImageToStorage] Starting upload, path:', path);
+    
+    // 🛡️ 재발 방지: 버킷 검증 (FATAL 차단)
+    const activeBucket =
+      (storage as any)._location?.bucket ||
+      (storage as any)._bucket?.name ||
+      'UNKNOWN';
+    
+    if (activeBucket.includes('appspot.com')) {
+      console.error(
+        '[FATAL] WRONG STORAGE BUCKET DETECTED → appspot.com fallback 발생',
+        activeBucket
+      );
+      throw new Error('INVALID_STORAGE_BUCKET: appspot.com 버킷 사용 감지. 환경 변수 VITE_FIREBASE_STORAGE_BUCKET를 확인하세요.');
+    }
+    
+    console.log('[uploadImageToStorage] Using storage bucket:', activeBucket);
+    console.log('[uploadImageToStorage] Full path:', path);
+    
     const storageRef = ref(storage, path);
     console.log('[uploadImageToStorage] Uploading bytes...');
     await uploadBytes(storageRef, file);
     console.log('[uploadImageToStorage] Getting download URL...');
     const downloadURL = await getDownloadURL(storageRef);
     console.log('[uploadImageToStorage] Upload successful, URL:', downloadURL);
+    
+    // 🛡️ 재발 방지: 다운로드 URL에서 버킷 검증 (FATAL 차단)
+    if (downloadURL.includes('firebasestorage.googleapis.com')) {
+      const urlMatch = downloadURL.match(/\/b\/([^/]+)\//);
+      if (urlMatch) {
+        const urlBucket = urlMatch[1];
+        console.log('[uploadImageToStorage] URL bucket:', urlBucket);
+        
+        // appspot.com이 URL에 포함되어 있으면 즉시 차단
+        if (urlBucket.includes('appspot.com')) {
+          console.error(
+            '[FATAL] WRONG STORAGE BUCKET IN URL → appspot.com 감지',
+            urlBucket
+          );
+          throw new Error('INVALID_STORAGE_BUCKET: 다운로드 URL에 appspot.com 버킷이 포함되어 있습니다.');
+        }
+        
+        if (urlBucket !== activeBucket && !urlBucket.includes('firebasestorage.app')) {
+          console.warn('[uploadImageToStorage] ⚠️ URL 버킷이 예상과 다릅니다!');
+          console.warn('[uploadImageToStorage] Expected:', activeBucket);
+          console.warn('[uploadImageToStorage] Got:', urlBucket);
+        }
+      }
+    }
+    
     return downloadURL;
   } catch (error: any) {
     console.error('[uploadImageToStorage] Upload failed:', error);
@@ -44,6 +87,23 @@ export async function uploadMenuImage(
   menuId?: string
 ): Promise<{ url: string; path: string }> {
   console.log('[uploadMenuImage] Starting upload, menuId:', menuId);
+  
+  // 🛡️ 재발 방지: 버킷 검증 (FATAL 차단)
+  const activeBucket =
+    (storage as any)._location?.bucket ||
+    (storage as any)._bucket?.name ||
+    'UNKNOWN';
+  
+  if (activeBucket.includes('appspot.com')) {
+    console.error(
+      '[FATAL] WRONG STORAGE BUCKET DETECTED → appspot.com fallback 발생',
+      activeBucket
+    );
+    throw new Error('INVALID_STORAGE_BUCKET: appspot.com 버킷 사용 감지. 환경 변수 VITE_FIREBASE_STORAGE_BUCKET를 확인하세요.');
+  }
+  
+  console.log('[uploadMenuImage] Using storage bucket:', activeBucket);
+  
   const storeId = STORE_ID;
   if (!storeId) {
     console.error('[uploadMenuImage] STORE_ID is not set');

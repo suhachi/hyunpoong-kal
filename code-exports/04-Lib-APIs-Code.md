@@ -1,6 +1,6 @@
 # Lib APIs - Full Source Code
 
-**Generated**: 2025-11-28-1123  
+**Generated**: 2025-11-29-1240  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -36,7 +36,8 @@ const firebaseConfig = {
 
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
 
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  // 🔴 Explicitly set the bucket to avoid "appspot.com" default
+  storageBucket: "hyun-poong.firebasestorage.app", 
 
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
 
@@ -46,7 +47,7 @@ const firebaseConfig = {
 
 };
 
-
+console.log('[Firebase Config] storageBucket:', firebaseConfig.storageBucket);
 
 export const app = initializeApp(firebaseConfig);
 
@@ -70,7 +71,8 @@ export const auth = getAuth(app);
 
 export const db = getFirestore(app);
 
-export const storage = getStorage(app);
+// Storage: 명시적으로 버킷 이름 지정 (CORS 설정이 적용된 버킷 사용)
+export const storage = getStorage(app, "gs://hyun-poong.firebasestorage.app");
 
 
 
