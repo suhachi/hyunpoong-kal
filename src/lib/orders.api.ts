@@ -16,6 +16,13 @@ import type { Order, OrderStatus } from '../types/order';
  * @returns 생성된 주문 객체
  */
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
+  // 배달 주문 시 주소 검증 (절대 통과하지 않아야 함)
+  if (payload.deliveryType === 'delivery' && !payload.deliveryAddress) {
+    const error = new Error('배달 주문은 배달 주소가 필수입니다');
+    console.error('[createOrder] CRITICAL ERROR:', error);
+    throw error;
+  }
+
   if (!USE_FIREBASE) {
     // Mock 모드: localStorage 기반 repository 사용
     return await ordersRepository.createOrder(payload);

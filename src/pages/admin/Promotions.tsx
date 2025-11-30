@@ -31,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
+import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+import { UserSearchDialog } from '../../components/admin/UserSearchDialog';
 
 export function AdminPromotions() {
   const [stats, setStats] = useState<CouponStats | null>(null);
@@ -47,7 +49,12 @@ export function AdminPromotions() {
     minSpend: 15000,
     expiryDays: 30,
     issueLimit: 100,
+    targetType: 'all',
   });
+
+  // 사용자 검색 다이얼로그
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ uid: string; name?: string; email?: string } | null>(null);
 
   const user = getCurrentUser();
 
@@ -76,6 +83,17 @@ export function AdminPromotions() {
       return;
     }
 
+    // 발급 대상 검증
+    if (issueForm.targetType === 'user' && !issueForm.targetUserId) {
+      toast.error('특정 고객을 선택하세요');
+      return;
+    }
+
+    if (issueForm.targetType === 'phone' && !issueForm.targetPhone?.trim()) {
+      toast.error('전화번호를 입력하세요');
+      return;
+    }
+
     setIssuing(true);
     try {
       const issued = await issueCoupon(issueForm, user.uid, user.name);
@@ -93,13 +111,29 @@ export function AdminPromotions() {
         minSpend: 15000,
         expiryDays: 30,
         issueLimit: 100,
+        targetType: 'all',
       });
+      setSelectedUser(null);
     } catch (error: any) {
       console.error('Failed to issue coupons:', error);
       toast.error(error.message || '쿠폰 발급에 실패했습니다');
     } finally {
       setIssuing(false);
     }
+  };
+
+  // 사용자 선택 핸들러
+  const handleUserSelect = (user: { uid: string; displayName?: string; email?: string }) => {
+    setSelectedUser({
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+    });
+    setIssueForm({
+      ...issueForm,
+      targetType: 'user',
+      targetUserId: user.uid,
+    });
   };
 
   return (
@@ -280,6 +314,74 @@ export function AdminPromotions() {
                 />
               </div>
             </div>
+
+            {/* 발급 대상 */}
+            <div className="space-y-3 border-t pt-4">
+              <Label>발급 대상</Label>
+              <RadioGroup
+                value={issueForm.targetType || 'all'}
+                onValueChange={(value) => {
+                  setIssueForm({
+                    ...issueForm,
+                    targetType: value as 'all' | 'user' | 'phone',
+                    targetUserId: undefined,
+                    targetPhone: undefined,
+                  });
+                  setSelectedUser(null);
+                }}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="target-all" />
+                  <Label htmlFor="target-all" className="cursor-pointer">전체 고객</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="user" id="target-user" />
+                  <Label htmlFor="target-user" className="cursor-pointer">특정 고객 (회원 검색)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="phone" id="target-phone" />
+                  <Label htmlFor="target-phone" className="cursor-pointer">전화번호로 지정</Label>
+                </div>
+              </RadioGroup>
+
+              {/* 특정 고객 선택 */}
+              {issueForm.targetType === 'user' && (
+                <div className="space-y-2 pl-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setUserSearchOpen(true)}
+                  >
+                    {selectedUser ? `${selectedUser.name || selectedUser.email} (선택됨)` : '고객 검색'}
+                  </Button>
+                  {selectedUser && (
+                    <div className="text-xs text-gray-500">
+                      {selectedUser.email && <div>이메일: {selectedUser.email}</div>}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 전화번호 입력 */}
+              {issueForm.targetType === 'phone' && (
+                <div className="space-y-2 pl-6">
+                  <Input
+                    type="tel"
+                    placeholder="010-1234-5678"
+                    value={issueForm.targetPhone || ''}
+                    onChange={(e) => {
+                      // 숫자와 하이픈만 허용
+                      const value = e.target.value.replace(/[^\d-]/g, '');
+                      setIssueForm({ ...issueForm, targetPhone: value });
+                    }}
+                  />
+                  <p className="text-xs text-gray-500">
+                    해당 전화번호로 주문한 고객에게만 쿠폰이 적용됩니다
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           <DialogFooter>
@@ -296,6 +398,13 @@ export function AdminPromotions() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* 사용자 검색 다이얼로그 */}
+      <UserSearchDialog
+        open={userSearchOpen}
+        onOpenChange={setUserSearchOpen}
+        onSelect={handleUserSelect}
+      />
     </div>
   );
 }

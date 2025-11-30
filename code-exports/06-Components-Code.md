@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-11-30-1558  
+**Generated**: 2025-11-30-1717  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -15,6 +15,203 @@ Complete source code of reusable components.
 
 ```tsx
  
+```
+
+---
+
+## src\components\admin\AdminOrderAlert.tsx
+
+```tsx
+import { useEffect, useMemo, useRef } from 'react';
+import { collection, query, orderBy, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { toast } from 'sonner';
+import { useOrderNotifications } from '../../hooks/useOrderNotifications';
+import { useIsAdmin } from '../../hooks/useIsAdmin';
+import { printOrderReceipt } from '../../utils/printReceipt';
+import { Button } from '../ui/button';
+import type { Order } from '../../types/order';
+
+export function AdminOrderAlert() {
+    const { isAdmin, loading } = useIsAdmin();
+    const enabled = !loading && isAdmin;
+
+    const loopRef = useRef<NodeJS.Timeout | null>(null);
+    const toastIdRef = useRef<string | number | null>(null);
+    const latestOrderIdRef = useRef<string | null>(null);
+
+    // 오디오 언락 (브라우저 자동재생 정책 대응)
+    useEffect(() => {
+        const unlock = () => {
+            // 빈 오디오 재생 시도
+            const audio = new Audio('/alert3.mp3');
+            audio.muted = true;
+            audio.play()
+                .then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                })
+                .catch(() => {
+                    // 파일이 없거나 재생 실패 시 무시
+                });
+
+            // Web Audio API Context resume (if needed)
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+            }
+
+            window.removeEventListener('pointerdown', unlock);
+            window.removeEventListener('keydown', unlock);
+        };
+
+        window.addEventListener('pointerdown', unlock, { once: true });
+        window.addEventListener('keydown', unlock, { once: true });
+        return () => {
+            window.removeEventListener('pointerdown', unlock);
+            window.removeEventListener('keydown', unlock);
+        };
+    }, []);
+
+    const q = useMemo(
+        () => query(collection(db, 'orders'), orderBy('createdAt', 'desc')),
+        []
+    );
+
+    const stopLoop = () => {
+        if (loopRef.current) {
+            clearInterval(loopRef.current);
+            loopRef.current = null;
+        }
+        if (toastIdRef.current) {
+            toast.dismiss(toastIdRef.current);
+            toastIdRef.current = null;
+        }
+    };
+
+    // 비프음 재생 (Web Audio API)
+    const playBeep = () => {
+        try {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (!AudioContext) return;
+
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.frequency.value = 800;
+            osc.type = 'sine';
+
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.5);
+        } catch (e) {
+            console.error('Beep play failed', e);
+        }
+    };
+
+    useOrderNotifications(q, {
+        role: 'admin',
+        enabled,
+        notifyAdded: true,
+        notifyModified: false,
+        play: (type, { id }) => {
+            if (type !== 'new') return;
+
+            latestOrderIdRef.current = id;
+
+            const playSound = () => {
+                const audio = new Audio('/alert3.mp3');
+                audio.play().catch(() => {
+                    // 파일 재생 실패 시 비프음 사용
+                    playBeep();
+                });
+            };
+
+            playSound();
+
+            // 반복 재생 (알림 확인 전까지)
+            if (!loopRef.current) {
+                loopRef.current = setInterval(playSound, 3000);
+            }
+        },
+        toast: (msg, type, { id }) => {
+            if (type !== 'new') return;
+
+            if (toastIdRef.current) {
+                toast.dismiss(toastIdRef.current);
+            }
+
+            toastIdRef.current = toast(
+                <div className="flex flex-col gap-3 w-full">
+                    <div className="flex items-center gap-2 font-semibold text-lg">
+                        <span className="text-2xl animate-bounce">🔔</span>
+                        <span>{msg}</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            size="sm"
+                            variant="default"
+                            className="bg-[#D61C1C] hover:bg-[#B81515] text-white flex-1"
+                            onClick={async () => {
+                                stopLoop();
+                                try {
+                                    const orderId = latestOrderIdRef.current;
+                                    if (!orderId) return;
+
+                                    const docRef = doc(db, 'orders', orderId);
+                                    const snap = await getDoc(docRef);
+                                    if (snap.exists()) {
+                                        printOrderReceipt(orderId, snap.data() as Order);
+                                    } else {
+                                        toast.error('주문 정보를 찾을 수 없습니다.');
+                                    }
+                                } catch (error) {
+                                    console.error(error);
+                                    toast.error('영수증 출력 중 오류가 발생했습니다.');
+                                }
+                            }}
+                        >
+                            확인 및 영수증 출력
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => stopLoop()}
+                        >
+                            알림 끄기
+                        </Button>
+                    </div>
+                </div>,
+                {
+                    duration: Infinity, // 사용자가 닫을 때까지 유지
+                    position: 'top-center',
+                    style: {
+                        background: '#fff',
+                        border: '2px solid #D61C1C',
+                        padding: '16px',
+                    }
+                }
+            );
+        },
+    });
+
+    // 컴포넌트 언마운트 시 루프 정지
+    useEffect(() => {
+        return () => stopLoop();
+    }, []);
+
+    return null;
+}
+
 ```
 
 ---
@@ -3037,15 +3234,37 @@ import { Bell, Printer, Download } from 'lucide-react';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { generateReceipt } from '../../lib/functions';
-import type { Order } from '../../types/order';
+import { updateOrderStatus } from '../../lib/admin/orders.api';
+import { getStatusList, getStatusColor, getOrderStatusLabelForAdmin } from '../../lib/orders.utils';
+import type { Order, OrderStatus } from '../../types/order';
 
 interface OrderActionBarProps {
   order: Order;
+  onUpdate?: () => void;
 }
 
-export function OrderActionBar({ order }: OrderActionBarProps) {
+export function OrderActionBar({ order, onUpdate }: OrderActionBarProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+
+  const handleStatusChange = async (newStatus: OrderStatus) => {
+    try {
+      const result = await updateOrderStatus(order.orderId, newStatus);
+      if (result.success) {
+        toast.success('상태가 변경되었습니다', {
+          description: `${getOrderStatusLabelForAdmin(order.status)} → ${getOrderStatusLabelForAdmin(newStatus)}`,
+        });
+        onUpdate?.();
+      } else {
+        toast.error('상태 변경 실패', {
+          description: result.error,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      toast.error('상태 변경 중 오류가 발생했습니다');
+    }
+  };
 
   const handleBellRing = () => {
     // 자리표시자: 실제로는 주방 벨 시스템 연동
@@ -3058,7 +3277,7 @@ export function OrderActionBar({ order }: OrderActionBarProps) {
     try {
       // 브라우저 프린트 API 사용
       window.print();
-      
+
       toast.success('인쇄 창이 열렸습니다', {
         description: `주문번호: ${order.orderId.slice(0, 8).toUpperCase()}`,
       });
@@ -3074,7 +3293,7 @@ export function OrderActionBar({ order }: OrderActionBarProps) {
     setDownloading(true);
     try {
       const receiptUrl = await generateReceipt(order.orderId);
-      
+
       // 새 탭에서 열기
       window.open(receiptUrl, '_blank');
       toast.success('영수증이 다운로드되었습니다');
@@ -3087,7 +3306,27 @@ export function OrderActionBar({ order }: OrderActionBarProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 mr-auto">
+        {getStatusList(order.deliveryType).map((status) => (
+          <Button
+            key={status}
+            size="sm"
+            variant={order.status === status ? 'default' : 'outline'}
+            className={`${
+              order.status === status 
+                ? getStatusColor(status) 
+                : 'text-gray-500 hover:text-gray-700'
+            } h-8 px-3 text-xs`}
+            disabled={order.status === status}
+            onClick={() => handleStatusChange(status)}
+          >
+            {getOrderStatusLabelForAdmin(status)}
+          </Button>
+        ))}
+      </div>
+
+      <div className="h-4 w-px bg-gray-200 mx-2" />
+
       <Button
         variant="outline"
         size="sm"
@@ -3116,7 +3355,7 @@ export function OrderActionBar({ order }: OrderActionBarProps) {
         <Download className="w-4 h-4" />
         영수증
       </Button>
-    </div>
+    </div >
   );
 }
 
@@ -3520,6 +3759,8 @@ import {
 } from '../ui/dropdown-menu';
 import { OrderStatusBadge } from '../shared/OrderStatusBadge';
 import { formatPrice, formatRelativeTime } from '../../lib/utils';
+import { printOrderReceipt } from '../../utils/printReceipt';
+import { Printer } from 'lucide-react';
 
 interface OrderTableProps {
   orders: Order[];
@@ -3665,170 +3906,163 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       data-testid="admin.orders.item.detail-button"
                     >
                       <Eye className="w-4 h-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onViewDetail(order)}>
-                          상세 보기
-                        </DropdownMenuItem>
-                        {order.status === 'pending' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'accepted')}
-                            >
-                              접수하기
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {order.status === 'accepted' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cooking')}
-                            >
-                              조리중
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {order.status === 'cooking' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'delivering')}
-                            >
-                              배달
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {order.status === 'delivering' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'completed')}
-                            >
-                              완료
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* 모바일 카드 */}
-      <div className="md:hidden divide-y">
-        {orders.map((order) => (
-          <div
-            key={order.orderId}
-            className="p-4 space-y-3"
-            data-testid="admin.orders.item"
-          >
-            <div className="flex items-start justify-between">
-              <div className="space-y-1" data-testid="admin.orders.item.summary">
-                <div className="text-sm text-[#333]">{order.orderId}</div>
-                <div className="text-xs text-[#8B7355]">{formatDate(order.createdAt)}</div>
-              </div>
-              <div data-testid="admin.orders.item.status">
-                <OrderStatusBadge status={order.status} />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-sm text-[#333]">{getMenuSummary(order)}</div>
-              <div className="flex items-center gap-2 text-xs text-[#8B7355]">
-                <span>{order.phone}</span>
-                <span>·</span>
-                <span>{formatPrice(order.finalAmount)}</span>
-                <span>·</span>
-                <span>{paymentMethodLabels[order.payment.method]}</span>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onViewDetail(order)}
-                className="flex-1"
-                data-testid="admin.orders.item.detail-button"
-              >
-                상세보기
-              </Button>
-              {order.status !== 'completed' && order.status !== 'canceled' && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                      상세 보기
+                    </DropdownMenuItem>
                     {order.status === 'pending' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'accepted')}>
-                        접수 확인
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'accepted')}
+                        >
+                          접수하기
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {order.status === 'accepted' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'cooking')}>
-                        조리중
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cooking')}
+                        >
+                          조리중
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {order.status === 'cooking' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'delivering')}>
-                        배달
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'delivering')}
+                        >
+                          배달
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {order.status === 'delivering' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'completed')}>
-                        완료
-                      </DropdownMenuItem>
-                    )}
-                    {order.status !== 'completed' && order.status !== 'cancelled' && (
-                      <DropdownMenuItem
-                        onClick={() => onUpdateStatus(order, 'cancelled')}
-                        className="text-red-600"
-                      >
-                        주문 취소
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'completed')}
+                        >
+                          완료
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              </div>
+              </TableCell>
+        </TableRow>
+            ))}
+      </TableBody>
+    </Table>
+    </div >
+
+    {/* 모바일 카드 */ }
+    < div className = "md:hidden divide-y" >
+    {
+      orders.map((order) => (
+        <div
+          key={order.orderId}
+          className="p-4 space-y-3"
+          data-testid="admin.orders.item"
+        >
+          <div className="flex items-start justify-between">
+            <div className="space-y-1" data-testid="admin.orders.item.summary">
+              <div className="text-sm text-[#333]">{order.orderId}</div>
+              <div className="text-xs text-[#8B7355]">{formatDate(order.createdAt)}</div>
+            </div>
+            <div data-testid="admin.orders.item.status">
+              <OrderStatusBadge status={order.status} />
             </div>
           </div>
-        ))}
-      </div>
-    </div>
+
+          <div className="space-y-1">
+            <div className="text-sm text-[#333]">{getMenuSummary(order)}</div>
+            <div className="flex items-center gap-2 text-xs text-[#8B7355]">
+              <span>{order.phone}</span>
+              <span>·</span>
+              <span>{formatPrice(order.finalAmount)}</span>
+              <span>·</span>
+              <span>{paymentMethodLabels[order.payment.method]}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onViewDetail(order)}
+              className="flex-1"
+              data-testid="admin.orders.item.detail-button"
+            >
+              상세보기
+            </Button>
+            {order.status !== 'completed' && order.status !== 'canceled' && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {order.status === 'pending' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'accepted')}>
+                      접수 확인
+                    </DropdownMenuItem>
+                  )}
+                  {order.status === 'accepted' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'cooking')}>
+                      조리중
+                    </DropdownMenuItem>
+                  )}
+                  {order.status === 'cooking' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'delivering')}>
+                      배달
+                    </DropdownMenuItem>
+                  )}
+                  {order.status === 'delivering' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'completed')}>
+                      완료
+                    </DropdownMenuItem>
+                  )}
+                  {order.status !== 'completed' && order.status !== 'cancelled' && (
+                    <DropdownMenuItem
+                      onClick={() => onUpdateStatus(order, 'cancelled')}
+                      className="text-red-600"
+                    >
+                      주문 취소
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
+      ))
+    }
+  </div >
+    </div >
   );
 }
 

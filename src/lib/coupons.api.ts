@@ -129,7 +129,18 @@ async function issueCouponMock(
 ): Promise<Coupon[]> {
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  const targetUsers = issue.targetUsers || ['user-001'];
+  // targetType에 따라 대상 사용자 결정
+  let targetUsers: string[] = [];
+  if (issue.targetType === 'user' && issue.targetUserId) {
+    targetUsers = [issue.targetUserId];
+  } else if (issue.targetType === 'phone') {
+    // 전화번호로 지정된 경우 Mock에서는 임시 사용자 ID 생성
+    targetUsers = ['user-phone-' + (issue.targetPhone || 'unknown')];
+  } else {
+    // 'all' 또는 기존 targetUsers 사용
+    targetUsers = issue.targetUsers || ['user-001'];
+  }
+
   const expiresAt = Date.now() + issue.expiryDays * 24 * 60 * 60 * 1000;
 
   const issued: Coupon[] = targetUsers.slice(0, issue.issueLimit || 999).map((uid, index) => {
@@ -245,8 +256,11 @@ function buildCouponDocFromEntity(params: {
   isActive: boolean;
   usageLimit?: number;
   userLimit?: number;
+  targetType?: 'all' | 'user' | 'phone';
+  targetUserId?: string;
+  targetPhone?: string;
 }): Omit<CouponDoc, 'createdAt' | 'updatedAt'> {
-  return {
+  const doc: Omit<CouponDoc, 'createdAt' | 'updatedAt'> = {
     couponId: params.couponId,
     storeId: params.storeId,
     code: params.code,
@@ -262,6 +276,19 @@ function buildCouponDocFromEntity(params: {
     usageCount: 0,
     userLimit: params.userLimit,
   };
+
+  // 발급 대상 정보 추가 (있는 경우만)
+  if (params.targetType) {
+    doc.targetType = params.targetType;
+  }
+  if (params.targetUserId) {
+    doc.targetUserId = params.targetUserId;
+  }
+  if (params.targetPhone) {
+    doc.targetPhone = params.targetPhone;
+  }
+
+  return doc;
 }
 
 /**
@@ -476,7 +503,11 @@ export async function issueCoupon(
       validUntil,
       isActive: true,
       usageLimit: issue.issueLimit,
-      userLimit: issue.targetUsers?.length,
+      userLimit: issue.targetType === 'user' ? 1 : issue.targetUsers?.length,
+      // 발급 대상 정보 저장
+      targetType: issue.targetType || 'all',
+      targetUserId: issue.targetUserId,
+      targetPhone: issue.targetPhone,
     });
 
     const docRef = await addDoc(colRef, {

@@ -166,72 +166,78 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       data-testid="admin.orders.item.detail-button"
                     >
                       <Eye className="w-4 h-4" />
-                      상세 보기
-                    </DropdownMenuItem>
-                    {order.status === 'pending' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'accepted')}
-                        >
-                          접수하기
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {order.status === 'accepted' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cooking')}
-                        >
-                          조리중
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {order.status === 'cooking' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'delivering')}
-                        >
-                          배달
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {order.status === 'delivering' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'completed')}
-                        >
-                          완료
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              </TableCell>
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {order.status === 'pending' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'accepted')}
+                            >
+                              접수하기
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'accepted' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cooking')}
+                            >
+                              조리중
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'cooking' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'delivering')}
+                            >
+                              배달
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'delivering' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'completed')}
+                            >
+                              완료
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
         </TableRow>
             ))}
       </TableBody>

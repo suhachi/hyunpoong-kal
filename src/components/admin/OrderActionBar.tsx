@@ -75,6 +75,7 @@ export function OrderActionBar({ order, onUpdate }: OrderActionBarProps) {
   };
 
   return (
+    <div className="flex items-center gap-2">
       <div className="flex items-center gap-1 mr-auto">
         {getStatusList(order.deliveryType).map((status) => (
           <Button
@@ -124,6 +125,6 @@ export function OrderActionBar({ order, onUpdate }: OrderActionBarProps) {
         <Download className="w-4 h-4" />
         영수증
       </Button>
-    </div >
+    </div>
   );
 }

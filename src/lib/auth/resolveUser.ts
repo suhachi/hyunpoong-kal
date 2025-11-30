@@ -31,7 +31,7 @@ export async function resolveUserFromFirebaseUser(firebaseUser: FirebaseUser): P
   // 관리자 이메일 주소에 대한 기본 역할 설정
   const adminEmails = ['admin@hyunpoongkalguksu.com'];
   let role: AuthUser['role'] = (userData?.role as AuthUser['role']) || 'customer';
-  
+
   // Firestore에 role이 없고 관리자 이메일인 경우 기본값 설정
   if (!userData?.role && adminEmails.includes(firebaseUser.email || '')) {
     role = 'owner';
@@ -44,6 +44,7 @@ export async function resolveUserFromFirebaseUser(firebaseUser: FirebaseUser): P
     role,
     photoURL: firebaseUser.photoURL || userData?.photoURL,
     storeId: userData?.storeId,
+    phoneNumber: userData?.phoneNumber || firebaseUser.phoneNumber || undefined,
     createdAt: userData?.createdAt?.toDate
       ? userData.createdAt.toDate()
       : undefined,

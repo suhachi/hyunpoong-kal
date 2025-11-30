@@ -94,6 +94,13 @@ export function Checkout() {
     setPaymentMethod('meet_card');
   }, [deliveryType]);
 
+  // 사용자 전화번호 프리필
+  useEffect(() => {
+    if (user?.phoneNumber) {
+      setPhone(user.phoneNumber);
+    }
+  }, [user]);
+
   const uid = user.uid;
 
   async function loadPointsBalance() {
@@ -143,17 +150,37 @@ export function Checkout() {
   }
 
   // 배달 시 주소 필수 확인
-  // 만나서 결제(meet_card, meet_cash)는 배달 주소가 필요 없음
+  // 배달 타입인 경우 주소가 반드시 있어야 함
   const canProceed = agreeTerms && phone && (
     deliveryType === 'pickup' ||
-    deliveryAddress ||
-    paymentMethod === 'meet_card' ||
-    paymentMethod === 'meet_cash'
+    (deliveryType === 'delivery' && deliveryAddress?.address)
   );
 
   const handlePayment = async () => {
     if (!canProceed) {
+      if (!phone) {
+        toast.error('전화번호를 입력해 주세요');
+        document.getElementById('phone')?.focus();
+        return;
+      }
+      if (!agreeTerms) {
+        toast.error('결제 약관에 동의해 주세요');
+        return;
+      }
+      if (deliveryType === 'delivery' && !deliveryAddress?.address) {
+        toast.error('배달 주소를 먼저 설정해 주세요 (장바구니에서 설정 버튼 사용)');
+        navigate('/cart');
+        return;
+      }
       toast.error('필수 정보를 입력해 주세요');
+      return;
+    }
+
+    // 배달 주소 최종 검증 (2차 방어막)
+    if (deliveryType === 'delivery' && !deliveryAddress?.address) {
+      console.error('[Checkout] CRITICAL: 배달 주문인데 주소가 없음');
+      toast.error('배달 주소를 먼저 설정해 주세요');
+      navigate('/cart');
       return;
     }
 
@@ -392,15 +419,20 @@ export function Checkout() {
         </div>
 
         {/* 배달 주소 (배달 시만) */}
-        {deliveryType === 'delivery' && !deliveryAddress && (
+        {deliveryType === 'delivery' && !deliveryAddress?.address && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              배달 주소를 입력해 주세요.{' '}
-              <button className="underline" onClick={() => navigate('/cart')}>
-                장바구니에서 설정
-              </button>
+              배달 주소를 먼저 설정해 주세요 (장바구니에서 설정 버튼 사용)
             </AlertDescription>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => navigate('/cart')}
+            >
+              장바구니로 이동
+            </Button>
           </Alert>
         )}
 
@@ -479,7 +511,7 @@ export function Checkout() {
         <Button
           size="lg"
           className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
-          disabled={!canProceed || isProcessing}
+          disabled={isProcessing}
           onClick={handlePayment}
           data-testid="checkout.button.submit"
         >

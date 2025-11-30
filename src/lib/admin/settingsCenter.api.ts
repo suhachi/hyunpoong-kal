@@ -302,6 +302,7 @@ export async function checkServiceWorkerStatus(): Promise<DiagnosticCheck> {
 
 /**
  * VAPID 키 확인
+ * 미설정과 실제 오류를 구분
  */
 export function checkVAPIDKey(): DiagnosticCheck {
   const vapidKey = getMetaEnv('VITE_FCM_VAPID_KEY');
@@ -309,8 +310,8 @@ export function checkVAPIDKey(): DiagnosticCheck {
   if (!vapidKey) {
     return {
       name: 'VAPID 키',
-      status: 'fail',
-      message: 'VITE_FCM_VAPID_KEY가 설정되지 않았습니다',
+      status: 'info', // 'fail' 대신 'info'로 변경하여 미설정 상태임을 명확히 표시
+      message: '아직 FCM 웹 푸시용 VAPID 키가 설정되지 않았습니다. Firebase 콘솔에서 키 생성 후 .env에 VITE_FCM_VAPID_KEY를 추가해 주세요.',
     };
   }
 
@@ -420,10 +421,21 @@ export async function runFCMDiagnostics(): Promise<DiagnosticResult> {
 
   const failCount = checks.filter(c => c.status === 'fail').length;
   const warningCount = checks.filter(c => c.status === 'warning').length;
+  const infoCount = checks.filter(c => c.status === 'info').length;
+
+  // overall 상태 결정: fail > warning > info > pass
+  let overall: 'pass' | 'info' | 'warning' | 'fail' = 'pass';
+  if (failCount > 0) {
+    overall = 'fail';
+  } else if (warningCount > 0) {
+    overall = 'warning';
+  } else if (infoCount > 0) {
+    overall = 'info';
+  }
 
   return {
     category: 'FCM 알림',
     checks,
-    overall: failCount > 0 ? 'fail' : warningCount > 0 ? 'warning' : 'pass',
+    overall,
   };
 }

@@ -1,6 +1,6 @@
 # Admin Pages - Full Source Code
 
-**Generated**: 2025-11-30-1558  
+**Generated**: 2025-11-30-1717  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -20,6 +20,7 @@ import { DollarSign, ShoppingBag, Star, TrendingUp } from 'lucide-react';
 import { StatCard } from '../../components/admin/common/StatCard';
 import { Card } from '../../components/ui/card';
 import { formatPrice } from '../../lib/utils';
+import { getDashboardStats } from '../../lib/admin/stats.api';
 
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -35,19 +36,14 @@ export function Dashboard() {
   }, []);
 
   async function loadStats() {
-    // 실제 데이터 로딩 (샘플 데이터 제거)
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    // 실제 주문/매출 데이터를 가져와서 계산
-    // TODO: 실제 API 연동 시 여기서 데이터 로드
-    setStats({
-      todaySales: 0,
-      todayOrders: 0,
-      averageRating: 0,
-      installRate: 0,
-    });
-
-    setLoading(false);
+    try {
+      const data = await getDashboardStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

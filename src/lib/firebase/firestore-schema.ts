@@ -10,7 +10,7 @@
 import { collection, doc, type Firestore, type Timestamp, type DocumentReference, type CollectionReference } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { OrderStatus, PaymentMethod, PaymentStatus, OrderItem, DeliveryAddress } from '../../types/order';
-import type { MenuCategory, MenuBadge } from '../../types/menu';
+import type { MenuCategory, MenuBadge, CustomOption } from '../../types/menu';
 
 // ============================================================================
 // Firestore 문서 타입 정의
@@ -69,6 +69,7 @@ export interface MenuDoc {
     toppings?: { label: string; price: number }[];
   };
   optionGroups?: string[]; // 옵션 그룹 ID 참조 (TODO: 추후 구현)
+  customOptions?: CustomOption[]; // 커스텀 옵션 (메뉴별 직접 정의)
   allergens: string[];
   origin: string;
   isAvailable: boolean;
@@ -217,6 +218,10 @@ export interface CouponDoc {
   usageLimit?: number;
   usageCount: number;
   userLimit?: number;
+  // 발급 대상 (신규)
+  targetType?: 'all' | 'user' | 'phone';
+  targetUserId?: string;
+  targetPhone?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

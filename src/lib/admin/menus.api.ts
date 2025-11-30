@@ -5,7 +5,7 @@
  * v1.0 STEP 4: Firestore stores/{storeId}/menus 구조로 전환
  */
 
-import { Menu, MenuFilters, MenuLog, MenuStatus } from '../../types/menu';
+import { Menu, MenuFilters, MenuLog, MenuStatus, CustomOption } from '../../types/menu';
 import menusData from '../../data/menus.json';
 import { USE_FIREBASE, getEnv } from '../../config/env';
 import { getOptionGroups, getOptionGroupById } from './optionGroups.api';
@@ -25,6 +25,7 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  deleteField,
   type Timestamp,
 } from 'firebase/firestore';
 import type { FirebaseError } from 'firebase/app';
@@ -100,6 +101,11 @@ function buildMenuDocFromEntity(params: {
     menuDoc.options = menu.options;
   }
 
+  // customOptions는 undefined인 경우 필드에서 제외 (Firestore는 undefined 허용 안 함)
+  if (menu.customOptions !== undefined && menu.customOptions.length > 0) {
+    menuDoc.customOptions = menu.customOptions;
+  }
+
   // availableHours는 undefined인 경우 필드에서 제외 (Firestore는 undefined 허용 안 함)
   if (menu.availableHours !== undefined) {
     menuDoc.availableHours = menu.availableHours;
@@ -152,6 +158,7 @@ async function buildMenuFromDoc(docData: MenuDoc): Promise<Menu> {
     badges: docData.badges || [],
     options: docData.options,
     optionGroups: resolvedOptionGroups,
+    customOptions: docData.customOptions,
     allergens: docData.allergens || [],
     origin: docData.origin || '',
     isAvailable: docData.isAvailable,
@@ -537,25 +544,44 @@ async function updateMenuMock(
     throw new Error('메뉴를 찾을 수 없습니다');
   }
 
-  // 변경 사항 적용 및 로그 기록
-  Object.entries(updates).forEach(([field, newValue]) => {
-    const oldValue = menu[field as keyof Menu];
-    if (oldValue !== newValue) {
-      (menu as any)[field] = newValue;
+    // 변경 사항 적용 및 로그 기록
+    Object.entries(updates).forEach(([field, newValue]) => {
+      const oldValue = menu[field as keyof Menu];
+      // customOptions는 배열이므로 깊은 비교 필요
+      if (field === 'customOptions') {
+        const oldCustomOptions = (oldValue as CustomOption[]) || [];
+        const newCustomOptions = (newValue as CustomOption[]) || [];
+        const changed = JSON.stringify(oldCustomOptions) !== JSON.stringify(newCustomOptions);
+        if (changed) {
+          (menu as any)[field] = newValue;
+          mockMenuLogs.push({
+            id: `log-${Date.now()}-${field}`,
+            menuId,
+            field,
+            oldValue,
+            newValue,
+            by,
+            byName,
+            at: new Date(),
+            reason,
+          });
+        }
+      } else if (oldValue !== newValue) {
+        (menu as any)[field] = newValue;
 
-      mockMenuLogs.push({
-        id: `log-${Date.now()}-${field}`,
-        menuId,
-        field,
-        oldValue,
-        newValue,
-        by,
-        byName,
-        at: new Date(),
-        reason,
-      });
-    }
-  });
+        mockMenuLogs.push({
+          id: `log-${Date.now()}-${field}`,
+          menuId,
+          field,
+          oldValue,
+          newValue,
+          by,
+          byName,
+          at: new Date(),
+          reason,
+        });
+      }
+    });
 
   // 변경사항을 localStorage에 저장
   saveMenusToStorage();
@@ -564,11 +590,11 @@ async function updateMenuMock(
 }
 
 /**
- * 메뉴 수정 (메뉴명/카테고리/가격/설명/이미지)
+ * 메뉴 수정 (메뉴명/카테고리/가격/설명/이미지/커스텀옵션)
  */
 export async function updateMenu(
   menuId: string,
-  updates: Partial<Pick<Menu, 'name' | 'category' | 'price' | 'description' | 'image'>>,
+  updates: Partial<Pick<Menu, 'name' | 'category' | 'price' | 'description' | 'image' | 'customOptions'>>,
   by: string,
   byName: string,
   reason?: string
@@ -599,6 +625,15 @@ export async function updateMenu(
     if (updates.price !== undefined) updateData.price = updates.price;
     if (updates.description !== undefined) updateData.description = updates.description;
     if (updates.image !== undefined) updateData.imageUrl = updates.image; // Menu.image → MenuDoc.imageUrl
+    if (updates.customOptions !== undefined) {
+      // customOptions가 빈 배열이면 필드 삭제, 있으면 저장
+      if (updates.customOptions.length > 0) {
+        updateData.customOptions = updates.customOptions;
+      } else {
+        // 빈 배열인 경우 필드를 삭제하기 위해 deleteField() 사용
+        updateData.customOptions = deleteField();
+      }
+    }
 
     await updateDoc(ref, updateData);
 

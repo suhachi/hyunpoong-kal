@@ -1,6 +1,6 @@
 # Types & Constants - Full Source Code
 
-**Generated**: 2025-11-30-1558  
+**Generated**: 2025-11-30-1717  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -1081,7 +1081,7 @@ type FirebaseTimestamp = {
   toDate?: () => Date;
 };
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'     // 접수대기
   | 'accepted'    // 접수확인
   | 'cooking'     // 조리중
@@ -1089,12 +1089,12 @@ export type OrderStatus =
   | 'completed'   // 완료
   | 'cancelled';  // 취소
 
-export type PaymentMethod = 
+export type PaymentMethod =
   | 'app_card'   // 앱 내 카드 선결제 (PG 연동용, 지금은 준비 중)
   | 'meet_card'  // 만나서 카드 결제 (배달 기사 또는 매장에서 카드 단말기로 결제)
   | 'meet_cash'; // 만나서 현금 결제 (배달 기사 또는 매장에서 현금으로 결제)
 
-export type PaymentStatus = 
+export type PaymentStatus =
   | 'pending'     // 결제 대기
   | 'authorized'  // 인증됨 (승인 전)
   | 'approved'    // 승인됨
@@ -1139,24 +1139,24 @@ export interface Order {
   orderId: string;
   userId: string;
   storeId: string;
-  
+
   items: OrderItem[];
-  
+
   subtotal: number;
   discount: number;
   couponId?: string;
   deliveryFee: number;
   finalAmount: number;
-  
+
   deliveryType: 'delivery' | 'pickup';
   deliveryAddress?: DeliveryAddress;
   phone: string;
   email?: string;
   requests?: string;
-  
+
   status: OrderStatus;
   payment: PaymentInfo;
-  
+
   timeline: {
     pending?: Timestamp;
     accepted?: Timestamp;
@@ -1164,7 +1164,7 @@ export interface Order {
     completed?: Timestamp;
     canceled?: Timestamp;
   };
-  
+
   // 현금영수증/세금계산서
   cashReceipt?: {
     type: 'personal' | 'business';
@@ -1174,7 +1174,13 @@ export interface Order {
     businessNumber: string;
     companyName: string;
   };
-  
+
+  // 리뷰 미러링 (Step 5)
+  reviewed?: boolean;
+  reviewId?: string;
+  reviewRating?: number;
+  reviewContent?: string;
+
   // Firestore uses FirebaseTimestamp, local mock uses ISO string
   createdAt: FirebaseTimestamp | string;
   updatedAt: FirebaseTimestamp | string;
@@ -1402,78 +1408,37 @@ export interface PointsHistory {
 ## src\types\review.ts
 
 ```typescript
-// 리뷰 시스템 타입 정의
+import type { Timestamp } from 'firebase/firestore';
 
 export interface Review {
-  id?: string;
-  storeId: string;
+  id: string;
   orderId: string;
-  uid: string;
+  userId: string;
   userName?: string;
-  rating: number; // 1-5
-  text: string;
-  photos: string[]; // Storage download URLs
-  hasPhoto: boolean;
-  createdAt: number;
-  reply?: ReviewReply;
-  rewardIssued: boolean;
-  reportedCount?: number; // 신고 횟수
-  isHidden?: boolean; // 관리자가 숨김 처리
-}
 
-export interface ReviewReply {
-  text: string;
-  by: string; // 답글 작성자 (관리자/사장님)
-  at: number; // timestamp
+  rating: number;  // 1-5
+  content: string;
+  images?: string[];
+
+  menuNames: string[]; // 주문한 메뉴 이름들 (표시용)
+
+  createdAt: Timestamp;
+  updatedAt?: Timestamp;
+
+  // 관리자 답글
+  reply?: {
+    content: string;
+    createdAt: Timestamp;
+  };
+
+  isDeleted?: boolean;
 }
 
 export interface ReviewFormData {
   rating: number;
-  text: string;
-  photos: File[];
+  content: string;
+  images?: File[];
 }
-
-export interface ReviewStats {
-  totalCount: number;
-  averageRating: number;
-  photoCount: number;
-  ratingDistribution: {
-    5: number;
-    4: number;
-    3: number;
-    2: number;
-    1: number;
-  };
-}
-
-export type ReviewSortOption = 'latest' | 'rating_high' | 'rating_low';
-
-export interface ReviewFilters {
-  storeId: string;
-  photoOnly?: boolean;
-  minRating?: number;
-  sortBy?: ReviewSortOption;
-  reported?: boolean; // 신고된 리뷰만
-}
-
-// 리뷰 신고
-export interface ReviewReport {
-  id?: string;
-  reviewId: string;
-  reportedBy: string; // uid
-  reason: ReviewReportReason;
-  description?: string;
-  createdAt: number;
-}
-
-export type ReviewReportReason = 'spam' | 'abuse' | 'advertisement' | 'other';
-
-export const REPORT_REASON_LABELS: Record<ReviewReportReason, string> = {
-  spam: '스팸',
-  abuse: '욕설/비방',
-  advertisement: '광고',
-  other: '기타',
-};
 
 ```
 

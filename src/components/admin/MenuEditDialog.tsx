@@ -29,12 +29,14 @@ import { Checkbox } from '../ui/checkbox';
 import { Clock } from 'lucide-react';
 import { uploadMenuImage, validateImageFile, deleteImageFromStorage } from '../../lib/storage';
 import { USE_FIREBASE } from '../../config/env';
+import { AdminMenuCustomOptionsEditor } from './AdminMenuCustomOptionsEditor';
+import type { CustomOption } from '../../types/menu';
 
 interface MenuEditDialogProps {
   menu: Menu | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string }, reason: string) => void;
+  onSave: (updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; customOptions?: CustomOption[] | undefined }, reason: string) => void;
   loading?: boolean;
 }
 
@@ -59,6 +61,9 @@ export function MenuEditDialog({
   const [timeLimitStart, setTimeLimitStart] = useState('11:00');
   const [timeLimitEnd, setTimeLimitEnd] = useState('14:00');
 
+  // 커스텀 옵션 관리
+  const [customOptions, setCustomOptions] = useState<CustomOption[]>([]);
+
   // 다이얼로그 열릴 때 또는 menu가 변경될 때 초기값 설정
   useEffect(() => {
     if (open && menu) {
@@ -69,6 +74,8 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl(menu.image || '');
       setImageFile(null);
+      // 커스텀 옵션 초기화
+      setCustomOptions(menu.customOptions || []);
       // 시간제 판매 설정 초기화
       if (menu.availableHours) {
         setTimeLimitEnabled(true);
@@ -92,6 +99,7 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl('');
       setImageFile(null);
+      setCustomOptions([]);
       setTimeLimitEnabled(false);
       setTimeLimitStart('11:00');
       setTimeLimitEnd('14:00');
@@ -160,7 +168,7 @@ export function MenuEditDialog({
       return;
     }
 
-    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null } = {};
+    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null; customOptions?: CustomOption[] | undefined } = {};
 
     // 메뉴명 변경
     if (name.trim() !== menu.name) {
@@ -213,6 +221,17 @@ export function MenuEditDialog({
       updates.availableHours = newHours;
     }
 
+    // 커스텀 옵션 변경 감지
+    const currentCustomOptions = menu.customOptions || [];
+    const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
+    const customOptionsChanged = 
+      JSON.stringify(currentCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity }))) !==
+      JSON.stringify(validCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity })));
+    
+    if (customOptionsChanged) {
+      updates.customOptions = validCustomOptions.length > 0 ? validCustomOptions : undefined;
+    }
+
     if (Object.keys(updates).length === 0) {
       return;
     }
@@ -222,13 +241,20 @@ export function MenuEditDialog({
 
   if (!menu) return null;
 
+  const currentCustomOptions = menu.customOptions || [];
+  const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
+  const customOptionsChanged = 
+    JSON.stringify(currentCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity }))) !==
+    JSON.stringify(validCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity })));
+
   const hasChanges =
     name.trim() !== menu.name ||
     category !== menu.category ||
     (parseInt(price) !== menu.price && !isNaN(parseInt(price))) ||
     description.trim() !== menu.description ||
     imageFile !== null ||
-    (imageUrl && imageUrl !== (menu.image || ""));
+    (imageUrl && imageUrl !== (menu.image || "")) ||
+    customOptionsChanged;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -380,6 +406,14 @@ export function MenuEditDialog({
                   💡 <strong>{timeLimitStart} ~ {timeLimitEnd}</strong> 시간대에만 주문이 가능합니다.
                 </div>
               )}
+            </div>
+
+            {/* 커스텀 옵션 관리 */}
+            <div className="space-y-2">
+              <AdminMenuCustomOptionsEditor
+                value={customOptions}
+                onChange={setCustomOptions}
+              />
             </div>
 
             {/* 변경 사유 */}

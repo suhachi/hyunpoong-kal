@@ -33,8 +33,12 @@ export interface CouponIssue {
   amount: number;
   minSpend: number;
   expiryDays: number; // 유효 기간 (일)
-  targetUsers?: string[]; // 특정 사용자 타게팅
+  targetUsers?: string[]; // 특정 사용자 타게팅 (deprecated: targetType 사용)
   issueLimit?: number; // 발급 상한
+  // 발급 대상 (신규)
+  targetType?: 'all' | 'user' | 'phone'; // 'all': 전체 고객, 'user': 특정 고객, 'phone': 전화번호
+  targetUserId?: string; // targetType === 'user'일 때 사용자 ID
+  targetPhone?: string; // targetType === 'phone'일 때 전화번호
 }
 
 // 쿠폰 필터

@@ -29,3 +29,36 @@ export interface ReviewFormData {
   content: string;
   images?: File[];
 }
+
+// 리뷰 신고 관련
+export type ReviewReportReason = 'spam' | 'abuse' | 'advertisement' | 'other';
+
+export const REPORT_REASON_LABELS: Record<ReviewReportReason, string> = {
+  spam: '스팸/홍보',
+  abuse: '욕설/비방',
+  advertisement: '광고성 내용',
+  other: '기타',
+};
+
+export interface ReviewReport {
+  id: string;
+  reviewId: string;
+  reportedBy: string;
+  reason: ReviewReportReason;
+  description?: string;
+  createdAt: Timestamp;
+  status: 'pending' | 'resolved' | 'dismissed';
+}
+
+export interface ReviewReply {
+  content: string;
+  createdAt: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+export interface ReviewStats {
+  total: number;
+  averageRating: number;
+  byRating: Record<number, number>;
+  withPhotos: number;
+}
