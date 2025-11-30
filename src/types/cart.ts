@@ -1,3 +1,5 @@
+import type { CustomOption } from './menu';
+
 export interface CartItem {
   menuId: string;
   menuName: string;
@@ -12,7 +14,9 @@ export interface CartItem {
   optionPrices: {
     noodle: number;
     toppings: number;
+    custom?: number;  // 커스텀 옵션 총액
   };
+  customOptions?: CustomOption[];  // 선택된 커스텀 옵션 목록
   subtotal: number;
 }
 

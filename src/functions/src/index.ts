@@ -23,7 +23,7 @@ import * as admin from 'firebase-admin';
 import { sendPushToUser, sendPushToAdmins } from './lib/push';
 import { issueCoupon, issuePhotoReviewCoupon } from './lib/coupons';
 import { getStatusChangeMessage, getStatusChangeTitle } from './lib/report';
-import { authorizePayment, cancelPayment, issueCashReceipt } from './lib/nicepay';
+import { authorizePayment, cancelPayment as cancelPaymentLegacy, issueCashReceipt } from './lib/nicepay';
 import { generateReceiptPDF, ReceiptData } from './lib/pdf';
 import { RUNTIME_OPTS, POINTS_POLICY, REGION } from './config';
 import { earnPointsServer, refundPointsServer } from './lib/points';
@@ -535,7 +535,7 @@ export const payCancel = functions.https.onCall(async (data, context) => {
   }
 
   try {
-    const result = await cancelPayment(data);
+    const result = await cancelPaymentLegacy(data);
     return result;
   } catch (error: any) {
     console.error('Payment cancellation failed:', error);
@@ -684,3 +684,44 @@ export const requestCashReceipt = functions.https.onCall(
     }
   }
 );
+
+// ============================================================================
+// 배달대행 Webhook (별도 파일에서 export)
+// ============================================================================
+export { handleSaenggakdaeroWebhook } from './delivery-webhook-saenggakdaero';
+
+// ============================================================================
+// NICEPAY 결제 Functions (클라이언트 호출용)
+// ============================================================================
+import {
+  createPaymentHandler,
+  approvePaymentHandler,
+  getPaymentResultHandler,
+  cancelPaymentHandler,
+  createOnSitePaymentOrderHandler,
+} from './payments/nicepay-handlers';
+
+export const createPayment = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(createPaymentHandler);
+
+export const approvePayment = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(approvePaymentHandler);
+
+export const getPaymentResult = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(getPaymentResultHandler);
+
+export const cancelPayment = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(cancelPaymentHandler);
+
+export const createOnSitePaymentOrder = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(createOnSitePaymentOrderHandler);

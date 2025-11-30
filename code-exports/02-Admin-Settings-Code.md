@@ -1,6 +1,6 @@
 # Admin Settings - Full Source Code
 
-**Generated**: 2025-11-29-1240  
+**Generated**: 2025-11-30-1429  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -1719,7 +1719,7 @@ export function OperationsTab() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => copyCommand('gsutil cors set cors.json gs://hp-kal.appspot.com')}
+                onClick={() => copyCommand('gsutil cors set cors.json gs://hyun-poong.firebasestorage.app')}
               >
                 <Copy className="w-4 h-4 mr-2" />
                 복사
@@ -1727,7 +1727,7 @@ export function OperationsTab() {
             </div>
             <pre className="p-3 bg-[#2E1C10]/5 rounded-lg">
               <code className="text-xs text-[#2E1C10]/80">
-                gsutil cors set cors.json gs://hp-kal.appspot.com
+                gsutil cors set cors.json gs://hyun-poong.firebasestorage.app
               </code>
             </pre>
           </div>

@@ -8,6 +8,7 @@
 import type { DeliveryProvider } from '../../types/delivery';
 import { mockDelivery } from './providers/mock';
 import { providerA } from './providers/providerA';
+import { saenggakdaeroProvider } from './providers/saenggakdaero';
 import { FEATURE_FLAGS } from '../../config/env';
 
 /**
@@ -16,6 +17,7 @@ import { FEATURE_FLAGS } from '../../config/env';
 const providers: Record<string, DeliveryProvider> = {
   mock: mockDelivery,
   providerA: providerA,
+  saenggakdaero: saenggakdaeroProvider,
 };
 
 /**

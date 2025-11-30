@@ -19,6 +19,12 @@ import { FEATURE_FLAGS } from '../../config/env';
 import type { PaymentMethod } from '../../types/order';
 import { CheckoutSummary } from '../../components/app/CheckoutSummary';
 import { formatPrice } from '../../lib/utils';
+import {
+  initiatePayment,
+  pollPaymentResult,
+  openNicePayWindow,
+} from '../../lib/nicepay';
+import type { PaymentRequest } from '../../types/payment';
 
 export function Checkout() {
   const navigate = useNavigate();
@@ -219,12 +225,56 @@ export function Checkout() {
         await new Promise((r) => setTimeout(r, 75));
         navigate(`/order/${orderId}?result=on_site`);
       } else if (paymentMethod === 'app_card') {
-        // 앱 결제: 실제 PG 연동 필요 (현재는 준비 중)
-        // TODO: 실제 PG 결제 연동 구현 필요
+        // 앱 결제: NICEPAY 플로우
+        try {
+          // PaymentRequest 구성
+          const paymentRequest: PaymentRequest = {
+            orderId,
+            amount: totalAmount,
+            goodsName: items.length === 1
+              ? items[0].menuName
+              : `${items[0].menuName} 외 ${items.length - 1}건`,
+            buyerName: user?.displayName || '고객',
+            buyerTel: phone || user?.phoneNumber || '',
+            buyerEmail: user?.email || email || '',
+          };
 
-        toast.success(<span data-testid="toast.payment.success">결제가 완료되었습니다</span>, { duration: 5000 });
-        await new Promise((r) => setTimeout(r, 75));
-        navigate(`/order/${orderId}?result=success`);
+          // NICEPAY Auth 요청
+          const { authUrl, authToken } = await initiatePayment(paymentRequest);
+
+          // 결제창 열기
+          const popup = openNicePayWindow(authUrl);
+          if (!popup) {
+            toast.error('결제창을 열 수 없습니다. 브라우저 팝업 설정을 확인해 주세요.');
+            return;
+          }
+
+          // 결제 결과 폴링
+          const result = await pollPaymentResult(orderId);
+
+          if (!result.success) {
+            toast.error(result.resultMsg || '결제가 실패했습니다. 다시 시도해 주세요.');
+            // 필요 시 주문 상태를 취소로 업데이트하는 API 호출
+            return;
+          }
+
+          // 성공 처리
+          toast.success(
+            <span data-testid="toast.payment.success">결제가 완료되었습니다</span>,
+            { duration: 5000 }
+          );
+          await new Promise((r) => setTimeout(r, 75));
+          navigate(`/order/${orderId}?result=success`);
+        } catch (paymentError) {
+          console.error('NICEPAY payment error:', paymentError);
+          toast.error(
+            paymentError instanceof Error
+              ? paymentError.message
+              : '결제 처리 중 오류가 발생했습니다'
+          );
+          // 결제 실패 시 주문은 생성되었지만 pending 상태로 남음
+          return;
+        }
       }
 
       // 5. 장바구니 비우기 (navigate 완료 후 실행)

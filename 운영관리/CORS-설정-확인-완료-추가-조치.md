@@ -179,3 +179,6 @@ console.log("Storage Bucket:", firebaseConfig.storageBucket);
 **다음**: Firebase Console에서 Storage 설정을 확인하세요!
 
 
+
+
+

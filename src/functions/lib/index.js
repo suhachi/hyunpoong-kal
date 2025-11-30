@@ -52,7 +52,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.requestCashReceipt = exports.generateReceipt = exports.payCancel = exports.payAuthorize = exports.weeklyReport = exports.scheduledCouponExpiration = exports.onOrderUpdated = exports.onReviewReportCreated = exports.onReviewCreated = exports.onScheduleExpireCoupons = exports.onScheduleExpirePoints = exports.onReviewCreatedV1 = exports.onOrderStatusChanged = void 0;
+exports.createOnSitePaymentOrder = exports.cancelPayment = exports.getPaymentResult = exports.approvePayment = exports.createPayment = exports.handleSaenggakdaeroWebhook = exports.requestCashReceipt = exports.generateReceipt = exports.payCancel = exports.payAuthorize = exports.weeklyReport = exports.scheduledCouponExpiration = exports.onOrderUpdated = exports.onReviewReportCreated = exports.onReviewCreated = exports.onScheduleExpireCoupons = exports.onScheduleExpirePoints = exports.onReviewCreatedV1 = exports.onOrderStatusChanged = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const push_1 = require("./lib/push");
@@ -598,3 +598,32 @@ exports.requestCashReceipt = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', error.message);
     }
 });
+// ============================================================================
+// 배달대행 Webhook (별도 파일에서 export)
+// ============================================================================
+var delivery_webhook_saenggakdaero_1 = require("./delivery-webhook-saenggakdaero");
+Object.defineProperty(exports, "handleSaenggakdaeroWebhook", { enumerable: true, get: function () { return delivery_webhook_saenggakdaero_1.handleSaenggakdaeroWebhook; } });
+// ============================================================================
+// NICEPAY 결제 Functions (클라이언트 호출용)
+// ============================================================================
+const nicepay_handlers_1 = require("./payments/nicepay-handlers");
+exports.createPayment = functions
+    .region(config_1.REGION)
+    .runWith(config_1.RUNTIME_OPTS)
+    .https.onCall(nicepay_handlers_1.createPaymentHandler);
+exports.approvePayment = functions
+    .region(config_1.REGION)
+    .runWith(config_1.RUNTIME_OPTS)
+    .https.onCall(nicepay_handlers_1.approvePaymentHandler);
+exports.getPaymentResult = functions
+    .region(config_1.REGION)
+    .runWith(config_1.RUNTIME_OPTS)
+    .https.onCall(nicepay_handlers_1.getPaymentResultHandler);
+exports.cancelPayment = functions
+    .region(config_1.REGION)
+    .runWith(config_1.RUNTIME_OPTS)
+    .https.onCall(nicepay_handlers_1.cancelPaymentHandler);
+exports.createOnSitePaymentOrder = functions
+    .region(config_1.REGION)
+    .runWith(config_1.RUNTIME_OPTS)
+    .https.onCall(nicepay_handlers_1.createOnSitePaymentOrderHandler);

@@ -137,3 +137,6 @@ Firebase 프로젝트는 보통 두 가지 버킷 이름 형식을 사용합니�
 **중요**: `hyun-poong.appspot.com` 버킷에도 CORS 설정을 적용해야 합니다!
 
 
+
+
+

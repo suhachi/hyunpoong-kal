@@ -108,6 +108,8 @@ export const FIREBASE_CONFIG = {
 export const NICEPAY_CONFIG = {
   mid: getEnv('VITE_NICEPAY_MID', 'NICE_DEV_MID'),
   clientKey: getEnv('VITE_NICEPAY_CLIENT_KEY', 'NICE_DEV_KEY'),
+  returnUrl: getEnv('VITE_NICEPAY_RETURN_URL', `${typeof window !== 'undefined' ? window.location.origin : ''}/order/return`),
+  cancelUrl: getEnv('VITE_NICEPAY_CANCEL_URL', `${typeof window !== 'undefined' ? window.location.origin : ''}/order/cancel`),
 };
 
 // 배달 대행사 Provider A 설정
@@ -115,6 +117,13 @@ export const PROVIDER_A_CONFIG = {
   apiUrl: getEnv('VITE_PROVIDER_A_API_URL', 'https://api.provider-a.example.com'),
   apiKey: getEnv('VITE_PROVIDER_A_API_KEY', 'YOUR_API_KEY_HERE'),
   merchantId: getEnv('VITE_PROVIDER_A_MERCHANT_ID', 'YOUR_MERCHANT_ID'),
+};
+
+// '생각대로' 배달대행사 설정
+export const SAENGGAKDAERO_CONFIG = {
+  apiUrl: getEnv('VITE_SAENGGAKDAERO_API_URL', 'https://api.saenggakdaero.com'),
+  apiKey: getEnv('VITE_SAENGGAKDAERO_API_KEY', 'YOUR_API_KEY_HERE'),
+  merchantId: getEnv('VITE_SAENGGAKDAERO_MERCHANT_ID', 'YOUR_MERCHANT_ID'),
 };
 
 // Phase 3 기능 토글

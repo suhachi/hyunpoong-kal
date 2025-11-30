@@ -162,3 +162,6 @@ console.log(firebase.app().options.storageBucket);
 **다음**: `gsutil cors get gs://hyun-poong.firebasestorage.app` 명령어로 CORS 설정을 확인하세요!
 
 
+
+
+

@@ -1,6 +1,6 @@
 # Config & Utils - Full Source Code
 
-**Generated**: 2025-11-29-1240  
+**Generated**: 2025-11-30-1429  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -124,6 +124,8 @@ export const FIREBASE_CONFIG = {
 export const NICEPAY_CONFIG = {
   mid: getEnv('VITE_NICEPAY_MID', 'NICE_DEV_MID'),
   clientKey: getEnv('VITE_NICEPAY_CLIENT_KEY', 'NICE_DEV_KEY'),
+  returnUrl: getEnv('VITE_NICEPAY_RETURN_URL', `${typeof window !== 'undefined' ? window.location.origin : ''}/order/return`),
+  cancelUrl: getEnv('VITE_NICEPAY_CANCEL_URL', `${typeof window !== 'undefined' ? window.location.origin : ''}/order/cancel`),
 };
 
 // 배달 대행사 Provider A 설정
@@ -131,6 +133,13 @@ export const PROVIDER_A_CONFIG = {
   apiUrl: getEnv('VITE_PROVIDER_A_API_URL', 'https://api.provider-a.example.com'),
   apiKey: getEnv('VITE_PROVIDER_A_API_KEY', 'YOUR_API_KEY_HERE'),
   merchantId: getEnv('VITE_PROVIDER_A_MERCHANT_ID', 'YOUR_MERCHANT_ID'),
+};
+
+// '생각대로' 배달대행사 설정
+export const SAENGGAKDAERO_CONFIG = {
+  apiUrl: getEnv('VITE_SAENGGAKDAERO_API_URL', 'https://api.saenggakdaero.com'),
+  apiKey: getEnv('VITE_SAENGGAKDAERO_API_KEY', 'YOUR_API_KEY_HERE'),
+  merchantId: getEnv('VITE_SAENGGAKDAERO_MERCHANT_ID', 'YOUR_MERCHANT_ID'),
 };
 
 // Phase 3 기능 토글
@@ -212,7 +221,7 @@ export default {
     server: {
       port: 3000,
       open: true,
-      strictPort: true, // 테스트 환경에서 포트 충돌 시 명확히 실패하도록 고정
+      strictPort: false, // 포트 충돌 시 자동으로 다른 포트 사용
     },
   });
 ```
@@ -344,7 +353,9 @@ export default {
             "build": "vite build",
             "preview": "vite preview",
             "analyze:dist": "npm run build && node scripts/print-dist-size.cjs",
+            "verify:build": "npm run build && node scripts/verify-build.mjs",
             "cors:apply": "node scripts/apply-cors.mjs",
+            "predeploy": "npm run verify:build && npm run cors:apply",
             "test:e2e": "playwright test -c src/playwright.config.ts",
             "test:e2e:admin": "playwright test -c src/playwright.config.ts --project=chromium --grep @admin",
             "test:e2e:admin:routes": "playwright test -c src/playwright.config.ts admin-routes.spec.ts --project=chromium",

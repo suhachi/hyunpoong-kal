@@ -142,3 +142,6 @@ gsutil cors get gs://hyun-poong.firebasestorage.app
 **중요**: 실제 존재하는 버킷에만 CORS 설정을 적용하세요!
 
 
+
+
+

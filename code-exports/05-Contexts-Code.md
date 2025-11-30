@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-29-1240  
+**Generated**: 2025-11-30-1429  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -31,10 +31,16 @@ import {
   onAuthStateChanged,
   updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { USE_FIREBASE } from '../config/env';
 import { resolveUser, loadMockUserFromStorage } from '../lib/auth/resolveUser';
+import {
+  sendVerificationCode,
+  verifyPhoneCode,
+  normalizePhoneNumber,
+  type ConfirmationResult,
+} from '../lib/auth/phone';
 
 export type UserRole = 'customer' | 'owner' | 'admin';
 
@@ -55,6 +61,10 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<AuthUser>;
   signInWithGoogle: () => Promise<AuthUser>;
+  signInWithPhone: (phoneNumber: string, code: string, displayName?: string) => Promise<AuthUser>;
+  signUpWithPhone: (phoneNumber: string, code: string, displayName: string) => Promise<void>;
+  sendPhoneVerificationCode?: (phone: string) => Promise<ConfirmationResult>;
+  verifyAndSignInWithPhone?: (confirmationResult: ConfirmationResult, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateUserProfile: (data: Partial<AuthUser>) => Promise<void>;
 }
@@ -296,6 +306,122 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  // 전화번호 로그인
+  const signInWithPhone = async (
+    phoneNumber: string,
+    code: string,
+    displayName?: string
+  ): Promise<AuthUser> => {
+    if (USE_FIREBASE && auth) {
+      // Firebase Phone Auth는 sendVerificationCode와 verifyPhoneCode를 별도로 호출해야 함
+      // 여기서는 이미 verifyPhoneCode가 완료된 상태라고 가정
+      // 실제로는 Signup/Login 컴포넌트에서 sendVerificationCode → verifyPhoneCode 순서로 호출
+      const firebaseUser = auth.currentUser;
+      
+      if (!firebaseUser) {
+        throw new Error('인증이 완료되지 않았습니다.');
+      }
+
+      // Firestore에서 사용자 정보 확인
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      
+      let authUser: AuthUser;
+      
+      if (!userDoc.exists()) {
+        // 신규 사용자 (로그인 시도했지만 회원 정보 없음)
+        authUser = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: displayName || '사용자',
+          role: 'customer',
+          createdAt: new Date(),
+        };
+        
+        await setDoc(doc(db, 'users', firebaseUser.uid), {
+          ...authUser,
+          phoneNumber: normalizePhoneNumber(phoneNumber),
+          createdAt: new Date(),
+        });
+      } else {
+        // 기존 사용자
+        const userData = userDoc.data();
+        authUser = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: userData?.displayName || displayName || '사용자',
+          role: (userData?.role as UserRole) || 'customer',
+          storeId: userData?.storeId,
+          createdAt: userData?.createdAt?.toDate(),
+        };
+      }
+      
+      setUser(authUser);
+      return authUser;
+    } else {
+      // Mock 전화번호 로그인
+      const mockUser: AuthUser = {
+        uid: `phone-${Date.now()}`,
+        email: '',
+        displayName: displayName || '전화번호 사용자',
+        role: 'customer',
+        createdAt: new Date(),
+      };
+      
+      localStorage.setItem('mockUser', JSON.stringify(mockUser));
+      setUser(mockUser);
+      return mockUser;
+    }
+  };
+
+  // 전화번호 회원가입
+  const signUpWithPhone = async (
+    phoneNumber: string,
+    code: string,
+    displayName: string
+  ): Promise<void> => {
+    if (USE_FIREBASE && auth) {
+      // Firebase Phone Auth는 sendVerificationCode와 verifyPhoneCode를 별도로 호출해야 함
+      // 여기서는 이미 verifyPhoneCode가 완료된 상태라고 가정
+      const firebaseUser = auth.currentUser;
+      
+      if (!firebaseUser) {
+        throw new Error('인증이 완료되지 않았습니다.');
+      }
+
+      // 프로필 업데이트
+      await updateProfile(firebaseUser, { displayName });
+
+      // Firestore에 사용자 정보 저장
+      const newUser: AuthUser = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        displayName,
+        role: 'customer',
+        createdAt: new Date(),
+      };
+
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
+        ...newUser,
+        phoneNumber: normalizePhoneNumber(phoneNumber),
+        createdAt: new Date(),
+      });
+
+      setUser(newUser);
+    } else {
+      // Mock 전화번호 회원가입
+      const newUser: AuthUser = {
+        uid: `phone-${Date.now()}`,
+        email: '',
+        displayName,
+        role: 'customer',
+        createdAt: new Date(),
+      };
+      
+      localStorage.setItem('mockUser', JSON.stringify(newUser));
+      setUser(newUser);
+    }
+  };
+
   // 프로필 업데이트
   const updateUserProfile = async (data: Partial<AuthUser>) => {
     if (!user) return;
@@ -316,13 +442,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     loading,
     initializing,
     signUp,
     signIn,
     signInWithGoogle,
+    signInWithPhone,
+    signUpWithPhone,
+    sendPhoneVerificationCode,
+    verifyAndSignInWithPhone,
     signOut,
     updateUserProfile,
   };
