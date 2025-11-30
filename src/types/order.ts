@@ -7,7 +7,7 @@ type FirebaseTimestamp = {
   toDate?: () => Date;
 };
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'     // 접수대기
   | 'accepted'    // 접수확인
   | 'cooking'     // 조리중
@@ -15,12 +15,12 @@ export type OrderStatus =
   | 'completed'   // 완료
   | 'cancelled';  // 취소
 
-export type PaymentMethod = 
+export type PaymentMethod =
   | 'app_card'   // 앱 내 카드 선결제 (PG 연동용, 지금은 준비 중)
   | 'meet_card'  // 만나서 카드 결제 (배달 기사 또는 매장에서 카드 단말기로 결제)
   | 'meet_cash'; // 만나서 현금 결제 (배달 기사 또는 매장에서 현금으로 결제)
 
-export type PaymentStatus = 
+export type PaymentStatus =
   | 'pending'     // 결제 대기
   | 'authorized'  // 인증됨 (승인 전)
   | 'approved'    // 승인됨
@@ -65,24 +65,24 @@ export interface Order {
   orderId: string;
   userId: string;
   storeId: string;
-  
+
   items: OrderItem[];
-  
+
   subtotal: number;
   discount: number;
   couponId?: string;
   deliveryFee: number;
   finalAmount: number;
-  
+
   deliveryType: 'delivery' | 'pickup';
   deliveryAddress?: DeliveryAddress;
   phone: string;
   email?: string;
   requests?: string;
-  
+
   status: OrderStatus;
   payment: PaymentInfo;
-  
+
   timeline: {
     pending?: Timestamp;
     accepted?: Timestamp;
@@ -90,7 +90,7 @@ export interface Order {
     completed?: Timestamp;
     canceled?: Timestamp;
   };
-  
+
   // 현금영수증/세금계산서
   cashReceipt?: {
     type: 'personal' | 'business';
@@ -100,7 +100,13 @@ export interface Order {
     businessNumber: string;
     companyName: string;
   };
-  
+
+  // 리뷰 미러링 (Step 5)
+  reviewed?: boolean;
+  reviewId?: string;
+  reviewRating?: number;
+  reviewContent?: string;
+
   // Firestore uses FirebaseTimestamp, local mock uses ISO string
   createdAt: FirebaseTimestamp | string;
   updatedAt: FirebaseTimestamp | string;

@@ -19,6 +19,8 @@ import {
 } from '../ui/dropdown-menu';
 import { OrderStatusBadge } from '../shared/OrderStatusBadge';
 import { formatPrice, formatRelativeTime } from '../../lib/utils';
+import { printOrderReceipt } from '../../utils/printReceipt';
+import { Printer } from 'lucide-react';
 
 interface OrderTableProps {
   orders: Order[];
@@ -164,169 +166,162 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       data-testid="admin.orders.item.detail-button"
                     >
                       <Eye className="w-4 h-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onViewDetail(order)}>
-                          상세 보기
-                        </DropdownMenuItem>
-                        {order.status === 'pending' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'accepted')}
-                            >
-                              접수하기
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {order.status === 'accepted' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cooking')}
-                            >
-                              조리중
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {order.status === 'cooking' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'delivering')}
-                            >
-                              배달
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {order.status === 'delivering' && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'completed')}
-                            >
-                              완료
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(order, 'cancelled')}
-                              className="text-red-600"
-                            >
-                              주문 취소
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* 모바일 카드 */}
-      <div className="md:hidden divide-y">
-        {orders.map((order) => (
-          <div
-            key={order.orderId}
-            className="p-4 space-y-3"
-            data-testid="admin.orders.item"
-          >
-            <div className="flex items-start justify-between">
-              <div className="space-y-1" data-testid="admin.orders.item.summary">
-                <div className="text-sm text-[#333]">{order.orderId}</div>
-                <div className="text-xs text-[#8B7355]">{formatDate(order.createdAt)}</div>
-              </div>
-              <div data-testid="admin.orders.item.status">
-                <OrderStatusBadge status={order.status} />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-sm text-[#333]">{getMenuSummary(order)}</div>
-              <div className="flex items-center gap-2 text-xs text-[#8B7355]">
-                <span>{order.phone}</span>
-                <span>·</span>
-                <span>{formatPrice(order.finalAmount)}</span>
-                <span>·</span>
-                <span>{paymentMethodLabels[order.payment.method]}</span>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onViewDetail(order)}
-                className="flex-1"
-                data-testid="admin.orders.item.detail-button"
-              >
-                상세보기
-              </Button>
-              {order.status !== 'completed' && order.status !== 'canceled' && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                      상세 보기
+                    </DropdownMenuItem>
                     {order.status === 'pending' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'accepted')}>
-                        접수 확인
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'accepted')}
+                        >
+                          접수하기
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {order.status === 'accepted' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'cooking')}>
-                        조리중
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cooking')}
+                        >
+                          조리중
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {order.status === 'cooking' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'delivering')}>
-                        배달
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'delivering')}
+                        >
+                          배달
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {order.status === 'delivering' && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(order, 'completed')}>
-                        완료
-                      </DropdownMenuItem>
-                    )}
-                    {order.status !== 'completed' && order.status !== 'cancelled' && (
-                      <DropdownMenuItem
-                        onClick={() => onUpdateStatus(order, 'cancelled')}
-                        className="text-red-600"
-                      >
-                        주문 취소
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'completed')}
+                        >
+                          완료
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(order, 'cancelled')}
+                          className="text-red-600"
+                        >
+                          주문 취소
+                        </DropdownMenuItem>
+                      </>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              </div>
+              </TableCell>
+        </TableRow>
+            ))}
+      </TableBody>
+    </Table>
+    </div >
+
+    {/* 모바일 카드 */ }
+    < div className = "md:hidden divide-y" >
+    {
+      orders.map((order) => (
+        <div
+          key={order.orderId}
+          className="p-4 space-y-3"
+          data-testid="admin.orders.item"
+        >
+          <div className="flex items-start justify-between">
+            <div className="space-y-1" data-testid="admin.orders.item.summary">
+              <div className="text-sm text-[#333]">{order.orderId}</div>
+              <div className="text-xs text-[#8B7355]">{formatDate(order.createdAt)}</div>
+            </div>
+            <div data-testid="admin.orders.item.status">
+              <OrderStatusBadge status={order.status} />
             </div>
           </div>
-        ))}
-      </div>
-    </div>
+
+          <div className="space-y-1">
+            <div className="text-sm text-[#333]">{getMenuSummary(order)}</div>
+            <div className="flex items-center gap-2 text-xs text-[#8B7355]">
+              <span>{order.phone}</span>
+              <span>·</span>
+              <span>{formatPrice(order.finalAmount)}</span>
+              <span>·</span>
+              <span>{paymentMethodLabels[order.payment.method]}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onViewDetail(order)}
+              className="flex-1"
+              data-testid="admin.orders.item.detail-button"
+            >
+              상세보기
+            </Button>
+            {order.status !== 'completed' && order.status !== 'canceled' && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {order.status === 'pending' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'accepted')}>
+                      접수 확인
+                    </DropdownMenuItem>
+                  )}
+                  {order.status === 'accepted' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'cooking')}>
+                      조리중
+                    </DropdownMenuItem>
+                  )}
+                  {order.status === 'cooking' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'delivering')}>
+                      배달
+                    </DropdownMenuItem>
+                  )}
+                  {order.status === 'delivering' && (
+                    <DropdownMenuItem onClick={() => onUpdateStatus(order, 'completed')}>
+                      완료
+                    </DropdownMenuItem>
+                  )}
+                  {order.status !== 'completed' && order.status !== 'cancelled' && (
+                    <DropdownMenuItem
+                      onClick={() => onUpdateStatus(order, 'cancelled')}
+                      className="text-red-600"
+                    >
+                      주문 취소
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
+      ))
+    }
+  </div >
+    </div >
   );
 }

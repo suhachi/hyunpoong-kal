@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from '../../components/ui/select';
 import { USE_FIREBASE } from '../../config/env';
+import { getRecentReviews } from '../../lib/reviews.api';
+import { toast } from 'sonner';
 import type { Review, ReviewSortOption, ReviewStats } from '../../types/review';
 
 // Mock 데이터
@@ -87,60 +89,55 @@ export function ReviewList() {
   async function loadReviews() {
     setLoading(true);
     try {
-      if (USE_FIREBASE) {
-        // TODO: Firestore에서 리뷰 조회
-      } else {
-        // Mock 데이터
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      // Firestore 데이터 로드
+      const data = await getRecentReviews(50); // 최대 50개
+      setReviews(data);
 
-        let filtered = [...MOCK_REVIEWS];
+      // 통계 계산
+      const totalCount = data.length;
+      const photoCount = data.filter((r) => r.images && r.images.length > 0).length;
+      const totalRating = data.reduce((sum, r) => sum + r.rating, 0);
+      const averageRating = totalCount > 0 ? totalRating / totalCount : 0;
 
-        // 사진 필터
-        if (photoOnly) {
-          filtered = filtered.filter((r) => r.hasPhoto);
-        }
+      const ratingDistribution = data.reduce(
+        (dist, r) => {
+          const rating = Math.floor(r.rating) as 1 | 2 | 3 | 4 | 5;
+          if (dist[rating] !== undefined) {
+            dist[rating]++;
+          }
+          return dist;
+        },
+        { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+      );
 
-        // 정렬
-        if (sortBy === 'rating_high') {
-          filtered.sort((a, b) => b.rating - a.rating);
-        } else if (sortBy === 'rating_low') {
-          filtered.sort((a, b) => a.rating - b.rating);
-        } else {
-          filtered.sort((a, b) => b.createdAt - a.createdAt);
-        }
-
-        setReviews(filtered);
-
-        // 통계 계산
-        const totalCount = MOCK_REVIEWS.length;
-        const photoCount = MOCK_REVIEWS.filter((r) => r.hasPhoto).length;
-        const totalRating = MOCK_REVIEWS.reduce((sum, r) => sum + r.rating, 0);
-        const averageRating = totalCount > 0 ? totalRating / totalCount : 0;
-
-        const ratingDistribution = MOCK_REVIEWS.reduce(
-          (dist, r) => {
-            dist[r.rating as keyof typeof dist]++;
-            return dist;
-          },
-          { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-        );
-
-        setStats({
-          totalCount,
-          averageRating,
-          photoCount,
-          ratingDistribution,
-        });
-      }
+      setStats({
+        totalCount,
+        averageRating,
+        photoCount,
+        ratingDistribution,
+      });
     } catch (error) {
       console.error('Failed to load reviews:', error);
+      toast.error('리뷰를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
     }
   }
 
-  function formatDate(timestamp: number): string {
-    const date = new Date(timestamp);
+  function formatDate(timestamp: any): string {
+    if (!timestamp) return '';
+
+    let date: Date;
+    if (typeof timestamp === 'number') {
+      date = new Date(timestamp);
+    } else if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      return '';
+    }
+
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -248,11 +245,10 @@ export function ReviewList() {
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${
-                            i < review.rating
-                              ? 'fill-[#F37021] text-[#F37021]'
-                              : 'text-[#E5DDD5]'
-                          }`}
+                          className={`w-4 h-4 ${i < review.rating
+                            ? 'fill-[#F37021] text-[#F37021]'
+                            : 'text-[#E5DDD5]'
+                            }`}
                         />
                       ))}
                     </div>
@@ -262,9 +258,9 @@ export function ReviewList() {
               </div>
 
               {/* 리뷰 사진 */}
-              {review.photos.length > 0 && (
+              {review.images && review.images.length > 0 && (
                 <div className="grid grid-cols-3 gap-2 mb-3">
-                  {review.photos.slice(0, 3).map((photo, index) => (
+                  {review.images.slice(0, 3).map((photo, index) => (
                     <div key={index} className="aspect-square rounded-lg overflow-hidden">
                       <img
                         src={photo}
@@ -277,14 +273,14 @@ export function ReviewList() {
               )}
 
               {/* 리뷰 텍스트 */}
-              <p className="text-[#333] mb-3 whitespace-pre-wrap">{review.text}</p>
+              <p className="text-[#333] mb-3 whitespace-pre-wrap">{review.content}</p>
 
               {/* 사장님 답글 */}
               {review.reply && (
                 <div className="bg-[#F9F6F3] rounded-lg p-3 border-l-4 border-[#C7A45A]">
                   <p className="text-[#8B7355] mb-1">사장님</p>
-                  <p className="text-[#333] whitespace-pre-wrap">{review.reply.text}</p>
-                  <p className="text-[#8B7355] mt-2">{formatDate(review.reply.at)}</p>
+                  <p className="text-[#333] whitespace-pre-wrap">{review.reply.content}</p>
+                  <p className="text-[#8B7355] mt-2">{formatDate(review.reply.createdAt as any)}</p>
                 </div>
               )}
             </Card>

@@ -9,13 +9,16 @@ import { DEFAULT_MENU_IMAGE } from '../../config/ui';
 import { formatPrice } from '../../lib/utils';
 import { getMenus } from '../../lib/admin/menus.api';
 import { getActiveNotices } from '../../lib/admin/notices.api';
+import { getRecentReviews } from '../../lib/reviews.api';
 import type { Menu } from '../../types/menu';
 import type { Notice } from '../../types/notice';
+import type { Review } from '../../types/review';
 
 export function Home() {
   const navigate = useNavigate();
   const [recommendedMenus, setRecommendedMenus] = useState<Menu[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [recentReviews, setRecentReviews] = useState<Review[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,6 +33,10 @@ export function Home() {
         // 공지사항 로드
         const activeNotices = await getActiveNotices(1);
         setNotices(activeNotices);
+
+        // 최근 리뷰 로드 (3개)
+        const reviews = await getRecentReviews(3);
+        setRecentReviews(reviews);
       } catch (error) {
         console.error('Failed to load data:', error);
       }
@@ -51,16 +58,16 @@ export function Home() {
           <p className="text-lg text-center drop-shadow-md opacity-90">
             정성껏 끓여낸 진한 국물과 쫄깃한 수타면
           </p>
-          <Button 
-            onClick={() => navigate('/menu')} 
-            size="lg" 
+          <Button
+            onClick={() => navigate('/menu')}
+            size="lg"
             className="mt-6 bg-white text-[#D61C1C] hover:bg-gray-100"
           >
             메뉴 보러가기
           </Button>
         </div>
       </section>
-      
+
       <div className="px-4 space-y-6">
         {/* 영업 상태 */}
         <div className="flex items-center gap-2 p-4 bg-white rounded-2xl shadow-sm">
@@ -74,12 +81,12 @@ export function Home() {
             10:00 - 22:00
           </span>
         </div>
-        
+
         {/* 빠른 액션 */}
         <div className="grid grid-cols-2 gap-3">
           {FEATURE_FLAGS.points && (
-            <Link 
-              to="/points" 
+            <Link
+              to="/points"
               className="p-4 bg-gradient-to-br from-[#D61C1C] to-[#F37021] rounded-2xl shadow-sm text-white hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between mb-2">
@@ -90,9 +97,9 @@ export function Home() {
               <p className="text-xl">0P</p>
             </Link>
           )}
-          
-          <Link 
-            to="/coupons" 
+
+          <Link
+            to="/coupons"
             className="p-4 bg-gradient-to-br from-[#F37021] to-[#C7A45A] rounded-2xl shadow-sm text-white hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between mb-2">
@@ -103,7 +110,7 @@ export function Home() {
             <p className="text-xl">0개</p>
           </Link>
         </div>
-        
+
         {/* 날씨 기반 추천 */}
         <section>
           <div className="flex items-center gap-2 mb-3">
@@ -122,7 +129,7 @@ export function Home() {
             ))}
           </div>
         </section>
-        
+
         {/* 리뷰 하이라이트 */}
         <section>
           <div className="flex items-center justify-between mb-3">
@@ -135,21 +142,48 @@ export function Home() {
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-          
-          {/* 초기 상태: 아직 리뷰가 없을 때 */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
-            <p className="text-sm text-[#2E1C10] mb-1">
-              아직 등록된 리뷰가 없습니다.
-            </p>
-            <p className="text-xs text-[#2E1C10]/80">
-              첫 리뷰를 남겨주시면 더 많은 손님들이 참고할 수 있어요.
-            </p>
-          </div>
+
+          {recentReviews.length > 0 ? (
+            <div className="space-y-3">
+              {recentReviews.map((review) => (
+                <div key={review.id} className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-[#2E1C10]">{review.userName}님</span>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-[#F37021] text-[#F37021]" />
+                      <span className="text-sm font-bold text-[#2E1C10]">{review.rating}</span>
+                    </div>
+                  </div>
+                  {review.images && review.images.length > 0 && (
+                    <div className="mb-2 aspect-video rounded-lg overflow-hidden">
+                      <img
+                        src={review.images[0]}
+                        alt="리뷰 사진"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <p className="text-sm text-[#2E1C10]/80 line-clamp-2">
+                    {review.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <p className="text-sm text-[#2E1C10] mb-1">
+                아직 등록된 리뷰가 없습니다.
+              </p>
+              <p className="text-xs text-[#2E1C10]/80">
+                첫 리뷰를 남겨주시면 더 많은 손님들이 참고할 수 있어요.
+              </p>
+            </div>
+          )}
         </section>
-        
+
         {/* 공지사항 */}
         {notices.length > 0 && (
-          <section 
+          <section
             className="p-4 bg-[#F37021]/10 rounded-2xl cursor-pointer hover:bg-[#F37021]/15 transition-colors"
             onClick={() => navigate('/notices')}
           >
@@ -192,10 +226,10 @@ export function Home() {
             })}
           </section>
         )}
-        
+
         {/* CTA 버튼 */}
         <Link to="/menu">
-          <Button 
+          <Button
             size="lg"
             className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
           >
@@ -224,7 +258,7 @@ const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
   const hasBestBadge = menu.badges.includes('best');
 
   return (
-    <div 
+    <div
       className="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
       onClick={onClick}
     >

@@ -12,12 +12,12 @@ import { Button } from '../../components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Skeleton } from '../../components/ui/skeleton';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
-import { 
-  ShoppingBag, 
-  ChevronRight, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  ShoppingBag,
+  ChevronRight,
+  Clock,
+  CheckCircle2,
+  XCircle,
   Loader2,
   Star,
   Package
@@ -111,7 +111,7 @@ export function OrderHistory() {
   function formatDate(timestamp: any): string {
     try {
       let date: Date;
-      
+
       if (typeof timestamp === 'string') {
         date = new Date(timestamp);
       } else if (timestamp?.seconds) {
@@ -133,8 +133,8 @@ export function OrderHistory() {
       } else if (days < 7) {
         return `${days}일 전`;
       } else {
-        return date.toLocaleDateString('ko-KR', { 
-          month: 'long', 
+        return date.toLocaleDateString('ko-KR', {
+          month: 'long',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit'
@@ -147,13 +147,7 @@ export function OrderHistory() {
   }
 
   function hasReview(order: Order): boolean {
-    // TODO: 실제로는 reviews 컬렉션 확인
-    try {
-      const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      return reviews.some((review: any) => review.orderId === order.orderId);
-    } catch {
-      return false;
-    }
+    return !!order.reviewed;
   }
 
   const reviewableCount = getReviewableOrders(orders).length;
@@ -163,7 +157,7 @@ export function OrderHistory() {
       {/* 헤더 */}
       <div className="sticky top-14 z-40 bg-[#F9F6F3] border-b border-[#E5DDD5] px-4 py-4">
         <h1 className="text-xl text-[#2E1C10] mb-4">주문내역</h1>
-        
+
         {/* 필터 탭 */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
           <TabsList className="w-full grid grid-cols-3 bg-white">
@@ -177,10 +171,10 @@ export function OrderHistory() {
               진행중
               {!loading && (
                 <span className="ml-1 text-xs opacity-60">
-                  ({orders.filter(o => 
-                    o.status === 'accepted' || 
-                    o.status === 'preparing' || 
-                    o.status === 'cooking' || 
+                  ({orders.filter(o =>
+                    o.status === 'accepted' ||
+                    o.status === 'preparing' ||
+                    o.status === 'cooking' ||
                     o.status === 'out_for_delivery' ||
                     o.status === 'placed'
                   ).length})
@@ -224,13 +218,13 @@ export function OrderHistory() {
           <Card className="rounded-2xl border-[#E5DDD5] p-12 text-center">
             <ShoppingBag className="w-16 h-16 text-[#2E1C10]/20 mx-auto mb-4" />
             <p className="text-[#2E1C10]/60 mb-4">
-              {filter === 'all' 
-                ? '주문 내역이 없습니다' 
+              {filter === 'all'
+                ? '주문 내역이 없습니다'
                 : filter === 'reviewable'
-                ? '리뷰 작성 가능한 주문이 없습니다'
-                : '해당 상태의 주문이 없습니다'}
+                  ? '리뷰 작성 가능한 주문이 없습니다'
+                  : '해당 상태의 주문이 없습니다'}
             </p>
-            <Button 
+            <Button
               onClick={() => navigate('/menu')}
               className="bg-[#D61C1C] hover:bg-[#D61C1C]/90"
             >
@@ -240,8 +234,8 @@ export function OrderHistory() {
         ) : (
           // 주문 목록
           filteredOrders.map((order) => (
-            <OrderCard 
-              key={order.orderId} 
+            <OrderCard
+              key={order.orderId}
               order={order}
               hasReview={hasReview(order)}
               formatDate={formatDate}
@@ -261,7 +255,7 @@ interface OrderCardProps {
 
 function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
   const navigate = useNavigate();
-  
+
   const statusInfo = extendedStatusConfig[order.status] || statusConfig.completed;
   const isCompleted = order.status === 'completed' || order.status === 'done';
   const isCanceled = order.status === 'canceled';
@@ -317,7 +311,7 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
                 />
               </div>
             )}
-            
+
             {/* 주문 정보 */}
             <div className="flex-1 min-w-0">
               <p className="text-[#2E1C10] mb-1 truncate">
@@ -368,7 +362,7 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
               <Clock className="w-4 h-4 mr-1" />
               주문상세
             </Button>
-            
+
             {canReview && (
               <Button
                 size="sm"
@@ -382,7 +376,7 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
                 리뷰작성
               </Button>
             )}
-            
+
             {isCompleted && hasReview && (
               <Button
                 size="sm"

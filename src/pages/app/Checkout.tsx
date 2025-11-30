@@ -217,65 +217,21 @@ export function Checkout() {
       isOrderCompleting.current = true;
 
       // 4. 성공 메시지 및 주문 트래킹으로 이동 (먼저 실행)
-      if (paymentMethod === 'meet_card' || paymentMethod === 'meet_cash') {
-        // 만나서 결제: 주문 접수만 완료
+      if (paymentMethod === 'meet_card' || paymentMethod === 'meet_cash' || paymentMethod === 'app_card') {
+        // 모든 결제 방식: 주문 접수 완료 (Mock 모드)
 
-        toast.success(<span data-testid="toast.order.success">주문이 접수되었습니다</span>, { duration: 5000 });
+        const message = paymentMethod === 'app_card'
+          ? '결제가 완료되었습니다 (테스트)'
+          : '주문이 접수되었습니다';
+
+        toast.success(<span data-testid="toast.order.success">{message}</span>, { duration: 5000 });
         // 토스트 DOM 마운트 확보를 위한 짧은 지연
         await new Promise((r) => setTimeout(r, 75));
-        navigate(`/order/${orderId}?result=on_site`);
-      } else if (paymentMethod === 'app_card') {
-        // 앱 결제: NICEPAY 플로우
-        try {
-          // PaymentRequest 구성
-          const paymentRequest: PaymentRequest = {
-            orderId,
-            amount: totalAmount,
-            goodsName: items.length === 1
-              ? items[0].menuName
-              : `${items[0].menuName} 외 ${items.length - 1}건`,
-            buyerName: user?.displayName || '고객',
-            buyerTel: phone || user?.phoneNumber || '',
-            buyerEmail: user?.email || email || '',
-          };
 
-          // NICEPAY Auth 요청
-          const { authUrl, authToken } = await initiatePayment(paymentRequest);
-
-          // 결제창 열기
-          const popup = openNicePayWindow(authUrl);
-          if (!popup) {
-            toast.error('결제창을 열 수 없습니다. 브라우저 팝업 설정을 확인해 주세요.');
-            return;
-          }
-
-          // 결제 결과 폴링
-          const result = await pollPaymentResult(orderId);
-
-          if (!result.success) {
-            toast.error(result.resultMsg || '결제가 실패했습니다. 다시 시도해 주세요.');
-            // 필요 시 주문 상태를 취소로 업데이트하는 API 호출
-            return;
-          }
-
-          // 성공 처리
-          toast.success(
-            <span data-testid="toast.payment.success">결제가 완료되었습니다</span>,
-            { duration: 5000 }
-          );
-          await new Promise((r) => setTimeout(r, 75));
-          navigate(`/order/${orderId}?result=success`);
-        } catch (paymentError) {
-          console.error('NICEPAY payment error:', paymentError);
-          toast.error(
-            paymentError instanceof Error
-              ? paymentError.message
-              : '결제 처리 중 오류가 발생했습니다'
-          );
-          // 결제 실패 시 주문은 생성되었지만 pending 상태로 남음
-          return;
-        }
+        const resultParam = paymentMethod === 'app_card' ? 'success' : 'on_site';
+        navigate(`/order/${orderId}?result=${resultParam}`);
       }
+      // NICEPAY 로직 제거 (Mock 모드에서는 불필요)
 
       // 5. 장바구니 비우기 (navigate 완료 후 실행)
       setTimeout(() => clearCart(), 100);
@@ -460,14 +416,14 @@ export function Checkout() {
         <div>
           <h2 className="text-[#2E1C10] mb-3">결제 수단</h2>
           <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
-            {/* 앱 결제 (배달/포장 모두 표시, 준비 중) */}
-            <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10 mb-2 opacity-60 pointer-events-none" aria-disabled="true">
-              <RadioGroupItem value="app_card" id="payment-app-card" disabled />
-              <Label htmlFor="payment-app-card" className="flex items-center gap-2 cursor-not-allowed flex-1">
+            {/* 앱 결제 (Mock) */}
+            <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10 mb-2">
+              <RadioGroupItem value="app_card" id="payment-app-card" />
+              <Label htmlFor="payment-app-card" className="flex items-center gap-2 cursor-pointer flex-1">
                 <Smartphone className="w-5 h-5 text-[#D61C1C]" />
                 <div>
-                  <p className="text-[#2E1C10]">앱 결제 (준비 중)</p>
-                  <p className="text-sm text-[#2E1C10]/60">앱에서 바로 카드 결제가 가능하도록 준비 중입니다.</p>
+                  <p className="text-[#2E1C10]">앱 결제</p>
+                  <p className="text-sm text-[#2E1C10]/60">앱에서 바로 결제합니다. (현재는 테스트 모드로 결제 없이 주문만 생성됩니다)</p>
                 </div>
               </Label>
             </div>

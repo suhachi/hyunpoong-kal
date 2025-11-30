@@ -63,3 +63,35 @@ export function getOrderStatusColor(status: OrderStatus): string {
   }
 }
 
+/**
+ * 주문 상태 색상 (Tailwind 클래스)
+ */
+export function getStatusColor(status: OrderStatus): string {
+  switch (status) {
+    case 'pending':
+      return 'bg-gray-500 hover:bg-gray-600';
+    case 'accepted':
+      return 'bg-blue-600 hover:bg-blue-700';
+    case 'cooking':
+      return 'bg-amber-500 hover:bg-amber-600';
+    case 'delivering':
+      return 'bg-purple-600 hover:bg-purple-700';
+    case 'completed':
+      return 'bg-green-600 hover:bg-green-700';
+    case 'cancelled':
+      return 'bg-red-600 hover:bg-red-700';
+    default:
+      return 'bg-gray-500';
+  }
+}
+
+/**
+ * 배달/포장 유형에 따른 상태 목록
+ */
+export function getStatusList(deliveryType: 'delivery' | 'pickup'): OrderStatus[] {
+  if (deliveryType === 'delivery') {
+    return ['accepted', 'cooking', 'delivering', 'completed'];
+  } else {
+    return ['accepted', 'cooking', 'completed']; // 포장은 'delivering' 제외 (또는 'ready'가 있다면 추가)
+  }
+}
