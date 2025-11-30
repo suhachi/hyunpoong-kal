@@ -1,10 +1,10 @@
 // Route: /admin
-import { useState, useEffect } from 'react';
-import { DollarSign, ShoppingBag, Star, TrendingUp } from 'lucide-react';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Card } from '../../components/ui/card';
-import { formatPrice } from '../../lib/utils';
-import { getDashboardStats } from '../../lib/admin/stats.api';
+import { useState, useEffect } from "react";
+import { DollarSign, ShoppingBag, Star, TrendingUp } from "lucide-react";
+import { StatCard } from "@/components/admin/common/StatCard";
+import { Card } from "@/components/ui/card";
+import { formatPrice } from "@/lib/utils";
+import { getDashboardStats } from "@/lib/admin/stats.api";
 
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export function Dashboard() {
       const data = await getDashboardStats();
       setStats(data);
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error("Failed to load stats:", error);
     } finally {
       setLoading(false);
     }
@@ -35,9 +35,7 @@ export function Dashboard() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl text-[#333] mb-2">대시보드</h1>
-        <p className="text-[#8B7355]">
-          현풍닭칼국수 운영 현황을 한눈에 확인하세요
-        </p>
+        <p className="text-[#8B7355]">현풍닭칼국수 운영 현황을 한눈에 확인하세요</p>
       </div>
 
       {/* KPI Cards */}
@@ -90,12 +88,8 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-[#8B7355]">
-                  새로운 주문이 없습니다
-                </p>
-                <p className="text-[#8B7355] mt-1">
-                  주문이 들어오면 여기에 표시됩니다
-                </p>
+                <p className="text-[#8B7355]">새로운 주문이 없습니다</p>
+                <p className="text-[#8B7355] mt-1">주문이 들어오면 여기에 표시됩니다</p>
               </div>
             )}
           </div>
@@ -111,12 +105,8 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-[#8B7355]">
-                  최근 리뷰가 없습니다
-                </p>
-                <p className="text-[#8B7355] mt-1">
-                  고객이 리뷰를 남기면 여기에 표시됩니다
-                </p>
+                <p className="text-[#8B7355]">최근 리뷰가 없습니다</p>
+                <p className="text-[#8B7355] mt-1">고객이 리뷰를 남기면 여기에 표시됩니다</p>
               </div>
             )}
           </div>
@@ -127,9 +117,7 @@ export function Dashboard() {
       <Card className="p-6">
         <h2 className="text-[#333] mb-4">시간대별 주문 현황</h2>
         <div className="h-64 flex items-center justify-center border-2 border-dashed border-[#E5DDD5] rounded-lg">
-          <p className="text-[#8B7355]">
-            차트가 여기에 표시됩니다 (Phase 2-9에서 구현 예정)
-          </p>
+          <p className="text-[#8B7355]">차트가 여기에 표시됩니다 (Phase 2-9에서 구현 예정)</p>
         </div>
       </Card>
 

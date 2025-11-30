@@ -1,7 +1,7 @@
 /**
  * Mock 배달 대행사 Provider
  * Phase 3-1: GPS Tracking
- * 
+ *
  * 실제 배달 대행사 API 대신 로컬 시뮬레이션 제공
  */
 
@@ -11,10 +11,10 @@ import type {
   CreateTaskParams,
   CreateTaskResult,
   Coordinates,
-  DeliveryStatus
-} from '../../../types/delivery';
+  DeliveryStatus,
+} from "../../../types/delivery";
 
-const MOCK_TASKS_KEY = 'hyunpung_mock_delivery_tasks';
+const MOCK_TASKS_KEY = "hyunpung_mock_delivery_tasks";
 const SIMULATION_INTERVAL = 5000; // 5초마다 업데이트
 const BASE_ETA = 30; // 기본 30분
 
@@ -37,7 +37,7 @@ class MockDeliveryStorage {
         this.tasks = new Map(Object.entries(data));
       }
     } catch (error) {
-      console.error('[MockDelivery] Failed to load tasks:', error);
+      console.error("[MockDelivery] Failed to load tasks:", error);
     }
   }
 
@@ -46,7 +46,7 @@ class MockDeliveryStorage {
       const data = Object.fromEntries(this.tasks);
       localStorage.setItem(MOCK_TASKS_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('[MockDelivery] Failed to save tasks:', error);
+      console.error("[MockDelivery] Failed to save tasks:", error);
     }
   }
 
@@ -57,9 +57,9 @@ class MockDeliveryStorage {
     setInterval(() => {
       let hasChanges = false;
 
-      this.tasks.forEach((task) => {
+      this.tasks.forEach(task => {
         // 완료/취소된 태스크는 스킵
-        if (task.status === 'completed' || task.status === 'canceled') {
+        if (task.status === "completed" || task.status === "canceled") {
           return;
         }
 
@@ -72,23 +72,23 @@ class MockDeliveryStorage {
         const now = Date.now();
         const elapsed = (now - task.createdAt) / 1000 / 60; // 분
 
-        if (task.status === 'assigned' && elapsed > 3) {
-          task.status = 'picked_up';
+        if (task.status === "assigned" && elapsed > 3) {
+          task.status = "picked_up";
           hasChanges = true;
-        } else if (task.status === 'picked_up' && elapsed > 5) {
-          task.status = 'delivering';
+        } else if (task.status === "picked_up" && elapsed > 5) {
+          task.status = "delivering";
           hasChanges = true;
-        } else if (task.status === 'delivering' && task.eta === 0) {
-          task.status = 'completed';
+        } else if (task.status === "delivering" && task.eta === 0) {
+          task.status = "completed";
           hasChanges = true;
         }
 
         // 좌표 이동 시뮬레이션 (배달 중일 때만)
-        if (task.status === 'delivering' && task.lastCoord) {
+        if (task.status === "delivering" && task.lastCoord) {
           // 목적지로 천천히 이동 (간단한 시뮬레이션)
           const deltaLat = (Math.random() - 0.5) * 0.001;
           const deltaLng = (Math.random() - 0.5) * 0.001;
-          
+
           task.lastCoord = {
             lat: task.lastCoord.lat + deltaLat,
             lng: task.lastCoord.lng + deltaLng,
@@ -116,7 +116,7 @@ class MockDeliveryStorage {
   }
 
   private notifyListeners() {
-    this.listeners.forEach((listener) => listener());
+    this.listeners.forEach(listener => listener());
   }
 
   createTask(params: CreateTaskParams): DeliveryTask {
@@ -129,7 +129,7 @@ class MockDeliveryStorage {
       taskId,
       orderId: params.orderId,
       driverId,
-      status: 'assigned',
+      status: "assigned",
       eta: BASE_ETA,
       lastCoord: {
         lat: params.pickup.lat,
@@ -154,7 +154,7 @@ class MockDeliveryStorage {
     const task = this.tasks.get(taskId);
     if (!task) return false;
 
-    task.status = 'canceled';
+    task.status = "canceled";
     task.updatedAt = Date.now();
     this.saveToStorage();
 
@@ -173,7 +173,7 @@ const storage = new MockDeliveryStorage();
  */
 export const mockDelivery: DeliveryProvider = {
   async createTask(params: CreateTaskParams): Promise<CreateTaskResult> {
-    console.log('[MockDelivery] Creating task:', params);
+    console.log("[MockDelivery] Creating task:", params);
 
     const task = storage.createTask(params);
 
@@ -183,7 +183,7 @@ export const mockDelivery: DeliveryProvider = {
   },
 
   async getTask(taskId: string): Promise<DeliveryTask> {
-    console.log('[MockDelivery] Getting task:', taskId);
+    console.log("[MockDelivery] Getting task:", taskId);
 
     const task = storage.getTask(taskId);
     if (!task) {
@@ -194,7 +194,7 @@ export const mockDelivery: DeliveryProvider = {
   },
 
   async cancelTask(taskId: string): Promise<void> {
-    console.log('[MockDelivery] Canceling task:', taskId);
+    console.log("[MockDelivery] Canceling task:", taskId);
 
     const success = storage.cancelTask(taskId);
     if (!success) {

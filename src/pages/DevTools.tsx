@@ -4,12 +4,12 @@
  * 프로덕션에서는 제거 필요
  */
 
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { mockLogin, getCurrentUser, type AuthUser } from '../lib/auth';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { mockLogin, getCurrentUser, type AuthUser } from "../lib/auth";
 
 export function DevTools() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export function DevTools() {
     setCurrentUser(user);
   }
 
-  function handleRoleSwitch(role: 'customer' | 'owner' | 'admin') {
+  function handleRoleSwitch(role: "customer" | "owner" | "admin") {
     mockLogin(role);
     // mockLogin()이 window.location.reload()를 호출하므로 loadCurrentUser()는 실행되지 않음
   }
@@ -35,9 +35,7 @@ export function DevTools() {
         {/* Header */}
         <div className="text-center pt-8 pb-4">
           <h1 className="text-2xl text-[#333] mb-2">🛠️ 개발자 도구</h1>
-          <p className="text-[#8B7355]">
-            권한 전환 및 개발 모드 설정
-          </p>
+          <p className="text-[#8B7355]">권한 전환 및 개발 모드 설정</p>
         </div>
 
         {/* 현재 상태 */}
@@ -46,23 +44,21 @@ export function DevTools() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[#8B7355]">사용자 ID</span>
-              <span className="text-[#333]">{currentUser?.uid || '-'}</span>
+              <span className="text-[#333]">{currentUser?.uid || "-"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[#8B7355]">이름</span>
-              <span className="text-[#333]">{currentUser?.displayName || '-'}</span>
+              <span className="text-[#333]">{currentUser?.displayName || "-"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[#8B7355]">역할</span>
-              <Badge variant={currentUser?.role === 'admin' ? 'destructive' : 'default'}>
-                {currentUser?.role || '-'}
+              <Badge variant={currentUser?.role === "admin" ? "destructive" : "default"}>
+                {currentUser?.role || "-"}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[#8B7355]">Firebase 모드</span>
-              <Badge variant="outline">
-                USE_FIREBASE = false (Mock)
-              </Badge>
+              <Badge variant="outline">USE_FIREBASE = false (Mock)</Badge>
             </div>
           </div>
         </Card>
@@ -72,20 +68,20 @@ export function DevTools() {
           <h2 className="text-[#333] mb-4">권한 전환</h2>
           <div className="grid grid-cols-3 gap-3">
             <Button
-              variant={currentUser?.role === 'customer' ? 'default' : 'outline'}
-              onClick={() => handleRoleSwitch('customer')}
+              variant={currentUser?.role === "customer" ? "default" : "outline"}
+              onClick={() => handleRoleSwitch("customer")}
             >
               고객
             </Button>
             <Button
-              variant={currentUser?.role === 'owner' ? 'default' : 'outline'}
-              onClick={() => handleRoleSwitch('owner')}
+              variant={currentUser?.role === "owner" ? "default" : "outline"}
+              onClick={() => handleRoleSwitch("owner")}
             >
               점주
             </Button>
             <Button
-              variant={currentUser?.role === 'admin' ? 'default' : 'outline'}
-              onClick={() => handleRoleSwitch('admin')}
+              variant={currentUser?.role === "admin" ? "default" : "outline"}
+              onClick={() => handleRoleSwitch("admin")}
             >
               관리자
             </Button>
@@ -96,38 +92,34 @@ export function DevTools() {
         <Card className="p-6">
           <h2 className="text-[#333] mb-4">페이지 테스트</h2>
           <div className="space-y-2">
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => navigate('/')}
-            >
+            <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/")}>
               🏠 홈
             </Button>
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => navigate('/menu')}
+              onClick={() => navigate("/menu")}
             >
               🍜 메뉴 목록
             </Button>
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => navigate('/cart')}
+              onClick={() => navigate("/cart")}
             >
               🛒 장바구니
             </Button>
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => navigate('/coupons')}
+              onClick={() => navigate("/coupons")}
             >
               🎟️ 쿠폰함
             </Button>
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => navigate('/reviews')}
+              onClick={() => navigate("/reviews")}
             >
               ⭐ 리뷰 목록
             </Button>
@@ -136,8 +128,8 @@ export function DevTools() {
               variant="ghost"
               className="w-full justify-start"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin');
+                handleRoleSwitch("admin");
+                navigate("/admin");
               }}
             >
               📊 관리자 대시보드
@@ -146,8 +138,8 @@ export function DevTools() {
               variant="ghost"
               className="w-full justify-start"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin/orders');
+                handleRoleSwitch("admin");
+                navigate("/admin/orders");
               }}
             >
               📦 주문 관리
@@ -156,8 +148,8 @@ export function DevTools() {
               variant="ghost"
               className="w-full justify-start"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin/reviews');
+                handleRoleSwitch("admin");
+                navigate("/admin/reviews");
               }}
             >
               💬 리뷰 관리
@@ -166,8 +158,8 @@ export function DevTools() {
               variant="ghost"
               className="w-full justify-start"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin/menus');
+                handleRoleSwitch("admin");
+                navigate("/admin/menus");
               }}
             >
               📋 메뉴 관리
@@ -176,8 +168,8 @@ export function DevTools() {
               variant="ghost"
               className="w-full justify-start"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin/promotions');
+                handleRoleSwitch("admin");
+                navigate("/admin/promotions");
               }}
             >
               🎫 쿠폰/프로모션
@@ -186,8 +178,8 @@ export function DevTools() {
               variant="ghost"
               className="w-full justify-start"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin/analytics');
+                handleRoleSwitch("admin");
+                navigate("/admin/analytics");
               }}
             >
               📈 관제 대시보드
@@ -196,8 +188,8 @@ export function DevTools() {
               variant="ghost"
               className="w-full justify-start"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin/settings');
+                handleRoleSwitch("admin");
+                navigate("/admin/settings");
               }}
             >
               ⚙️ 설정
@@ -209,31 +201,22 @@ export function DevTools() {
         <Card className="p-6">
           <h2 className="text-[#333] mb-4">빠른 이동</h2>
           <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/')}
-            >
+            <Button variant="outline" onClick={() => navigate("/")}>
               🍜 고객 앱
             </Button>
             <Button
               variant="outline"
               onClick={() => {
-                handleRoleSwitch('admin');
-                navigate('/admin');
+                handleRoleSwitch("admin");
+                navigate("/admin");
               }}
             >
               📊 관리자
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/brand')}
-            >
+            <Button variant="outline" onClick={() => navigate("/brand")}>
               🎨 브랜드 가이드
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/reviews')}
-            >
+            <Button variant="outline" onClick={() => navigate("/reviews")}>
               ⭐ 리뷰
             </Button>
           </div>

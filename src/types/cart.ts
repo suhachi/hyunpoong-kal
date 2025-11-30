@@ -1,4 +1,4 @@
-import type { CustomOption } from './menu';
+import type { CustomOption } from "./menu";
 
 export interface CartItem {
   menuId: string;
@@ -14,13 +14,13 @@ export interface CartItem {
   optionPrices: {
     noodle: number;
     toppings: number;
-    custom?: number;  // 커스텀 옵션 총액
+    custom?: number; // 커스텀 옵션 총액
   };
-  customOptions?: CustomOption[];  // 선택된 커스텀 옵션 목록
+  customOptions?: CustomOption[]; // 선택된 커스텀 옵션 목록
   subtotal: number;
 }
 
-export type DeliveryType = 'delivery' | 'pickup';
+export type DeliveryType = "delivery" | "pickup";
 
 export interface DeliveryAddress {
   address: string;
@@ -38,7 +38,7 @@ export interface CartState {
   couponDiscount: number;
 }
 
-export interface CartContextType extends CartState {
+export interface CartActions {
   addItem: (item: CartItem) => void;
   removeItem: (menuId: string) => void;
   updateQuantity: (menuId: string, quantity: number) => void;
@@ -48,9 +48,18 @@ export interface CartContextType extends CartState {
   setRequests: (requests: string) => void;
   applyCoupon: (couponId: string, discount: number) => void;
   removeCoupon: () => void;
+  
+  // Computed / Getters
   getTotalItems: () => number;
   getSubtotal: () => number;
   getDeliveryFee: () => number;
   getTotalAmount: () => number;
+  
+  // Utils
   forceReload: () => void;
+}
+
+export interface CartContextType {
+  state: CartState;
+  actions: CartActions;
 }

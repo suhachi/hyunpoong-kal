@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Star, Image as ImageIcon, MessageSquare, Flag, Eye, EyeOff } from 'lucide-react';
-import { Card } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import type { Review } from '../../types/review';
+import { useState } from "react";
+import { Star, Image as ImageIcon, MessageSquare, Flag, Eye, EyeOff } from "lucide-react";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import type { Review } from "../../types/review";
 
 export interface ReviewCardProps {
   review: Review;
@@ -23,7 +23,7 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[#333]">{review.userName || '익명'}</span>
+            <span className="text-[#333]">{review.userName || "익명"}</span>
             {review.hasPhoto && (
               <Badge variant="outline" className="text-[#F37021] border-[#F37021]">
                 <ImageIcon className="w-3 h-3 mr-1" />
@@ -50,9 +50,7 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
               <Star
                 key={i}
                 className={`w-4 h-4 ${
-                  i < review.rating
-                    ? 'fill-[#F37021] text-[#F37021]'
-                    : 'text-[#E5DDD5]'
+                  i < review.rating ? "fill-[#F37021] text-[#F37021]" : "text-[#E5DDD5]"
                 }`}
               />
             ))}
@@ -60,16 +58,14 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
         </div>
 
         {/* 날짜 */}
-        <time className="text-[#8B7355]">
-          {formatDate(review.createdAt)}
-        </time>
+        <time className="text-[#8B7355]">{formatDate(review.createdAt)}</time>
       </div>
 
       {/* 리뷰 내용 */}
       <div className="mb-4">
         <p className="text-[#333] whitespace-pre-wrap break-words">
           {needsExpansion && !isExpanded
-            ? review.text.slice(0, maxPreviewLength) + '...'
+            ? review.text.slice(0, maxPreviewLength) + "..."
             : review.text}
         </p>
         {needsExpansion && (
@@ -77,7 +73,7 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-[#D61C1C] hover:underline mt-1"
           >
-            {isExpanded ? '접기' : '더보기'}
+            {isExpanded ? "접기" : "더보기"}
           </button>
         )}
       </div>
@@ -86,15 +82,12 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
       {review.photos.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
           {review.photos.map((photo, index) => (
-            <div
-              key={index}
-              className="aspect-square rounded-lg overflow-hidden bg-[#F9F6F3]"
-            >
+            <div key={index} className="aspect-square rounded-lg overflow-hidden bg-[#F9F6F3]">
               <img
                 src={photo}
                 alt={`리뷰 사진 ${index + 1}`}
                 className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                onClick={() => window.open(photo, '_blank')}
+                onClick={() => window.open(photo, "_blank")}
               />
             </div>
           ))}
@@ -108,9 +101,7 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
             <MessageSquare className="w-4 h-4 text-[#D61C1C]" />
             <span className="text-[#D61C1C]">{review.reply.by}</span>
             <span className="text-[#8B7355]">·</span>
-            <time className="text-[#8B7355]">
-              {formatDate(review.reply.at)}
-            </time>
+            <time className="text-[#8B7355]">{formatDate(review.reply.at)}</time>
           </div>
           <p className="text-[#333] whitespace-pre-wrap">{review.reply.text}</p>
         </div>
@@ -126,7 +117,7 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
             className="text-[#D61C1C] border-[#D61C1C] hover:bg-[#D61C1C] hover:text-white"
           >
             <MessageSquare className="w-4 h-4 mr-2" />
-            {review.reply ? '답글 수정' : '답글 달기'}
+            {review.reply ? "답글 수정" : "답글 달기"}
           </Button>
         )}
 
@@ -167,9 +158,7 @@ export function ReviewCard({ review, onReply, onReport, onToggleHidden }: Review
       <div className="mt-4 pt-4 border-t border-[#E5DDD5]">
         <p className="text-[#8B7355]">
           주문번호: {review.orderId}
-          {review.rewardIssued && (
-            <span className="ml-2 text-[#F37021]">🎁 쿠폰 발급됨</span>
-          )}
+          {review.rewardIssued && <span className="ml-2 text-[#F37021]">🎁 쿠폰 발급됨</span>}
         </p>
       </div>
     </Card>
@@ -189,9 +178,9 @@ function formatDate(timestamp: number): string {
   if (hours < 24) return `${hours}시간 전`;
   if (days < 7) return `${days}일 전`;
 
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 }

@@ -1,9 +1,9 @@
-﻿import { useState, useEffect } from 'react';
-import { Modal } from './common/Modal';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
-import { toast } from 'sonner';
-import type { Review } from '../../types/review';
+﻿import { useState, useEffect } from "react";
+import { Modal } from "./common/Modal";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
+import type { Review } from "../../types/review";
 
 export interface ReplyModalProps {
   open: boolean;
@@ -13,14 +13,8 @@ export interface ReplyModalProps {
   onDelete?: (reviewId: string) => Promise<void>;
 }
 
-export function ReplyModal({
-  open,
-  onOpenChange,
-  review,
-  onSubmit,
-  onDelete,
-}: ReplyModalProps) {
-  const [text, setText] = useState('');
+export function ReplyModal({ open, onOpenChange, review, onSubmit, onDelete }: ReplyModalProps) {
+  const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
 
   const maxLength = 200;
@@ -30,7 +24,7 @@ export function ReplyModal({
     if (review?.reply) {
       setText(review.reply.text);
     } else {
-      setText('');
+      setText("");
     }
   }, [review]);
 
@@ -38,7 +32,7 @@ export function ReplyModal({
     if (!review) return;
 
     if (text.trim().length < 10) {
-      toast.error('답글은 최소 10자 이상 입력해주세요.');
+      toast.error("답글은 최소 10자 이상 입력해주세요.");
       return;
     }
 
@@ -50,11 +44,11 @@ export function ReplyModal({
     setLoading(true);
     try {
       await onSubmit(review.id!, text.trim());
-      toast.success(isEditing ? '답글이 수정되었습니다.' : '답글이 등록되었습니다.');
+      toast.success(isEditing ? "답글이 수정되었습니다." : "답글이 등록되었습니다.");
       onOpenChange(false);
     } catch (error) {
-      console.error('답글 저장 실패:', error);
-      toast.error('답글 저장에 실패했습니다.');
+      console.error("답글 저장 실패:", error);
+      toast.error("답글 저장에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -63,16 +57,16 @@ export function ReplyModal({
   async function handleDelete() {
     if (!review?.id || !onDelete) return;
 
-    if (!confirm('답글을 삭제하시겠습니까?')) return;
+    if (!confirm("답글을 삭제하시겠습니까?")) return;
 
     setLoading(true);
     try {
       await onDelete(review.id);
-      toast.success('답글이 삭제되었습니다.');
+      toast.success("답글이 삭제되었습니다.");
       onOpenChange(false);
     } catch (error) {
-      console.error('답글 삭제 실패:', error);
-      toast.error('답글 삭제에 실패했습니다.');
+      console.error("답글 삭제 실패:", error);
+      toast.error("답글 삭제에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -84,7 +78,7 @@ export function ReplyModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={isEditing ? '답글 수정' : '답글 작성'}
+      title={isEditing ? "답글 수정" : "답글 작성"}
       description={`${review.userName}님의 리뷰에 답글을 남겨보세요.`}
       size="md"
     >
@@ -96,7 +90,9 @@ export function ReplyModal({
             <span className="text-[#8B7355]">·</span>
             <div className="flex items-center gap-1">
               {Array.from({ length: review.rating }).map((_, i) => (
-                <span key={i} className="text-[#F37021]">⭐</span>
+                <span key={i} className="text-[#F37021]">
+                  ⭐
+                </span>
               ))}
             </div>
           </div>
@@ -107,7 +103,7 @@ export function ReplyModal({
         <div>
           <Textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={e => setText(e.target.value)}
             placeholder="고객님께 전할 답글을 입력하세요..."
             rows={5}
             maxLength={maxLength}
@@ -118,9 +114,7 @@ export function ReplyModal({
             <span className="text-[#8B7355]">
               {text.length}/{maxLength}자
             </span>
-            <span className="text-[#8B7355]">
-              최소 10자 이상
-            </span>
+            <span className="text-[#8B7355]">최소 10자 이상</span>
           </div>
         </div>
 
@@ -163,7 +157,7 @@ export function ReplyModal({
             disabled={loading || text.trim().length < 10}
             className="flex-1 bg-[#D61C1C] hover:bg-[#B91818]"
           >
-            {loading ? '저장 중...' : isEditing ? '수정' : '등록'}
+            {loading ? "저장 중..." : isEditing ? "수정" : "등록"}
           </Button>
         </div>
       </div>

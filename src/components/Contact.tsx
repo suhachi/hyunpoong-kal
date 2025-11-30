@@ -1,4 +1,4 @@
-import { MapPin, Phone, Clock, Mail } from 'lucide-react';
+import { MapPin, Phone, Clock, Mail } from "lucide-react";
 
 export function Contact() {
   return (
@@ -6,9 +6,7 @@ export function Contact() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-[#2E1C10] mb-4">매장 안내 & 창업 문의</h2>
-          <p className="text-gray-700">
-            현풍닭칼국수와 함께 성공적인 창업을 시작하세요
-          </p>
+          <p className="text-gray-700">현풍닭칼국수와 함께 성공적인 창업을 시작하세요</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
@@ -62,8 +60,8 @@ export function Contact() {
             <form className="space-y-4">
               <div>
                 <label className="block text-[#2E1C10] mb-2">성함</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="이름을 입력해주세요"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D61C1C]"
                 />
@@ -71,8 +69,8 @@ export function Contact() {
 
               <div>
                 <label className="block text-[#2E1C10] mb-2">연락처</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   placeholder="010-0000-0000"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D61C1C]"
                 />
@@ -80,8 +78,8 @@ export function Contact() {
 
               <div>
                 <label className="block text-[#2E1C10] mb-2">관심 지역</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="예) 서울시 강남구"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D61C1C]"
                 />
@@ -89,14 +87,14 @@ export function Contact() {
 
               <div>
                 <label className="block text-[#2E1C10] mb-2">문의 내용</label>
-                <textarea 
+                <textarea
                   rows={4}
                   placeholder="창업 문의 내용을 입력해주세요"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D61C1C] resize-none"
                 ></textarea>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 className="w-full py-4 bg-[#D61C1C] text-white rounded-lg hover:bg-[#b71616] transition-colors"
               >

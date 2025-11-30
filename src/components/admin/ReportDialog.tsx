@@ -1,12 +1,12 @@
-﻿import { useState } from 'react';
-import { Modal } from './common/Modal';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
-import { Label } from '../ui/label';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { toast } from 'sonner';
-import type { ReviewReportReason } from '../../types/review';
-import { REPORT_REASON_LABELS } from '../../types/review';
+﻿import { useState } from "react";
+import { Modal } from "./common/Modal";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { toast } from "sonner";
+import type { ReviewReportReason } from "../../types/review";
+import { REPORT_REASON_LABELS } from "../../types/review";
 
 export interface ReportDialogProps {
   open: boolean;
@@ -15,14 +15,9 @@ export interface ReportDialogProps {
   onSubmit: (reviewId: string, reason: ReviewReportReason, description?: string) => Promise<void>;
 }
 
-export function ReportDialog({
-  open,
-  onOpenChange,
-  reviewId,
-  onSubmit,
-}: ReportDialogProps) {
-  const [reason, setReason] = useState<ReviewReportReason>('spam');
-  const [description, setDescription] = useState('');
+export function ReportDialog({ open, onOpenChange, reviewId, onSubmit }: ReportDialogProps) {
+  const [reason, setReason] = useState<ReviewReportReason>("spam");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
@@ -31,15 +26,15 @@ export function ReportDialog({
     setLoading(true);
     try {
       await onSubmit(reviewId, reason, description.trim() || undefined);
-      toast.success('리뷰 신고가 접수되었습니다.');
+      toast.success("리뷰 신고가 접수되었습니다.");
       onOpenChange(false);
-      
+
       // 초기화
-      setReason('spam');
-      setDescription('');
+      setReason("spam");
+      setDescription("");
     } catch (error: any) {
-      console.error('리뷰 신고 실패:', error);
-      toast.error(error.message || '리뷰 신고에 실패했습니다.');
+      console.error("리뷰 신고 실패:", error);
+      toast.error(error.message || "리뷰 신고에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -57,8 +52,8 @@ export function ReportDialog({
         {/* 신고 사유 선택 */}
         <div>
           <Label className="mb-3 block text-[#333]">신고 사유</Label>
-          <RadioGroup value={reason} onValueChange={(v) => setReason(v as ReviewReportReason)}>
-            {(Object.keys(REPORT_REASON_LABELS) as ReviewReportReason[]).map((key) => (
+          <RadioGroup value={reason} onValueChange={v => setReason(v as ReviewReportReason)}>
+            {(Object.keys(REPORT_REASON_LABELS) as ReviewReportReason[]).map(key => (
               <div key={key} className="flex items-center space-x-2">
                 <RadioGroupItem value={key} id={`reason-${key}`} />
                 <Label htmlFor={`reason-${key}`} className="cursor-pointer">
@@ -77,7 +72,7 @@ export function ReportDialog({
           <Textarea
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             placeholder="신고 사유에 대한 자세한 설명을 입력하세요..."
             rows={3}
             maxLength={500}
@@ -85,9 +80,7 @@ export function ReportDialog({
             disabled={loading}
           />
           <div className="flex justify-end mt-1">
-            <span className="text-[#8B7355]">
-              {description.length}/500자
-            </span>
+            <span className="text-[#8B7355]">{description.length}/500자</span>
           </div>
         </div>
 
@@ -119,7 +112,7 @@ export function ReportDialog({
             disabled={loading}
             className="flex-1 bg-red-600 hover:bg-red-700 text-white"
           >
-            {loading ? '신고 중...' : '신고하기'}
+            {loading ? "신고 중..." : "신고하기"}
           </Button>
         </div>
       </div>

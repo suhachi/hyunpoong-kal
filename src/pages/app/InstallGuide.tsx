@@ -1,20 +1,20 @@
-import React, { useMemo } from 'react';
-import { QRCodeCanvas } from 'qrcode.react';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo } from "react";
+import { QRCodeCanvas } from "qrcode.react";
+import { Card } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export const InstallGuide: React.FC = () => {
   const navigate = useNavigate();
 
   // 현재 호스팅된 origin 기반 URL (프리뷰/프로덕션 모두 대응)
   const appUrl = useMemo(() => {
-    if (typeof window === 'undefined') return 'https://hyun-poong.web.app';
+    if (typeof window === "undefined") return "https://hyun-poong.web.app";
     return window.location.origin;
   }, []);
 
   const handleGoHome = () => {
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -38,8 +38,7 @@ export const InstallGuide: React.FC = () => {
             <h2 className="font-semibold mb-1 text-[#8B4513]">1. QR 코드 스캔</h2>
             <p className="text-muted-foreground">
               휴대폰 카메라 또는 QR 스캐너 앱으로 위 QR 코드를 스캔하면
-              <span className="font-mono break-all text-xs block mt-1">{appUrl}</span>
-              로 접속합니다.
+              <span className="font-mono break-all text-xs block mt-1">{appUrl}</span>로 접속합니다.
             </p>
           </div>
           <div>
@@ -64,4 +63,3 @@ export const InstallGuide: React.FC = () => {
     </div>
   );
 };
-

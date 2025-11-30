@@ -3,10 +3,10 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useAuth } from '../../contexts/AuthContext';
-import { USE_FIREBASE, APP_CONFIG, ENV } from '../../config/env';
-import { Button } from '../../components/ui/button';
-import { Card } from '../../components/ui/card';
+import { useAuth } from "../../contexts/AuthContext";
+import { USE_FIREBASE, APP_CONFIG, ENV } from "../../config/env";
+import { Button } from "../../components/ui/button";
+import { Card } from "../../components/ui/card";
 
 export function Debug() {
   const { user, loading } = useAuth();
@@ -25,7 +25,7 @@ export function Debug() {
           </div>
           <div className="flex justify-between">
             <dt className="font-semibold">Firebase 사용:</dt>
-            <dd className="font-mono">{USE_FIREBASE ? 'true ✅' : 'false ❌ (Mock 모드)'}</dd>
+            <dd className="font-mono">{USE_FIREBASE ? "true ✅" : "false ❌ (Mock 모드)"}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="font-semibold">앱 버전:</dt>
@@ -40,11 +40,11 @@ export function Debug() {
         <dl className="space-y-2">
           <div className="flex justify-between">
             <dt className="font-semibold">로딩 중:</dt>
-            <dd className="font-mono">{loading ? 'true 🔄' : 'false ✅'}</dd>
+            <dd className="font-mono">{loading ? "true 🔄" : "false ✅"}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="font-semibold">사용자:</dt>
-            <dd className="font-mono">{user ? '✅ 로그인됨' : '❌ 비로그인'}</dd>
+            <dd className="font-mono">{user ? "✅ 로그인됨" : "❌ 비로그인"}</dd>
           </div>
           {user && (
             <>
@@ -75,11 +75,11 @@ export function Debug() {
         <pre className="bg-gray-100 p-4 rounded overflow-auto text-xs">
           {JSON.stringify(
             {
-              mockUser: localStorage.getItem('mockUser'),
-              mockRole: localStorage.getItem('mockRole'),
+              mockUser: localStorage.getItem("mockUser"),
+              mockRole: localStorage.getItem("mockRole"),
             },
             null,
-            2
+            2,
           )}
         </pre>
       </Card>
@@ -99,14 +99,14 @@ export function Debug() {
           </Button>
           <Button
             onClick={() => {
-              window.location.href = '/';
+              window.location.href = "/";
             }}
           >
             홈으로 이동
           </Button>
           <Button
             onClick={() => {
-              window.location.href = '/login';
+              window.location.href = "/login";
             }}
             variant="outline"
           >
@@ -114,8 +114,8 @@ export function Debug() {
           </Button>
           <Button
             onClick={() => {
-              localStorage.setItem('mockRole', 'owner');
-              window.location.href = '/admin/dashboard';
+              localStorage.setItem("mockRole", "owner");
+              window.location.href = "/admin/dashboard";
             }}
             variant="outline"
           >
@@ -126,7 +126,9 @@ export function Debug() {
 
       {/* 개발사 정보 */}
       <div className="mt-8 text-center text-sm text-gray-500">
-        <p>© 2024 {APP_CONFIG.company} (사업자번호: {APP_CONFIG.bizNo})</p>
+        <p>
+          © 2024 {APP_CONFIG.company} (사업자번호: {APP_CONFIG.bizNo})
+        </p>
         <p>대표: {APP_CONFIG.ceo}</p>
       </div>
     </div>

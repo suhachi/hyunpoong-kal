@@ -2,11 +2,11 @@
  * 쿠폰 카드 컴포넌트
  */
 
-import { Coupon, getCouponStatus, COUPON_TYPE_LABELS } from '../../types/coupon';
-import { Card } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Ticket } from 'lucide-react';
-import { formatPrice } from '../../lib/utils';
+import { Coupon, getCouponStatus, COUPON_TYPE_LABELS } from "@/types/coupon";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Ticket } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 interface CouponCardProps {
   coupon: Coupon;
@@ -20,7 +20,7 @@ export function CouponCard({ coupon, selectable, selected, onSelect }: CouponCar
   const expiryDate = new Date(coupon.expiresAt);
   const daysLeft = Math.ceil((coupon.expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
 
-  const isAvailable = status === 'available';
+  const isAvailable = status === "available";
   const isExpiringSoon = isAvailable && daysLeft <= 7;
 
   return (
@@ -28,10 +28,10 @@ export function CouponCard({ coupon, selectable, selected, onSelect }: CouponCar
       className={`p-4 ${
         selectable
           ? isAvailable
-            ? 'cursor-pointer hover:border-[#D61C1C] transition-colors'
-            : 'opacity-50 cursor-not-allowed'
-          : ''
-      } ${selected ? 'border-[#D61C1C] border-2' : ''}`}
+            ? "cursor-pointer hover:border-[#D61C1C] transition-colors"
+            : "opacity-50 cursor-not-allowed"
+          : ""
+      } ${selected ? "border-[#D61C1C] border-2" : ""}`}
       onClick={() => {
         if (selectable && isAvailable && onSelect) {
           onSelect(coupon);
@@ -42,7 +42,7 @@ export function CouponCard({ coupon, selectable, selected, onSelect }: CouponCar
         {/* 금액 */}
         <div className="flex-shrink-0 w-24 flex flex-col items-center justify-center bg-gradient-to-br from-[#D61C1C] to-[#F37021] rounded-lg text-white p-3">
           <Ticket className="w-6 h-6 mb-1" />
-          <div className="text-xl">{formatPrice(coupon.amount).replace('원', '')}</div>
+          <div className="text-xl">{formatPrice(coupon.amount).replace("원", "")}</div>
           <div className="text-xs opacity-90">원</div>
         </div>
 
@@ -53,22 +53,22 @@ export function CouponCard({ coupon, selectable, selected, onSelect }: CouponCar
             <Badge
               variant="outline"
               className={
-                status === 'available'
+                status === "available"
                   ? isExpiringSoon
-                    ? 'border-yellow-500 text-yellow-700'
-                    : 'border-green-500 text-green-700'
-                  : status === 'used'
-                  ? 'border-gray-400 text-gray-600'
-                  : 'border-red-500 text-red-700'
+                    ? "border-yellow-500 text-yellow-700"
+                    : "border-green-500 text-green-700"
+                  : status === "used"
+                    ? "border-gray-400 text-gray-600"
+                    : "border-red-500 text-red-700"
               }
             >
-              {status === 'available'
+              {status === "available"
                 ? isExpiringSoon
                   ? `${daysLeft}일 남음`
-                  : '사용가능'
-                : status === 'used'
-                ? '사용완료'
-                : '만료됨'}
+                  : "사용가능"
+                : status === "used"
+                  ? "사용완료"
+                  : "만료됨"}
             </Badge>
           </div>
 
@@ -77,8 +77,8 @@ export function CouponCard({ coupon, selectable, selected, onSelect }: CouponCar
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{formatPrice(coupon.minSpend)} 이상 주문 시</span>
             <span>
-              {expiryDate.getFullYear()}.{String(expiryDate.getMonth() + 1).padStart(2, '0')}.
-              {String(expiryDate.getDate()).padStart(2, '0')}까지
+              {expiryDate.getFullYear()}.{String(expiryDate.getMonth() + 1).padStart(2, "0")}.
+              {String(expiryDate.getDate()).padStart(2, "0")}까지
             </span>
           </div>
         </div>

@@ -3,8 +3,8 @@
  * Phase 3-7: 통합 리포트
  */
 
-import { USE_FIREBASE } from '../../config/env';
-import { formatPrice } from '../utils';
+import { USE_FIREBASE } from "../../config/env";
+import { formatPrice } from "../utils";
 import type {
   IntegratedKPI,
   IntegratedReport,
@@ -19,7 +19,7 @@ import type {
   NotificationEffectiveness,
   DateRange,
   ReportPeriod,
-} from '../../types/analytics';
+} from "../../types/analytics";
 
 /**
  * 빈 데이터 기본값 (초기 상태)
@@ -91,13 +91,15 @@ const EMPTY_NOTIFICATION_EFFECTIVENESS: NotificationEffectiveness = {
 export async function getIntegratedKPI(dateRange: DateRange): Promise<IntegratedKPI> {
   if (USE_FIREBASE) {
     // TODO: Firestore aggregation
-    console.warn('[IntegratedAnalytics] Firebase aggregation not implemented yet, returning empty data');
+    console.warn(
+      "[IntegratedAnalytics] Firebase aggregation not implemented yet, returning empty data",
+    );
   } else {
-    console.log('[Mock] Getting integrated KPI for range:', dateRange);
+    console.log("[Mock] Getting integrated KPI for range:", dateRange);
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 500));
-  
+
   // 초기 상태: 모든 값 0
   return EMPTY_INTEGRATED_KPI;
 }
@@ -108,13 +110,13 @@ export async function getIntegratedKPI(dateRange: DateRange): Promise<Integrated
 export async function getHourlyAnalysis(dateRange: DateRange): Promise<HourlyAnalysis[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting hourly analysis');
+    console.log("[Mock] Getting hourly analysis");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 빈 배열
   return [];
 }
@@ -125,13 +127,13 @@ export async function getHourlyAnalysis(dateRange: DateRange): Promise<HourlyAna
 export async function getDayOfWeekAnalysis(dateRange: DateRange): Promise<DayOfWeekAnalysis[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting day of week analysis');
+    console.log("[Mock] Getting day of week analysis");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 빈 배열
   return [];
 }
@@ -142,13 +144,13 @@ export async function getDayOfWeekAnalysis(dateRange: DateRange): Promise<DayOfW
 export async function getMenuPerformance(dateRange: DateRange): Promise<MenuPerformance[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting menu performance');
+    console.log("[Mock] Getting menu performance");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 빈 배열
   return [];
 }
@@ -159,13 +161,13 @@ export async function getMenuPerformance(dateRange: DateRange): Promise<MenuPerf
 export async function getCustomerBehavior(dateRange: DateRange): Promise<CustomerBehavior[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting customer behavior');
+    console.log("[Mock] Getting customer behavior");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 빈 배열
   return [];
 }
@@ -176,13 +178,13 @@ export async function getCustomerBehavior(dateRange: DateRange): Promise<Custome
 export async function getCouponEffectiveness(dateRange: DateRange): Promise<CouponEffectiveness[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting coupon effectiveness');
+    console.log("[Mock] Getting coupon effectiveness");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 빈 배열
   return [];
 }
@@ -193,13 +195,13 @@ export async function getCouponEffectiveness(dateRange: DateRange): Promise<Coup
 export async function getPointsEffectiveness(dateRange: DateRange): Promise<PointsEffectiveness> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting points effectiveness');
+    console.log("[Mock] Getting points effectiveness");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 모든 값 0
   return EMPTY_POINTS_EFFECTIVENESS;
 }
@@ -210,13 +212,13 @@ export async function getPointsEffectiveness(dateRange: DateRange): Promise<Poin
 export async function getReviewAnalysis(dateRange: DateRange): Promise<ReviewAnalysis> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting review analysis');
+    console.log("[Mock] Getting review analysis");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 모든 값 0, 빈 배열
   return EMPTY_REVIEW_ANALYSIS;
 }
@@ -227,13 +229,13 @@ export async function getReviewAnalysis(dateRange: DateRange): Promise<ReviewAna
 export async function getDeliveryPerformance(dateRange: DateRange): Promise<DeliveryPerformance> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting delivery performance');
+    console.log("[Mock] Getting delivery performance");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 모든 값 0
   return EMPTY_DELIVERY_PERFORMANCE;
 }
@@ -241,16 +243,18 @@ export async function getDeliveryPerformance(dateRange: DateRange): Promise<Deli
 /**
  * 알림 효과
  */
-export async function getNotificationEffectiveness(dateRange: DateRange): Promise<NotificationEffectiveness> {
+export async function getNotificationEffectiveness(
+  dateRange: DateRange,
+): Promise<NotificationEffectiveness> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[IntegratedAnalytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[IntegratedAnalytics] Firebase query not implemented yet, returning empty data");
   } else {
-    console.log('[Mock] Getting notification effectiveness');
+    console.log("[Mock] Getting notification effectiveness");
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   // 초기 상태: 모든 값 0, 빈 객체
   return EMPTY_NOTIFICATION_EFFECTIVENESS;
 }
@@ -260,10 +264,10 @@ export async function getNotificationEffectiveness(dateRange: DateRange): Promis
  */
 export async function generateIntegratedReport(
   period: ReportPeriod,
-  dateRange: DateRange
+  dateRange: DateRange,
 ): Promise<IntegratedReport> {
-  console.log('[Mock] Generating integrated report:', period, dateRange);
-  
+  console.log("[Mock] Generating integrated report:", period, dateRange);
+
   const [
     kpi,
     hourlyAnalysis,
@@ -292,19 +296,19 @@ export async function generateIntegratedReport(
     period,
     dateRange,
     generatedAt: new Date(),
-    
+
     kpi,
     hourlyAnalysis,
     dayOfWeekAnalysis,
     topMenus,
     topCustomers,
-    
+
     couponEffectiveness,
     pointsEffectiveness,
     reviewAnalysis,
     deliveryPerformance,
     notificationEffectiveness,
-    
+
     insights: [],
     recommendations: [],
   };
@@ -315,16 +319,18 @@ export async function generateIntegratedReport(
  */
 export function exportReportToCSV(report: IntegratedReport): string {
   const lines: string[] = [];
-  
+
   // 헤더
-  lines.push('현풍닭칼국수 통합 리포트');
-  lines.push(`기간: ${report.dateRange.start.toLocaleDateString()} ~ ${report.dateRange.end.toLocaleDateString()}`);
+  lines.push("현풍닭칼국수 통합 리포트");
+  lines.push(
+    `기간: ${report.dateRange.start.toLocaleDateString()} ~ ${report.dateRange.end.toLocaleDateString()}`,
+  );
   lines.push(`생성일: ${report.generatedAt.toLocaleString()}`);
-  lines.push('');
-  
+  lines.push("");
+
   // KPI
-  lines.push('## 핵심 지표 (KPI)');
-  lines.push('지표,값');
+  lines.push("## 핵심 지표 (KPI)");
+  lines.push("지표,값");
   lines.push(`총 매출,${formatPrice(report.kpi.totalSales)}`);
   lines.push(`평균 주문 금액,${formatPrice(report.kpi.averageOrderValue)}`);
   lines.push(`총 주문 수,${report.kpi.totalOrders}건`);
@@ -333,23 +339,27 @@ export function exportReportToCSV(report: IntegratedReport): string {
   lines.push(`고객 유지율,${report.kpi.customerRetentionRate}%`);
   lines.push(`평균 평점,${report.kpi.averageRating}점`);
   lines.push(`총 리뷰 수,${report.kpi.totalReviews}개`);
-  lines.push('');
-  
+  lines.push("");
+
   // 메뉴 성과
-  lines.push('## 메뉴별 성과');
-  lines.push('메뉴명,주문수,매출,평점,리뷰수');
+  lines.push("## 메뉴별 성과");
+  lines.push("메뉴명,주문수,매출,평점,리뷰수");
   report.topMenus.forEach(menu => {
-    lines.push(`${menu.menuName},${menu.totalOrders},${menu.totalSales},${menu.averageRating},${menu.reviewCount}`);
+    lines.push(
+      `${menu.menuName},${menu.totalOrders},${menu.totalSales},${menu.averageRating},${menu.reviewCount}`,
+    );
   });
-  lines.push('');
-  
+  lines.push("");
+
   // 쿠폰 효과
-  lines.push('## 쿠폰 효과');
-  lines.push('쿠폰 타입,발급수,사용수,사용률,할인액,ROI');
+  lines.push("## 쿠폰 효과");
+  lines.push("쿠폰 타입,발급수,사용수,사용률,할인액,ROI");
   report.couponEffectiveness.forEach(coupon => {
-    lines.push(`${coupon.couponType},${coupon.totalIssued},${coupon.totalUsed},${coupon.usageRate}%,${coupon.totalDiscount},${coupon.roi}`);
+    lines.push(
+      `${coupon.couponType},${coupon.totalIssued},${coupon.totalUsed},${coupon.usageRate}%,${coupon.totalDiscount},${coupon.roi}`,
+    );
   });
-  lines.push('');
-  
-  return lines.join('\n');
+  lines.push("");
+
+  return lines.join("\n");
 }

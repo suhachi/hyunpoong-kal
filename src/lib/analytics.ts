@@ -2,15 +2,12 @@
  * Firebase Analytics
  * 사용자 행동 추적 및 분석
  */
-import { USE_FIREBASE } from '../config/env';
+import { USE_FIREBASE } from "../config/env";
 
 /**
  * 이벤트 로깅
  */
-export function trackEvent(
-  name: string,
-  params?: Record<string, any>
-): void {
+export function trackEvent(name: string, params?: Record<string, any>): void {
   if (USE_FIREBASE) {
     // TODO: Firebase Analytics 설정
     // import('firebase/analytics').then(({ logEvent }) => {
@@ -28,7 +25,7 @@ export function trackEvent(
  * 페이지 뷰 추적
  */
 export function trackPageView(pageName: string, params?: Record<string, any>): void {
-  trackEvent('page_view', {
+  trackEvent("page_view", {
     page_name: pageName,
     ...params,
   });
@@ -38,7 +35,7 @@ export function trackPageView(pageName: string, params?: Record<string, any>): v
  * 메뉴 조회 추적
  */
 export function trackMenuView(menuId: string, menuName: string): void {
-  trackEvent('menu_view', {
+  trackEvent("menu_view", {
     menu_id: menuId,
     menu_name: menuName,
   });
@@ -51,9 +48,9 @@ export function trackAddToCart(
   menuId: string,
   menuName: string,
   quantity: number,
-  price: number
+  price: number,
 ): void {
-  trackEvent('add_to_cart', {
+  trackEvent("add_to_cart", {
     menu_id: menuId,
     menu_name: menuName,
     quantity,
@@ -65,12 +62,8 @@ export function trackAddToCart(
 /**
  * 장바구니 제거 추적
  */
-export function trackRemoveFromCart(
-  menuId: string,
-  menuName: string,
-  quantity: number
-): void {
-  trackEvent('remove_from_cart', {
+export function trackRemoveFromCart(menuId: string, menuName: string, quantity: number): void {
+  trackEvent("remove_from_cart", {
     menu_id: menuId,
     menu_name: menuName,
     quantity,
@@ -80,11 +73,8 @@ export function trackRemoveFromCart(
 /**
  * 체크아웃 시작 추적
  */
-export function trackBeginCheckout(
-  itemCount: number,
-  totalAmount: number
-): void {
-  trackEvent('begin_checkout', {
+export function trackBeginCheckout(itemCount: number, totalAmount: number): void {
+  trackEvent("begin_checkout", {
     item_count: itemCount,
     value: totalAmount,
   });
@@ -98,9 +88,9 @@ export function trackPurchase(
   orderNumber: string,
   amount: number,
   paymentMethod: string,
-  itemCount: number
+  itemCount: number,
 ): void {
-  trackEvent('purchase', {
+  trackEvent("purchase", {
     transaction_id: orderId,
     order_number: orderNumber,
     value: amount,
@@ -112,12 +102,8 @@ export function trackPurchase(
 /**
  * 쿠폰 사용 추적
  */
-export function trackCouponUsed(
-  couponId: string,
-  couponType: string,
-  discount: number
-): void {
-  trackEvent('coupon_used', {
+export function trackCouponUsed(couponId: string, couponType: string, discount: number): void {
+  trackEvent("coupon_used", {
     coupon_id: couponId,
     coupon_type: couponType,
     discount,
@@ -127,12 +113,8 @@ export function trackCouponUsed(
 /**
  * 리뷰 작성 추적
  */
-export function trackReviewWritten(
-  orderId: string,
-  rating: number,
-  hasPhoto: boolean
-): void {
-  trackEvent('review_written', {
+export function trackReviewWritten(orderId: string, rating: number, hasPhoto: boolean): void {
+  trackEvent("review_written", {
     order_id: orderId,
     rating,
     has_photo: hasPhoto,
@@ -143,7 +125,7 @@ export function trackReviewWritten(
  * 검색 추적
  */
 export function trackSearch(searchTerm: string, resultCount: number): void {
-  trackEvent('search', {
+  trackEvent("search", {
     search_term: searchTerm,
     result_count: resultCount,
   });
@@ -152,12 +134,8 @@ export function trackSearch(searchTerm: string, resultCount: number): void {
 /**
  * 공유 추적
  */
-export function trackShare(
-  contentType: string,
-  itemId: string,
-  method: string
-): void {
-  trackEvent('share', {
+export function trackShare(contentType: string, itemId: string, method: string): void {
+  trackEvent("share", {
     content_type: contentType,
     item_id: itemId,
     method,
@@ -175,8 +153,8 @@ export function setUserProperties(properties: Record<string, any>): void {
     //     setUserProperties(analytics, properties);
     //   });
     // });
-    console.log('[Analytics - Firebase] User properties:', properties);
+    console.log("[Analytics - Firebase] User properties:", properties);
   } else {
-    console.log('[Analytics - Mock] User properties:', properties);
+    console.log("[Analytics - Mock] User properties:", properties);
   }
 }

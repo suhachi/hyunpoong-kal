@@ -1,7 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell, ShoppingCart, MessageCircle } from 'lucide-react';
-import { useCart } from '../../contexts/CartContext';
-import { FEATURE_FLAGS } from '../../config/env';
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Bell, ShoppingCart, MessageCircle } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { FEATURE_FLAGS } from "@/config/env";
 
 interface AppHeaderProps {
   showBack?: boolean;
@@ -10,16 +10,20 @@ interface AppHeaderProps {
 
 export function AppHeader({ showBack = false, title }: AppHeaderProps) {
   const navigate = useNavigate();
-  const { getTotalItems } = useCart();
+  const { actions: { getTotalItems } } = useCart();
   const totalItems = getTotalItems();
-  
+
   return (
-    <header 
+    <header
       className="sticky top-0 z-50 bg-white border-b border-[#2E1C10]/10"
       role="banner"
       aria-label="사이트 헤더"
     >
-      <nav className="flex items-center justify-between h-14 px-4" role="navigation" aria-label="주요 네비게이션">
+      <nav
+        className="flex items-center justify-between h-14 px-4"
+        role="navigation"
+        aria-label="주요 네비게이션"
+      >
         {/* 왼쪽: 뒤로가기 또는 로고 */}
         <div className="flex items-center">
           {showBack ? (
@@ -33,18 +37,12 @@ export function AppHeader({ showBack = false, title }: AppHeaderProps) {
           ) : (
             <Link to="/" className="flex items-center gap-2">
               <ChickenLogo />
-              <span className="text-[#2E1C10]">
-                현풍닭칼국수
-              </span>
+              <span className="text-[#2E1C10]">현풍닭칼국수</span>
             </Link>
           )}
-          {title && (
-            <h1 className="ml-2 text-[#2E1C10]">
-              {title}
-            </h1>
-          )}
+          {title && <h1 className="ml-2 text-[#2E1C10]">{title}</h1>}
         </div>
-        
+
         {/* 오른쪽: 고객지원, 알림, 장바구니 */}
         <div className="flex items-center gap-1">
           {FEATURE_FLAGS.support && (
@@ -56,7 +54,7 @@ export function AppHeader({ showBack = false, title }: AppHeaderProps) {
               <MessageCircle className="w-6 h-6 text-[#2E1C10]" />
             </Link>
           )}
-          
+
           <Link
             to="/notifications"
             className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#2E1C10]/5"
@@ -64,7 +62,7 @@ export function AppHeader({ showBack = false, title }: AppHeaderProps) {
           >
             <Bell className="w-6 h-6 text-[#2E1C10]" />
           </Link>
-          
+
           <Link
             to="/cart"
             className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#2E1C10]/5"
@@ -73,11 +71,11 @@ export function AppHeader({ showBack = false, title }: AppHeaderProps) {
             <ShoppingCart className="w-6 h-6 text-[#2E1C10]" aria-hidden="true" />
             {/* 장바구니 아이템 수 뱃지 */}
             {totalItems > 0 && (
-              <span 
+              <span
                 className="absolute top-1 right-1 flex items-center justify-center w-5 h-5 text-xs text-white bg-[#D61C1C] rounded-full"
                 aria-label={`${totalItems}개 상품`}
               >
-                {totalItems > 99 ? '99+' : totalItems}
+                {totalItems > 99 ? "99+" : totalItems}
               </span>
             )}
           </Link>
@@ -90,11 +88,11 @@ export function AppHeader({ showBack = false, title }: AppHeaderProps) {
 // 간단한 닭 로고 (SVG)
 function ChickenLogo() {
   return (
-    <svg 
-      width="32" 
-      height="32" 
-      viewBox="0 0 32 32" 
-      fill="none" 
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="현풍닭칼국수 로고"
@@ -114,6 +112,7 @@ function ChickenLogo() {
         stroke="#D61C1C"
         strokeWidth="1.5"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

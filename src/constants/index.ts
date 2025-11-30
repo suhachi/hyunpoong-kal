@@ -4,13 +4,13 @@
  */
 
 // 레이블
-export * from './labels';
+export * from "./labels";
 
 // 상태
-export * from './status';
+export * from "./status";
 
 // 컬러
-export * from './colors';
+export * from "./colors";
 
 // 유효성 검증
-export * from './validation';
+export * from "./validation";

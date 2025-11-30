@@ -1,6 +1,6 @@
 # Admin Settings - Full Source Code
 
-**Generated**: 2025-11-30-1717  
+**Generated**: 2025-11-30-1905  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -1219,12 +1219,25 @@ export function FCMTab() {
       const result = await runFCMDiagnostics();
       setDiagnostics(result);
       
+      // 전체 상태에 따라 다른 메시지 표시
       if (result.overall === 'pass') {
         toast.success('모든 FCM 설정이 정상입니다');
+      } else if (result.overall === 'info') {
+        // 미설정 상태는 정보 메시지로 표시
+        toast.info('FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요');
       } else if (result.overall === 'warning') {
         toast.warning('일부 설정을 확인해주세요');
       } else {
-        toast.error('FCM 설정에 문제가 있습니다');
+        // 실제 오류만 에러 메시지 표시
+        const hasActualError = result.checks.some(
+          check => check.status === 'fail' && check.name !== 'VAPID 키'
+        );
+        if (hasActualError) {
+          toast.error('FCM 설정에 문제가 있습니다');
+        } else {
+          // VAPID 키만 미설정인 경우는 정보 메시지
+          toast.info('FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요');
+        }
       }
     } catch (error) {
       console.error('Diagnostics failed:', error);

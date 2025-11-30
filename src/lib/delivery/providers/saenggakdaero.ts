@@ -1,6 +1,6 @@
 /**
  * '생각대로' 배달대행사 Provider - 스켈레톤
- * 
+ *
  * 실제 배달대행 계약 후 제공되는 API 스펙에 맞춰 구현
  * 현재는 스켈레톤 구조만 제공
  */
@@ -11,16 +11,16 @@ import type {
   CreateTaskParams,
   CreateTaskResult,
   DeliveryStatus,
-} from '../../../types/delivery';
-import { getEnv } from '../../../config/env';
+} from "../../../types/delivery";
+import { getEnv } from "../../../config/env";
 
 /**
  * '생각대로' 배달대행사 설정
  */
 const SAENGGAKDAERO_CONFIG = {
-  apiUrl: getEnv('VITE_SAENGGAKDAERO_API_URL', 'https://api.saenggakdaero.com'),
-  apiKey: getEnv('VITE_SAENGGAKDAERO_API_KEY', 'YOUR_API_KEY_HERE'),
-  merchantId: getEnv('VITE_SAENGGAKDAERO_MERCHANT_ID', 'YOUR_MERCHANT_ID'),
+  apiUrl: getEnv("VITE_SAENGGAKDAERO_API_URL", "https://api.saenggakdaero.com"),
+  apiKey: getEnv("VITE_SAENGGAKDAERO_API_KEY", "YOUR_API_KEY_HERE"),
+  merchantId: getEnv("VITE_SAENGGAKDAERO_MERCHANT_ID", "YOUR_MERCHANT_ID"),
 };
 
 /**
@@ -37,15 +37,12 @@ class SaenggakdaeroClient {
     this.merchantId = config.merchantId;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.apiKey}`,
-      'X-Merchant-Id': this.merchantId,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.apiKey}`,
+      "X-Merchant-Id": this.merchantId,
       ...options.headers,
     };
 
@@ -57,20 +54,20 @@ class SaenggakdaeroClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[Saenggakdaero] API Error:', response.status, errorText);
+        console.error("[Saenggakdaero] API Error:", response.status, errorText);
         throw new Error(`Saenggakdaero API Error: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('[Saenggakdaero] Request failed:', error);
+      console.error("[Saenggakdaero] Request failed:", error);
       throw error;
     }
   }
 
   /**
    * 배달 태스크 생성
-   * 
+   *
    * TODO: 실제 '생각대로' API 스펙에 맞게 수정
    */
   async createDeliveryTask(params: {
@@ -79,7 +76,7 @@ class SaenggakdaeroClient {
     dropoff: { address: string; lat: number; lng: number; phone?: string };
   }) {
     // 현재는 Mock 응답
-    console.info('[Saenggakdaero] createDeliveryTask (mock)', params);
+    console.info("[Saenggakdaero] createDeliveryTask (mock)", params);
 
     // TODO: 실제 API 호출
     /*
@@ -111,12 +108,12 @@ class SaenggakdaeroClient {
 
   /**
    * 배달 태스크 조회
-   * 
+   *
    * TODO: 실제 '생각대로' API 스펙에 맞게 수정
    */
   async getDeliveryTask(taskId: string) {
     // 현재는 Mock 응답
-    console.info('[Saenggakdaero] getDeliveryTask (mock)', taskId);
+    console.info("[Saenggakdaero] getDeliveryTask (mock)", taskId);
 
     // TODO: 실제 API 호출
     /*
@@ -128,8 +125,8 @@ class SaenggakdaeroClient {
     // Mock 응답
     return {
       id: taskId,
-      order_id: '',
-      status: 'REQUESTED',
+      order_id: "",
+      status: "REQUESTED",
       driver_id: null,
       driver_location: null,
       eta: 30,
@@ -140,12 +137,12 @@ class SaenggakdaeroClient {
 
   /**
    * 배달 태스크 취소
-   * 
+   *
    * TODO: 실제 '생각대로' API 스펙에 맞게 수정
    */
   async cancelDeliveryTask(taskId: string) {
     // 현재는 Mock 응답
-    console.info('[Saenggakdaero] cancelDeliveryTask (mock)', taskId);
+    console.info("[Saenggakdaero] cancelDeliveryTask (mock)", taskId);
 
     // TODO: 실제 API 호출
     /*
@@ -160,20 +157,20 @@ const client = new SaenggakdaeroClient(SAENGGAKDAERO_CONFIG);
 
 /**
  * '생각대로' 상태를 내부 상태로 매핑
- * 
+ *
  * TODO: 실제 '생각대로' API 상태 값에 맞게 수정
  */
 function mapSaenggakdaeroStatus(status: string): DeliveryStatus {
   const statusMap: Record<string, DeliveryStatus> = {
-    'REQUESTED': 'assigned',
-    'ASSIGNED': 'assigned',
-    'PICKED_UP': 'picked_up',
-    'IN_TRANSIT': 'delivering',
-    'DELIVERED': 'completed',
-    'CANCELLED': 'canceled',
+    REQUESTED: "assigned",
+    ASSIGNED: "assigned",
+    PICKED_UP: "picked_up",
+    IN_TRANSIT: "delivering",
+    DELIVERED: "completed",
+    CANCELLED: "canceled",
   };
 
-  return statusMap[status] || 'assigned';
+  return statusMap[status] || "assigned";
 }
 
 /**
@@ -181,7 +178,7 @@ function mapSaenggakdaeroStatus(status: string): DeliveryStatus {
  */
 export const saenggakdaeroProvider: DeliveryProvider = {
   async createTask(params: CreateTaskParams): Promise<CreateTaskResult> {
-    console.log('[Saenggakdaero] Creating task:', params);
+    console.log("[Saenggakdaero] Creating task:", params);
 
     const response = await client.createDeliveryTask({
       orderId: params.orderId,
@@ -203,14 +200,14 @@ export const saenggakdaeroProvider: DeliveryProvider = {
   },
 
   async getTask(taskId: string): Promise<DeliveryTask> {
-    console.log('[Saenggakdaero] Getting task:', taskId);
+    console.log("[Saenggakdaero] Getting task:", taskId);
 
     const data = await client.getDeliveryTask(taskId);
 
     // TODO: 실제 API 응답을 DeliveryTask 타입으로 변환
     return {
       taskId: data.id || taskId,
-      orderId: data.order_id || '',
+      orderId: data.order_id || "",
       driverId: data.driver_id,
       status: mapSaenggakdaeroStatus(data.status),
       eta: data.eta,
@@ -227,9 +224,8 @@ export const saenggakdaeroProvider: DeliveryProvider = {
   },
 
   async cancelTask(taskId: string): Promise<void> {
-    console.log('[Saenggakdaero] Canceling task:', taskId);
+    console.log("[Saenggakdaero] Canceling task:", taskId);
 
     await client.cancelDeliveryTask(taskId);
   },
 };
-

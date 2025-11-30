@@ -3,21 +3,27 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Button } from '../../../components/ui/button';
-import { Switch } from '../../../components/ui/switch';
-import { Separator } from '../../../components/ui/separator';
-import { Store, Save, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
-import { storeDocRef, type StoreDoc } from '../../../lib/firebase/firestore-schema';
-import { STORE_ID } from '../../../config/env';
-import { useAuth } from '../../../contexts/AuthContext';
-import { StoreLocationPicker } from '../../../components/admin/StoreLocationPicker';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Button } from "../../../components/ui/button";
+import { Switch } from "../../../components/ui/switch";
+import { Separator } from "../../../components/ui/separator";
+import { Store, Save, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../../../lib/firebase";
+import { storeDocRef, type StoreDoc } from "../../../lib/firebase/firestore-schema";
+import { STORE_ID } from "../../../config/env";
+import { useAuth } from "../../../contexts/AuthContext";
+import { StoreLocationPicker } from "../../../components/admin/StoreLocationPicker";
 
 export function StoreInfoTab() {
   const { user } = useAuth();
@@ -25,16 +31,16 @@ export function StoreInfoTab() {
   const [saving, setSaving] = useState(false);
   const [storeInfo, setStoreInfo] = useState<Partial<StoreDoc>>({
     storeId: STORE_ID,
-    name: '',
+    name: "",
     address: {
-      full: '',
-      detail: '',
+      full: "",
+      detail: "",
     },
-    phone: '',
+    phone: "",
     businessHours: {
-      open: '10:00',
-      close: '22:00',
-      days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+      open: "10:00",
+      close: "22:00",
+      days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
     },
     isOpen: true,
     deliveryAvailable: true,
@@ -56,7 +62,7 @@ export function StoreInfoTab() {
     try {
       const docRef = storeDocRef(STORE_ID);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data() as StoreDoc;
         setStoreInfo({
@@ -64,11 +70,11 @@ export function StoreInfoTab() {
         });
       } else {
         // 문서가 없으면 기본값 유지
-        console.log('[StoreInfoTab] Store document does not exist, using defaults');
+        console.log("[StoreInfoTab] Store document does not exist, using defaults");
       }
     } catch (error: any) {
-      console.error('[StoreInfoTab] Failed to load store info:', error);
-      toast.error('가게 정보를 불러오는데 실패했습니다');
+      console.error("[StoreInfoTab] Failed to load store info:", error);
+      toast.error("가게 정보를 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -76,23 +82,23 @@ export function StoreInfoTab() {
 
   const handleSave = async () => {
     if (!user) {
-      toast.error('로그인이 필요합니다');
+      toast.error("로그인이 필요합니다");
       return;
     }
 
     // 필수 항목 검증
     if (!storeInfo.name || !storeInfo.name.trim()) {
-      toast.error('가게 이름을 입력해주세요');
+      toast.error("가게 이름을 입력해주세요");
       return;
     }
 
     if (!storeInfo.phone || !storeInfo.phone.trim()) {
-      toast.error('전화번호를 입력해주세요');
+      toast.error("전화번호를 입력해주세요");
       return;
     }
 
     if (!storeInfo.address?.full || !storeInfo.address.full.trim()) {
-      toast.error('주소를 입력해주세요');
+      toast.error("주소를 입력해주세요");
       return;
     }
 
@@ -104,15 +110,15 @@ export function StoreInfoTab() {
         name: storeInfo.name.trim(),
         phone: storeInfo.phone.trim(),
         address: {
-          full: storeInfo.address?.full?.trim() || '',
-          detail: storeInfo.address?.detail?.trim() || '',
+          full: storeInfo.address?.full?.trim() || "",
+          detail: storeInfo.address?.detail?.trim() || "",
           lat: storeInfo.address?.lat ?? undefined,
           lng: storeInfo.address?.lng ?? undefined,
         },
         businessHours: storeInfo.businessHours || {
-          open: '10:00',
-          close: '22:00',
-          days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+          open: "10:00",
+          close: "22:00",
+          days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
         },
         isOpen: storeInfo.isOpen ?? true,
         deliveryAvailable: storeInfo.deliveryAvailable ?? true,
@@ -131,10 +137,10 @@ export function StoreInfoTab() {
       }
 
       await setDoc(docRef, updateData, { merge: true });
-      toast.success('가게 정보가 저장되었습니다');
+      toast.success("가게 정보가 저장되었습니다");
     } catch (error: any) {
-      console.error('[StoreInfoTab] Failed to save store info:', error);
-      toast.error('저장에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
+      console.error("[StoreInfoTab] Failed to save store info:", error);
+      toast.error("저장에 실패했습니다: " + (error.message || "알 수 없는 오류"));
     } finally {
       setSaving(false);
     }
@@ -157,20 +163,20 @@ export function StoreInfoTab() {
             <Store className="w-5 h-5 text-[#D61C1C]" />
             <CardTitle>기본 정보</CardTitle>
           </div>
-          <CardDescription>
-            가게의 기본 정보를 입력하세요
-          </CardDescription>
+          <CardDescription>가게의 기본 정보를 입력하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="store-name">가게 이름 *</Label>
             <Input
               id="store-name"
-              value={storeInfo.name || ''}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                name: e.target.value,
-              })}
+              value={storeInfo.name || ""}
+              onChange={e =>
+                setStoreInfo({
+                  ...storeInfo,
+                  name: e.target.value,
+                })
+              }
               placeholder="현풍닭칼국수"
               className="bg-gray-50"
             />
@@ -180,11 +186,13 @@ export function StoreInfoTab() {
             <Label htmlFor="store-phone">전화번호 *</Label>
             <Input
               id="store-phone"
-              value={storeInfo.phone || ''}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                phone: e.target.value,
-              })}
+              value={storeInfo.phone || ""}
+              onChange={e =>
+                setStoreInfo({
+                  ...storeInfo,
+                  phone: e.target.value,
+                })
+              }
               placeholder="053-123-4567"
               className="bg-gray-50"
             />
@@ -196,24 +204,24 @@ export function StoreInfoTab() {
       <Card>
         <CardHeader>
           <CardTitle>주소 정보</CardTitle>
-          <CardDescription>
-            가게의 주소를 입력하세요
-          </CardDescription>
+          <CardDescription>가게의 주소를 입력하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="store-address-full">주소 *</Label>
             <Input
               id="store-address-full"
-              value={storeInfo.address?.full || ''}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                address: {
-                  ...storeInfo.address,
-                  full: e.target.value,
-                  detail: storeInfo.address?.detail || '',
-                },
-              })}
+              value={storeInfo.address?.full || ""}
+              onChange={e =>
+                setStoreInfo({
+                  ...storeInfo,
+                  address: {
+                    ...storeInfo.address,
+                    full: e.target.value,
+                    detail: storeInfo.address?.detail || "",
+                  },
+                })
+              }
               placeholder="대구광역시 달성군 현풍면"
               className="bg-gray-50"
             />
@@ -223,17 +231,19 @@ export function StoreInfoTab() {
             <Label htmlFor="store-address-detail">상세 주소</Label>
             <Input
               id="store-address-detail"
-              value={storeInfo.address?.detail || ''}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                address: {
-                  ...storeInfo.address,
-                  full: storeInfo.address?.full || '',
-                  detail: e.target.value,
-                  lat: storeInfo.address?.lat,
-                  lng: storeInfo.address?.lng,
-                },
-              })}
+              value={storeInfo.address?.detail || ""}
+              onChange={e =>
+                setStoreInfo({
+                  ...storeInfo,
+                  address: {
+                    ...storeInfo.address,
+                    full: storeInfo.address?.full || "",
+                    detail: e.target.value,
+                    lat: storeInfo.address?.lat,
+                    lng: storeInfo.address?.lng,
+                  },
+                })
+              }
               placeholder="상세 주소를 입력하세요"
               className="bg-gray-50"
             />
@@ -245,24 +255,22 @@ export function StoreInfoTab() {
       <Card>
         <CardHeader>
           <CardTitle>영업 설정</CardTitle>
-          <CardDescription>
-            영업 상태 및 배달 설정을 관리하세요
-          </CardDescription>
+          <CardDescription>영업 상태 및 배달 설정을 관리하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>영업 중</Label>
-              <p className="text-sm text-[#2E1C10]/60">
-                현재 영업 상태를 표시합니다
-              </p>
+              <p className="text-sm text-[#2E1C10]/60">현재 영업 상태를 표시합니다</p>
             </div>
             <Switch
               checked={storeInfo.isOpen ?? true}
-              onCheckedChange={(checked) => setStoreInfo({
-                ...storeInfo,
-                isOpen: checked,
-              })}
+              onCheckedChange={checked =>
+                setStoreInfo({
+                  ...storeInfo,
+                  isOpen: checked,
+                })
+              }
             />
           </div>
 
@@ -271,16 +279,16 @@ export function StoreInfoTab() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>배달 가능</Label>
-              <p className="text-sm text-[#2E1C10]/60">
-                배달 서비스 제공 여부
-              </p>
+              <p className="text-sm text-[#2E1C10]/60">배달 서비스 제공 여부</p>
             </div>
             <Switch
               checked={storeInfo.deliveryAvailable ?? true}
-              onCheckedChange={(checked) => setStoreInfo({
-                ...storeInfo,
-                deliveryAvailable: checked,
-              })}
+              onCheckedChange={checked =>
+                setStoreInfo({
+                  ...storeInfo,
+                  deliveryAvailable: checked,
+                })
+              }
             />
           </div>
 
@@ -292,10 +300,12 @@ export function StoreInfoTab() {
               id="store-min-order"
               type="number"
               value={storeInfo.minOrderAmount || 15000}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                minOrderAmount: parseInt(e.target.value) || 0,
-              })}
+              onChange={e =>
+                setStoreInfo({
+                  ...storeInfo,
+                  minOrderAmount: parseInt(e.target.value) || 0,
+                })
+              }
               className="bg-gray-50"
             />
           </div>
@@ -306,10 +316,12 @@ export function StoreInfoTab() {
               id="store-delivery-fee"
               type="number"
               value={storeInfo.deliveryFee || 3000}
-              onChange={(e) => setStoreInfo({
-                ...storeInfo,
-                deliveryFee: parseInt(e.target.value) || 0,
-              })}
+              onChange={e =>
+                setStoreInfo({
+                  ...storeInfo,
+                  deliveryFee: parseInt(e.target.value) || 0,
+                })
+              }
               className="bg-gray-50"
             />
           </div>
@@ -320,9 +332,7 @@ export function StoreInfoTab() {
       <Card>
         <CardHeader>
           <CardTitle>영업시간</CardTitle>
-          <CardDescription>
-            가게의 영업시간을 설정하세요
-          </CardDescription>
+          <CardDescription>가게의 영업시간을 설정하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -331,16 +341,26 @@ export function StoreInfoTab() {
               <Input
                 id="store-open-time"
                 type="time"
-                value={storeInfo.businessHours?.open || '10:00'}
-                onChange={(e) => setStoreInfo({
-                  ...storeInfo,
-                  businessHours: {
-                    ...storeInfo.businessHours,
-                    open: e.target.value,
-                    close: storeInfo.businessHours?.close || '22:00',
-                    days: storeInfo.businessHours?.days || ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
-                  },
-                })}
+                value={storeInfo.businessHours?.open || "10:00"}
+                onChange={e =>
+                  setStoreInfo({
+                    ...storeInfo,
+                    businessHours: {
+                      ...storeInfo.businessHours,
+                      open: e.target.value,
+                      close: storeInfo.businessHours?.close || "22:00",
+                      days: storeInfo.businessHours?.days || [
+                        "mon",
+                        "tue",
+                        "wed",
+                        "thu",
+                        "fri",
+                        "sat",
+                        "sun",
+                      ],
+                    },
+                  })
+                }
                 className="bg-gray-50"
               />
             </div>
@@ -350,16 +370,26 @@ export function StoreInfoTab() {
               <Input
                 id="store-close-time"
                 type="time"
-                value={storeInfo.businessHours?.close || '22:00'}
-                onChange={(e) => setStoreInfo({
-                  ...storeInfo,
-                  businessHours: {
-                    ...storeInfo.businessHours,
-                    open: storeInfo.businessHours?.open || '10:00',
-                    close: e.target.value,
-                    days: storeInfo.businessHours?.days || ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
-                  },
-                })}
+                value={storeInfo.businessHours?.close || "22:00"}
+                onChange={e =>
+                  setStoreInfo({
+                    ...storeInfo,
+                    businessHours: {
+                      ...storeInfo.businessHours,
+                      open: storeInfo.businessHours?.open || "10:00",
+                      close: e.target.value,
+                      days: storeInfo.businessHours?.days || [
+                        "mon",
+                        "tue",
+                        "wed",
+                        "thu",
+                        "fri",
+                        "sat",
+                        "sun",
+                      ],
+                    },
+                  })
+                }
                 className="bg-gray-50"
               />
             </div>
@@ -372,7 +402,8 @@ export function StoreInfoTab() {
         <CardHeader>
           <CardTitle>위치(지도)</CardTitle>
           <CardDescription>
-            주소 입력 후 지도를 클릭해서 가게 위치를 지정해 주세요. 지정된 위치는 고객 앱에서 지도에 표시됩니다.
+            주소 입력 후 지도를 클릭해서 가게 위치를 지정해 주세요. 지정된 위치는 고객 앱에서 지도에
+            표시됩니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -380,27 +411,25 @@ export function StoreInfoTab() {
             lat={storeInfo.address?.lat}
             lng={storeInfo.address?.lng}
             addressText={storeInfo.address?.full}
-            onChange={(value) => setStoreInfo({
-              ...storeInfo,
-              address: {
-                ...storeInfo.address,
-                full: storeInfo.address?.full || '',
-                detail: storeInfo.address?.detail || '',
-                lat: value.lat,
-                lng: value.lng,
-              },
-            })}
+            onChange={value =>
+              setStoreInfo({
+                ...storeInfo,
+                address: {
+                  ...storeInfo.address,
+                  full: storeInfo.address?.full || "",
+                  detail: storeInfo.address?.detail || "",
+                  lat: value.lat,
+                  lng: value.lng,
+                },
+              })
+            }
           />
         </CardContent>
       </Card>
 
       {/* 저장 버튼 */}
       <div className="flex justify-end gap-3">
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-[#D61C1C] hover:bg-[#B81515]"
-        >
+        <Button onClick={handleSave} disabled={saving} className="bg-[#D61C1C] hover:bg-[#B81515]">
           {saving ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -417,4 +446,3 @@ export function StoreInfoTab() {
     </div>
   );
 }
-

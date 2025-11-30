@@ -3,25 +3,25 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { formatPrice } from './format';
+import { formatPrice } from "./format";
 
 /**
  * 배달비 계산
  */
 export function calculateDeliveryFee(distance: number, nightTime: boolean = false): number {
   let baseFee = 3000;
-  
+
   // 거리별 추가 요금
   if (distance > 3000) {
     const extraKm = Math.ceil((distance - 3000) / 1000);
     baseFee += extraKm * 1000;
   }
-  
+
   // 야간 할증 (22:00-06:00)
   if (nightTime) {
     baseFee += 2000;
   }
-  
+
   return baseFee;
 }
 
@@ -30,18 +30,18 @@ export function calculateDeliveryFee(distance: number, nightTime: boolean = fals
  */
 export function applyDiscount(
   price: number,
-  discountType: 'amount' | 'percent',
-  discountValue: number
+  discountType: "amount" | "percent",
+  discountValue: number,
 ): number {
-  if (discountType === 'amount') {
+  if (discountType === "amount") {
     return Math.max(0, price - discountValue);
   }
-  
-  if (discountType === 'percent') {
+
+  if (discountType === "percent") {
     const discountAmount = Math.floor(price * discountValue);
     return Math.max(0, price - discountAmount);
   }
-  
+
   return price;
 }
 
@@ -65,7 +65,7 @@ export function isMinimumOrderMet(amount: number, minimum: number = 10000): bool
 export function canUsePoints(
   points: number,
   orderAmount: number,
-  minUse: number = 1000
+  minUse: number = 1000,
 ): {
   canUse: boolean;
   message?: string;
@@ -76,7 +76,7 @@ export function canUsePoints(
       message: `최소 ${formatPrice(minUse)} 이상 사용 가능합니다`,
     };
   }
-  
+
   // 주문 금액의 50%까지만 사용 가능
   const maxUse = Math.floor(orderAmount * 0.5);
   if (points > maxUse) {
@@ -85,7 +85,7 @@ export function canUsePoints(
       message: `주문 금액의 50%까지만 사용 가능합니다 (최대 ${formatPrice(maxUse)})`,
     };
   }
-  
+
   return { canUse: true };
 }
 
@@ -96,7 +96,7 @@ export function calculateTotalAmount(
   subtotal: number,
   deliveryFee: number,
   discount: number = 0,
-  pointsUsed: number = 0
+  pointsUsed: number = 0,
 ): number {
   const total = subtotal + deliveryFee - discount - pointsUsed;
   return Math.max(0, total);
@@ -133,7 +133,7 @@ export function calculateRefundAmount(
     fullRefundMinutes: number;
     partialRefundRate: number;
   },
-  elapsedMinutes: number
+  elapsedMinutes: number,
 ): {
   refundAmount: number;
   refundRate: number;
@@ -145,11 +145,11 @@ export function calculateRefundAmount(
       refundRate: 100,
     };
   }
-  
+
   // 부분 환불
   const refundAmount = Math.floor(totalPaid * refundPolicy.partialRefundRate);
   const refundRate = refundPolicy.partialRefundRate * 100;
-  
+
   return {
     refundAmount,
     refundRate,

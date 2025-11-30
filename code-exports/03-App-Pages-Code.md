@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-11-30-1717  
+**Generated**: 2025-11-30-1905  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -548,6 +548,7 @@ import { PriceBreakdown } from '../../components/shared/PriceBreakdown';
 import { ORDER_LIMITS } from '../../constants';
 import type { Menu } from '../../types/menu';
 import { formatPrice } from '../../lib/utils';
+import { AddressInput } from '../../components/app/AddressInput';
 
 // 실제 음식 이미지 매핑
 const menuImages: Record<string, string> = {
@@ -573,11 +574,13 @@ export function Cart() {
   const {
     items,
     deliveryType,
+    deliveryAddress,
     requests,
     couponDiscount,
     removeItem,
     updateQuantity,
     setDeliveryType,
+    setDeliveryAddress,
     setRequests,
     getSubtotal,
     getDeliveryFee,
@@ -742,6 +745,25 @@ export function Cart() {
           </RadioGroup>
         </div>
 
+        {/* 배달 주소 설정 (배달 선택 시 필수) */}
+        {deliveryType === 'delivery' && (
+          <div className="space-y-2">
+            <AddressInput
+              value={deliveryAddress}
+              onChange={setDeliveryAddress}
+              required
+            />
+            {!deliveryAddress?.address && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  배달 주문은 주소를 먼저 설정해야 합니다.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
+
         {/* 요청사항 */}
         <div>
           <h2 className="text-[#2E1C10] mb-3">
@@ -809,10 +831,20 @@ export function Cart() {
           data-testid="cart.button.submit"
           size="lg"
           className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
-          disabled={!canProceed}
-          onClick={() => navigate('/checkout')}
+          disabled={!canProceed || (deliveryType === 'delivery' && !deliveryAddress?.address)}
+          onClick={() => {
+            if (deliveryType === 'delivery' && !deliveryAddress?.address) {
+              toast.error('배달 주소를 먼저 설정해주세요');
+              return;
+            }
+            navigate('/checkout');
+          }}
         >
-          {canProceed ? `${formatPrice(totalAmount)} 결제하기` : '최소 주문 금액 미달'}
+          {!canProceed
+            ? '최소 주문 금액 미달'
+            : deliveryType === 'delivery' && !deliveryAddress?.address
+              ? '배달 주소를 설정해주세요'
+              : `${formatPrice(totalAmount)} 결제하기`}
         </Button>
       </div>
     </div>

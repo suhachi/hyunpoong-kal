@@ -4,9 +4,9 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { memo } from 'react';
-import { Separator } from '../ui/separator';
-import { formatPrice } from '../../lib/utils';
+import { memo } from "react";
+import { Separator } from "../ui/separator";
+import { formatPrice } from "../../lib/utils";
 
 interface PriceBreakdownProps {
   subtotal: number;
@@ -25,7 +25,7 @@ export const PriceBreakdown = memo(function PriceBreakdown({
   pointsDiscount = 0,
   total,
   showDeliveryFee = true,
-  className = '',
+  className = "",
 }: PriceBreakdownProps) {
   return (
     <div className={`space-y-3 ${className}`}>
@@ -40,7 +40,7 @@ export const PriceBreakdown = memo(function PriceBreakdown({
         <div className="flex justify-between text-sm">
           <span className="text-[#2E1C10]/60">배달비</span>
           <span className="text-[#2E1C10]">
-            {deliveryFee === 0 ? '무료' : formatPrice(deliveryFee)}
+            {deliveryFee === 0 ? "무료" : formatPrice(deliveryFee)}
           </span>
         </div>
       )}

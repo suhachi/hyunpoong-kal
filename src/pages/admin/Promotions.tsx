@@ -4,15 +4,15 @@
  * Phase 2-8: 쿠폰 발급 및 통계
  */
 
-import { useState, useEffect } from 'react';
-import { CouponStats, CouponIssue } from '../../types/coupon';
-import { getCouponStats, issueCoupon } from '../../lib/coupons.api';
-import { getCurrentUser } from '../../lib/auth';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Button } from '../../components/ui/button';
-import { Card } from '../../components/ui/card';
-import { Plus, Ticket } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { CouponStats, CouponIssue, CouponType } from "@/types/coupon";
+import { getCouponStats, issueCoupon } from "@/lib/coupons.api";
+import { getCurrentUser } from "@/lib/auth";
+import { StatCard } from "@/components/admin/common/StatCard";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Plus, Ticket } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -20,19 +20,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
-import { Label } from '../../components/ui/label';
-import { Input } from '../../components/ui/input';
-import { Textarea } from '../../components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { UserSearchDialog } from '../../components/admin/UserSearchDialog';
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { UserSearchDialog } from "@/components/admin/UserSearchDialog";
 
 export function AdminPromotions() {
   const [stats, setStats] = useState<CouponStats | null>(null);
@@ -42,19 +42,23 @@ export function AdminPromotions() {
 
   // 발급 폼
   const [issueForm, setIssueForm] = useState<CouponIssue>({
-    type: 'admin',
-    title: '',
-    description: '',
+    type: "admin",
+    title: "",
+    description: "",
     amount: 5000,
     minSpend: 15000,
     expiryDays: 30,
     issueLimit: 100,
-    targetType: 'all',
+    targetType: "all",
   });
 
   // 사용자 검색 다이얼로그
   const [userSearchOpen, setUserSearchOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{ uid: string; name?: string; email?: string } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<{
+    uid: string;
+    name?: string;
+    email?: string;
+  } | null>(null);
 
   const user = getCurrentUser();
 
@@ -68,8 +72,8 @@ export function AdminPromotions() {
       const data = await getCouponStats();
       setStats(data);
     } catch (error) {
-      console.error('Failed to load stats:', error);
-      toast.error('통계를 불러오는데 실패했습니다');
+      console.error("Failed to load stats:", error);
+      toast.error("통계를 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -79,44 +83,44 @@ export function AdminPromotions() {
     if (!user) return;
 
     if (!issueForm.title.trim() || !issueForm.description.trim()) {
-      toast.error('제목과 설명을 입력하세요');
+      toast.error("제목과 설명을 입력하세요");
       return;
     }
 
     // 발급 대상 검증
-    if (issueForm.targetType === 'user' && !issueForm.targetUserId) {
-      toast.error('특정 고객을 선택하세요');
+    if (issueForm.targetType === "user" && !issueForm.targetUserId) {
+      toast.error("특정 고객을 선택하세요");
       return;
     }
 
-    if (issueForm.targetType === 'phone' && !issueForm.targetPhone?.trim()) {
-      toast.error('전화번호를 입력하세요');
+    if (issueForm.targetType === "phone" && !issueForm.targetPhone?.trim()) {
+      toast.error("전화번호를 입력하세요");
       return;
     }
 
     setIssuing(true);
     try {
       const issued = await issueCoupon(issueForm, user.uid, user.name);
-      
+
       toast.success(`쿠폰 ${issued.length}장을 발급했습니다`);
       setIssueDialogOpen(false);
       loadStats();
 
       // 폼 초기화
       setIssueForm({
-        type: 'admin',
-        title: '',
-        description: '',
+        type: "admin",
+        title: "",
+        description: "",
         amount: 5000,
         minSpend: 15000,
         expiryDays: 30,
         issueLimit: 100,
-        targetType: 'all',
+        targetType: "all",
       });
       setSelectedUser(null);
     } catch (error: any) {
-      console.error('Failed to issue coupons:', error);
-      toast.error(error.message || '쿠폰 발급에 실패했습니다');
+      console.error("Failed to issue coupons:", error);
+      toast.error(error.message || "쿠폰 발급에 실패했습니다");
     } finally {
       setIssuing(false);
     }
@@ -131,7 +135,7 @@ export function AdminPromotions() {
     });
     setIssueForm({
       ...issueForm,
-      targetType: 'user',
+      targetType: "user",
       targetUserId: user.uid,
     });
   };
@@ -142,9 +146,7 @@ export function AdminPromotions() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#333] mb-2">쿠폰/프로모션</h1>
-          <p className="text-[#8B7355]">
-            쿠폰을 발급하고 사용 현황을 관리하세요
-          </p>
+          <p className="text-[#8B7355]">쿠폰을 발급하고 사용 현황을 관리하세요</p>
         </div>
         <Button onClick={() => setIssueDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
@@ -155,11 +157,7 @@ export function AdminPromotions() {
       {/* 통계 */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            title="발급 총량"
-            value={stats.totalIssued}
-            subtitle="총 발급 쿠폰"
-          />
+          <StatCard title="발급 총량" value={stats.totalIssued} subtitle="총 발급 쿠폰" />
           <StatCard
             title="사용 완료"
             value={stats.totalUsed}
@@ -190,19 +188,27 @@ export function AdminPromotions() {
         <div className="space-y-3 text-sm text-[#8B7355]">
           <div className="flex items-start gap-2">
             <span className="text-[#D61C1C]">•</span>
-            <span><strong>사진 리뷰 보상:</strong> 자동 발급 (3,000원, 10,000원 이상 주문 시)</span>
+            <span>
+              <strong>사진 리뷰 보상:</strong> 자동 발급 (3,000원, 10,000원 이상 주문 시)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#F37021]">•</span>
-            <span><strong>신규 가입:</strong> 자동 발급 (5,000원, 15,000원 이상 주문 시)</span>
+            <span>
+              <strong>신규 가입:</strong> 자동 발급 (5,000원, 15,000원 이상 주문 시)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#C7A45A]">•</span>
-            <span><strong>관리자 발급:</strong> 수동 발급 (금액/조건 설정 가능)</span>
+            <span>
+              <strong>관리자 발급:</strong> 수동 발급 (금액/조건 설정 가능)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-gray-400">•</span>
-            <span><strong>만료 처리:</strong> 매일 04:00 자동 처리 (Firebase Functions)</span>
+            <span>
+              <strong>만료 처리:</strong> 매일 04:00 자동 처리 (Firebase Functions)
+            </span>
           </div>
         </div>
       </Card>
@@ -213,9 +219,7 @@ export function AdminPromotions() {
         <div className="text-center py-8 text-gray-500">
           <Ticket className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p>발급 내역이 표시됩니다</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Firebase 연동 시 실시간 내역 조회
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Firebase 연동 시 실시간 내역 조회</p>
         </div>
       </Card>
 
@@ -224,9 +228,7 @@ export function AdminPromotions() {
         <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
             <DialogTitle>쿠폰 발급</DialogTitle>
-            <DialogDescription>
-              새로운 쿠폰을 발급합니다
-            </DialogDescription>
+            <DialogDescription>새로운 쿠폰을 발급합니다</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -235,7 +237,7 @@ export function AdminPromotions() {
               <Label>쿠폰 타입</Label>
               <Select
                 value={issueForm.type}
-                onValueChange={(v) => setIssueForm({ ...issueForm, type: v as any })}
+                onValueChange={v => setIssueForm({ ...issueForm, type: v as CouponType })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -253,7 +255,7 @@ export function AdminPromotions() {
               <Label>제목</Label>
               <Input
                 value={issueForm.title}
-                onChange={(e) => setIssueForm({ ...issueForm, title: e.target.value })}
+                onChange={e => setIssueForm({ ...issueForm, title: e.target.value })}
                 placeholder="예: 설날 특별 할인 쿠폰"
               />
             </div>
@@ -263,7 +265,7 @@ export function AdminPromotions() {
               <Label>설명</Label>
               <Textarea
                 value={issueForm.description}
-                onChange={(e) => setIssueForm({ ...issueForm, description: e.target.value })}
+                onChange={e => setIssueForm({ ...issueForm, description: e.target.value })}
                 placeholder="예: 20,000원 이상 주문 시 사용 가능"
                 rows={2}
               />
@@ -276,7 +278,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.amount}
-                  onChange={(e) => setIssueForm({ ...issueForm, amount: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, amount: Number(e.target.value) })}
                   min="1000"
                   step="1000"
                 />
@@ -286,7 +288,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.minSpend}
-                  onChange={(e) => setIssueForm({ ...issueForm, minSpend: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, minSpend: Number(e.target.value) })}
                   min="0"
                   step="1000"
                 />
@@ -300,7 +302,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.expiryDays}
-                  onChange={(e) => setIssueForm({ ...issueForm, expiryDays: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, expiryDays: Number(e.target.value) })}
                   min="1"
                 />
               </div>
@@ -309,7 +311,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.issueLimit}
-                  onChange={(e) => setIssueForm({ ...issueForm, issueLimit: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, issueLimit: Number(e.target.value) })}
                   min="1"
                 />
               </div>
@@ -319,11 +321,11 @@ export function AdminPromotions() {
             <div className="space-y-3 border-t pt-4">
               <Label>발급 대상</Label>
               <RadioGroup
-                value={issueForm.targetType || 'all'}
-                onValueChange={(value) => {
+                value={issueForm.targetType || "all"}
+                onValueChange={value => {
                   setIssueForm({
                     ...issueForm,
-                    targetType: value as 'all' | 'user' | 'phone',
+                    targetType: value as "all" | "user" | "phone",
                     targetUserId: undefined,
                     targetPhone: undefined,
                   });
@@ -332,20 +334,26 @@ export function AdminPromotions() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="all" id="target-all" />
-                  <Label htmlFor="target-all" className="cursor-pointer">전체 고객</Label>
+                  <Label htmlFor="target-all" className="cursor-pointer">
+                    전체 고객
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="user" id="target-user" />
-                  <Label htmlFor="target-user" className="cursor-pointer">특정 고객 (회원 검색)</Label>
+                  <Label htmlFor="target-user" className="cursor-pointer">
+                    특정 고객 (회원 검색)
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="phone" id="target-phone" />
-                  <Label htmlFor="target-phone" className="cursor-pointer">전화번호로 지정</Label>
+                  <Label htmlFor="target-phone" className="cursor-pointer">
+                    전화번호로 지정
+                  </Label>
                 </div>
               </RadioGroup>
 
               {/* 특정 고객 선택 */}
-              {issueForm.targetType === 'user' && (
+              {issueForm.targetType === "user" && (
                 <div className="space-y-2 pl-6">
                   <Button
                     type="button"
@@ -353,7 +361,9 @@ export function AdminPromotions() {
                     size="sm"
                     onClick={() => setUserSearchOpen(true)}
                   >
-                    {selectedUser ? `${selectedUser.name || selectedUser.email} (선택됨)` : '고객 검색'}
+                    {selectedUser
+                      ? `${selectedUser.name || selectedUser.email} (선택됨)`
+                      : "고객 검색"}
                   </Button>
                   {selectedUser && (
                     <div className="text-xs text-gray-500">
@@ -364,15 +374,15 @@ export function AdminPromotions() {
               )}
 
               {/* 전화번호 입력 */}
-              {issueForm.targetType === 'phone' && (
+              {issueForm.targetType === "phone" && (
                 <div className="space-y-2 pl-6">
                   <Input
                     type="tel"
                     placeholder="010-1234-5678"
-                    value={issueForm.targetPhone || ''}
-                    onChange={(e) => {
+                    value={issueForm.targetPhone || ""}
+                    onChange={e => {
                       // 숫자와 하이픈만 허용
-                      const value = e.target.value.replace(/[^\d-]/g, '');
+                      const value = e.target.value.replace(/[^\d-]/g, "");
                       setIssueForm({ ...issueForm, targetPhone: value });
                     }}
                   />
@@ -385,15 +395,11 @@ export function AdminPromotions() {
           </div>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIssueDialogOpen(false)}
-              disabled={issuing}
-            >
+            <Button variant="outline" onClick={() => setIssueDialogOpen(false)} disabled={issuing}>
               취소
             </Button>
             <Button onClick={handleIssue} disabled={issuing}>
-              {issuing ? '발급 중...' : '발급'}
+              {issuing ? "발급 중..." : "발급"}
             </Button>
           </DialogFooter>
         </DialogContent>

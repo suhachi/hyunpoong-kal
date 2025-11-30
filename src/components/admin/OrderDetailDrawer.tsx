@@ -1,20 +1,14 @@
-import { useEffect, useState } from 'react';
-import type { Order, OrderLog } from '../../types/order';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '../ui/sheet';
-import { Badge } from '../ui/badge';
-import { Separator } from '../ui/separator';
-import { ScrollArea } from '../ui/scroll-area';
-import { MapPin, Phone, Mail, FileText, CreditCard, Clock } from 'lucide-react';
-import { fetchOrderLogs } from '../../lib/admin/orders.api';
-import { OrderActionBar } from './OrderActionBar';
-import { formatPrice, formatDateTime, formatTime } from '../../lib/utils';
-import { getOrderStatusLabelForAdmin } from '../../lib/orders.utils';
+import { useEffect, useState } from "react";
+import { type Order, type OrderLog, OrderStatus, PaymentMethod, PaymentStatus } from "@/types/order";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MapPin, Phone, Mail, FileText, CreditCard, Clock } from "lucide-react";
+import { fetchOrderLogs } from "@/lib/admin/orders.api";
+import { OrderActionBar } from "./OrderActionBar";
+import { formatPrice, formatDateTime, formatTime } from "@/lib/utils";
+import { getOrderStatusLabelForAdmin } from "@/lib/orders.utils";
 
 interface OrderDetailDrawerProps {
   order: Order | null;
@@ -37,21 +31,20 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
 
   if (!order) return null;
 
-
   // 상태 라벨은 getOrderStatusLabelForAdmin 사용
 
   // 결제수단 라벨
   const paymentMethodLabels: Record<string, string> = {
-    app_card: '앱 결제',
-    meet_card: '만나서 카드',
-    meet_cash: '만나서 현금',
+    [PaymentMethod.APP_CARD]: "앱 결제",
+    [PaymentMethod.MEET_CARD]: "만나서 카드",
+    [PaymentMethod.MEET_CASH]: "만나서 현금",
     // 기존 호환성 (레거시 데이터)
-    card: '카드',
-    transfer: '계좌이체',
-    easy_pay: '간편결제',
-    on_site: '만나서결제',
-    on_site_card: '만나서 카드',
-    on_site_cash: '만나서 현금',
+    card: "카드",
+    transfer: "계좌이체",
+    easy_pay: "간편결제",
+    on_site: "만나서결제",
+    on_site_card: "만나서 카드",
+    on_site_cash: "만나서 현금",
   };
 
   // 타임라인 항목
@@ -59,19 +52,21 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
     .filter(([_, timestamp]) => timestamp)
     .map(([status, timestamp]) => ({
       status,
-      label: statusLabels[status] || status,
+      label: getOrderStatusLabelForAdmin(status as OrderStatus),
       timestamp: timestamp!,
     }))
     .sort((a, b) => {
       const toMs = (t: any) => {
         if (!t) return 0;
-        if (typeof t === 'string') {
+        if (typeof t === "string") {
           const ms = Date.parse(t);
           return isNaN(ms) ? 0 : ms;
         }
-        if (typeof t === 'object') {
-          if ('seconds' in t && typeof (t as any).seconds === 'number') return (t as any).seconds * 1000;
-          if ('toDate' in t && typeof (t as any).toDate === 'function') return (t as any).toDate().getTime();
+        if (typeof t === "object") {
+          if ("seconds" in t && typeof (t as any).seconds === "number")
+            return (t as any).seconds * 1000;
+          if ("toDate" in t && typeof (t as any).toDate === "function")
+            return (t as any).toDate().getTime();
         }
         return 0;
       };
@@ -92,24 +87,24 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
             <div className="flex items-center justify-between">
               <Badge
                 variant={
-                  order.status === 'completed'
-                    ? 'default'
-                    : order.status === 'cancelled'
-                    ? 'destructive'
-                    : 'secondary'
+                  order.status === OrderStatus.COMPLETED
+                    ? "default"
+                    : order.status === OrderStatus.CANCELLED
+                      ? "destructive"
+                      : "secondary"
                 }
                 className={
-                  order.status === 'pending'
-                    ? 'bg-gray-100 text-gray-700'
-                    : order.status === 'accepted'
-                    ? 'bg-blue-100 text-blue-700'
-                    : order.status === 'cooking'
-                    ? 'bg-amber-100 text-amber-700'
-                    : order.status === 'delivering'
-                    ? 'bg-purple-100 text-purple-700'
-                    : order.status === 'completed'
-                    ? 'bg-green-100 text-green-700'
-                    : ''
+                  order.status === OrderStatus.PENDING
+                    ? "bg-gray-100 text-gray-700"
+                    : order.status === OrderStatus.ACCEPTED
+                      ? "bg-blue-100 text-blue-700"
+                      : order.status === OrderStatus.COOKING
+                        ? "bg-amber-100 text-amber-700"
+                        : order.status === OrderStatus.DELIVERING
+                          ? "bg-purple-100 text-purple-700"
+                          : order.status === OrderStatus.COMPLETED
+                            ? "bg-green-100 text-green-700"
+                            : ""
                 }
               >
                 {getOrderStatusLabelForAdmin(order.status)}
@@ -136,15 +131,13 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                         {item.options.noodle && <div>면: {item.options.noodle}</div>}
                         {item.options.spicy && <div>맵기: {item.options.spicy}</div>}
                         {item.options.toppings && item.options.toppings.length > 0 && (
-                          <div>토핑: {item.options.toppings.join(', ')}</div>
+                          <div>토핑: {item.options.toppings.join(", ")}</div>
                         )}
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-[#333]">{item.quantity}개</div>
-                      <div className="text-sm text-[#8B7355]">
-                        {formatPrice(item.subtotal)}
-                      </div>
+                      <div className="text-sm text-[#8B7355]">{formatPrice(item.subtotal)}</div>
                     </div>
                   </div>
                 ))}
@@ -183,7 +176,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
               <div className="space-y-3 text-sm">
                 <div className="flex gap-2">
                   <Badge variant="outline">
-                    {order.deliveryType === 'delivery' ? '배달' : '포장'}
+                    {order.deliveryType === "delivery" ? "배달" : "포장"}
                   </Badge>
                 </div>
 
@@ -229,29 +222,27 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2 items-center">
                     <CreditCard className="w-4 h-4 text-[#8B7355]" />
-                    <span className="text-[#333]">
-                      {paymentMethodLabels[order.payment.method]}
-                    </span>
+                    <span className="text-[#333]">{paymentMethodLabels[order.payment.method]}</span>
                   </div>
                   <Badge
                     variant={
-                      order.payment.status === 'approved' ? 'default' : 'secondary'
+                      order.payment.status === PaymentStatus.APPROVED ? "default" : "secondary"
                     }
                     className={
-                      order.payment.status === 'approved'
-                        ? 'bg-green-100 text-green-700'
-                        : order.payment.status === 'refunded'
-                        ? 'bg-red-100 text-red-700'
-                        : ''
+                      order.payment.status === PaymentStatus.APPROVED
+                        ? "bg-green-100 text-green-700"
+                        : order.payment.status === PaymentStatus.REFUNDED
+                          ? "bg-red-100 text-red-700"
+                          : ""
                     }
                   >
-                    {order.payment.status === 'approved'
-                      ? '승인'
-                      : order.payment.status === 'pending'
-                      ? '대기'
-                      : order.payment.status === 'refunded'
-                      ? '환불'
-                      : order.payment.status}
+                    {order.payment.status === PaymentStatus.APPROVED
+                      ? "승인"
+                      : order.payment.status === PaymentStatus.PENDING
+                        ? "대기"
+                        : order.payment.status === PaymentStatus.REFUNDED
+                          ? "환불"
+                          : order.payment.status}
                   </Badge>
                 </div>
 
@@ -297,9 +288,7 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-[#333]">{item.label}</span>
                         <Clock className="w-3 h-3 text-[#8B7355]" />
-                        <span className="text-xs text-[#8B7355]">
-                          {formatTime(item.timestamp)}
-                        </span>
+                        <span className="text-xs text-[#8B7355]">{formatTime(item.timestamp)}</span>
                       </div>
                       <div className="text-xs text-[#8B7355] mt-0.5">
                         {formatDateTime(item.timestamp)}
@@ -321,36 +310,28 @@ export function OrderDetailDrawer({ order, open, onClose }: OrderDetailDrawerPro
                 <div className="text-xs text-[#8B7355]">변경 이력이 없습니다</div>
               ) : (
                 <div className="space-y-2">
-                  {logs.map((log) => (
-                    <div
-                      key={log.logId}
-                      className="p-3 bg-gray-50 rounded-lg text-xs space-y-1"
-                    >
+                  {logs.map(log => (
+                    <div key={log.logId} className="p-3 bg-gray-50 rounded-lg text-xs space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-[#333]">
-                          {log.action === 'status_changed'
-                            ? '상태 변경'
-                            : log.action === 'canceled'
-                            ? '주문 취소'
-                            : log.action === 'created'
-                            ? '주문 생성'
-                            : log.action}
+                          {log.action === "status_changed"
+                            ? "상태 변경"
+                            : log.action === "canceled"
+                              ? "주문 취소"
+                              : log.action === "created"
+                                ? "주문 생성"
+                                : log.action}
                         </span>
-                        <span className="text-[#8B7355]">
-                          {formatDateTime(log.at)}
-                        </span>
+                        <span className="text-[#8B7355]">{formatDateTime(log.at)}</span>
                       </div>
                       {log.from && log.to && (
                         <div className="text-[#8B7355]">
-                          {getOrderStatusLabelForAdmin(log.from as any)} → {getOrderStatusLabelForAdmin(log.to as any)}
+                          {getOrderStatusLabelForAdmin(log.from as OrderStatus)} →{" "}
+                          {getOrderStatusLabelForAdmin(log.to as OrderStatus)}
                         </div>
                       )}
-                      {log.byName && (
-                        <div className="text-[#8B7355]">담당자: {log.byName}</div>
-                      )}
-                      {log.reason && (
-                        <div className="text-[#D61C1C]">사유: {log.reason}</div>
-                      )}
+                      {log.byName && <div className="text-[#8B7355]">담당자: {log.byName}</div>}
+                      {log.reason && <div className="text-[#D61C1C]">사유: {log.reason}</div>}
                     </div>
                   ))}
                 </div>

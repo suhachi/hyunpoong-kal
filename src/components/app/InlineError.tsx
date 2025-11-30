@@ -1,14 +1,14 @@
 /**
  * 인라인 에러 컴포넌트
  * Phase A: 쿠폰 적용 - 검증 오류 표시
- * 
+ *
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { AlertCircle, Info, AlertTriangle } from 'lucide-react';
-import { motion } from 'motion/react';
+import { AlertCircle, Info, AlertTriangle } from "lucide-react";
+import { motion } from "motion/react";
 
-export type InlineErrorVariant = 'error' | 'warning' | 'info';
+export type InlineErrorVariant = "error" | "warning" | "info";
 
 export interface InlineErrorProps {
   message: string;
@@ -19,7 +19,7 @@ export interface InlineErrorProps {
 
 export function InlineError({
   message,
-  variant = 'error',
+  variant = "error",
   actionLabel,
   onAction,
 }: InlineErrorProps) {
@@ -41,9 +41,7 @@ export function InlineError({
 
       {/* 메시지 */}
       <div className="flex-1 min-w-0">
-        <p className={`text-sm ${config.textColor}`}>
-          {message}
-        </p>
+        <p className={`text-sm ${config.textColor}`}>{message}</p>
 
         {/* 액션 버튼 (선택적) */}
         {actionLabel && onAction && (
@@ -68,32 +66,32 @@ export function InlineError({
  */
 function getVariantConfig(variant: InlineErrorVariant) {
   switch (variant) {
-    case 'error':
+    case "error":
       return {
         icon: AlertCircle,
-        bgColor: 'bg-red-50',
-        borderColor: 'border-red-200',
-        iconColor: 'text-red-500',
-        textColor: 'text-red-900',
-        actionColor: 'text-red-700',
+        bgColor: "bg-red-50",
+        borderColor: "border-red-200",
+        iconColor: "text-red-500",
+        textColor: "text-red-900",
+        actionColor: "text-red-700",
       };
-    case 'warning':
+    case "warning":
       return {
         icon: AlertTriangle,
-        bgColor: 'bg-yellow-50',
-        borderColor: 'border-yellow-200',
-        iconColor: 'text-yellow-500',
-        textColor: 'text-yellow-900',
-        actionColor: 'text-yellow-700',
+        bgColor: "bg-yellow-50",
+        borderColor: "border-yellow-200",
+        iconColor: "text-yellow-500",
+        textColor: "text-yellow-900",
+        actionColor: "text-yellow-700",
       };
-    case 'info':
+    case "info":
       return {
         icon: Info,
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        iconColor: 'text-blue-500',
-        textColor: 'text-blue-900',
-        actionColor: 'text-blue-700',
+        bgColor: "bg-blue-50",
+        borderColor: "border-blue-200",
+        iconColor: "text-blue-500",
+        textColor: "text-blue-900",
+        actionColor: "text-blue-700",
       };
   }
 }

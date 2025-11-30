@@ -1,5 +1,5 @@
-import { LucideIcon } from 'lucide-react';
-import { Card } from '../../ui/card';
+import { LucideIcon } from "lucide-react";
+import { Card } from "../../ui/card";
 
 export interface StatCardProps {
   title: string;
@@ -11,15 +11,23 @@ export interface StatCardProps {
   };
   subtitle?: string;
   loading?: boolean;
-  variant?: 'default' | 'success' | 'info' | 'warning';
+  variant?: "default" | "success" | "info" | "warning";
 }
 
-export function StatCard({ title, value, icon: Icon, trend, subtitle, loading, variant = 'default' }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  subtitle,
+  loading,
+  variant = "default",
+}: StatCardProps) {
   const variantColors = {
-    default: 'bg-white text-[#D61C1C]',
-    success: 'bg-white text-green-600',
-    info: 'bg-white text-blue-600',
-    warning: 'bg-white text-amber-600',
+    default: "bg-white text-[#D61C1C]",
+    success: "bg-white text-green-600",
+    info: "bg-white text-blue-600",
+    warning: "bg-white text-amber-600",
   };
 
   if (loading) {
@@ -43,12 +51,8 @@ export function StatCard({ title, value, icon: Icon, trend, subtitle, loading, v
           <div className="flex items-baseline gap-2">
             <span className="text-2xl text-[#333]">{value}</span>
             {trend && (
-              <span
-                className={`text-sm ${
-                  trend.isPositive ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+              <span className={`text-sm ${trend.isPositive ? "text-green-600" : "text-red-600"}`}>
+                {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
               </span>
             )}
           </div>
@@ -56,7 +60,9 @@ export function StatCard({ title, value, icon: Icon, trend, subtitle, loading, v
         </div>
 
         {Icon && (
-          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${variantColors[variant]}`}>
+          <div
+            className={`w-12 h-12 rounded-lg flex items-center justify-center ${variantColors[variant]}`}
+          >
             <Icon className="w-6 h-6" />
           </div>
         )}

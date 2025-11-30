@@ -5,13 +5,13 @@
  * v1.0 STEP 5: Firebase 전환
  */
 
-import { USE_FIREBASE, getEnv } from '../config/env';
-import { db } from './firebase';
+import { USE_FIREBASE, getEnv } from "../config/env";
+import { db } from "./firebase";
 import {
   storeCouponsCollection,
   storeCouponDocRef,
   type CouponDoc,
-} from './firebase/firestore-schema';
+} from "./firebase/firestore-schema";
 import {
   getDoc,
   getDocs,
@@ -23,24 +23,21 @@ import {
   orderBy,
   serverTimestamp,
   type Timestamp,
-} from 'firebase/firestore';
-import type { Coupon, CouponFilters, CouponStats, CouponIssue } from '../types/coupon';
-import { getCouponStatus } from '../types/coupon';
+} from "firebase/firestore";
+import type { Coupon, CouponFilters, CouponStats, CouponIssue } from "../types/coupon";
+import { getCouponStatus } from "../types/coupon";
 
 // ============================================================================
 // Mock 모드 함수 (기존 로직 보전)
 // ============================================================================
 
 // Mock 데이터 (샘플 데이터 제거)
-let mockCoupons: Coupon[] = [];
+const mockCoupons: Coupon[] = [];
 
 /**
  * Mock 모드: 쿠폰 목록 조회
  */
-async function getCouponsMock(
-  uid: string,
-  filters: CouponFilters = {}
-): Promise<Coupon[]> {
+async function getCouponsMock(uid: string, filters: CouponFilters = {}): Promise<Coupon[]> {
   await new Promise(resolve => setTimeout(resolve, 300));
 
   let filtered = mockCoupons.filter(c => c.uid === uid);
@@ -57,13 +54,13 @@ async function getCouponsMock(
 
   // 정렬
   switch (filters.sortBy) {
-    case 'issuedAt':
+    case "issuedAt":
       filtered.sort((a, b) => b.issuedAt - a.issuedAt);
       break;
-    case 'expiresAt':
+    case "expiresAt":
       filtered.sort((a, b) => a.expiresAt - b.expiresAt);
       break;
-    case 'amount':
+    case "amount":
       filtered.sort((a, b) => b.amount - a.amount);
       break;
     default:
@@ -76,40 +73,31 @@ async function getCouponsMock(
 /**
  * Mock 모드: 사용 가능한 쿠폰만 조회
  */
-async function getAvailableCouponsMock(
-  uid: string,
-  orderAmount: number
-): Promise<Coupon[]> {
+async function getAvailableCouponsMock(uid: string, orderAmount: number): Promise<Coupon[]> {
   await new Promise(resolve => setTimeout(resolve, 300));
 
-  return mockCoupons.filter(c =>
-    c.uid === uid &&
-    !c.used &&
-    Date.now() <= c.expiresAt &&
-    orderAmount >= c.minSpend
+  return mockCoupons.filter(
+    c => c.uid === uid && !c.used && Date.now() <= c.expiresAt && orderAmount >= c.minSpend,
   );
 }
 
 /**
  * Mock 모드: 쿠폰 사용
  */
-async function useCouponMock(
-  couponId: string,
-  orderId: string
-): Promise<Coupon> {
+async function useCouponMock(couponId: string, orderId: string): Promise<Coupon> {
   await new Promise(resolve => setTimeout(resolve, 400));
 
   const coupon = mockCoupons.find(c => c.id === couponId);
   if (!coupon) {
-    throw new Error('쿠폰을 찾을 수 없습니다');
+    throw new Error("쿠폰을 찾을 수 없습니다");
   }
 
   if (coupon.used) {
-    throw new Error('이미 사용된 쿠폰입니다');
+    throw new Error("이미 사용된 쿠폰입니다");
   }
 
   if (Date.now() > coupon.expiresAt) {
-    throw new Error('만료된 쿠폰입니다');
+    throw new Error("만료된 쿠폰입니다");
   }
 
   coupon.used = true;
@@ -122,23 +110,19 @@ async function useCouponMock(
 /**
  * Mock 모드: 쿠폰 발급
  */
-async function issueCouponMock(
-  issue: CouponIssue,
-  by: string,
-  byName: string
-): Promise<Coupon[]> {
+async function issueCouponMock(issue: CouponIssue, by: string, byName: string): Promise<Coupon[]> {
   await new Promise(resolve => setTimeout(resolve, 500));
 
   // targetType에 따라 대상 사용자 결정
   let targetUsers: string[] = [];
-  if (issue.targetType === 'user' && issue.targetUserId) {
+  if (issue.targetType === "user" && issue.targetUserId) {
     targetUsers = [issue.targetUserId];
-  } else if (issue.targetType === 'phone') {
+  } else if (issue.targetType === "phone") {
     // 전화번호로 지정된 경우 Mock에서는 임시 사용자 ID 생성
-    targetUsers = ['user-phone-' + (issue.targetPhone || 'unknown')];
+    targetUsers = ["user-phone-" + (issue.targetPhone || "unknown")];
   } else {
     // 'all' 또는 기존 targetUsers 사용
-    targetUsers = issue.targetUsers || ['user-001'];
+    targetUsers = issue.targetUsers || ["user-001"];
   }
 
   const expiresAt = Date.now() + issue.expiryDays * 24 * 60 * 60 * 1000;
@@ -185,9 +169,7 @@ async function getCouponStatsMock(): Promise<CouponStats> {
 async function expireCouponsMock(): Promise<number> {
   await new Promise(resolve => setTimeout(resolve, 300));
 
-  const expiredCount = mockCoupons.filter(
-    c => !c.used && Date.now() > c.expiresAt
-  ).length;
+  const expiredCount = mockCoupons.filter(c => !c.used && Date.now() > c.expiresAt).length;
 
   return expiredCount;
 }
@@ -200,7 +182,7 @@ async function expireCouponsMock(): Promise<number> {
  * storeId 가져오기 헬퍼
  */
 function getStoreId(): string {
-  return getEnv('VITE_STORE_ID', 'hyunpoong_main');
+  return getEnv("VITE_STORE_ID", "hyunpoong_main");
 }
 
 /**
@@ -208,9 +190,9 @@ function getStoreId(): string {
  */
 function timestampToMs(ts: Timestamp | undefined): number {
   if (!ts) return Date.now();
-  if (typeof ts === 'string') return Date.parse(ts);
-  if (typeof ts.toDate === 'function') return ts.toDate().getTime();
-  if ((ts as any).seconds && typeof (ts as any).seconds === 'number') {
+  if (typeof ts === "string") return Date.parse(ts);
+  if (typeof ts.toDate === "function") return ts.toDate().getTime();
+  if ((ts as any).seconds && typeof (ts as any).seconds === "number") {
     return (ts as any).seconds * 1000;
   }
   return Date.now();
@@ -224,12 +206,12 @@ function buildCouponFromDoc(doc: CouponDoc & { couponId: string }): Coupon {
   // 도메인 Coupon의 type은 'photo_review' | 'welcome' | 'event' | 'compensation' | 'admin'
   // 현재는 쿠폰 코드 기반 시스템이므로, CouponDoc의 name/description을 활용
   // TODO: 향후 CouponDoc에 도메인 type 필드 추가 고려
-  
+
   return {
     id: doc.couponId,
-    uid: '', // CouponDoc에는 userId가 없음 (쿠폰 템플릿이므로)
-    type: 'admin', // 기본값 (실제로는 쿠폰 발급 시 설정)
-    amount: doc.type === 'fixed' ? doc.value : 0, // percentage는 계산 필요
+    uid: "", // CouponDoc에는 userId가 없음 (쿠폰 템플릿이므로)
+    type: "admin", // 기본값 (실제로는 쿠폰 발급 시 설정)
+    amount: doc.type === "fixed" ? doc.value : 0, // percentage는 계산 필요
     minSpend: doc.minOrderAmount || 0,
     issuedAt: timestampToMs(doc.createdAt),
     expiresAt: timestampToMs(doc.validUntil),
@@ -247,7 +229,7 @@ function buildCouponDocFromEntity(params: {
   couponId: string;
   code: string;
   name: string;
-  type: 'percentage' | 'fixed';
+  type: "percentage" | "fixed";
   value: number;
   minOrderAmount?: number;
   maxDiscountAmount?: number;
@@ -256,11 +238,11 @@ function buildCouponDocFromEntity(params: {
   isActive: boolean;
   usageLimit?: number;
   userLimit?: number;
-  targetType?: 'all' | 'user' | 'phone';
+  targetType?: "all" | "user" | "phone";
   targetUserId?: string;
   targetPhone?: string;
-}): Omit<CouponDoc, 'createdAt' | 'updatedAt'> {
-  const doc: Omit<CouponDoc, 'createdAt' | 'updatedAt'> = {
+}): Omit<CouponDoc, "createdAt" | "updatedAt"> {
+  const doc: Omit<CouponDoc, "createdAt" | "updatedAt"> = {
     couponId: params.couponId,
     storeId: params.storeId,
     code: params.code,
@@ -294,10 +276,7 @@ function buildCouponDocFromEntity(params: {
 /**
  * 사용자 쿠폰 목록 조회
  */
-export async function getCoupons(
-  uid: string,
-  filters: CouponFilters = {}
-): Promise<Coupon[]> {
+export async function getCoupons(uid: string, filters: CouponFilters = {}): Promise<Coupon[]> {
   if (!USE_FIREBASE) {
     return await getCouponsMock(uid, filters);
   }
@@ -307,10 +286,10 @@ export async function getCoupons(
   try {
     const storeId = getStoreId();
     const colRef = storeCouponsCollection(storeId);
-    const q = query(colRef, where('isActive', '==', true), orderBy('createdAt', 'desc'));
+    const q = query(colRef, where("isActive", "==", true), orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
 
-    const coupons: Coupon[] = snapshot.docs.map((docSnap) => {
+    const coupons: Coupon[] = snapshot.docs.map(docSnap => {
       const data = docSnap.data() as CouponDoc;
       const couponId = data.couponId || docSnap.id;
       return buildCouponFromDoc({ ...data, couponId });
@@ -329,7 +308,7 @@ export async function getCoupons(
 
     return filtered;
   } catch (error) {
-    console.error('Failed to fetch coupons from Firestore:', error);
+    console.error("Failed to fetch coupons from Firestore:", error);
     return [];
   }
 }
@@ -337,10 +316,7 @@ export async function getCoupons(
 /**
  * 사용 가능한 쿠폰만 조회 (결제 시)
  */
-export async function getAvailableCoupons(
-  uid: string,
-  orderAmount: number
-): Promise<Coupon[]> {
+export async function getAvailableCoupons(uid: string, orderAmount: number): Promise<Coupon[]> {
   if (!USE_FIREBASE) {
     return await getAvailableCouponsMock(uid, orderAmount);
   }
@@ -352,14 +328,14 @@ export async function getAvailableCoupons(
     const now = new Date();
     const q = query(
       colRef,
-      where('isActive', '==', true),
-      where('validFrom', '<=', now as any),
-      where('validUntil', '>=', now as any)
+      where("isActive", "==", true),
+      where("validFrom", "<=", now as any),
+      where("validUntil", ">=", now as any),
     );
     const snapshot = await getDocs(q);
 
     const coupons: Coupon[] = snapshot.docs
-      .map((docSnap) => {
+      .map(docSnap => {
         const data = docSnap.data() as CouponDoc;
         const couponId = data.couponId || docSnap.id;
         return buildCouponFromDoc({ ...data, couponId });
@@ -372,7 +348,7 @@ export async function getAvailableCoupons(
 
     return coupons;
   } catch (error) {
-    console.error('Failed to fetch available coupons from Firestore:', error);
+    console.error("Failed to fetch available coupons from Firestore:", error);
     return [];
   }
 }
@@ -388,9 +364,9 @@ async function firebaseFindCouponByCode(params: {
 }): Promise<Coupon | null> {
   const { storeId, code, userId, now = new Date() } = params;
   const colRef = storeCouponsCollection(storeId);
-  const q = query(colRef, where('code', '==', code.toUpperCase()));
+  const q = query(colRef, where("code", "==", code.toUpperCase()));
   const snap = await getDocs(q);
-  
+
   if (snap.empty) return null;
 
   const docSnap = snap.docs[0];
@@ -402,7 +378,7 @@ async function firebaseFindCouponByCode(params: {
   const nowTs = now.getTime();
   const validFrom = timestampToMs(data.validFrom);
   const validUntil = timestampToMs(data.validUntil);
-  
+
   if (!data.isActive || nowTs < validFrom || nowTs > validUntil) {
     return null;
   }
@@ -420,10 +396,7 @@ async function firebaseFindCouponByCode(params: {
 /**
  * 쿠폰 사용
  */
-export async function useCoupon(
-  couponId: string,
-  orderId: string
-): Promise<Coupon> {
+export async function useCoupon(couponId: string, orderId: string): Promise<Coupon> {
   if (!USE_FIREBASE) {
     return await useCouponMock(couponId, orderId);
   }
@@ -435,7 +408,7 @@ export async function useCoupon(
     const snapshot = await getDoc(ref);
 
     if (!snapshot.exists()) {
-      throw new Error('쿠폰을 찾을 수 없습니다');
+      throw new Error("쿠폰을 찾을 수 없습니다");
     }
 
     const data = snapshot.data() as CouponDoc;
@@ -447,11 +420,11 @@ export async function useCoupon(
     const nowTs = now.getTime();
 
     if (!data.isActive || nowTs < validFrom || nowTs > validUntil) {
-      throw new Error('만료되었거나 비활성화된 쿠폰입니다');
+      throw new Error("만료되었거나 비활성화된 쿠폰입니다");
     }
 
     if (data.usageLimit && data.usageCount >= data.usageLimit) {
-      throw new Error('쿠폰 사용 횟수가 초과되었습니다');
+      throw new Error("쿠폰 사용 횟수가 초과되었습니다");
     }
 
     // 사용 횟수 증가
@@ -463,7 +436,7 @@ export async function useCoupon(
     const updatedData = (await getDoc(ref)).data() as CouponDoc;
     return buildCouponFromDoc({ ...updatedData, couponId });
   } catch (error) {
-    console.error('Failed to use coupon in Firestore:', error);
+    console.error("Failed to use coupon in Firestore:", error);
     throw error;
   }
 }
@@ -474,7 +447,7 @@ export async function useCoupon(
 export async function issueCoupon(
   issue: CouponIssue,
   by: string,
-  byName: string
+  byName: string,
 ): Promise<Coupon[]> {
   if (!USE_FIREBASE) {
     return await issueCouponMock(issue, by, byName);
@@ -493,19 +466,19 @@ export async function issueCoupon(
 
     const couponDocData = buildCouponDocFromEntity({
       storeId,
-      couponId: '', // addDoc 시점에는 id 없음
+      couponId: "", // addDoc 시점에는 id 없음
       code,
       name: issue.title,
-      type: 'fixed', // CouponIssue의 type을 매핑 필요 (현재는 fixed로 가정)
+      type: "fixed", // CouponIssue의 type을 매핑 필요 (현재는 fixed로 가정)
       value: issue.amount,
       minOrderAmount: issue.minSpend,
       validFrom: now,
       validUntil,
       isActive: true,
       usageLimit: issue.issueLimit,
-      userLimit: issue.targetType === 'user' ? 1 : issue.targetUsers?.length,
+      userLimit: issue.targetType === "user" ? 1 : issue.targetUsers?.length,
       // 발급 대상 정보 저장
-      targetType: issue.targetType || 'all',
+      targetType: issue.targetType || "all",
       targetUserId: issue.targetUserId,
       targetPhone: issue.targetPhone,
     });
@@ -522,7 +495,7 @@ export async function issueCoupon(
 
     return [buildCouponFromDoc({ ...data, couponId })];
   } catch (error) {
-    console.error('Failed to issue coupon in Firestore:', error);
+    console.error("Failed to issue coupon in Firestore:", error);
     throw error;
   }
 }
@@ -555,7 +528,7 @@ export async function getCouponStats(): Promise<CouponStats> {
 
     return stats;
   } catch (error) {
-    console.error('Failed to fetch coupon stats from Firestore:', error);
+    console.error("Failed to fetch coupon stats from Firestore:", error);
     return {
       totalIssued: 0,
       totalUsed: 0,
@@ -579,11 +552,7 @@ export async function expireCoupons(): Promise<number> {
     const storeId = getStoreId();
     const colRef = storeCouponsCollection(storeId);
     const now = new Date();
-    const q = query(
-      colRef,
-      where('isActive', '==', true),
-      where('validUntil', '<', now as any)
-    );
+    const q = query(colRef, where("isActive", "==", true), where("validUntil", "<", now as any));
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
@@ -603,7 +572,7 @@ export async function expireCoupons(): Promise<number> {
 
     return snapshot.size;
   } catch (error) {
-    console.error('Failed to expire coupons in Firestore:', error);
+    console.error("Failed to expire coupons in Firestore:", error);
     return 0;
   }
 }

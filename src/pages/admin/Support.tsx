@@ -5,34 +5,40 @@
  * Firebase Firestore 실시간 채팅 시스템
  */
 
-import { useEffect, useState, useRef } from 'react';
-import { 
-  Send, 
-  MessageSquare, 
-  Clock, 
-  Check, 
-  CheckCheck, 
-  AlertCircle, 
+import { useEffect, useState, useRef } from "react";
+import {
+  Send,
+  MessageSquare,
+  Clock,
+  Check,
+  CheckCheck,
+  AlertCircle,
   RefreshCw,
   UserCheck,
   X,
   CheckCircle,
   Timer,
-  TrendingUp
-} from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Badge } from '../../components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { ScrollArea } from '../../components/ui/scroll-area';
-import { Separator } from '../../components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
-import { formatDateTime } from '../../lib/utils';
-import { getCurrentUser } from '../../lib/auth';
-import type { ChatSession, ChatMessage } from '../../types/support';
-import { toast } from 'sonner';
+  TrendingUp,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FEATURE_FLAGS, USE_FIREBASE } from "@/config/env";
+import { formatDateTime } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth";
+import type { ChatSession, ChatMessage } from "@/types/support";
+import { toast } from "sonner";
 
 // Firebase API (실제 환경에서 사용)
 import {
@@ -46,17 +52,18 @@ import {
   getPendingSessionsCount,
   getAverageResponseTime,
   getTodayCompletedCount,
-} from '../../lib/admin/support.api';
+} from "@/lib/admin/support.api";
 
 export function AdminSupport() {
+  // 1. Hooks 최상단 선언
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [filterTab, setFilterTab] = useState<'all' | 'open' | 'closed'>('all');
-  
+  const [filterTab, setFilterTab] = useState<"all" | "open" | "closed">("all");
+
   // 통계
   const [stats, setStats] = useState({
     pending: 0,
@@ -66,33 +73,22 @@ export function AdminSupport() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   const currentUser = getCurrentUser();
 
-  // 지원 기능 비활성화 체크
-  if (!FEATURE_FLAGS.support) {
-    return (
-      <div className="p-6">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            고객 지원 기능이 비활성화되어 있습니다. 환경 변수에서 VITE_SUPPORT_ENABLED=true로 설정하세요.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
+  // 2. Effects (조건부 실행은 내부에서)
   // 초기 로드 + 통계
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     loadSessionsAndStats();
   }, []);
 
   // Firebase 실시간 구독
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     if (!USE_FIREBASE) return;
 
-    const unsubscribe = subscribeToSessions((updatedSessions) => {
+    const unsubscribe = subscribeToSessions(updatedSessions => {
       setSessions(updatedSessions);
       setLoading(false);
     });
@@ -102,11 +98,12 @@ export function AdminSupport() {
 
   // 선택된 세션의 메시지 구독
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     if (!selectedSession || !USE_FIREBASE) return;
 
-    const unsubscribe = subscribeToMessages(selectedSession.id, (updatedMessages) => {
+    const unsubscribe = subscribeToMessages(selectedSession.id, updatedMessages => {
       setMessages(updatedMessages);
-      
+
       // 읽음 처리
       markMessagesAsReadByAdmin(selectedSession.id).catch(console.error);
     });
@@ -116,11 +113,13 @@ export function AdminSupport() {
 
   // 메시지 자동 스크롤
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     scrollToBottom();
   }, [messages]);
 
+  // 3. Helper Functions
   function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
   // 세션 및 통계 로드
@@ -153,8 +152,8 @@ export function AdminSupport() {
         });
       }
     } catch (error) {
-      console.error('Failed to load sessions:', error);
-      toast.error('세션 목록을 불러오는데 실패했습니다');
+      console.error("Failed to load sessions:", error);
+      toast.error("세션 목록을 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -162,52 +161,52 @@ export function AdminSupport() {
 
   // Mock 데이터 로드
   async function loadSessionsMock() {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       setSessions([]);
       return;
     }
 
     try {
-      const sessionsData = localStorage.getItem('chat_sessions') || '{}';
-      
+      const sessionsData = localStorage.getItem("chat_sessions") || "{}";
+
       // localStorage가 비어있으면 빈 배열 반환 (샘플 데이터 생성 제거)
-      if (!sessionsData || sessionsData === '{}') {
+      if (!sessionsData || sessionsData === "{}") {
         setSessions([]);
         return;
       }
 
       const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
       const sessionsList = Object.values(sessionsObj);
-      
+
       // 안전성 체크: 배열이 아니면 빈 배열 반환
       if (!Array.isArray(sessionsList)) {
-        console.warn('[Support] Invalid sessions data format, resetting to empty');
+        console.warn("[Support] Invalid sessions data format, resetting to empty");
         setSessions([]);
         return;
       }
-      
+
       sessionsList.sort((a, b) => {
         const aHasUnread = hasUnreadMessagesMock(a.id);
         const bHasUnread = hasUnreadMessagesMock(b.id);
-        
+
         if (aHasUnread && !bHasUnread) return -1;
         if (!aHasUnread && bHasUnread) return 1;
-        
+
         return b.lastAt - a.lastAt;
       });
 
       setSessions(sessionsList);
     } catch (error) {
-      console.error('[Support] Failed to parse sessions from storage', error);
+      console.error("[Support] Failed to parse sessions from storage", error);
       setSessions([]);
     }
   }
 
   // Mock: 미응답 체크
   function hasUnreadMessagesMock(sessionId: string): boolean {
-    const messagesData = localStorage.getItem(`chat_messages_${sessionId}`) || '[]';
+    const messagesData = localStorage.getItem(`chat_messages_${sessionId}`) || "[]";
     const msgs: ChatMessage[] = JSON.parse(messagesData);
-    return msgs.some((m) => m.from === 'user' && !m.readByAdmin);
+    return msgs.some(m => m.from === "user" && !m.readByAdmin);
   }
 
   // 세션 선택
@@ -218,25 +217,25 @@ export function AdminSupport() {
       try {
         const msgs = await getSessionMessages(session.id);
         setMessages(msgs);
-        
+
         // 읽음 처리
         await markMessagesAsReadByAdmin(session.id);
       } catch (error) {
-        console.error('Failed to load messages:', error);
-        toast.error('메시지를 불러오는데 실패했습니다');
+        console.error("Failed to load messages:", error);
+        toast.error("메시지를 불러오는데 실패했습니다");
       }
     } else {
       // Mock
-      const messagesData = localStorage.getItem(`chat_messages_${session.id}`) || '[]';
+      const messagesData = localStorage.getItem(`chat_messages_${session.id}`) || "[]";
       const msgs: ChatMessage[] = JSON.parse(messagesData);
-      
-      const updatedMsgs = msgs.map((m) => {
-        if (m.from === 'user' && !m.readByAdmin) {
+
+      const updatedMsgs = msgs.map(m => {
+        if (m.from === "user" && !m.readByAdmin) {
           return { ...m, readByAdmin: true };
         }
         return m;
       });
-      
+
       localStorage.setItem(`chat_messages_${session.id}`, JSON.stringify(updatedMsgs));
       setMessages(updatedMsgs);
     }
@@ -247,34 +246,34 @@ export function AdminSupport() {
     if (!selectedSession || !inputText.trim() || sending || !currentUser) return;
 
     const text = inputText.trim();
-    setInputText('');
+    setInputText("");
     setSending(true);
 
     try {
       if (USE_FIREBASE) {
         await sendAdminMessage(selectedSession.id, text, currentUser.uid);
-        toast.success('메시지가 전송되었습니다');
+        toast.success("메시지가 전송되었습니다");
       } else {
         // Mock
         const newMessage: ChatMessage = {
           id: `msg_${Date.now()}`,
           sessionId: selectedSession.id,
-          from: 'admin',
-          type: 'text',
+          from: "admin",
+          type: "text",
           text,
           at: Date.now(),
           readByUser: false,
         };
 
-        const messagesData = localStorage.getItem(`chat_messages_${selectedSession.id}`) || '[]';
+        const messagesData = localStorage.getItem(`chat_messages_${selectedSession.id}`) || "[]";
         const allMessages: ChatMessage[] = JSON.parse(messagesData);
         allMessages.push(newMessage);
         localStorage.setItem(`chat_messages_${selectedSession.id}`, JSON.stringify(allMessages));
-        
+
         setMessages(allMessages);
 
         // 세션 업데이트
-        const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+        const sessionsData = localStorage.getItem("chat_sessions") || "{}";
         const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
         sessionsObj[selectedSession.id] = {
           ...selectedSession,
@@ -283,14 +282,14 @@ export function AdminSupport() {
           updatedAt: Date.now(),
           assignedTo: currentUser.uid,
         };
-        localStorage.setItem('chat_sessions', JSON.stringify(sessionsObj));
-        
+        localStorage.setItem("chat_sessions", JSON.stringify(sessionsObj));
+
         loadSessionsMock();
-        toast.success('메시지가 전송되었습니다');
+        toast.success("메시지가 전송되었습니다");
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
-      toast.error('메시지 전송에 실패했습니다');
+      console.error("Failed to send message:", error);
+      toast.error("메시지 전송에 실패했습니다");
       setInputText(text);
     } finally {
       setSending(false);
@@ -304,46 +303,62 @@ export function AdminSupport() {
 
     try {
       const newStatus = !session.open;
-      
+
       if (USE_FIREBASE) {
         await updateSessionStatus(session.id, newStatus, currentUser.uid);
-        toast.success(newStatus ? '세션을 재개했습니다' : '세션을 종료했습니다');
+        toast.success(newStatus ? "세션을 재개했습니다" : "세션을 종료했습니다");
       } else {
         // Mock
-        const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+        const sessionsData = localStorage.getItem("chat_sessions") || "{}";
         const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
         sessionsObj[session.id] = {
           ...session,
           open: newStatus,
           updatedAt: Date.now(),
         };
-        localStorage.setItem('chat_sessions', JSON.stringify(sessionsObj));
+        localStorage.setItem("chat_sessions", JSON.stringify(sessionsObj));
         loadSessionsMock();
-        
+
         if (selectedSession?.id === session.id) {
           setSelectedSession({ ...session, open: newStatus });
         }
-        
-        toast.success(newStatus ? '세션을 재개했습니다' : '세션을 종료했습니다');
+
+        toast.success(newStatus ? "세션을 재개했습니다" : "세션을 종료했습니다");
       }
     } catch (error) {
-      console.error('Failed to update session status:', error);
-      toast.error('세션 상태 변경에 실패했습니다');
+      console.error("Failed to update session status:", error);
+      toast.error("세션 상태 변경에 실패했습니다");
     }
   }
 
+  // 4. Render Logic
+  // 지원 기능 비활성화 체크
+  if (!FEATURE_FLAGS.support) {
+    return (
+      <div className="p-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            고객 지원 기능이 비활성화되어 있습니다. 환경 변수에서 VITE_SUPPORT_ENABLED=true로
+            설정하세요.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   // 필터링된 세션
-  const filteredSessions = (sessions || []).filter((s) => {
-    if (filterTab === 'open') return s.open;
-    if (filterTab === 'closed') return !s.open;
+  const filteredSessions = (sessions || []).filter(s => {
+    if (filterTab === "open") return s.open;
+    if (filterTab === "closed") return !s.open;
     return true;
   });
 
   // 통계
-  const openSessions = (sessions || []).filter((s) => s.open);
-  const unreadCount = USE_FIREBASE 
-    ? stats.pending 
-    : (sessions || []).filter((s) => hasUnreadMessagesMock(s.id)).length;
+  const openSessions = (sessions || []).filter(s => s.open);
+  const unreadCount = USE_FIREBASE
+    ? stats.pending
+    : (sessions || []).filter(s => hasUnreadMessagesMock(s.id)).length;
 
   return (
     <div className="space-y-6">
@@ -351,16 +366,10 @@ export function AdminSupport() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#2E1C10]">고객 지원 채팅</h1>
-          <p className="text-sm text-[#2E1C10]/60">
-            실시간 1:1 고객 문의 관리
-          </p>
+          <p className="text-sm text-[#2E1C10]/60">실시간 1:1 고객 문의 관리</p>
         </div>
-        <Button
-          variant="outline"
-          onClick={loadSessionsAndStats}
-          disabled={loading}
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+        <Button variant="outline" onClick={loadSessionsAndStats} disabled={loading}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           새로고침
         </Button>
       </div>
@@ -413,8 +422,7 @@ export function AdminSupport() {
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              <Timer className="w-3 h-3 inline mr-1" />
-              첫 응답까지
+              <Timer className="w-3 h-3 inline mr-1" />첫 응답까지
             </p>
           </CardContent>
         </Card>
@@ -436,7 +444,7 @@ export function AdminSupport() {
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle>문의 목록</CardTitle>
-            <Tabs value={filterTab} onValueChange={(v) => setFilterTab(v as any)} className="w-full">
+            <Tabs value={filterTab} onValueChange={v => setFilterTab(v as any)} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="all">전체</TabsTrigger>
                 <TabsTrigger value="open">진행중</TabsTrigger>
@@ -448,13 +456,15 @@ export function AdminSupport() {
             <ScrollArea className="h-[500px]">
               {filteredSessions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
-                  {filterTab === 'all' ? '문의가 없습니다' : 
-                   filterTab === 'open' ? '진행 중인 문의가 없습니다' :
-                   '완료된 문의가 없습니다'}
+                  {filterTab === "all"
+                    ? "문의가 없습니다"
+                    : filterTab === "open"
+                      ? "진행 중인 문의가 없습니다"
+                      : "완료된 문의가 없습니다"}
                 </div>
               ) : (
                 <div className="space-y-1 p-2">
-                  {filteredSessions.map((session) => {
+                  {filteredSessions.map(session => {
                     const unread = USE_FIREBASE ? false : hasUnreadMessagesMock(session.id);
                     const isSelected = selectedSession?.id === session.id;
 
@@ -464,15 +474,17 @@ export function AdminSupport() {
                         onClick={() => selectSession(session)}
                         className={`w-full text-left p-3 rounded-lg transition-colors ${
                           isSelected
-                            ? 'bg-[#D61C1C] text-white'
+                            ? "bg-[#D61C1C] text-white"
                             : unread
-                            ? 'bg-red-50 hover:bg-red-100'
-                            : 'hover:bg-gray-100'
+                              ? "bg-red-50 hover:bg-red-100"
+                              : "hover:bg-gray-100"
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm ${isSelected ? 'text-white' : 'text-[#2E1C10]'}`}>
+                            <span
+                              className={`text-sm ${isSelected ? "text-white" : "text-[#2E1C10]"}`}
+                            >
                               {session.userName || session.userId.substring(0, 12)}
                             </span>
                             {!session.open && (
@@ -487,15 +499,21 @@ export function AdminSupport() {
                             </Badge>
                           )}
                         </div>
-                        <p className={`text-xs truncate ${isSelected ? 'text-white/80' : 'text-[#2E1C10]/60'}`}>
-                          {session.lastMessage || '메시지 없음'}
+                        <p
+                          className={`text-xs truncate ${isSelected ? "text-white/80" : "text-[#2E1C10]/60"}`}
+                        >
+                          {session.lastMessage || "메시지 없음"}
                         </p>
                         <div className="flex items-center justify-between mt-1">
-                          <p className={`text-xs ${isSelected ? 'text-white/60' : 'text-[#2E1C10]/40'}`}>
+                          <p
+                            className={`text-xs ${isSelected ? "text-white/60" : "text-[#2E1C10]/40"}`}
+                          >
                             {formatDateTime(new Date(session.lastAt))}
                           </p>
                           {session.assignedTo && (
-                            <UserCheck className={`w-3 h-3 ${isSelected ? 'text-white/60' : 'text-green-600'}`} />
+                            <UserCheck
+                              className={`w-3 h-3 ${isSelected ? "text-white/60" : "text-green-600"}`}
+                            />
                           )}
                         </div>
                       </button>
@@ -514,9 +532,7 @@ export function AdminSupport() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>
-                      {selectedSession.userName || selectedSession.userId}
-                    </CardTitle>
+                    <CardTitle>{selectedSession.userName || selectedSession.userId}</CardTitle>
                     <CardDescription className="flex items-center gap-2 mt-1">
                       <span>세션 ID: {selectedSession.id}</span>
                       {selectedSession.userPhone && (
@@ -528,8 +544,8 @@ export function AdminSupport() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={selectedSession.open ? 'default' : 'secondary'}>
-                      {selectedSession.open ? '진행 중' : '종료'}
+                    <Badge variant={selectedSession.open ? "default" : "secondary"}>
+                      {selectedSession.open ? "진행 중" : "종료"}
                     </Badge>
                     <Button
                       variant="outline"
@@ -564,9 +580,7 @@ export function AdminSupport() {
                         <p className="text-sm">메시지가 없습니다</p>
                       </div>
                     ) : (
-                      messages.map((msg) => (
-                        <AdminMessageBubble key={msg.id} message={msg} />
-                      ))
+                      messages.map(msg => <AdminMessageBubble key={msg.id} message={msg} />)
                     )}
                     <div ref={messagesEndRef} />
                   </div>
@@ -586,14 +600,16 @@ export function AdminSupport() {
                     <Input
                       ref={inputRef}
                       value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                      onChange={e => setInputText(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
                           sendMessage();
                         }
                       }}
-                      placeholder={selectedSession.open ? "답변을 입력하세요..." : "세션이 종료되었습니다"}
+                      placeholder={
+                        selectedSession.open ? "답변을 입력하세요..." : "세션이 종료되었습니다"
+                      }
                       disabled={sending || !selectedSession.open}
                     />
                     <Button
@@ -652,39 +668,39 @@ export function AdminSupport() {
  * 관리자용 메시지 말풍선
  */
 function AdminMessageBubble({ message }: { message: ChatMessage }) {
-  const isUser = message.from === 'user';
-  const isBot = message.from === 'bot';
+  const isUser = message.from === "user";
+  const isBot = message.from === "bot";
 
   return (
-    <div className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex ${isUser ? "justify-start" : "justify-end"}`}>
       <div className="max-w-[75%]">
         {/* 보낸 사람 */}
-        <p className={`text-xs text-[#2E1C10]/60 mb-1 px-1 ${isUser ? 'text-left' : 'text-right'}`}>
-          {isUser ? '👤 고객' : isBot ? '🤖 자동 응답' : '👨‍💼 관리자'}
+        <p className={`text-xs text-[#2E1C10]/60 mb-1 px-1 ${isUser ? "text-left" : "text-right"}`}>
+          {isUser ? "👤 고객" : isBot ? "🤖 자동 응답" : "👨‍💼 관리자"}
         </p>
 
         {/* 메시지 */}
         <div
           className={`rounded-2xl px-4 py-3 ${
             isUser
-              ? 'bg-gray-100 text-[#2E1C10]'
+              ? "bg-gray-100 text-[#2E1C10]"
               : isBot
-              ? 'bg-blue-50 text-[#2E1C10] border border-blue-200'
-              : 'bg-[#D61C1C] text-white'
+                ? "bg-blue-50 text-[#2E1C10] border border-blue-200"
+                : "bg-[#D61C1C] text-white"
           }`}
         >
-          <p className="text-sm whitespace-pre-wrap break-words">
-            {message.text}
-          </p>
+          <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
         </div>
 
         {/* 시간 + 읽음 */}
-        <div className={`flex items-center gap-1 mt-1 px-1 ${isUser ? 'justify-start' : 'justify-end'}`}>
+        <div
+          className={`flex items-center gap-1 mt-1 px-1 ${isUser ? "justify-start" : "justify-end"}`}
+        >
           <p className="text-xs text-[#2E1C10]/40">
-            {new Date(message.at).toLocaleTimeString('ko-KR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {new Date(message.at).toLocaleTimeString("ko-KR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              })}
           </p>
           {!isUser && !isBot && (
             <>

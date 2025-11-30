@@ -1,18 +1,18 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect, memo, useCallback } from 'react';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import { ChevronRight, CloudSun, Star, Gift, Ticket } from 'lucide-react';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { FEATURE_FLAGS } from '../../config/env';
-import { DEFAULT_MENU_IMAGE } from '../../config/ui';
-import { formatPrice } from '../../lib/utils';
-import { getMenus } from '../../lib/admin/menus.api';
-import { getActiveNotices } from '../../lib/admin/notices.api';
-import { getRecentReviews } from '../../lib/reviews.api';
-import type { Menu } from '../../types/menu';
-import type { Notice } from '../../types/notice';
-import type { Review } from '../../types/review';
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, memo, useCallback } from "react";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { ChevronRight, CloudSun, Star, Gift, Ticket } from "lucide-react";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { FEATURE_FLAGS } from "../../config/env";
+import { DEFAULT_MENU_IMAGE } from "../../config/ui";
+import { formatPrice } from "../../lib/utils";
+import { getMenus } from "../../lib/admin/menus.api";
+import { getActiveNotices } from "../../lib/admin/notices.api";
+import { getRecentReviews } from "../../lib/reviews.api";
+import type { Menu } from "../../types/menu";
+import type { Notice } from "../../types/notice";
+import type { Review } from "../../types/review";
 
 export function Home() {
   const navigate = useNavigate();
@@ -25,9 +25,7 @@ export function Home() {
       try {
         // 추천 메뉴 로드
         const menus = await getMenus({});
-        const bestMenus = menus
-          .filter(m => m.badges.includes('best'))
-          .slice(0, 2);
+        const bestMenus = menus.filter(m => m.badges.includes("best")).slice(0, 2);
         setRecommendedMenus(bestMenus.length >= 2 ? bestMenus : menus.slice(0, 2));
 
         // 공지사항 로드
@@ -38,16 +36,19 @@ export function Home() {
         const reviews = await getRecentReviews(3);
         setRecentReviews(reviews);
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error("Failed to load data:", error);
       }
     };
     loadData();
   }, []);
 
   // 추천 메뉴 클릭 핸들러
-  const handleMenuClick = useCallback((menuId: string) => {
-    navigate(`/menu/${menuId}`);
-  }, [navigate]);
+  const handleMenuClick = useCallback(
+    (menuId: string) => {
+      navigate(`/menu/${menuId}`);
+    },
+    [navigate],
+  );
 
   return (
     <div className="space-y-6">
@@ -59,7 +60,7 @@ export function Home() {
             정성껏 끓여낸 진한 국물과 쫄깃한 수타면
           </p>
           <Button
-            onClick={() => navigate('/menu')}
+            onClick={() => navigate("/menu")}
             size="lg"
             className="mt-6 bg-white text-[#D61C1C] hover:bg-gray-100"
           >
@@ -74,12 +75,8 @@ export function Home() {
           <div className="flex items-center justify-center w-3 h-3">
             <span className="w-full h-full bg-green-500 rounded-full animate-pulse" />
           </div>
-          <span className="text-sm text-[#2E1C10]">
-            영업중
-          </span>
-          <span className="text-sm text-[#2E1C10]/80">
-            10:00 - 22:00
-          </span>
+          <span className="text-sm text-[#2E1C10]">영업중</span>
+          <span className="text-sm text-[#2E1C10]/80">10:00 - 22:00</span>
         </div>
 
         {/* 빠른 액션 */}
@@ -115,12 +112,10 @@ export function Home() {
         <section>
           <div className="flex items-center gap-2 mb-3">
             <CloudSun className="w-5 h-5 text-[#F37021]" />
-            <h2 className="text-[#2E1C10]">
-              오늘의 추천 메뉴
-            </h2>
+            <h2 className="text-[#2E1C10]">오늘의 추천 메뉴</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {recommendedMenus.map((menu) => (
+            {recommendedMenus.map(menu => (
               <RecommendCard
                 key={menu.menuId}
                 menu={menu}
@@ -145,7 +140,7 @@ export function Home() {
 
           {recentReviews.length > 0 ? (
             <div className="space-y-3">
-              {recentReviews.map((review) => (
+              {recentReviews.map(review => (
                 <div key={review.id} className="bg-white rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-[#2E1C10]">{review.userName}님</span>
@@ -163,17 +158,13 @@ export function Home() {
                       />
                     </div>
                   )}
-                  <p className="text-sm text-[#2E1C10]/80 line-clamp-2">
-                    {review.content}
-                  </p>
+                  <p className="text-sm text-[#2E1C10]/80 line-clamp-2">{review.content}</p>
                 </div>
               ))}
             </div>
           ) : (
             <div className="bg-white rounded-2xl p-4 shadow-sm">
-              <p className="text-sm text-[#2E1C10] mb-1">
-                아직 등록된 리뷰가 없습니다.
-              </p>
+              <p className="text-sm text-[#2E1C10] mb-1">아직 등록된 리뷰가 없습니다.</p>
               <p className="text-xs text-[#2E1C10]/80">
                 첫 리뷰를 남겨주시면 더 많은 손님들이 참고할 수 있어요.
               </p>
@@ -185,18 +176,18 @@ export function Home() {
         {notices.length > 0 && (
           <section
             className="p-4 bg-[#F37021]/10 rounded-2xl cursor-pointer hover:bg-[#F37021]/15 transition-colors"
-            onClick={() => navigate('/notices')}
+            onClick={() => navigate("/notices")}
           >
             {notices.map(notice => {
               const typeColors = {
-                notice: 'border-[#F37021] text-[#F37021]',
-                event: 'border-blue-500 text-blue-600',
-                promotion: 'border-purple-500 text-purple-600',
+                notice: "border-[#F37021] text-[#F37021]",
+                event: "border-blue-500 text-blue-600",
+                promotion: "border-purple-500 text-purple-600",
               };
               const typeLabels = {
-                notice: '공지',
-                event: '이벤트',
-                promotion: '프로모션',
+                notice: "공지",
+                event: "이벤트",
+                promotion: "프로모션",
               };
               return (
                 <div key={notice.id} className="flex items-start justify-between gap-3">
@@ -206,19 +197,18 @@ export function Home() {
                         {typeLabels[notice.type]}
                       </Badge>
                       <span className="text-xs text-[#2E1C10]/80">
-                        {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                        }).replace(/\./g, '.').replace(/\s/g, '')}
+                        {new Date(notice.createdAt)
+                          .toLocaleDateString("ko-KR", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          })
+                          .replace(/\./g, ".")
+                          .replace(/\s/g, "")}
                       </span>
                     </div>
-                    <h3 className="text-sm text-[#2E1C10] mb-1">
-                      {notice.title}
-                    </h3>
-                    <p className="text-sm text-[#2E1C10]/80">
-                      {notice.content}
-                    </p>
+                    <h3 className="text-sm text-[#2E1C10] mb-1">{notice.title}</h3>
+                    <p className="text-sm text-[#2E1C10]/80">{notice.content}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-[#2E1C10]/40 flex-shrink-0" />
                 </div>
@@ -229,10 +219,7 @@ export function Home() {
 
         {/* CTA 버튼 */}
         <Link to="/menu">
-          <Button
-            size="lg"
-            className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
-          >
+          <Button size="lg" className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90">
             메뉴 보기
           </Button>
         </Link>
@@ -248,14 +235,14 @@ interface RecommendCardProps {
 
 const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
   const badgeLabels: Record<string, string> = {
-    best: '베스트',
-    signature: '시그니처',
-    spicy: '매운맛',
-    cold: '냉메뉴',
-    seasonal: '계절메뉴',
+    best: "베스트",
+    signature: "시그니처",
+    spicy: "매운맛",
+    cold: "냉메뉴",
+    seasonal: "계절메뉴",
   };
 
-  const hasBestBadge = menu.badges.includes('best');
+  const hasBestBadge = menu.badges.includes("best");
 
   return (
     <div
@@ -273,18 +260,10 @@ const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
       </div>
       <div className="p-3">
         <div className="flex items-center gap-2 mb-1">
-          {hasBestBadge && (
-            <Badge className="bg-[#D61C1C] text-white text-xs">
-              베스트
-            </Badge>
-          )}
+          {hasBestBadge && <Badge className="bg-[#D61C1C] text-white text-xs">베스트</Badge>}
         </div>
-        <h3 className="text-sm text-[#2E1C10] mb-1">
-          {menu.name}
-        </h3>
-        <p className="text-[#D61C1C]">
-          {formatPrice(menu.price)}
-        </p>
+        <h3 className="text-sm text-[#2E1C10] mb-1">{menu.name}</h3>
+        <p className="text-[#D61C1C]">{formatPrice(menu.price)}</p>
       </div>
     </div>
   );

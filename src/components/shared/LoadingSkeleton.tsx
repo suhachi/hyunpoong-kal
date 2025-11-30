@@ -3,22 +3,22 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import React from 'react';
+import React from "react";
 
 interface LoadingSkeletonProps {
   count?: number;
   height?: number;
   className?: string;
-  variant?: 'default' | 'card' | 'list' | 'table';
+  variant?: "default" | "card" | "list" | "table";
 }
 
-export function LoadingSkeleton({ 
-  count = 3, 
+export function LoadingSkeleton({
+  count = 3,
   height = 64,
-  className = '',
-  variant = 'default'
+  className = "",
+  variant = "default",
 }: LoadingSkeletonProps) {
-  if (variant === 'card') {
+  if (variant === "card") {
     return (
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${className}`}>
         {Array.from({ length: count }).map((_, i) => (
@@ -36,7 +36,7 @@ export function LoadingSkeleton({
     );
   }
 
-  if (variant === 'list') {
+  if (variant === "list") {
     return (
       <div className={`space-y-4 ${className}`}>
         {Array.from({ length: count }).map((_, i) => (
@@ -53,7 +53,7 @@ export function LoadingSkeleton({
     );
   }
 
-  if (variant === 'table') {
+  if (variant === "table") {
     return (
       <div className={`space-y-2 ${className}`}>
         {/* 헤더 */}
@@ -80,9 +80,9 @@ export function LoadingSkeleton({
   return (
     <div className={`space-y-4 ${className}`}>
       {Array.from({ length: count }).map((_, i) => (
-        <div 
-          key={i} 
-          className="bg-gray-100 rounded-lg animate-pulse" 
+        <div
+          key={i}
+          className="bg-gray-100 rounded-lg animate-pulse"
           style={{ height: `${height}px` }}
         />
       ))}

@@ -1,4 +1,4 @@
-import type { Timestamp } from 'firebase/firestore';
+import type { FTimestamp } from "./common";
 
 export interface Review {
   id: string;
@@ -6,19 +6,19 @@ export interface Review {
   userId: string;
   userName?: string;
 
-  rating: number;  // 1-5
+  rating: number; // 1-5
   content: string;
   images?: string[];
 
   menuNames: string[]; // 주문한 메뉴 이름들 (표시용)
 
-  createdAt: Timestamp;
-  updatedAt?: Timestamp;
+  createdAt: FTimestamp;
+  updatedAt?: FTimestamp;
 
   // 관리자 답글
   reply?: {
     content: string;
-    createdAt: Timestamp;
+    createdAt: FTimestamp;
   };
 
   isDeleted?: boolean;
@@ -31,13 +31,13 @@ export interface ReviewFormData {
 }
 
 // 리뷰 신고 관련
-export type ReviewReportReason = 'spam' | 'abuse' | 'advertisement' | 'other';
+export type ReviewReportReason = "spam" | "abuse" | "advertisement" | "other";
 
 export const REPORT_REASON_LABELS: Record<ReviewReportReason, string> = {
-  spam: '스팸/홍보',
-  abuse: '욕설/비방',
-  advertisement: '광고성 내용',
-  other: '기타',
+  spam: "스팸/홍보",
+  abuse: "욕설/비방",
+  advertisement: "광고성 내용",
+  other: "기타",
 };
 
 export interface ReviewReport {
@@ -46,14 +46,14 @@ export interface ReviewReport {
   reportedBy: string;
   reason: ReviewReportReason;
   description?: string;
-  createdAt: Timestamp;
-  status: 'pending' | 'resolved' | 'dismissed';
+  createdAt: FTimestamp;
+  status: "pending" | "resolved" | "dismissed";
 }
 
 export interface ReviewReply {
   content: string;
-  createdAt: Timestamp;
-  updatedAt?: Timestamp;
+  createdAt: FTimestamp;
+  updatedAt?: FTimestamp;
 }
 
 export interface ReviewStats {

@@ -5,21 +5,21 @@
 
 // 알림 타입
 export type NotificationType =
-  | 'order_received' // 주문 접수
-  | 'order_cooking' // 조리 시작
-  | 'order_ready' // 조리 완료 (픽업 준비)
-  | 'order_delivering' // 배달 시작
-  | 'order_completed' // 주문 완료
-  | 'order_cancelled' // 주문 취소
-  | 'coupon_issued' // 쿠폰 발급
-  | 'points_earned' // 포인트 적립
-  | 'review_reminder' // 리뷰 작성 요청
-  | 'review_reply' // 리뷰 답글
-  | 'promotion' // 프로모션/이벤트
-  | 'system'; // 시스템 공지
+  | "order_received" // 주문 접수
+  | "order_cooking" // 조리 시작
+  | "order_ready" // 조리 완료 (픽업 준비)
+  | "order_delivering" // 배달 시작
+  | "order_completed" // 주문 완료
+  | "order_cancelled" // 주문 취소
+  | "coupon_issued" // 쿠폰 발급
+  | "points_earned" // 포인트 적립
+  | "review_reminder" // 리뷰 작성 요청
+  | "review_reply" // 리뷰 답글
+  | "promotion" // 프로모션/이벤트
+  | "system"; // 시스템 공지
 
 // 알림 우선순위
-export type NotificationPriority = 'high' | 'normal' | 'low';
+export type NotificationPriority = "high" | "normal" | "low";
 
 // 알림 데이터
 export interface Notification {
@@ -67,7 +67,7 @@ export interface PushPayload {
 export interface FCMToken {
   userId: string;
   token: string;
-  platform: 'web' | 'android' | 'ios';
+  platform: "web" | "android" | "ios";
   createdAt: Date;
   updatedAt: Date;
 }

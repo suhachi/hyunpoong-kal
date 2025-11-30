@@ -2,25 +2,25 @@
  * 주문 상태 관련 유틸리티 함수
  */
 
-import type { OrderStatus } from '../types/order';
+import { OrderStatus } from "../types/order";
 
 /**
  * 관리자 화면용 주문 상태 라벨
  */
 export function getOrderStatusLabelForAdmin(status: OrderStatus): string {
   switch (status) {
-    case 'pending':
-      return '접수대기';
-    case 'accepted':
-      return '접수확인';
-    case 'cooking':
-      return '조리중';
-    case 'delivering':
-      return '배달중';
-    case 'completed':
-      return '완료';
-    case 'cancelled':
-      return '취소';
+    case OrderStatus.PENDING:
+      return "접수대기";
+    case OrderStatus.ACCEPTED:
+      return "접수확인";
+    case OrderStatus.COOKING:
+      return "조리중";
+    case OrderStatus.DELIVERING:
+      return "배달중";
+    case OrderStatus.COMPLETED:
+      return "완료";
+    case OrderStatus.CANCELLED:
+      return "취소";
   }
 }
 
@@ -29,17 +29,17 @@ export function getOrderStatusLabelForAdmin(status: OrderStatus): string {
  */
 export function getOrderStatusLabelForCustomer(status: OrderStatus): string {
   switch (status) {
-    case 'pending':
-    case 'accepted':
-      return '주문접수';
-    case 'cooking':
-      return '조리중';
-    case 'delivering':
-      return '배달중';
-    case 'completed':
-      return '배달완료';
-    case 'cancelled':
-      return '주문취소';
+    case OrderStatus.PENDING:
+    case OrderStatus.ACCEPTED:
+      return "주문접수";
+    case OrderStatus.COOKING:
+      return "조리중";
+    case OrderStatus.DELIVERING:
+      return "배달중";
+    case OrderStatus.COMPLETED:
+      return "배달완료";
+    case OrderStatus.CANCELLED:
+      return "주문취소";
   }
 }
 
@@ -48,18 +48,18 @@ export function getOrderStatusLabelForCustomer(status: OrderStatus): string {
  */
 export function getOrderStatusColor(status: OrderStatus): string {
   switch (status) {
-    case 'pending':
-      return 'blue';
-    case 'accepted':
-      return 'blue';
-    case 'cooking':
-      return 'orange';
-    case 'delivering':
-      return 'purple';
-    case 'completed':
-      return 'green';
-    case 'cancelled':
-      return 'red';
+    case OrderStatus.PENDING:
+      return "blue";
+    case OrderStatus.ACCEPTED:
+      return "blue";
+    case OrderStatus.COOKING:
+      return "orange";
+    case OrderStatus.DELIVERING:
+      return "purple";
+    case OrderStatus.COMPLETED:
+      return "green";
+    case OrderStatus.CANCELLED:
+      return "red";
   }
 }
 
@@ -68,30 +68,35 @@ export function getOrderStatusColor(status: OrderStatus): string {
  */
 export function getStatusColor(status: OrderStatus): string {
   switch (status) {
-    case 'pending':
-      return 'bg-gray-500 hover:bg-gray-600';
-    case 'accepted':
-      return 'bg-blue-600 hover:bg-blue-700';
-    case 'cooking':
-      return 'bg-amber-500 hover:bg-amber-600';
-    case 'delivering':
-      return 'bg-purple-600 hover:bg-purple-700';
-    case 'completed':
-      return 'bg-green-600 hover:bg-green-700';
-    case 'cancelled':
-      return 'bg-red-600 hover:bg-red-700';
+    case OrderStatus.PENDING:
+      return "bg-gray-500 hover:bg-gray-600";
+    case OrderStatus.ACCEPTED:
+      return "bg-blue-600 hover:bg-blue-700";
+    case OrderStatus.COOKING:
+      return "bg-amber-500 hover:bg-amber-600";
+    case OrderStatus.DELIVERING:
+      return "bg-purple-600 hover:bg-purple-700";
+    case OrderStatus.COMPLETED:
+      return "bg-green-600 hover:bg-green-700";
+    case OrderStatus.CANCELLED:
+      return "bg-red-600 hover:bg-red-700";
     default:
-      return 'bg-gray-500';
+      return "bg-gray-500";
   }
 }
 
 /**
  * 배달/포장 유형에 따른 상태 목록
  */
-export function getStatusList(deliveryType: 'delivery' | 'pickup'): OrderStatus[] {
-  if (deliveryType === 'delivery') {
-    return ['accepted', 'cooking', 'delivering', 'completed'];
+export function getStatusList(deliveryType: "delivery" | "pickup"): OrderStatus[] {
+  if (deliveryType === "delivery") {
+    return [
+      OrderStatus.ACCEPTED,
+      OrderStatus.COOKING,
+      OrderStatus.DELIVERING,
+      OrderStatus.COMPLETED,
+    ];
   } else {
-    return ['accepted', 'cooking', 'completed']; // 포장은 'delivering' 제외 (또는 'ready'가 있다면 추가)
+    return [OrderStatus.ACCEPTED, OrderStatus.COOKING, OrderStatus.COMPLETED]; // 포장은 'delivering' 제외 (또는 'ready'가 있다면 추가)
   }
 }

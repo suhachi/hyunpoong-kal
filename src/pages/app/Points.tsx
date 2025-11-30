@@ -3,21 +3,27 @@
  * Phase 3-3: Points System
  */
 
-import { useEffect, useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { ArrowLeft, Gift, TrendingUp, TrendingDown, Clock, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Separator } from '../../components/ui/separator';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Skeleton } from '../../components/ui/skeleton';
-import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
-import { getPointsHistory, POINTS_POLICY } from '../../lib/points.api';
-import { FEATURE_FLAGS } from '../../config/env';
-import type { PointsHistory, PointsLedger } from '../../types/points';
-import { formatDateTime } from '../../lib/utils';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { ArrowLeft, Gift, TrendingUp, TrendingDown, Clock, AlertCircle } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
+import { Separator } from "../../components/ui/separator";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Skeleton } from "../../components/ui/skeleton";
+import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
+import { getPointsHistory, POINTS_POLICY } from "../../lib/points.api";
+import { FEATURE_FLAGS } from "../../config/env";
+import type { PointsHistory, PointsLedger } from "../../types/points";
+import { formatDateTime } from "../../lib/utils";
+import { toast } from "sonner";
 
 export function Points() {
   const navigate = useNavigate();
@@ -54,8 +60,8 @@ export function Points() {
       const data = await getPointsHistory(uid);
       setHistory(data);
     } catch (error) {
-      console.error('Failed to load points history:', error);
-      toast.error('포인트 내역을 불러오는데 실패했습니다. 다시 시도해주세요.');
+      console.error("Failed to load points history:", error);
+      toast.error("포인트 내역을 불러오는데 실패했습니다. 다시 시도해주세요.");
       setHistory(null);
     } finally {
       setLoading(false);
@@ -67,9 +73,7 @@ export function Points() {
       <div className="min-h-screen bg-[#FBF9F6] p-4">
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            포인트 기능이 비활성화되어 있습니다.
-          </AlertDescription>
+          <AlertDescription>포인트 기능이 비활성화되어 있습니다.</AlertDescription>
         </Alert>
       </div>
     );
@@ -106,9 +110,7 @@ export function Points() {
           <CardContent>
             <div className="flex items-center gap-2 text-white/90 text-sm">
               <Gift className="w-4 h-4" />
-              <span>
-                {POINTS_POLICY.minUse.toLocaleString()}P부터 사용 가능
-              </span>
+              <span>{POINTS_POLICY.minUse.toLocaleString()}P부터 사용 가능</span>
             </div>
           </CardContent>
         </Card>
@@ -121,12 +123,8 @@ export function Points() {
               <div className="space-y-1">
                 {history.expiringPoints.slice(0, 3).map((item, idx) => (
                   <div key={idx} className="flex justify-between text-sm">
-                    <span>
-                      {new Date(item.expiresAt).toLocaleDateString()} 만료 예정
-                    </span>
-                    <span className="font-medium">
-                      {item.amount.toLocaleString()}P
-                    </span>
+                    <span>{new Date(item.expiresAt).toLocaleDateString()} 만료 예정</span>
+                    <span className="font-medium">{item.amount.toLocaleString()}P</span>
                   </div>
                 ))}
               </div>
@@ -163,9 +161,7 @@ export function Points() {
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">포인트 유효기간</span>
-              <span className="font-medium text-gray-700">
-                {POINTS_POLICY.expireDays}일
-              </span>
+              <span className="font-medium text-gray-700">{POINTS_POLICY.expireDays}일</span>
             </div>
           </CardContent>
         </Card>
@@ -174,29 +170,25 @@ export function Points() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">포인트 내역</CardTitle>
-            <CardDescription>
-              최근 포인트 적립 및 사용 내역
-            </CardDescription>
+            <CardDescription>최근 포인트 적립 및 사용 내역</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
+                {[1, 2, 3].map(i => (
                   <Skeleton key={i} className="h-16 w-full" />
                 ))}
               </div>
             ) : history && history.ledger.length > 0 ? (
               <div className="space-y-3">
-                {history.ledger.map((entry) => (
+                {history.ledger.map(entry => (
                   <PointsHistoryItem key={entry.id} entry={entry} />
                 ))}
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <p>아직 포인트 내역이 없습니다</p>
-                <p className="text-sm mt-2">
-                  주문하고 포인트를 적립해보세요!
-                </p>
+                <p className="text-sm mt-2">주문하고 포인트를 적립해보세요!</p>
               </div>
             )}
           </CardContent>
@@ -211,7 +203,7 @@ export function Points() {
  */
 function PointsHistoryItem({ entry }: { entry: PointsLedger }) {
   const isPositive = entry.amount > 0;
-  const isExpired = entry.type === 'expire';
+  const isExpired = entry.type === "expire";
 
   const getIcon = () => {
     if (isExpired) return <Clock className="w-5 h-5 text-gray-400" />;
@@ -221,51 +213,50 @@ function PointsHistoryItem({ entry }: { entry: PointsLedger }) {
 
   const getLabel = () => {
     switch (entry.type) {
-      case 'earn':
-        return entry.ref?.kind === 'order' ? '주문 적립' :
-               entry.ref?.kind === 'review' ? '리뷰 적립' : '적립';
-      case 'spend':
-        return '포인트 사용';
-      case 'expire':
-        return '포인트 만료';
-      case 'adjust':
-        return '관리자 조정';
+      case "earn":
+        return entry.ref?.kind === "order"
+          ? "주문 적립"
+          : entry.ref?.kind === "review"
+            ? "리뷰 적립"
+            : "적립";
+      case "spend":
+        return "포인트 사용";
+      case "expire":
+        return "포인트 만료";
+      case "adjust":
+        return "관리자 조정";
       default:
         return entry.type;
     }
   };
 
   const getColor = () => {
-    if (isExpired) return 'text-gray-600';
-    if (isPositive) return 'text-green-600';
-    return 'text-red-600';
+    if (isExpired) return "text-gray-600";
+    if (isPositive) return "text-green-600";
+    return "text-red-600";
   };
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
       <div className="flex-shrink-0">{getIcon()}</div>
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="font-medium">{getLabel()}</p>
-          {entry.type === 'earn' && entry.expiresAt && (
+          {entry.type === "earn" && entry.expiresAt && (
             <Badge variant="outline" className="text-xs">
               {new Date(entry.expiresAt).toLocaleDateString()} 만료
             </Badge>
           )}
         </div>
-        
-        {entry.note && (
-          <p className="text-sm text-gray-600 truncate">{entry.note}</p>
-        )}
-        
-        <p className="text-xs text-gray-500">
-          {formatDateTime(new Date(entry.at))}
-        </p>
+
+        {entry.note && <p className="text-sm text-gray-600 truncate">{entry.note}</p>}
+
+        <p className="text-xs text-gray-500">{formatDateTime(new Date(entry.at))}</p>
       </div>
-      
+
       <div className={`font-medium ${getColor()}`}>
-        {isPositive ? '+' : ''}
+        {isPositive ? "+" : ""}
         {entry.amount.toLocaleString()}P
       </div>
     </div>

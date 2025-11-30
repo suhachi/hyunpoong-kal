@@ -3,28 +3,35 @@
  * Phase 2-8: 쿠폰 목록 및 상태별 필터
  */
 
-import { useState, useEffect } from 'react';
-import { Coupon, CouponStatus, getCouponStatus, COUPON_TYPE_LABELS } from '../../types/coupon';
-import { getCoupons } from '../../lib/coupons.api';
-import { getCurrentUser } from '../../lib/auth';
-import { CouponCard } from '../../components/app/CouponCard';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
-import { Ticket, Plus } from 'lucide-react';
-import { toast } from 'sonner';
-import { formatPrice } from '../../lib/utils';
+import { useState, useEffect } from "react";
+import { Coupon, CouponStatus, getCouponStatus, COUPON_TYPE_LABELS } from "../../types/coupon";
+import { getCoupons } from "../../lib/coupons.api";
+import { getCurrentUser } from "../../lib/auth";
+import { CouponCard } from "../../components/app/CouponCard";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
+import { Ticket, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { formatPrice } from "../../lib/utils";
 
 export function Coupons() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [filteredCoupons, setFilteredCoupons] = useState<Coupon[]>([]);
-  const [statusFilter, setStatusFilter] = useState<CouponStatus | 'all'>('available');
+  const [statusFilter, setStatusFilter] = useState<CouponStatus | "all">("available");
   const [loading, setLoading] = useState(true);
-  
+
   // 쿠폰 코드 입력
   const [codeDialogOpen, setCodeDialogOpen] = useState(false);
-  const [couponCode, setCouponCode] = useState('');
+  const [couponCode, setCouponCode] = useState("");
   const [applying, setApplying] = useState(false);
 
   const user = getCurrentUser();
@@ -34,7 +41,7 @@ export function Coupons() {
   }, []);
 
   useEffect(() => {
-    if (statusFilter === 'all') {
+    if (statusFilter === "all") {
       setFilteredCoupons(coupons);
     } else {
       setFilteredCoupons(coupons.filter(c => getCouponStatus(c) === statusFilter));
@@ -49,7 +56,7 @@ export function Coupons() {
       const data = await getCoupons(user.uid);
       setCoupons(data);
     } catch (error) {
-      console.error('Failed to load coupons:', error);
+      console.error("Failed to load coupons:", error);
     } finally {
       setLoading(false);
     }
@@ -58,7 +65,7 @@ export function Coupons() {
   const handleApplyCouponCode = async () => {
     if (!user) return;
     if (!couponCode.trim()) {
-      toast.error('쿠폰 코드를 입력하세요');
+      toast.error("쿠폰 코드를 입력하세요");
       return;
     }
 
@@ -66,26 +73,26 @@ export function Coupons() {
     try {
       // Mock: 쿠폰 코드 검증 및 발급
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // 임시 쿠폰 코드 검증 (실제로는 서버에서 처리)
       const validCodes: Record<string, { title: string; amount: number; minSpend: number }> = {
-        'WELCOME2025': { title: '신년 맞이 특별 할인', amount: 10000, minSpend: 30000 },
-        'FIRSTORDER': { title: '첫 주문 감사 쿠폰', amount: 5000, minSpend: 15000 },
-        'REVIEW500': { title: '리뷰 이벤트 쿠폰', amount: 3000, minSpend: 10000 },
+        WELCOME2025: { title: "신년 맞이 특별 할인", amount: 10000, minSpend: 30000 },
+        FIRSTORDER: { title: "첫 주문 감사 쿠폰", amount: 5000, minSpend: 15000 },
+        REVIEW500: { title: "리뷰 이벤트 쿠폰", amount: 3000, minSpend: 10000 },
       };
 
       const codeUpper = couponCode.toUpperCase().trim();
       const couponData = validCodes[codeUpper];
 
       if (!couponData) {
-        toast.error('유효하지 않은 쿠폰 코드입니다');
+        toast.error("유효하지 않은 쿠폰 코드입니다");
         return;
       }
 
       // 이미 등록된 코드인지 확인
       const alreadyHas = coupons.some(c => c.title === couponData.title);
       if (alreadyHas) {
-        toast.error('이미 등록된 쿠폰입니다');
+        toast.error("이미 등록된 쿠폰입니다");
         return;
       }
 
@@ -93,7 +100,7 @@ export function Coupons() {
       const newCoupon: Coupon = {
         id: `coupon-code-${Date.now()}`,
         uid: user.uid,
-        type: 'code',
+        type: "code",
         amount: couponData.amount,
         minSpend: couponData.minSpend,
         issuedAt: Date.now(),
@@ -106,18 +113,18 @@ export function Coupons() {
       setCoupons([newCoupon, ...coupons]);
       toast.success(`🎉 ${couponData.title} 쿠폰이 등록되었습니다!`);
       setCodeDialogOpen(false);
-      setCouponCode('');
+      setCouponCode("");
     } catch (error) {
-      console.error('Failed to apply coupon code:', error);
-      toast.error('쿠폰 등록에 실패했습니다');
+      console.error("Failed to apply coupon code:", error);
+      toast.error("쿠폰 등록에 실패했습니다");
     } finally {
       setApplying(false);
     }
   };
 
-  const availableCount = coupons.filter(c => getCouponStatus(c) === 'available').length;
-  const usedCount = coupons.filter(c => getCouponStatus(c) === 'used').length;
-  const expiredCount = coupons.filter(c => getCouponStatus(c) === 'expired').length;
+  const availableCount = coupons.filter(c => getCouponStatus(c) === "available").length;
+  const usedCount = coupons.filter(c => getCouponStatus(c) === "used").length;
+  const expiredCount = coupons.filter(c => getCouponStatus(c) === "expired").length;
 
   return (
     <div className="min-h-screen bg-[#F9F6F3] pb-20">
@@ -125,32 +132,21 @@ export function Coupons() {
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-xl text-[#333] flex items-center gap-2">
-            <Ticket className="w-6 h-6 text-[#D61C1C]" />
-            내 쿠폰
+            <Ticket className="w-6 h-6 text-[#D61C1C]" />내 쿠폰
           </h1>
-          <p className="text-sm text-[#8B7355] mt-1">
-            사용 가능한 쿠폰 {availableCount}장
-          </p>
+          <p className="text-sm text-[#8B7355] mt-1">사용 가능한 쿠폰 {availableCount}장</p>
         </div>
       </div>
 
       {/* 탭 필터 */}
       <div className="bg-white border-b sticky top-[73px] z-10">
         <div className="container mx-auto px-4 py-3">
-          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+          <Tabs value={statusFilter} onValueChange={v => setStatusFilter(v as any)}>
             <TabsList className="w-full justify-start">
-              <TabsTrigger value="available">
-                사용가능 ({availableCount})
-              </TabsTrigger>
-              <TabsTrigger value="used">
-                사용완료 ({usedCount})
-              </TabsTrigger>
-              <TabsTrigger value="expired">
-                만료됨 ({expiredCount})
-              </TabsTrigger>
-              <TabsTrigger value="all">
-                전체 ({coupons.length})
-              </TabsTrigger>
+              <TabsTrigger value="available">사용가능 ({availableCount})</TabsTrigger>
+              <TabsTrigger value="used">사용완료 ({usedCount})</TabsTrigger>
+              <TabsTrigger value="expired">만료됨 ({expiredCount})</TabsTrigger>
+              <TabsTrigger value="all">전체 ({coupons.length})</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -189,7 +185,9 @@ export function Coupons() {
             <ul className="space-y-2 text-sm text-[#8B7355]">
               <li className="flex items-start gap-2">
                 <span className="text-[#D61C1C]">•</span>
-                <span>주문 후 <strong>사진 리뷰</strong>를 남기면 3,000원 쿠폰</span>
+                <span>
+                  주문 후 <strong>사진 리뷰</strong>를 남기면 3,000원 쿠폰
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#F37021]">•</span>

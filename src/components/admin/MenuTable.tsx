@@ -3,20 +3,20 @@
  * 썸네일/이름/카테고리/가격/배지/상태/액션
  */
 
-import { Menu, CATEGORY_LABELS, BADGE_LABELS } from '../../types/menu';
-import { getMenuStatus } from '../../lib/admin/menus.api';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Switch } from '../ui/switch';
+import { Menu, CATEGORY_LABELS, BADGE_LABELS } from "../../types/menu";
+import { getMenuStatus } from "../../lib/admin/menus.api";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { MoreVertical, Edit2, Clock, Trash2 } from 'lucide-react';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { formatPrice } from '../../lib/utils';
+} from "../ui/dropdown-menu";
+import { MoreVertical, Edit2, Clock, Trash2 } from "lucide-react";
+import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { formatPrice } from "../../lib/utils";
 
 interface MenuTableProps {
   menus: Menu[];
@@ -103,9 +103,7 @@ export function MenuTable({
                   </td>
 
                   {/* 가격 */}
-                  <td className="px-4 py-3 text-right text-sm">
-                    {formatPrice(menu.price)}
-                  </td>
+                  <td className="px-4 py-3 text-right text-sm">{formatPrice(menu.price)}</td>
 
                   {/* 배지 */}
                   <td className="px-4 py-3">
@@ -114,16 +112,22 @@ export function MenuTable({
                         <Badge
                           key={badge}
                           variant={
-                            badge === 'best' ? 'default' :
-                            badge === 'signature' ? 'secondary' :
-                            'outline'
+                            badge === "best"
+                              ? "default"
+                              : badge === "signature"
+                                ? "secondary"
+                                : "outline"
                           }
                           className={
-                            badge === 'best' ? 'bg-[#D61C1C]' :
-                            badge === 'signature' ? 'bg-[#C7A45A]' :
-                            badge === 'spicy' ? 'bg-[#F37021] text-white' :
-                            badge === 'cold' ? 'bg-blue-500 text-white' :
-                            ''
+                            badge === "best"
+                              ? "bg-[#D61C1C]"
+                              : badge === "signature"
+                                ? "bg-[#C7A45A]"
+                                : badge === "spicy"
+                                  ? "bg-[#F37021] text-white"
+                                  : badge === "cold"
+                                    ? "bg-blue-500 text-white"
+                                    : ""
                           }
                         >
                           {BADGE_LABELS[badge]}
@@ -137,16 +141,22 @@ export function MenuTable({
                     <Badge
                       variant="outline"
                       className={
-                        status === 'available' ? 'border-green-500 text-green-700' :
-                        status === 'soldout' ? 'border-gray-400 text-gray-600' :
-                        status === 'time-limited' ? 'border-yellow-500 text-yellow-700' :
-                        ''
+                        status === "available"
+                          ? "border-green-500 text-green-700"
+                          : status === "soldout"
+                            ? "border-gray-400 text-gray-600"
+                            : status === "time-limited"
+                              ? "border-yellow-500 text-yellow-700"
+                              : ""
                       }
                     >
-                      {status === 'available' ? '판매중' :
-                       status === 'soldout' ? '품절' :
-                       status === 'time-limited' ? '시간외' :
-                       '숨김'}
+                      {status === "available"
+                        ? "판매중"
+                        : status === "soldout"
+                          ? "품절"
+                          : status === "time-limited"
+                            ? "시간외"
+                            : "숨김"}
                     </Badge>
                   </td>
 
@@ -180,7 +190,7 @@ export function MenuTable({
                           </DropdownMenuItem>
                         )}
                         {onDelete && (
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => onDelete(menu.menuId)}
                             className="text-red-600 focus:text-red-600"
                           >
@@ -222,11 +232,15 @@ export function MenuTable({
                         key={badge}
                         variant="outline"
                         className={
-                          badge === 'best' ? 'bg-[#D61C1C] text-white border-[#D61C1C]' :
-                          badge === 'signature' ? 'bg-[#C7A45A] text-white border-[#C7A45A]' :
-                          badge === 'spicy' ? 'bg-[#F37021] text-white border-[#F37021]' :
-                          badge === 'cold' ? 'bg-blue-500 text-white border-blue-500' :
-                          ''
+                          badge === "best"
+                            ? "bg-[#D61C1C] text-white border-[#D61C1C]"
+                            : badge === "signature"
+                              ? "bg-[#C7A45A] text-white border-[#C7A45A]"
+                              : badge === "spicy"
+                                ? "bg-[#F37021] text-white border-[#F37021]"
+                                : badge === "cold"
+                                  ? "bg-blue-500 text-white border-blue-500"
+                                  : ""
                         }
                       >
                         {BADGE_LABELS[badge]}
@@ -242,16 +256,22 @@ export function MenuTable({
                   <Badge
                     variant="outline"
                     className={
-                      status === 'available' ? 'border-green-500 text-green-700' :
-                      status === 'soldout' ? 'border-gray-400 text-gray-600' :
-                      status === 'time-limited' ? 'border-yellow-500 text-yellow-700' :
-                      ''
+                      status === "available"
+                        ? "border-green-500 text-green-700"
+                        : status === "soldout"
+                          ? "border-gray-400 text-gray-600"
+                          : status === "time-limited"
+                            ? "border-yellow-500 text-yellow-700"
+                            : ""
                     }
                   >
-                    {status === 'available' ? '판매중' :
-                     status === 'soldout' ? '품절' :
-                     status === 'time-limited' ? '시간외' :
-                     '숨김'}
+                    {status === "available"
+                      ? "판매중"
+                      : status === "soldout"
+                        ? "품절"
+                        : status === "time-limited"
+                          ? "시간외"
+                          : "숨김"}
                   </Badge>
                   {menu.availableHours && (
                     <span className="text-xs text-gray-500">
@@ -284,7 +304,7 @@ export function MenuTable({
                         </DropdownMenuItem>
                       )}
                       {onDelete && (
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => onDelete(menu.menuId)}
                           className="text-red-600 focus:text-red-600"
                         >

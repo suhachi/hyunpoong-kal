@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-30-1717  
+**Generated**: 2025-11-30-1905  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -51,6 +51,7 @@ export interface AuthUser {
   role: UserRole;
   photoURL?: string;
   storeId?: string; // owner인 경우 관리하는 매장 ID
+  phoneNumber?: string;
   createdAt?: Date;
 }
 
@@ -112,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.log('[AuthContext] 🔍 USE_FIREBASE:', USE_FIREBASE);
-    
+
     if (USE_FIREBASE && auth) {
       // Firebase Auth 리스너
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -173,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: 'customer',
         createdAt: new Date(),
       };
-      
+
       localStorage.setItem('mockUser', JSON.stringify(newUser));
       setUser(newUser);
     }
@@ -264,7 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!userData?.role && adminEmails.includes(firebaseUser.email || '')) {
           role = 'owner';
         }
-        
+
         authUser = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || '',
@@ -289,7 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: 'customer',
         createdAt: new Date(),
       };
-      
+
       localStorage.setItem('mockUser', JSON.stringify(mockUser));
       setUser(mockUser);
       return mockUser;
@@ -317,16 +318,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 여기서는 이미 verifyPhoneCode가 완료된 상태라고 가정
       // 실제로는 Signup/Login 컴포넌트에서 sendVerificationCode → verifyPhoneCode 순서로 호출
       const firebaseUser = auth.currentUser;
-      
+
       if (!firebaseUser) {
         throw new Error('인증이 완료되지 않았습니다.');
       }
 
       // Firestore에서 사용자 정보 확인
       const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      
+
       let authUser: AuthUser;
-      
+
       if (!userDoc.exists()) {
         // 신규 사용자 (로그인 시도했지만 회원 정보 없음)
         authUser = {
@@ -336,7 +337,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: 'customer',
           createdAt: new Date(),
         };
-        
+
         await setDoc(doc(db, 'users', firebaseUser.uid), {
           ...authUser,
           phoneNumber: normalizePhoneNumber(phoneNumber),
@@ -354,7 +355,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           createdAt: userData?.createdAt?.toDate(),
         };
       }
-      
+
       setUser(authUser);
       return authUser;
     } else {
@@ -366,7 +367,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: 'customer',
         createdAt: new Date(),
       };
-      
+
       localStorage.setItem('mockUser', JSON.stringify(mockUser));
       setUser(mockUser);
       return mockUser;
@@ -383,7 +384,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Firebase Phone Auth는 sendVerificationCode와 verifyPhoneCode를 별도로 호출해야 함
       // 여기서는 이미 verifyPhoneCode가 완료된 상태라고 가정
       const firebaseUser = auth.currentUser;
-      
+
       if (!firebaseUser) {
         throw new Error('인증이 완료되지 않았습니다.');
       }
@@ -416,7 +417,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: 'customer',
         createdAt: new Date(),
       };
-      
+
       localStorage.setItem('mockUser', JSON.stringify(newUser));
       setUser(newUser);
     }
@@ -431,7 +432,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.displayName) {
         await updateProfile(auth.currentUser, { displayName: data.displayName });
       }
-      
+
       // Firestore 업데이트
       await setDoc(doc(db, 'users', user.uid), data, { merge: true });
     } else {

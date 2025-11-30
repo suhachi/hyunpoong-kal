@@ -5,15 +5,11 @@
  * v1.0 STEP 4: Firestore stores/{storeId}/menus 구조로 전환
  */
 
-import { Menu, MenuFilters, MenuLog, MenuStatus, CustomOption } from '../../types/menu';
-import menusData from '../../data/menus.json';
-import { USE_FIREBASE, getEnv } from '../../config/env';
-import { getOptionGroups, getOptionGroupById } from './optionGroups.api';
-import {
-  type MenuDoc,
-  storeMenusCollection,
-  storeMenuDocRef,
-} from '../firebase/firestore-schema';
+import { Menu, MenuFilters, MenuLog, MenuStatus, CustomOption } from "../../types/menu";
+import menusData from "../../data/menus.json";
+import { USE_FIREBASE, getEnv } from "../../config/env";
+import { getOptionGroups, getOptionGroupById } from "./optionGroups.api";
+import { type MenuDoc, storeMenusCollection, storeMenuDocRef } from "../firebase/firestore-schema";
 import {
   addDoc,
   setDoc,
@@ -27,26 +23,26 @@ import {
   serverTimestamp,
   deleteField,
   type Timestamp,
-} from 'firebase/firestore';
-import type { FirebaseError } from 'firebase/app';
-import { db } from '../firebase';
+} from "firebase/firestore";
+import type { FirebaseError } from "firebase/app";
+import { db } from "../firebase";
 
 // Mock 데이터 (menus.json 기반)
 // localStorage에서 저장된 데이터를 먼저 확인, 없으면 menus.json 사용
-const STORAGE_KEY = 'hyunpoong_mock_menus';
+const STORAGE_KEY = "hyunpoong_mock_menus";
 const getStoredMenus = (): Menu[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       // Date 객체 복원
-      return parsed.map((m: any) => ({
-        ...m,
+      return parsed.map((m: unknown) => ({
+        ...(m as object),
         // 필요시 Date 필드 복원
-      }));
+      })) as Menu[];
     }
   } catch (error) {
-    console.error('Failed to load stored menus:', error);
+    console.error("Failed to load stored menus:", error);
   }
   return Array.isArray(menusData) ? menusData : [];
 };
@@ -58,12 +54,12 @@ const saveMenusToStorage = () => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mockMenus));
   } catch (error) {
-    console.error('Failed to save menus to storage:', error);
+    console.error("Failed to save menus to storage:", error);
   }
 };
 
 // Mock 로그
-let mockMenuLogs: MenuLog[] = [];
+const mockMenuLogs: MenuLog[] = [];
 
 // ============================================================================
 // Menu ↔ MenuDoc 매퍼 함수
@@ -76,24 +72,24 @@ function buildMenuDocFromEntity(params: {
   storeId: string;
   menuId: string;
   menu: Menu;
-}): Omit<MenuDoc, 'createdAt' | 'updatedAt'> {
+}): Omit<MenuDoc, "createdAt" | "updatedAt"> {
   const { storeId, menuId, menu } = params;
 
-  const menuDoc: Omit<MenuDoc, 'createdAt' | 'updatedAt'> = {
+  const menuDoc: Omit<MenuDoc, "createdAt" | "updatedAt"> = {
     menuId,
     storeId,
     category: menu.category,
     name: menu.name,
     price: menu.price,
-    description: menu.description || '',
-    imageUrl: menu.image || '', // Menu.image → MenuDoc.imageUrl
-    imagePath: '', // Storage 경로는 업로드 시 설정
+    description: menu.description || "",
+    imageUrl: menu.image || "", // Menu.image → MenuDoc.imageUrl
+    imagePath: "", // Storage 경로는 업로드 시 설정
     badges: menu.badges || [],
     optionGroups: menu.optionGroups?.map(og => og.id) || [],
     allergens: menu.allergens || [],
-    origin: menu.origin || '',
+    origin: menu.origin || "",
     isAvailable: menu.isAvailable ?? true,
-    order: typeof menu.order === 'number' ? menu.order : 0,
+    order: typeof menu.order === "number" ? menu.order : 0,
   };
 
   // options는 undefined인 경우 필드에서 제외 (Firestore는 undefined 허용 안 함)
@@ -121,19 +117,23 @@ async function buildMenuFromDoc(docData: MenuDoc): Promise<Menu> {
   // Timestamp → string 변환 헬퍼 (Order 매퍼와 동일한 패턴)
   const toDateOrString = (ts: Timestamp | undefined): string | undefined => {
     if (!ts) return undefined;
-    if (typeof ts === 'string') return ts;
-    if (typeof ts.toDate === 'function') {
+    if (typeof ts === "string") return ts;
+    if (typeof ts.toDate === "function") {
       return ts.toDate().toISOString();
     }
     // Mock 모드 호환: { seconds, nanoseconds } 형태
-    if ((ts as any).seconds && typeof (ts as any).seconds === 'number') {
-      return new Date((ts as any).seconds * 1000).toISOString();
+    if (
+      typeof ts === "object" &&
+      "seconds" in ts &&
+      typeof (ts as { seconds: number }).seconds === "number"
+    ) {
+      return new Date((ts as { seconds: number }).seconds * 1000).toISOString();
     }
     return undefined;
   };
 
   // optionGroups ID 배열을 실제 OptionGroup 객체로 변환
-  let resolvedOptionGroups: Menu['optionGroups'] = [];
+  let resolvedOptionGroups: Menu["optionGroups"] = [];
   if (docData.optionGroups && docData.optionGroups.length > 0) {
     try {
       // 모든 옵션 그룹을 가져와서 ID로 매칭
@@ -142,7 +142,7 @@ async function buildMenuFromDoc(docData: MenuDoc): Promise<Menu> {
         .map(id => allOptionGroups.find(og => og.id === id))
         .filter((og): og is NonNullable<typeof og> => og !== undefined);
     } catch (error) {
-      console.warn('[buildMenuFromDoc] Failed to resolve option groups:', error);
+      console.warn("[buildMenuFromDoc] Failed to resolve option groups:", error);
       // 에러 발생 시 빈 배열 유지
       resolvedOptionGroups = [];
     }
@@ -154,13 +154,13 @@ async function buildMenuFromDoc(docData: MenuDoc): Promise<Menu> {
     name: docData.name,
     price: docData.price,
     description: docData.description,
-    image: docData.imageUrl || '', // MenuDoc.imageUrl → Menu.image
+    image: docData.imageUrl || "", // MenuDoc.imageUrl → Menu.image
     badges: docData.badges || [],
     options: docData.options,
     optionGroups: resolvedOptionGroups,
     customOptions: docData.customOptions,
     allergens: docData.allergens || [],
-    origin: docData.origin || '',
+    origin: docData.origin || "",
     isAvailable: docData.isAvailable,
     availableHours: docData.availableHours,
     order: docData.order,
@@ -172,7 +172,7 @@ async function buildMenuFromDoc(docData: MenuDoc): Promise<Menu> {
  * storeId 가져오기 헬퍼
  */
 function getStoreId(): string {
-  return getEnv('VITE_STORE_ID', 'hyunpoong_main');
+  return getEnv("VITE_STORE_ID", "hyunpoong_main");
 }
 
 // ============================================================================
@@ -184,7 +184,7 @@ function getStoreId(): string {
  */
 export function getMenuStatus(menu: Menu): MenuStatus {
   if (!menu.isAvailable) {
-    return 'soldout';
+    return "soldout";
   }
 
   if (menu.availableHours) {
@@ -193,17 +193,17 @@ export function getMenuStatus(menu: Menu): MenuStatus {
     const currentMinute = now.getMinutes();
     const currentTime = currentHour * 60 + currentMinute;
 
-    const [startHour, startMinute] = menu.availableHours.start.split(':').map(Number);
-    const [endHour, endMinute] = menu.availableHours.end.split(':').map(Number);
+    const [startHour, startMinute] = menu.availableHours.start.split(":").map(Number);
+    const [endHour, endMinute] = menu.availableHours.end.split(":").map(Number);
     const startTime = startHour * 60 + startMinute;
     const endTime = endHour * 60 + endMinute;
 
     if (currentTime < startTime || currentTime >= endTime) {
-      return 'time-limited';
+      return "time-limited";
     }
   }
 
-  return 'available';
+  return "available";
 }
 
 /**
@@ -215,37 +215,38 @@ async function getMenusMock(filters: MenuFilters = {}): Promise<Menu[]> {
   let filtered = [...mockMenus];
 
   // 카테고리 필터
-  if (filters.category && filters.category !== 'all') {
+  if (filters.category && filters.category !== "all") {
     filtered = filtered.filter(m => m.category === filters.category);
   }
 
   // 검색 (이름/태그)
   if (filters.search) {
     const search = filters.search.toLowerCase();
-    filtered = filtered.filter(m => 
-      m.name.toLowerCase().includes(search) ||
-      m.description.toLowerCase().includes(search) ||
-      m.badges.some(b => b.toLowerCase().includes(search))
+    filtered = filtered.filter(
+      m =>
+        m.name.toLowerCase().includes(search) ||
+        m.description.toLowerCase().includes(search) ||
+        m.badges.some(b => b.toLowerCase().includes(search)),
     );
   }
 
   // 판매 가능만
   if (filters.availableOnly) {
-    filtered = filtered.filter(m => getMenuStatus(m) === 'available');
+    filtered = filtered.filter(m => getMenuStatus(m) === "available");
   }
 
   // 정렬
   switch (filters.sortBy) {
-    case 'name':
-      filtered.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    case "name":
+      filtered.sort((a, b) => a.name.localeCompare(b.name, "ko"));
       break;
-    case 'price-asc':
+    case "price-asc":
       filtered.sort((a, b) => a.price - b.price);
       break;
-    case 'price-desc':
+    case "price-desc":
       filtered.sort((a, b) => b.price - a.price);
       break;
-    case 'order':
+    case "order":
     default:
       filtered.sort((a, b) => a.order - b.order);
       break;
@@ -265,39 +266,39 @@ export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
   // Firebase 모드: Firestore stores/{storeId}/menus에서 조회
   try {
     const storeId = getStoreId();
-    console.log('[getMenus] storeId:', storeId);
+    console.log("[getMenus] storeId:", storeId);
     const colRef = storeMenusCollection(storeId);
-    console.log('[getMenus] collection path:', colRef.path);
+    console.log("[getMenus] collection path:", colRef.path);
 
-    const constraints: any[] = [];
+    const constraints: QueryConstraint[] = [];
 
     // 카테고리 필터
-    if (filters.category && filters.category !== 'all') {
-      constraints.push(where('category', '==', filters.category));
+    if (filters.category && filters.category !== "all") {
+      constraints.push(where("category", "==", filters.category));
     }
 
     // 정렬: 기본적으로 order 필드로 정렬
-    if (filters.sortBy === 'order' || !filters.sortBy) {
-      constraints.push(orderBy('order', 'asc'));
-    } else if (filters.sortBy === 'name') {
-      constraints.push(orderBy('name', 'asc'));
-    } else if (filters.sortBy === 'price-asc') {
-      constraints.push(orderBy('price', 'asc'));
-    } else if (filters.sortBy === 'price-desc') {
-      constraints.push(orderBy('price', 'desc'));
+    if (filters.sortBy === "order" || !filters.sortBy) {
+      constraints.push(orderBy("order", "asc"));
+    } else if (filters.sortBy === "name") {
+      constraints.push(orderBy("name", "asc"));
+    } else if (filters.sortBy === "price-asc") {
+      constraints.push(orderBy("price", "asc"));
+    } else if (filters.sortBy === "price-desc") {
+      constraints.push(orderBy("price", "desc"));
     }
 
     // createdAt로 보조 정렬
-    constraints.push(orderBy('createdAt', 'asc'));
+    constraints.push(orderBy("createdAt", "asc"));
 
-    console.log('[getMenus] query constraints:', constraints.length);
+    console.log("[getMenus] query constraints:", constraints.length);
     const q = query(colRef, ...constraints);
     const snapshot = await getDocs(q);
-    console.log('[getMenus] snapshot size:', snapshot.size);
+    console.log("[getMenus] snapshot size:", snapshot.size);
     const menus: Menu[] = [];
 
     // 모든 문서를 병렬로 처리
-    const menuPromises = snapshot.docs.map(async (docSnap) => {
+    const menuPromises = snapshot.docs.map(async docSnap => {
       const data = docSnap.data() as MenuDoc;
       data.menuId = data.menuId || docSnap.id;
       return await buildMenuFromDoc(data);
@@ -310,24 +311,25 @@ export async function getMenus(filters: MenuFilters = {}): Promise<Menu[]> {
 
     if (filters.search) {
       const search = filters.search.toLowerCase();
-      filtered = filtered.filter(m => 
-        m.name.toLowerCase().includes(search) ||
-        m.description.toLowerCase().includes(search) ||
-        m.badges.some(b => b.toLowerCase().includes(search))
+      filtered = filtered.filter(
+        m =>
+          m.name.toLowerCase().includes(search) ||
+          m.description.toLowerCase().includes(search) ||
+          m.badges.some(b => b.toLowerCase().includes(search)),
       );
     }
 
     if (filters.availableOnly) {
-      filtered = filtered.filter(m => getMenuStatus(m) === 'available');
+      filtered = filtered.filter(m => getMenuStatus(m) === "available");
     }
 
-    console.log('[getMenus] filtered menus count:', filtered.length);
+    console.log("[getMenus] filtered menus count:", filtered.length);
     return filtered;
   } catch (error) {
-    console.error('[getMenus] Failed to fetch menus from Firestore:', error);
+    console.error("[getMenus] Failed to fetch menus from Firestore:", error);
     if (error instanceof Error) {
-      console.error('[getMenus] Error message:', error.message);
-      console.error('[getMenus] Error stack:', error.stack);
+      console.error("[getMenus] Error message:", error.message);
+      console.error("[getMenus] Error stack:", error.stack);
     }
     return [];
   }
@@ -354,7 +356,7 @@ export async function getMenuById(menuId: string): Promise<Menu | null> {
     const storeId = getStoreId();
     const ref = storeMenuDocRef(storeId, menuId);
     const snapshot = await getDoc(ref);
-    
+
     if (!snapshot.exists()) {
       return null;
     }
@@ -363,7 +365,7 @@ export async function getMenuById(menuId: string): Promise<Menu | null> {
     data.menuId = data.menuId || snapshot.id;
     return await buildMenuFromDoc(data);
   } catch (error) {
-    console.error('Failed to fetch menu from Firestore:', error);
+    console.error("Failed to fetch menu from Firestore:", error);
     return null;
   }
 }
@@ -374,13 +376,13 @@ export async function getMenuById(menuId: string): Promise<Menu | null> {
 async function toggleMenuAvailabilityMock(
   menuId: string,
   by: string,
-  byName: string
+  byName: string,
 ): Promise<Menu> {
   await new Promise(resolve => setTimeout(resolve, 400));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
   if (!menu) {
-    throw new Error('메뉴를 찾을 수 없습니다');
+    throw new Error("메뉴를 찾을 수 없습니다");
   }
 
   const oldValue = menu.isAvailable;
@@ -392,13 +394,13 @@ async function toggleMenuAvailabilityMock(
   mockMenuLogs.push({
     id: `log-${Date.now()}`,
     menuId,
-    field: 'isAvailable',
+    field: "isAvailable",
     oldValue,
     newValue,
     by,
     byName,
     at: new Date(),
-    reason: newValue ? '판매 재개' : '품절 처리',
+    reason: newValue ? "판매 재개" : "품절 처리",
   });
 
   // 변경사항을 localStorage에 저장
@@ -413,7 +415,7 @@ async function toggleMenuAvailabilityMock(
 export async function toggleMenuAvailability(
   menuId: string,
   by: string,
-  byName: string
+  byName: string,
 ): Promise<Menu> {
   if (!USE_FIREBASE) {
     return await toggleMenuAvailabilityMock(menuId, by, byName);
@@ -426,7 +428,7 @@ export async function toggleMenuAvailability(
     const snapshot = await getDoc(ref);
 
     if (!snapshot.exists()) {
-      throw new Error('메뉴를 찾을 수 없습니다.');
+      throw new Error("메뉴를 찾을 수 없습니다.");
     }
 
     const prev = snapshot.data() as MenuDoc;
@@ -444,7 +446,7 @@ export async function toggleMenuAvailability(
 
     return await buildMenuFromDoc(afterData);
   } catch (error) {
-    console.error('Failed to toggle menu availability in Firestore:', error);
+    console.error("Failed to toggle menu availability in Firestore:", error);
     throw error;
   }
 }
@@ -456,13 +458,13 @@ async function updateMenuAvailableHoursMock(
   menuId: string,
   availableHours: { start: string; end: string } | null,
   by: string,
-  byName: string
+  byName: string,
 ): Promise<Menu> {
   await new Promise(resolve => setTimeout(resolve, 400));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
   if (!menu) {
-    throw new Error('메뉴를 찾을 수 없습니다');
+    throw new Error("메뉴를 찾을 수 없습니다");
   }
 
   const oldValue = menu.availableHours;
@@ -472,13 +474,13 @@ async function updateMenuAvailableHoursMock(
   mockMenuLogs.push({
     id: `log-${Date.now()}`,
     menuId,
-    field: 'availableHours',
+    field: "availableHours",
     oldValue,
     newValue: availableHours,
     by,
     byName,
     at: new Date(),
-    reason: availableHours ? '시간제 판매 설정' : '시간제 판매 해제',
+    reason: availableHours ? "시간제 판매 설정" : "시간제 판매 해제",
   });
 
   // 변경사항을 localStorage에 저장
@@ -494,7 +496,7 @@ export async function updateMenuAvailableHours(
   menuId: string,
   availableHours: { start: string; end: string } | null,
   by: string,
-  byName: string
+  byName: string,
 ): Promise<Menu> {
   if (!USE_FIREBASE) {
     return await updateMenuAvailableHoursMock(menuId, availableHours, by, byName);
@@ -507,7 +509,7 @@ export async function updateMenuAvailableHours(
     const snapshot = await getDoc(ref);
 
     if (!snapshot.exists()) {
-      throw new Error('메뉴를 찾을 수 없습니다.');
+      throw new Error("메뉴를 찾을 수 없습니다.");
     }
 
     await updateDoc(ref, {
@@ -522,7 +524,7 @@ export async function updateMenuAvailableHours(
 
     return await buildMenuFromDoc(afterData);
   } catch (error) {
-    console.error('Failed to update menu available hours in Firestore:', error);
+    console.error("Failed to update menu available hours in Firestore:", error);
     throw error;
   }
 }
@@ -532,43 +534,28 @@ export async function updateMenuAvailableHours(
  */
 async function updateMenuMock(
   menuId: string,
-  updates: Partial<Pick<Menu, 'name' | 'category' | 'price' | 'description' | 'image'>>,
+  updates: Partial<Pick<Menu, "name" | "category" | "price" | "description" | "image">>,
   by: string,
   byName: string,
-  reason?: string
+  reason?: string,
 ): Promise<Menu> {
   await new Promise(resolve => setTimeout(resolve, 500));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
   if (!menu) {
-    throw new Error('메뉴를 찾을 수 없습니다');
+    throw new Error("메뉴를 찾을 수 없습니다");
   }
 
-    // 변경 사항 적용 및 로그 기록
-    Object.entries(updates).forEach(([field, newValue]) => {
-      const oldValue = menu[field as keyof Menu];
-      // customOptions는 배열이므로 깊은 비교 필요
-      if (field === 'customOptions') {
-        const oldCustomOptions = (oldValue as CustomOption[]) || [];
-        const newCustomOptions = (newValue as CustomOption[]) || [];
-        const changed = JSON.stringify(oldCustomOptions) !== JSON.stringify(newCustomOptions);
-        if (changed) {
-          (menu as any)[field] = newValue;
-          mockMenuLogs.push({
-            id: `log-${Date.now()}-${field}`,
-            menuId,
-            field,
-            oldValue,
-            newValue,
-            by,
-            byName,
-            at: new Date(),
-            reason,
-          });
-        }
-      } else if (oldValue !== newValue) {
-        (menu as any)[field] = newValue;
-
+  // 변경 사항 적용 및 로그 기록
+  Object.entries(updates).forEach(([field, newValue]) => {
+    const oldValue = menu[field as keyof Menu];
+    // customOptions는 배열이므로 깊은 비교 필요
+    if (field === "customOptions") {
+      const oldCustomOptions = (oldValue as CustomOption[]) || [];
+      const newCustomOptions = (newValue as CustomOption[]) || [];
+      const changed = JSON.stringify(oldCustomOptions) !== JSON.stringify(newCustomOptions);
+      if (changed) {
+        (menu as unknown as Record<string, unknown>)[field] = newValue;
         mockMenuLogs.push({
           id: `log-${Date.now()}-${field}`,
           menuId,
@@ -581,7 +568,22 @@ async function updateMenuMock(
           reason,
         });
       }
-    });
+    } else if (oldValue !== newValue) {
+      (menu as unknown as Record<string, unknown>)[field] = newValue;
+
+      mockMenuLogs.push({
+        id: `log-${Date.now()}-${field}`,
+        menuId,
+        field,
+        oldValue,
+        newValue,
+        by,
+        byName,
+        at: new Date(),
+        reason,
+      });
+    }
+  });
 
   // 변경사항을 localStorage에 저장
   saveMenusToStorage();
@@ -594,10 +596,12 @@ async function updateMenuMock(
  */
 export async function updateMenu(
   menuId: string,
-  updates: Partial<Pick<Menu, 'name' | 'category' | 'price' | 'description' | 'image' | 'customOptions'>>,
+  updates: Partial<
+    Pick<Menu, "name" | "category" | "price" | "description" | "image" | "customOptions">
+  >,
   by: string,
   byName: string,
-  reason?: string
+  reason?: string,
 ): Promise<Menu> {
   if (!USE_FIREBASE) {
     return await updateMenuMock(menuId, updates, by, byName, reason);
@@ -610,13 +614,13 @@ export async function updateMenu(
     const snapshot = await getDoc(ref);
 
     if (!snapshot.exists()) {
-      throw new Error('메뉴를 찾을 수 없습니다.');
+      throw new Error("메뉴를 찾을 수 없습니다.");
     }
 
     const prev = snapshot.data() as MenuDoc;
 
     // 업데이트할 필드만 골라서 업데이트
-    const updateData: any = {
+    const updateData: Partial<MenuDoc> & { [key: string]: unknown } = {
       updatedAt: serverTimestamp(),
     };
 
@@ -644,7 +648,7 @@ export async function updateMenu(
 
     return await buildMenuFromDoc(afterData);
   } catch (error) {
-    console.error('Failed to update menu in Firestore:', error);
+    console.error("Failed to update menu in Firestore:", error);
     throw error;
   }
 }
@@ -655,7 +659,7 @@ export async function updateMenu(
 export async function getMenuLogs(menuId: string): Promise<MenuLog[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore 연동
-    throw new Error('Firebase not configured');
+    throw new Error("Firebase not configured");
   }
 
   await new Promise(resolve => setTimeout(resolve, 200));
@@ -690,16 +694,16 @@ export async function getMenuStats(): Promise<MenuStats> {
 
       menus.forEach(menu => {
         const status = getMenuStatus(menu);
-        if (status === 'available') stats.available++;
-        else if (status === 'soldout') stats.soldout++;
-        else if (status === 'time-limited') stats.timeLimited++;
+        if (status === "available") stats.available++;
+        else if (status === "soldout") stats.soldout++;
+        else if (status === "time-limited") stats.timeLimited++;
 
         stats.byCategory[menu.category] = (stats.byCategory[menu.category] || 0) + 1;
       });
 
       return stats;
     } catch (error) {
-      console.error('[getMenuStats] Failed to fetch menus for stats:', error);
+      console.error("[getMenuStats] Failed to fetch menus for stats:", error);
       // 에러 발생 시 빈 통계 반환
       return {
         total: 0,
@@ -723,9 +727,9 @@ export async function getMenuStats(): Promise<MenuStats> {
 
   mockMenus.forEach(menu => {
     const status = getMenuStatus(menu);
-    if (status === 'available') stats.available++;
-    else if (status === 'soldout') stats.soldout++;
-    else if (status === 'time-limited') stats.timeLimited++;
+    if (status === "available") stats.available++;
+    else if (status === "soldout") stats.soldout++;
+    else if (status === "time-limited") stats.timeLimited++;
 
     stats.byCategory[menu.category] = (stats.byCategory[menu.category] || 0) + 1;
   });
@@ -736,41 +740,37 @@ export async function getMenuStats(): Promise<MenuStats> {
 /**
  * Mock 모드: 메뉴 생성
  */
-async function createMenuMock(
-  menuData: Partial<Menu>,
-  by: string,
-  byName: string
-): Promise<Menu> {
+async function createMenuMock(menuData: Partial<Menu>, by: string, byName: string): Promise<Menu> {
   await new Promise(resolve => setTimeout(resolve, 500));
 
   // 중복 확인 (같은 이름 + 카테고리)
   const duplicate = mockMenus.find(
-    m => m.name === menuData.name && m.category === menuData.category
+    m => m.name === menuData.name && m.category === menuData.category,
   );
 
   if (duplicate) {
-    throw new Error('동일한 이름과 카테고리의 메뉴가 이미 존재합니다');
+    throw new Error("동일한 이름과 카테고리의 메뉴가 이미 존재합니다");
   }
 
   // ID 생성
   const maxId = mockMenus.reduce((max, m) => {
-    const num = parseInt(m.menuId.replace('menu-', ''));
+    const num = parseInt(m.menuId.replace("menu-", ""));
     return Math.max(max, isNaN(num) ? 0 : num);
   }, 0);
-  const menuId = `menu-${String(maxId + 1).padStart(3, '0')}`;
+  const menuId = `menu-${String(maxId + 1).padStart(3, "0")}`;
 
   // 새 메뉴 생성
   const newMenu: Menu = {
     menuId,
-    category: menuData.category || 'noodle',
-    name: menuData.name || '',
+    category: menuData.category || "noodle",
+    name: menuData.name || "",
     price: menuData.price || 0,
-    description: menuData.description || '',
-    image: menuData.image || '',
+    description: menuData.description || "",
+    image: menuData.image || "",
     badges: menuData.badges || [],
     options: menuData.options,
     allergens: menuData.allergens || [],
-    origin: menuData.origin || '-',
+    origin: menuData.origin || "-",
     isAvailable: menuData.isAvailable !== false,
     order: menuData.order || mockMenus.length + 1,
   };
@@ -782,13 +782,13 @@ async function createMenuMock(
   mockMenuLogs.push({
     id: `log-${Date.now()}`,
     menuId,
-    field: 'created',
+    field: "created",
     oldValue: null,
     newValue: newMenu,
     by,
     byName,
     at: new Date(),
-    reason: '신규 메뉴 등록',
+    reason: "신규 메뉴 등록",
   });
 
   // 변경사항을 localStorage에 저장
@@ -803,7 +803,7 @@ async function createMenuMock(
 export async function createMenu(
   menuData: Partial<Menu>,
   by: string,
-  byName: string
+  byName: string,
 ): Promise<Menu> {
   if (!USE_FIREBASE) {
     return await createMenuMock(menuData, by, byName);
@@ -812,36 +812,36 @@ export async function createMenu(
   // Firebase 모드: Firestore stores/{storeId}/menus에 문서 생성
   try {
     const storeId = getStoreId();
-    if (!storeId || storeId.trim() === '') {
-      throw new Error('STORE_ID가 설정되지 않았습니다. 환경 변수를 확인하세요.');
+    if (!storeId || storeId.trim() === "") {
+      throw new Error("STORE_ID가 설정되지 않았습니다. 환경 변수를 확인하세요.");
     }
-    console.log('[createMenu] storeId:', storeId);
-    console.log('[createMenu] menuData:', menuData);
+    console.log("[createMenu] storeId:", storeId);
+    console.log("[createMenu] menuData:", menuData);
     const colRef = storeMenusCollection(storeId);
 
     // 중복 확인 (같은 이름 + 카테고리)
-    const existingMenus = await getMenus({ category: menuData.category as any });
+    const existingMenus = await getMenus({ category: menuData.category });
     const duplicate = existingMenus.find(
-      m => m.name === menuData.name && m.category === menuData.category
+      m => m.name === menuData.name && m.category === menuData.category,
     );
 
     if (duplicate) {
-      throw new Error('동일한 이름과 카테고리의 메뉴가 이미 존재합니다');
+      throw new Error("동일한 이름과 카테고리의 메뉴가 이미 존재합니다");
     }
 
     // Menu 엔티티 생성 (임시 menuId)
     const tempMenuId = `menu-${Date.now()}`;
     const menu: Menu = {
       menuId: tempMenuId,
-      category: menuData.category || 'noodle',
-      name: menuData.name || '',
+      category: menuData.category || "noodle",
+      name: menuData.name || "",
       price: menuData.price || 0,
-      description: menuData.description || '',
-      image: menuData.image || '',
+      description: menuData.description || "",
+      image: menuData.image || "",
       badges: menuData.badges || [],
       options: menuData.options,
       allergens: menuData.allergens || [],
-      origin: menuData.origin || '-',
+      origin: menuData.origin || "-",
       isAvailable: menuData.isAvailable !== false,
       order: menuData.order || existingMenus.length + 1,
     };
@@ -849,23 +849,23 @@ export async function createMenu(
     // MenuDoc 생성
     const menuDocData = buildMenuDocFromEntity({
       storeId,
-      menuId: '', // addDoc 시점에는 id 없음
+      menuId: "", // addDoc 시점에는 id 없음
       menu,
     });
-    console.log('[createMenu] menuDocData:', menuDocData);
-    console.log('[createMenu] collection path:', colRef.path);
+    console.log("[createMenu] menuDocData:", menuDocData);
+    console.log("[createMenu] collection path:", colRef.path);
 
     const docRef = await addDoc(colRef, {
       ...menuDocData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    console.log('[createMenu] Document created with ID:', docRef.id);
+    console.log("[createMenu] Document created with ID:", docRef.id);
 
     // 생성된 문서 읽기
     const snapshot = await getDoc(docRef);
     if (!snapshot.exists()) {
-      throw new Error('메뉴 생성 후 데이터를 읽을 수 없습니다.');
+      throw new Error("메뉴 생성 후 데이터를 읽을 수 없습니다.");
     }
 
     const data = snapshot.data() as MenuDoc;
@@ -874,37 +874,37 @@ export async function createMenu(
     return await buildMenuFromDoc(data);
   } catch (error) {
     // Firestore 권한 에러를 명확히 표시
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === "object" && "code" in error) {
       const firebaseError = error as FirebaseError;
       const errorCode = firebaseError.code;
-      
+
       // 권한 관련 에러 코드 체크
       if (
-        errorCode === 'permission-denied' ||
-        errorCode === 'unauthenticated' ||
-        errorCode === 'failed-precondition'
+        errorCode === "permission-denied" ||
+        errorCode === "unauthenticated" ||
+        errorCode === "failed-precondition"
       ) {
-        console.error('[createMenu] Firestore permission error:', {
+        console.error("[createMenu] Firestore permission error:", {
           code: errorCode,
           message: firebaseError.message,
           storeId: getStoreId(),
           collectionPath: `stores/${getStoreId()}/menus`,
         });
-        
+
         // 사용자 친화적인 에러 메시지
-        const errorMessage = 
-          errorCode === 'permission-denied'
-            ? '메뉴 등록에 실패했습니다. Firestore Security Rules에서 stores/{storeId}/menus 쓰기 권한을 허용해야 합니다. 자세한 내용은 관리자에게 문의하세요.'
-            : errorCode === 'unauthenticated'
-            ? '메뉴 등록에 실패했습니다. 로그인이 필요합니다. 다시 로그인해주세요.'
-            : '메뉴 등록에 실패했습니다. Firestore 설정을 확인해주세요.';
-        
+        const errorMessage =
+          errorCode === "permission-denied"
+            ? "메뉴 등록에 실패했습니다. Firestore Security Rules에서 stores/{storeId}/menus 쓰기 권한을 허용해야 합니다. 자세한 내용은 관리자에게 문의하세요."
+            : errorCode === "unauthenticated"
+              ? "메뉴 등록에 실패했습니다. 로그인이 필요합니다. 다시 로그인해주세요."
+              : "메뉴 등록에 실패했습니다. Firestore 설정을 확인해주세요.";
+
         throw new Error(errorMessage);
       }
     }
-    
+
     // 기타 에러는 그대로 전달
-    console.error('[createMenu] Failed to create menu in Firestore:', error);
+    console.error("[createMenu] Failed to create menu in Firestore:", error);
     throw error;
   }
 }
@@ -912,16 +912,12 @@ export async function createMenu(
 /**
  * Mock 모드: 메뉴 삭제
  */
-async function deleteMenuMock(
-  menuId: string,
-  by: string,
-  byName: string
-): Promise<void> {
+async function deleteMenuMock(menuId: string, by: string, byName: string): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 300));
 
   const menu = mockMenus.find(m => m.menuId === menuId);
   if (!menu) {
-    throw new Error('메뉴를 찾을 수 없습니다');
+    throw new Error("메뉴를 찾을 수 없습니다");
   }
 
   mockMenus = mockMenus.filter(m => m.menuId !== menuId);
@@ -930,13 +926,13 @@ async function deleteMenuMock(
   mockMenuLogs.push({
     id: `log-${Date.now()}`,
     menuId,
-    field: 'deleted',
+    field: "deleted",
     oldValue: menu,
     newValue: null,
     by,
     byName,
     at: new Date(),
-    reason: '메뉴 삭제',
+    reason: "메뉴 삭제",
   });
 
   // 변경사항을 localStorage에 저장
@@ -946,11 +942,7 @@ async function deleteMenuMock(
 /**
  * 메뉴 삭제 (Undo용)
  */
-export async function deleteMenu(
-  menuId: string,
-  by: string,
-  byName: string
-): Promise<void> {
+export async function deleteMenu(menuId: string, by: string, byName: string): Promise<void> {
   if (!USE_FIREBASE) {
     return await deleteMenuMock(menuId, by, byName);
   }
@@ -961,7 +953,7 @@ export async function deleteMenu(
     const ref = storeMenuDocRef(storeId, menuId);
     await deleteDoc(ref);
   } catch (error) {
-    console.error('Failed to delete menu from Firestore:', error);
+    console.error("Failed to delete menu from Firestore:", error);
     throw error;
   }
 }

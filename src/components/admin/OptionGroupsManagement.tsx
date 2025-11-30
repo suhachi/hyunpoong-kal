@@ -3,8 +3,8 @@
  * 관리자가 옵션 그룹과 옵션 항목을 생성/수정/삭제
  */
 
-import { useState, useEffect } from 'react';
-import { OptionGroup, OptionItem } from '../../types/menu';
+import { useState, useEffect } from "react";
+import { OptionGroup, OptionItem } from "../../types/menu";
 import {
   getOptionGroups,
   createOptionGroup,
@@ -13,12 +13,12 @@ import {
   addOptionItem,
   updateOptionItem,
   deleteOptionItem,
-} from '../../lib/admin/optionGroups.api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Checkbox } from '../ui/checkbox';
+} from "../../lib/admin/optionGroups.api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Checkbox } from "../ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -26,24 +26,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
-import { Badge } from '../ui/badge';
-import { Plus, Edit2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { toast } from 'sonner';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '../ui/collapsible';
-import { formatPrice } from '../../lib/utils';
+} from "../ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Badge } from "../ui/badge";
+import { Plus, Edit2, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+import { formatPrice } from "../../lib/utils";
 
 export function OptionGroupsManagement() {
   const [optionGroups, setOptionGroups] = useState<OptionGroup[]>([]);
@@ -54,7 +43,7 @@ export function OptionGroupsManagement() {
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<OptionGroup | null>(null);
   const [groupForm, setGroupForm] = useState({
-    name: '',
+    name: "",
     required: true,
     multiSelect: false,
     maxSelect: 1,
@@ -62,13 +51,15 @@ export function OptionGroupsManagement() {
 
   // 옵션 항목 다이얼로그
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<{ groupId: string; item: OptionItem } | null>(null);
+  const [editingItem, setEditingItem] = useState<{ groupId: string; item: OptionItem } | null>(
+    null,
+  );
   const [itemForm, setItemForm] = useState({
-    name: '',
+    name: "",
     quantity: 1,
     price: 0,
   });
-  const [currentGroupId, setCurrentGroupId] = useState<string>('');
+  const [currentGroupId, setCurrentGroupId] = useState<string>("");
 
   // 데이터 로드
   useEffect(() => {
@@ -81,7 +72,7 @@ export function OptionGroupsManagement() {
       const groups = await getOptionGroups();
       setOptionGroups(groups);
     } catch (error) {
-      toast.error('옵션 그룹을 불러오는데 실패했습니다');
+      toast.error("옵션 그룹을 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -89,7 +80,7 @@ export function OptionGroupsManagement() {
 
   // 옵션 그룹 펼치기/접기
   const toggleGroup = (groupId: string) => {
-    setExpandedGroups((prev) => {
+    setExpandedGroups(prev => {
       const newSet = new Set(prev);
       if (newSet.has(groupId)) {
         newSet.delete(groupId);
@@ -113,7 +104,7 @@ export function OptionGroupsManagement() {
     } else {
       setEditingGroup(null);
       setGroupForm({
-        name: '',
+        name: "",
         required: true,
         multiSelect: false,
         maxSelect: 1,
@@ -126,14 +117,14 @@ export function OptionGroupsManagement() {
   const handleSaveGroup = async () => {
     try {
       if (!groupForm.name.trim()) {
-        toast.error('옵션 그룹 이름을 입력하세요');
+        toast.error("옵션 그룹 이름을 입력하세요");
         return;
       }
 
       if (editingGroup) {
         // 수정
         await updateOptionGroup(editingGroup.id, groupForm);
-        toast.success('옵션 그룹이 수정되었습니다');
+        toast.success("옵션 그룹이 수정되었습니다");
       } else {
         // 생성
         await createOptionGroup({
@@ -141,26 +132,26 @@ export function OptionGroupsManagement() {
           items: [],
           order: optionGroups.length + 1,
         });
-        toast.success('옵션 그룹이 생성되었습니다');
+        toast.success("옵션 그룹이 생성되었습니다");
       }
 
       setGroupDialogOpen(false);
       loadOptionGroups();
     } catch (error) {
-      toast.error('저장에 실패했습니다');
+      toast.error("저장에 실패했습니다");
     }
   };
 
   // 옵션 그룹 삭제
   const handleDeleteGroup = async (groupId: string) => {
-    if (!confirm('이 옵션 그룹을 삭제하시겠습니까?')) return;
+    if (!confirm("이 옵션 그룹을 삭제하시겠습니까?")) return;
 
     try {
       await deleteOptionGroup(groupId);
-      toast.success('옵션 그룹이 삭제되었습니다');
+      toast.success("옵션 그룹이 삭제되었습니다");
       loadOptionGroups();
     } catch (error) {
-      toast.error('삭제에 실패했습니다');
+      toast.error("삭제에 실패했습니다");
     }
   };
 
@@ -177,7 +168,7 @@ export function OptionGroupsManagement() {
     } else {
       setEditingItem(null);
       setItemForm({
-        name: '',
+        name: "",
         quantity: 1,
         price: 0,
       });
@@ -189,42 +180,42 @@ export function OptionGroupsManagement() {
   const handleSaveItem = async () => {
     try {
       if (!itemForm.name.trim()) {
-        toast.error('옵션 이름을 입력하세요');
+        toast.error("옵션 이름을 입력하세요");
         return;
       }
 
       if (itemForm.quantity < 1) {
-        toast.error('수량은 1 이상이어야 합니다');
+        toast.error("수량은 1 이상이어야 합니다");
         return;
       }
 
       if (editingItem) {
         // 수정
         await updateOptionItem(editingItem.groupId, editingItem.item.id, itemForm);
-        toast.success('옵션이 수정되었습니다');
+        toast.success("옵션이 수정되었습니다");
       } else {
         // 추가
         await addOptionItem(currentGroupId, itemForm);
-        toast.success('옵션이 추가되었습니다');
+        toast.success("옵션이 추가되었습니다");
       }
 
       setItemDialogOpen(false);
       loadOptionGroups();
     } catch (error) {
-      toast.error('저장에 실패했습니다');
+      toast.error("저장에 실패했습니다");
     }
   };
 
   // 옵션 항목 삭제
   const handleDeleteItem = async (groupId: string, itemId: string) => {
-    if (!confirm('이 옵션을 삭제하시겠습니까?')) return;
+    if (!confirm("이 옵션을 삭제하시겠습니까?")) return;
 
     try {
       await deleteOptionItem(groupId, itemId);
-      toast.success('옵션이 삭제되었습니다');
+      toast.success("옵션이 삭제되었습니다");
       loadOptionGroups();
     } catch (error) {
-      toast.error('삭제에 실패했습니다');
+      toast.error("삭제에 실패했습니다");
     }
   };
 
@@ -253,7 +244,7 @@ export function OptionGroupsManagement() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {optionGroups.map((group) => (
+          {optionGroups.map(group => (
             <Card key={group.id}>
               <Collapsible open={expandedGroups.has(group.id)}>
                 <CardHeader className="pb-3">
@@ -276,37 +267,23 @@ export function OptionGroupsManagement() {
                           )}
                           {group.multiSelect && (
                             <Badge variant="outline" className="text-xs">
-                              다중선택 (최대 {group.maxSelect || '무제한'})
+                              다중선택 (최대 {group.maxSelect || "무제한"})
                             </Badge>
                           )}
-                          <span className="text-xs text-gray-500">
-                            {group.items.length}개 항목
-                          </span>
+                          <span className="text-xs text-gray-500">{group.items.length}개 항목</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openItemDialog(group.id)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => openItemDialog(group.id)}>
                         <Plus className="w-4 h-4 mr-1" />
                         옵션 추가
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openGroupDialog(group)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => openGroupDialog(group)}>
                         <Edit2 className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteGroup(group.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteGroup(group.id)}>
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </Button>
                     </div>
@@ -316,9 +293,7 @@ export function OptionGroupsManagement() {
                 <CollapsibleContent>
                   <CardContent>
                     {group.items.length === 0 ? (
-                      <p className="text-sm text-gray-500 text-center py-4">
-                        옵션 항목이 없습니다
-                      </p>
+                      <p className="text-sm text-gray-500 text-center py-4">옵션 항목이 없습니다</p>
                     ) : (
                       <Table>
                         <TableHeader>
@@ -330,14 +305,12 @@ export function OptionGroupsManagement() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {group.items.map((item) => (
+                          {group.items.map(item => (
                             <TableRow key={item.id}>
                               <TableCell>{item.name}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>
-                                {item.price > 0
-                                  ? `+${formatPrice(item.price)}`
-                                  : '무료'}
+                                {item.price > 0 ? `+${formatPrice(item.price)}` : "무료"}
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-2">
@@ -374,12 +347,8 @@ export function OptionGroupsManagement() {
       <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
         <DialogContent className="!bg-gray-50">
           <DialogHeader>
-            <DialogTitle>
-              {editingGroup ? '옵션 그룹 수정' : '옵션 그룹 추가'}
-            </DialogTitle>
-            <DialogDescription>
-              옵션 그룹 정보를 입력하세요
-            </DialogDescription>
+            <DialogTitle>{editingGroup ? "옵션 그룹 수정" : "옵션 그룹 추가"}</DialogTitle>
+            <DialogDescription>옵션 그룹 정보를 입력하세요</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -389,7 +358,7 @@ export function OptionGroupsManagement() {
                 id="groupName"
                 placeholder="예: 면양, 맵기, 토핑, 사이즈"
                 value={groupForm.name}
-                onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
+                onChange={e => setGroupForm({ ...groupForm, name: e.target.value })}
               />
             </div>
 
@@ -397,9 +366,7 @@ export function OptionGroupsManagement() {
               <Checkbox
                 id="required"
                 checked={groupForm.required}
-                onCheckedChange={(checked) =>
-                  setGroupForm({ ...groupForm, required: !!checked })
-                }
+                onCheckedChange={checked => setGroupForm({ ...groupForm, required: !!checked })}
               />
               <Label htmlFor="required" className="cursor-pointer">
                 필수 선택
@@ -410,9 +377,7 @@ export function OptionGroupsManagement() {
               <Checkbox
                 id="multiSelect"
                 checked={groupForm.multiSelect}
-                onCheckedChange={(checked) =>
-                  setGroupForm({ ...groupForm, multiSelect: !!checked })
-                }
+                onCheckedChange={checked => setGroupForm({ ...groupForm, multiSelect: !!checked })}
               />
               <Label htmlFor="multiSelect" className="cursor-pointer">
                 다중 선택 가능
@@ -427,7 +392,7 @@ export function OptionGroupsManagement() {
                   type="number"
                   min="1"
                   value={groupForm.maxSelect}
-                  onChange={(e) =>
+                  onChange={e =>
                     setGroupForm({ ...groupForm, maxSelect: parseInt(e.target.value) || 1 })
                   }
                 />
@@ -448,12 +413,8 @@ export function OptionGroupsManagement() {
       <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
         <DialogContent className="!bg-gray-50">
           <DialogHeader>
-            <DialogTitle>
-              {editingItem ? '옵션 수정' : '옵션 추가'}
-            </DialogTitle>
-            <DialogDescription>
-              옵션명, 수량, 가격을 입력하세요
-            </DialogDescription>
+            <DialogTitle>{editingItem ? "옵션 수정" : "옵션 추가"}</DialogTitle>
+            <DialogDescription>옵션명, 수량, 가격을 입력하세요</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -463,7 +424,7 @@ export function OptionGroupsManagement() {
                 id="itemName"
                 placeholder="예: 보통, 곱빼기, 순한맛, 수육"
                 value={itemForm.name}
-                onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })}
+                onChange={e => setItemForm({ ...itemForm, name: e.target.value })}
               />
             </div>
 
@@ -474,13 +435,11 @@ export function OptionGroupsManagement() {
                 type="number"
                 min="1"
                 value={itemForm.quantity}
-                onChange={(e) =>
+                onChange={e =>
                   setItemForm({ ...itemForm, quantity: parseInt(e.target.value) || 1 })
                 }
               />
-              <p className="text-xs text-gray-500 mt-1">
-                이 옵션을 선택하면 제공되는 수량입니다
-              </p>
+              <p className="text-xs text-gray-500 mt-1">이 옵션을 선택하면 제공되는 수량입니다</p>
             </div>
 
             <div>
@@ -490,13 +449,9 @@ export function OptionGroupsManagement() {
                 type="number"
                 min="0"
                 value={itemForm.price}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, price: parseInt(e.target.value) || 0 })
-                }
+                onChange={e => setItemForm({ ...itemForm, price: parseInt(e.target.value) || 0 })}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                0원이면 추가 비용이 없습니다
-              </p>
+              <p className="text-xs text-gray-500 mt-1">0원이면 추가 비용이 없습니다</p>
             </div>
           </div>
 

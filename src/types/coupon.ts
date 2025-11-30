@@ -1,7 +1,7 @@
 // 쿠폰 시스템 타입 정의
 
-export type CouponType = 'photo_review' | 'welcome' | 'event' | 'compensation' | 'admin';
-export type CouponStatus = 'available' | 'used' | 'expired';
+export type CouponType = "photo_review" | "welcome" | "event" | "compensation" | "admin";
+export type CouponStatus = "available" | "used" | "expired";
 
 export interface Coupon {
   id?: string;
@@ -36,7 +36,7 @@ export interface CouponIssue {
   targetUsers?: string[]; // 특정 사용자 타게팅 (deprecated: targetType 사용)
   issueLimit?: number; // 발급 상한
   // 발급 대상 (신규)
-  targetType?: 'all' | 'user' | 'phone'; // 'all': 전체 고객, 'user': 특정 고객, 'phone': 전화번호
+  targetType?: "all" | "user" | "phone"; // 'all': 전체 고객, 'user': 특정 고객, 'phone': 전화번호
   targetUserId?: string; // targetType === 'user'일 때 사용자 ID
   targetPhone?: string; // targetType === 'phone'일 때 전화번호
 }
@@ -45,25 +45,25 @@ export interface CouponIssue {
 export interface CouponFilters {
   status?: CouponStatus;
   type?: CouponType;
-  sortBy?: 'issuedAt' | 'expiresAt' | 'amount';
+  sortBy?: "issuedAt" | "expiresAt" | "amount";
 }
 
 // 쿠폰 타입 라벨
 export const COUPON_TYPE_LABELS: Record<CouponType, string> = {
-  photo_review: '사진 리뷰 보상',
-  welcome: '신규 가입',
-  event: '이벤트',
-  compensation: '보상',
-  admin: '관리자 발급',
+  photo_review: "사진 리뷰 보상",
+  welcome: "신규 가입",
+  event: "이벤트",
+  compensation: "보상",
+  admin: "관리자 발급",
 };
 
 // 쿠폰 상태 계산
 export function getCouponStatus(coupon: Coupon): CouponStatus {
   if (coupon.used) {
-    return 'used';
+    return "used";
   }
   if (Date.now() > coupon.expiresAt) {
-    return 'expired';
+    return "expired";
   }
-  return 'available';
+  return "available";
 }

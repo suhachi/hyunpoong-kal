@@ -3,8 +3,8 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import React from "react";
+import { LucideIcon } from "lucide-react";
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -14,34 +14,22 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export function EmptyState({ 
-  icon: Icon, 
+export function EmptyState({
+  icon: Icon,
   title,
-  message, 
+  message,
   action,
-  className = ''
+  className = "",
 }: EmptyStateProps) {
   return (
     <div className={`text-center py-12 ${className}`}>
-      {Icon && (
-        <Icon className="w-16 h-16 mx-auto mb-4 text-[#8B7355]/40" />
-      )}
-      
-      {title && (
-        <h3 className="mb-2 text-[#1A1A1A]">
-          {title}
-        </h3>
-      )}
-      
-      <p className="text-[#8B7355] mb-6">
-        {message}
-      </p>
-      
-      {action && (
-        <div className="flex justify-center">
-          {action}
-        </div>
-      )}
+      {Icon && <Icon className="w-16 h-16 mx-auto mb-4 text-[#8B7355]/40" />}
+
+      {title && <h3 className="mb-2 text-[#1A1A1A]">{title}</h3>}
+
+      <p className="text-[#8B7355] mb-6">{message}</p>
+
+      {action && <div className="flex justify-center">{action}</div>}
     </div>
   );
 }

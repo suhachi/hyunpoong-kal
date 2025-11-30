@@ -1,7 +1,7 @@
 ﻿/**
  * 마이페이지
  * 고객 정보 및 주요 기능 접근 허브
- * 
+ *
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
@@ -12,8 +12,22 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
-import { User, ShoppingBag, Ticket, Gift, Bell, MessageSquare, LogOut, Settings, Store, Phone, MapPin, Clock, Loader2 } from "lucide-react";
-import { toast } from 'sonner';
+import {
+  User,
+  ShoppingBag,
+  Ticket,
+  Gift,
+  Bell,
+  MessageSquare,
+  LogOut,
+  Settings,
+  Store,
+  Phone,
+  MapPin,
+  Clock,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
 import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
 import { getDoc } from "firebase/firestore";
 import { storeDocRef, type StoreDoc } from "../../lib/firebase/firestore-schema";
@@ -45,11 +59,11 @@ export function My() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success('로그아웃되었습니다.');
-      navigate('/');
+      toast.success("로그아웃되었습니다.");
+      navigate("/");
     } catch (error) {
-      console.error('로그아웃 실패:', error);
-      toast.error('로그아웃에 실패했습니다.');
+      console.error("로그아웃 실패:", error);
+      toast.error("로그아웃에 실패했습니다.");
     }
   };
 
@@ -67,11 +81,11 @@ export function My() {
         const data = docSnap.data() as StoreDoc;
         setStoreInfo(data);
       } else {
-        toast.error('가게 정보를 찾을 수 없습니다');
+        toast.error("가게 정보를 찾을 수 없습니다");
       }
     } catch (error: any) {
-      console.error('[My] Failed to load store info:', error);
-      toast.error('가게 정보를 불러오는데 실패했습니다');
+      console.error("[My] Failed to load store info:", error);
+      toast.error("가게 정보를 불러오는데 실패했습니다");
     } finally {
       setLoadingStoreInfo(false);
     }
@@ -90,8 +104,8 @@ export function My() {
       <Card className="rounded-2xl border-[#E5DDD5] bg-gradient-to-br from-white to-[#F9F6F3]">
         <CardHeader className="flex flex-row items-center gap-4">
           {user?.photoURL ? (
-            <img 
-              src={user.photoURL} 
+            <img
+              src={user.photoURL}
               alt={userName}
               className="w-16 h-16 rounded-full object-cover"
             />
@@ -107,8 +121,11 @@ export function My() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex gap-2 items-center">
-            <Badge variant="secondary" className="bg-[#D61C1C]/10 text-[#D61C1C] border-[#D61C1C]/20">
-              {user?.role === 'owner' || user?.role === 'admin' ? '관리자' : '고객'}
+            <Badge
+              variant="secondary"
+              className="bg-[#D61C1C]/10 text-[#D61C1C] border-[#D61C1C]/20"
+            >
+              {user?.role === "owner" || user?.role === "admin" ? "관리자" : "고객"}
             </Badge>
             <Badge variant="outline" className="border-[#C7A45A]/30 text-[#8B7355]">
               PWA 설치됨
@@ -117,24 +134,19 @@ export function My() {
               누적 주문 <span className="text-[#D61C1C] font-semibold">{recentOrdersCount}회</span>
             </span>
           </div>
-          
+
           {/* 로그아웃 버튼 */}
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={handleSignOut}
-            >
+            <Button variant="outline" size="sm" className="flex-1" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
               로그아웃
             </Button>
-            {(user?.role === 'owner' || user?.role === 'admin') && (
+            {(user?.role === "owner" || user?.role === "admin") && (
               <Button
                 variant="outline"
                 size="sm"
                 className="flex-1"
-                onClick={() => navigate('/admin')}
+                onClick={() => navigate("/admin")}
               >
                 <Settings className="w-4 h-4 mr-2" />
                 관리자
@@ -223,10 +235,7 @@ export function My() {
         </Link>
 
         {/* 가게 정보 */}
-        <button
-          onClick={handleStoreInfoClick}
-          className="block text-left"
-        >
+        <button onClick={handleStoreInfoClick} className="block text-left">
           <Card className="rounded-2xl hover:shadow-md transition-all hover:scale-[1.02] border-[#E5DDD5] h-full">
             <CardHeader className="pb-3">
               <div className="w-12 h-12 rounded-full bg-[#D61C1C]/10 flex items-center justify-center mb-2">
@@ -268,9 +277,15 @@ export function My() {
       <Card className="rounded-2xl border-[#E5DDD5] bg-[#F9F6F3]/50">
         <CardContent className="py-4">
           <div className="text-sm text-[#8B7355] space-y-1">
-            <p>📱 <span className="font-medium text-[#2E1C10]">PWA 앱</span>으로 더 빠르게</p>
-            <p>🎁 리뷰 작성 시 <span className="font-medium text-[#D61C1C]">포인트 적립</span></p>
-            <p>🔔 주문 상태를 <span className="font-medium text-[#2E1C10]">실시간 알림</span></p>
+            <p>
+              📱 <span className="font-medium text-[#2E1C10]">PWA 앱</span>으로 더 빠르게
+            </p>
+            <p>
+              🎁 리뷰 작성 시 <span className="font-medium text-[#D61C1C]">포인트 적립</span>
+            </p>
+            <p>
+              🔔 주문 상태를 <span className="font-medium text-[#2E1C10]">실시간 알림</span>
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -284,7 +299,7 @@ export function My() {
               가게 정보
             </DialogTitle>
           </DialogHeader>
-          
+
           {loadingStoreInfo ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-[#D61C1C]" />
@@ -294,7 +309,7 @@ export function My() {
               {/* 가게 이름 */}
               <div>
                 <h3 className="text-lg font-semibold text-[#2E1C10] mb-2">
-                  {storeInfo.name || '가게 이름'}
+                  {storeInfo.name || "가게 이름"}
                 </h3>
               </div>
 
@@ -342,11 +357,13 @@ export function My() {
                       {storeInfo.businessHours.open} - {storeInfo.businessHours.close}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className={`w-2 h-2 rounded-full ${
-                        storeInfo.isOpen ? 'bg-green-500' : 'bg-gray-400'
-                      }`} />
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          storeInfo.isOpen ? "bg-green-500" : "bg-gray-400"
+                        }`}
+                      />
                       <span className="text-sm text-[#8B7355]">
-                        {storeInfo.isOpen ? '영업 중' : '영업 종료'}
+                        {storeInfo.isOpen ? "영업 중" : "영업 종료"}
                       </span>
                     </div>
                   </div>

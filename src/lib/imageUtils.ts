@@ -8,34 +8,31 @@ export interface ImageProcessOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
-  outputFormat?: 'webp' | 'jpeg' | 'png';
+  outputFormat?: "webp" | "jpeg" | "png";
 }
 
 const DEFAULT_OPTIONS: Required<ImageProcessOptions> = {
   maxWidth: 1600,
   maxHeight: 1600,
   quality: 0.8,
-  outputFormat: 'webp',
+  outputFormat: "webp",
 };
 
 /**
  * 이미지 파일을 리사이징하고 WebP로 변환
  */
-export async function processImage(
-  file: File,
-  options: ImageProcessOptions = {}
-): Promise<Blob> {
+export async function processImage(file: File, options: ImageProcessOptions = {}): Promise<Blob> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = e => {
       img.src = e.target?.result as string;
     };
 
-    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.onerror = () => reject(new Error("Failed to read image file"));
 
     img.onload = () => {
       try {
@@ -54,13 +51,13 @@ export async function processImage(
         }
 
         // Canvas에 그리기
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
 
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
         if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
+          reject(new Error("Failed to get canvas context"));
           return;
         }
 
@@ -68,22 +65,22 @@ export async function processImage(
 
         // Blob으로 변환
         canvas.toBlob(
-          (blob) => {
+          blob => {
             if (blob) {
               resolve(blob);
             } else {
-              reject(new Error('Failed to convert canvas to blob'));
+              reject(new Error("Failed to convert canvas to blob"));
             }
           },
           `image/${opts.outputFormat}`,
-          opts.quality
+          opts.quality,
         );
       } catch (error) {
         reject(error);
       }
     };
 
-    img.onerror = () => reject(new Error('Failed to load image'));
+    img.onerror = () => reject(new Error("Failed to load image"));
 
     reader.readAsDataURL(file);
   });
@@ -94,9 +91,9 @@ export async function processImage(
  */
 export async function processImages(
   files: File[],
-  options: ImageProcessOptions = {}
+  options: ImageProcessOptions = {},
 ): Promise<Blob[]> {
-  return Promise.all(files.map((file) => processImage(file, options)));
+  return Promise.all(files.map(file => processImage(file, options)));
 }
 
 /**
@@ -105,12 +102,12 @@ export async function processImages(
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
   const MAX_SIZE = 3 * 1024 * 1024; // 3MB
 
-  if (!file.type.startsWith('image/')) {
-    return { valid: false, error: '이미지 파일만 업로드 가능합니다.' };
+  if (!file.type.startsWith("image/")) {
+    return { valid: false, error: "이미지 파일만 업로드 가능합니다." };
   }
 
   if (file.size > MAX_SIZE) {
-    return { valid: false, error: '이미지는 3MB 이하로 업로드해주세요.' };
+    return { valid: false, error: "이미지는 3MB 이하로 업로드해주세요." };
   }
 
   return { valid: true };
@@ -125,7 +122,7 @@ export function validateImageFiles(files: File[]): { valid: boolean; error?: str
   }
 
   if (files.length > 5) {
-    return { valid: false, error: '사진은 최대 5장까지 업로드 가능합니다.' };
+    return { valid: false, error: "사진은 최대 5장까지 업로드 가능합니다." };
   }
 
   for (const file of files) {

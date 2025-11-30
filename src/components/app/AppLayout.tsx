@@ -1,7 +1,7 @@
-import { Outlet } from 'react-router-dom';
-import { AppHeader } from './AppHeader';
-import { BottomNav } from './BottomNav';
-import { Credits } from '../shared/Credits';
+import { Outlet } from "react-router-dom";
+import { AppHeader } from "./AppHeader";
+import { BottomNav } from "./BottomNav";
+import { Credits } from "../shared/Credits";
 
 export function AppLayout() {
   return (
@@ -13,18 +13,18 @@ export function AppLayout() {
       >
         메인 콘텐츠로 건너뛰기
       </a>
-      
+
       {/* 헤더 */}
       <AppHeader />
-      
+
       {/* 메인 콘텐츠 */}
       <main id="main-content" className="flex-1 pb-20">
         <Outlet />
       </main>
-      
+
       {/* 개발사 정보 푸터 */}
       <Credits variant="footer" />
-      
+
       {/* 하단 네비게이션 */}
       <BottomNav />
     </div>

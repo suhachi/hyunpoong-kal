@@ -1,15 +1,15 @@
 /**
  * 결제 요약 컴포넌트
  * Phase A: 쿠폰 적용 - 금액 변화 하이라이트
- * 
+ *
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { memo, useEffect, useRef, useMemo } from 'react';
-import { motion } from 'motion/react';
-import { Separator } from '../ui/separator';
-import { Sparkles } from 'lucide-react';
-import { formatPrice } from '../../lib/utils';
+import { memo, useEffect, useRef, useMemo } from "react";
+import { motion } from "motion/react";
+import { Separator } from "@/components/ui/separator";
+import { Sparkles } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 export interface CheckoutSummaryProps {
   subtotal: number;
@@ -36,19 +36,14 @@ export const CheckoutSummary = memo(function CheckoutSummary({
   const couponChanged = prevCoupon !== undefined && prevCoupon !== couponDiscount;
   const pointsChanged = prevPoints !== undefined && prevPoints !== pointsUsed;
 
-  const savingsAmount = useMemo(() => 
-    couponDiscount + pointsUsed, 
-    [couponDiscount, pointsUsed]
-  );
+  const savingsAmount = useMemo(() => couponDiscount + pointsUsed, [couponDiscount, pointsUsed]);
 
   return (
     <div className="space-y-3">
       {/* 기본 항목 */}
       <SummaryLine label="상품 금액" amount={subtotal} />
 
-      {deliveryFee > 0 && (
-        <SummaryLine label="배달비" amount={deliveryFee} />
-      )}
+      {deliveryFee > 0 && <SummaryLine label="배달비" amount={deliveryFee} />}
 
       {/* 할인 항목 */}
       {couponDiscount > 0 && (
@@ -90,9 +85,7 @@ export const CheckoutSummary = memo(function CheckoutSummary({
             <Sparkles className="w-4 h-4 text-[#F37021]" />
             <span className="text-sm text-[#2E1C10]/80">총 절약</span>
           </div>
-          <span className="text-sm font-medium text-[#D61C1C]">
-            -{formatPrice(savingsAmount)}
-          </span>
+          <span className="text-sm font-medium text-[#D61C1C]">-{formatPrice(savingsAmount)}</span>
         </div>
       )}
 
@@ -123,24 +116,22 @@ interface SummaryLineProps {
   highlight?: boolean;
 }
 
-const SummaryLine = memo(function SummaryLine({ 
-  label, 
-  amount, 
-  className = '', 
-  highlight = false 
+const SummaryLine = memo(function SummaryLine({
+  label,
+  amount,
+  className = "",
+  highlight = false,
 }: SummaryLineProps) {
   return (
     <div
       className={`
         flex justify-between text-sm transition-colors
-        ${highlight ? 'bg-yellow-100 -mx-2 px-2 py-1 rounded' : ''}
+        ${highlight ? "bg-yellow-100 -mx-2 px-2 py-1 rounded" : ""}
         ${className}
       `}
     >
       <span className="text-[#2E1C10]/60">{label}</span>
-      <span className={className || 'text-[#2E1C10]'}>
-        {formatPrice(amount)}
-      </span>
+      <span className={className || "text-[#2E1C10]"}>{formatPrice(amount)}</span>
     </div>
   );
 });
@@ -155,4 +146,3 @@ function usePrevious<T>(value: T): T | undefined {
   }, [value]);
   return ref.current;
 }
-

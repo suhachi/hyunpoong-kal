@@ -16,9 +16,9 @@ export interface ChatSession {
   updatedAt: number;
 }
 
-export type MessageSender = 'user' | 'admin' | 'bot';
+export type MessageSender = "user" | "admin" | "bot";
 
-export type MessageType = 'text' | 'image';
+export type MessageType = "text" | "image";
 
 export interface ChatMessage {
   id: string;
@@ -45,7 +45,7 @@ export interface SendMessageParams {
  */
 export interface BusinessHours {
   start: string; // "09:00"
-  end: string;   // "21:00"
+  end: string; // "21:00"
 }
 
 export interface AutoReply {

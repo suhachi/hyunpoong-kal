@@ -3,27 +3,22 @@
  * 관리자 공지사항 관리 페이지
  */
 
-import { useState, useEffect } from 'react';
-import { Notice, NoticeFilters } from '../../types/notice';
-import {
-  getNotices,
-  createNotice,
-  updateNotice,
-  deleteNotice,
-} from '../../lib/admin/notices.api';
-import { getCurrentUser } from '../../lib/auth';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Textarea } from '../../components/ui/textarea';
+import { useState, useEffect } from "react";
+import { Notice, NoticeFilters } from "../../types/notice";
+import { getNotices, createNotice, updateNotice, deleteNotice } from "../../lib/admin/notices.api";
+import { getCurrentUser } from "../../lib/auth";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { Switch } from '../../components/ui/switch';
+} from "../../components/ui/select";
+import { Switch } from "../../components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +26,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
+} from "../../components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,20 +36,20 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog';
-import { Badge } from '../../components/ui/badge';
-import { Plus, Search, Edit2, Trash2, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
-import { formatDate } from '../../lib/utils/date';
+} from "../../components/ui/alert-dialog";
+import { Badge } from "../../components/ui/badge";
+import { Plus, Search, Edit2, Trash2, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { formatDate } from "../../lib/utils/date";
 
 export function AdminNotices() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [filters, setFilters] = useState<NoticeFilters>({
-    type: 'all',
+    type: "all",
     isActive: undefined,
-    search: '',
+    search: "",
   });
 
   // 다이얼로그 상태
@@ -66,9 +61,9 @@ export function AdminNotices() {
 
   // 폼 상태
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    type: 'notice' as 'notice' | 'event' | 'promotion',
+    title: "",
+    content: "",
+    type: "notice" as "notice" | "event" | "promotion",
     isActive: true,
     priority: 1,
   });
@@ -82,8 +77,8 @@ export function AdminNotices() {
       const data = await getNotices(filters);
       setNotices(data);
     } catch (error) {
-      console.error('Failed to load notices:', error);
-      toast.error('공지사항 목록을 불러오는데 실패했습니다');
+      console.error("Failed to load notices:", error);
+      toast.error("공지사항 목록을 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -96,9 +91,9 @@ export function AdminNotices() {
   // 폼 초기화
   const resetForm = () => {
     setFormData({
-      title: '',
-      content: '',
-      type: 'notice',
+      title: "",
+      content: "",
+      type: "notice",
       isActive: true,
       priority: 1,
     });
@@ -126,7 +121,7 @@ export function AdminNotices() {
   // 생성
   const handleCreate = async () => {
     if (!user || !formData.title.trim() || !formData.content.trim()) {
-      toast.error('제목과 내용을 입력하세요');
+      toast.error("제목과 내용을 입력하세요");
       return;
     }
 
@@ -136,19 +131,19 @@ export function AdminNotices() {
         {
           ...formData,
           createdBy: user.uid,
-          createdByName: user.displayName || '관리자',
+          createdByName: user.displayName || "관리자",
         },
         user.uid,
-        user.displayName || '관리자'
+        user.displayName || "관리자",
       );
 
-      toast.success('공지사항이 등록되었습니다');
+      toast.success("공지사항이 등록되었습니다");
       setCreateDialogOpen(false);
       resetForm();
       loadData();
     } catch (error: any) {
-      console.error('Failed to create notice:', error);
-      toast.error(error.message || '공지사항 등록에 실패했습니다');
+      console.error("Failed to create notice:", error);
+      toast.error(error.message || "공지사항 등록에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -157,7 +152,7 @@ export function AdminNotices() {
   // 수정
   const handleUpdate = async () => {
     if (!user || !editingNotice || !formData.title.trim() || !formData.content.trim()) {
-      toast.error('제목과 내용을 입력하세요');
+      toast.error("제목과 내용을 입력하세요");
       return;
     }
 
@@ -173,17 +168,17 @@ export function AdminNotices() {
           priority: formData.priority,
         },
         user.uid,
-        user.displayName || '관리자'
+        user.displayName || "관리자",
       );
 
-      toast.success('공지사항이 수정되었습니다');
+      toast.success("공지사항이 수정되었습니다");
       setEditDialogOpen(false);
       setEditingNotice(null);
       resetForm();
       loadData();
     } catch (error: any) {
-      console.error('Failed to update notice:', error);
-      toast.error(error.message || '공지사항 수정에 실패했습니다');
+      console.error("Failed to update notice:", error);
+      toast.error(error.message || "공지사항 수정에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -200,23 +195,23 @@ export function AdminNotices() {
 
     setActionLoading(true);
     try {
-      await deleteNotice(deletingNoticeId, user.uid, user.displayName || '관리자');
-      toast.success('공지사항이 삭제되었습니다');
+      await deleteNotice(deletingNoticeId, user.uid, user.displayName || "관리자");
+      toast.success("공지사항이 삭제되었습니다");
       setDeleteDialogOpen(false);
       setDeletingNoticeId(null);
       loadData();
     } catch (error: any) {
-      console.error('Failed to delete notice:', error);
-      toast.error(error.message || '공지사항 삭제에 실패했습니다');
+      console.error("Failed to delete notice:", error);
+      toast.error(error.message || "공지사항 삭제에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
   };
 
   const typeLabels = {
-    notice: '공지',
-    event: '이벤트',
-    promotion: '프로모션',
+    notice: "공지",
+    event: "이벤트",
+    promotion: "프로모션",
   };
 
   return (
@@ -225,9 +220,7 @@ export function AdminNotices() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#333] mb-2">게시판 관리</h1>
-          <p className="text-[#8B7355]">
-            공지사항을 등록하고 관리하세요
-          </p>
+          <p className="text-[#8B7355]">공지사항을 등록하고 관리하세요</p>
         </div>
         <Button onClick={handleCreateOpen}>
           <Plus className="w-4 h-4 mr-2" />
@@ -241,16 +234,14 @@ export function AdminNotices() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             placeholder="제목, 내용 검색..."
-            value={filters.search || ''}
+            value={filters.search || ""}
             onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
             className="pl-10"
           />
         </div>
         <Select
-          value={filters.type || 'all'}
-          onValueChange={(value) =>
-            setFilters(prev => ({ ...prev, type: value as any }))
-          }
+          value={filters.type || "all"}
+          onValueChange={value => setFilters(prev => ({ ...prev, type: value as any }))}
         >
           <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue />
@@ -262,13 +253,8 @@ export function AdminNotices() {
             <SelectItem value="promotion">프로모션</SelectItem>
           </SelectContent>
         </Select>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={loadData}
-          disabled={loading}
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+        <Button variant="outline" size="icon" onClick={loadData} disabled={loading}>
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
         </Button>
       </div>
 
@@ -296,11 +282,11 @@ export function AdminNotices() {
                     <Badge
                       variant="outline"
                       className={
-                        notice.type === 'notice'
-                          ? 'border-[#F37021] text-[#F37021]'
-                          : notice.type === 'event'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-purple-500 text-purple-600'
+                        notice.type === "notice"
+                          ? "border-[#F37021] text-[#F37021]"
+                          : notice.type === "event"
+                            ? "border-blue-500 text-blue-600"
+                            : "border-purple-500 text-purple-600"
                       }
                     >
                       {typeLabels[notice.type]}
@@ -310,28 +296,18 @@ export function AdminNotices() {
                         비활성
                       </Badge>
                     )}
-                    <span className="text-xs text-gray-500">
-                      {formatDate(notice.createdAt)}
-                    </span>
+                    <span className="text-xs text-gray-500">{formatDate(notice.createdAt)}</span>
                     {notice.priority > 0 && (
                       <Badge variant="outline" className="text-xs">
                         우선순위: {notice.priority}
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-base font-semibold text-[#333] mb-1">
-                    {notice.title}
-                  </h3>
-                  <p className="text-sm text-[#8B7355] line-clamp-2">
-                    {notice.content}
-                  </p>
+                  <h3 className="text-base font-semibold text-[#333] mb-1">{notice.title}</h3>
+                  <p className="text-sm text-[#8B7355] line-clamp-2">{notice.content}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditOpen(notice)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handleEditOpen(notice)}>
                     <Edit2 className="w-4 h-4" />
                   </Button>
                   <Button
@@ -354,9 +330,7 @@ export function AdminNotices() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>공지사항 등록</DialogTitle>
-            <DialogDescription>
-              새로운 공지사항을 등록합니다
-            </DialogDescription>
+            <DialogDescription>새로운 공지사항을 등록합니다</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -385,9 +359,7 @@ export function AdminNotices() {
                 <Label htmlFor="type">유형</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value: any) =>
-                    setFormData(prev => ({ ...prev, type: value }))
-                  }
+                  onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -415,9 +387,7 @@ export function AdminNotices() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={formData.isActive}
-                onCheckedChange={checked =>
-                  setFormData(prev => ({ ...prev, isActive: checked }))
-                }
+                onCheckedChange={checked => setFormData(prev => ({ ...prev, isActive: checked }))}
               />
               <Label>활성화</Label>
             </div>
@@ -427,7 +397,7 @@ export function AdminNotices() {
               취소
             </Button>
             <Button onClick={handleCreate} disabled={actionLoading}>
-              {actionLoading ? '등록 중...' : '등록'}
+              {actionLoading ? "등록 중..." : "등록"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -438,9 +408,7 @@ export function AdminNotices() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>공지사항 수정</DialogTitle>
-            <DialogDescription>
-              공지사항을 수정합니다
-            </DialogDescription>
+            <DialogDescription>공지사항을 수정합니다</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -469,9 +437,7 @@ export function AdminNotices() {
                 <Label htmlFor="edit-type">유형</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value: any) =>
-                    setFormData(prev => ({ ...prev, type: value }))
-                  }
+                  onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -499,9 +465,7 @@ export function AdminNotices() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={formData.isActive}
-                onCheckedChange={checked =>
-                  setFormData(prev => ({ ...prev, isActive: checked }))
-                }
+                onCheckedChange={checked => setFormData(prev => ({ ...prev, isActive: checked }))}
               />
               <Label>활성화</Label>
             </div>
@@ -511,7 +475,7 @@ export function AdminNotices() {
               취소
             </Button>
             <Button onClick={handleUpdate} disabled={actionLoading}>
-              {actionLoading ? '수정 중...' : '수정'}
+              {actionLoading ? "수정 중..." : "수정"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -533,7 +497,7 @@ export function AdminNotices() {
               disabled={actionLoading}
               className="bg-red-600 hover:bg-red-700"
             >
-              {actionLoading ? '삭제 중...' : '삭제'}
+              {actionLoading ? "삭제 중..." : "삭제"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -541,4 +505,3 @@ export function AdminNotices() {
     </div>
   );
 }
-

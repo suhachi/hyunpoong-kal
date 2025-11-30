@@ -4,18 +4,18 @@
  * USE_FIREBASE=true: Firestore appConfig 연동
  */
 
-import { 
-  StoreSettings, 
-  DEFAULT_BUSINESS_HOURS, 
+import {
+  StoreSettings,
+  DEFAULT_BUSINESS_HOURS,
   DEFAULT_DELIVERY_FEES,
-  DEFAULT_DELIVERY_PROVIDER_SETTINGS
-} from '../../types/settings';
+  DEFAULT_DELIVERY_PROVIDER_SETTINGS,
+} from "../../types/settings";
 
 const USE_FIREBASE = false;
 
 // Mock 데이터
 let mockSettings: StoreSettings = {
-  storeId: 'store-001',
+  storeId: "store-001",
   businessHours: DEFAULT_BUSINESS_HOURS,
   deliveryFees: DEFAULT_DELIVERY_FEES,
   deliveryRadius: 6,
@@ -24,8 +24,8 @@ let mockSettings: StoreSettings = {
   deliveryProvider: DEFAULT_DELIVERY_PROVIDER_SETTINGS,
   holidays: [],
   updatedAt: new Date(),
-  updatedBy: 'admin',
-  updatedByName: '관리자',
+  updatedBy: "admin",
+  updatedByName: "관리자",
 };
 
 /**
@@ -36,7 +36,7 @@ export async function getSettings(storeId: string): Promise<StoreSettings> {
     // TODO: Firestore 연동
     // const doc = await db.collection('appConfig').doc(storeId).get();
     // return doc.data() as StoreSettings;
-    throw new Error('Firebase not configured');
+    throw new Error("Firebase not configured");
   }
 
   // Mock 동작
@@ -51,7 +51,7 @@ export async function saveSettings(
   storeId: string,
   settings: Partial<StoreSettings>,
   by: string,
-  byName: string
+  byName: string,
 ): Promise<StoreSettings> {
   if (USE_FIREBASE) {
     // TODO: Firestore 연동
@@ -61,7 +61,7 @@ export async function saveSettings(
     //   updatedBy: by,
     //   updatedByName: byName,
     // }, { merge: true });
-    throw new Error('Firebase not configured');
+    throw new Error("Firebase not configured");
   }
 
   // Mock 동작
@@ -84,11 +84,11 @@ export async function saveSettings(
  */
 export function isOpenNow(settings: StoreSettings): boolean {
   const now = new Date();
-  const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][now.getDay()];
-  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const dayOfWeek = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()];
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
   // 휴무일 체크
-  const today = now.toISOString().split('T')[0];
+  const today = now.toISOString().split("T")[0];
   if (settings.holidays.includes(today)) {
     return false;
   }
@@ -105,16 +105,13 @@ export function isOpenNow(settings: StoreSettings): boolean {
 /**
  * 배달비 계산
  */
-export function calculateDeliveryFee(
-  settings: StoreSettings,
-  distance: number
-): number | null {
+export function calculateDeliveryFee(settings: StoreSettings, distance: number): number | null {
   if (distance > settings.deliveryRadius) {
     return null; // 배달 불가
   }
 
   const fee = settings.deliveryFees.find(
-    f => distance >= f.minDistance && distance < f.maxDistance
+    f => distance >= f.minDistance && distance < f.maxDistance,
   );
 
   return fee ? fee.fee : null;

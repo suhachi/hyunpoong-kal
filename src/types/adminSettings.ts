@@ -6,7 +6,7 @@
 /**
  * 설정 상태
  */
-export type ConfigStatus = 'connected' | 'not-set' | 'error' | 'unknown';
+export type ConfigStatus = "connected" | "not-set" | "error" | "unknown";
 
 export interface ConfigStatusInfo {
   status: ConfigStatus;
@@ -47,7 +47,7 @@ export interface FunctionsHealthCheck {
  * NICEPAY 설정
  */
 export interface NicepaySettings {
-  mode: 'test' | 'production';
+  mode: "test" | "production";
   endpoint: string;
   mid: string;
   returnUrl: string;
@@ -58,12 +58,12 @@ export interface NicepaySettings {
  * 배달 대행사 설정
  */
 export interface DeliverySettings {
-  provider: 'mock' | 'providerA' | 'custom';
+  provider: "mock" | "providerA" | "custom";
   maxDistanceKm: number;
   feeTable: DeliveryFeeZone[];
   nightSurcharge: number;
   nightStartHour: number; // 21
-  nightEndHour: number;   // 6
+  nightEndHour: number; // 6
 }
 
 export interface DeliveryFeeZone {
@@ -75,7 +75,7 @@ export interface DeliveryFeeZone {
  * 지도/지오코딩 설정
  */
 export interface MapsSettings {
-  provider: 'kakao' | 'google' | 'both';
+  provider: "kakao" | "google" | "both";
   kakaoApiKey?: string;
   googleApiKey?: string;
 }
@@ -106,19 +106,19 @@ export interface OperationsSettings {
   };
   firestoreRules: {
     lastDeployed?: Date;
-    status: 'up-to-date' | 'outdated' | 'unknown';
+    status: "up-to-date" | "outdated" | "unknown";
   };
   firestoreIndexes: {
     lastDeployed?: Date;
-    status: 'up-to-date' | 'outdated' | 'unknown';
+    status: "up-to-date" | "outdated" | "unknown";
   };
   storageRules: {
     lastDeployed?: Date;
-    status: 'up-to-date' | 'outdated' | 'unknown';
+    status: "up-to-date" | "outdated" | "unknown";
   };
   hosting: {
     lastDeployed?: Date;
-    status: 'deployed' | 'not-deployed' | 'unknown';
+    status: "deployed" | "not-deployed" | "unknown";
   };
 }
 
@@ -131,7 +131,7 @@ export interface AdminSettings {
   fcm: FCMSettings;
   points: PointsSettings;
   operations: OperationsSettings;
-  
+
   // 메타데이터
   updatedAt: Date;
   updatedBy: string;
@@ -179,12 +179,12 @@ export interface DeployScript {
 export interface DiagnosticResult {
   category?: string;
   checks: DiagnosticCheck[];
-  overall: 'pass' | 'warning' | 'fail' | 'info';
+  overall: "pass" | "warning" | "fail" | "info";
 }
 
 export interface DiagnosticCheck {
   name: string;
-  status: 'pass' | 'warning' | 'fail' | 'info';
+  status: "pass" | "warning" | "fail" | "info";
   message: string;
   details?: string;
 }
@@ -193,7 +193,7 @@ export interface DiagnosticCheck {
  * 기본값
  */
 export const DEFAULT_DELIVERY_SETTINGS: DeliverySettings = {
-  provider: 'mock',
+  provider: "mock",
   maxDistanceKm: 5,
   feeTable: [
     { toKm: 1, fee: 2000 },
@@ -206,12 +206,12 @@ export const DEFAULT_DELIVERY_SETTINGS: DeliverySettings = {
 };
 
 export const DEFAULT_MAPS_SETTINGS: MapsSettings = {
-  provider: 'kakao',
+  provider: "kakao",
 };
 
 export const DEFAULT_FCM_SETTINGS: FCMSettings = {
   enabled: false,
-  serviceWorkerPath: '/firebase-messaging-sw.js',
+  serviceWorkerPath: "/firebase-messaging-sw.js",
 };
 
 export const DEFAULT_POINTS_SETTINGS: PointsSettings = {
@@ -221,18 +221,18 @@ export const DEFAULT_POINTS_SETTINGS: PointsSettings = {
 export const DEFAULT_OPERATIONS_SETTINGS: OperationsSettings = {
   cors: {
     configured: false,
-    allowedOrigins: ['https://hp-kal.web.app', 'https://hp-kal.firebaseapp.com'],
+    allowedOrigins: ["https://hp-kal.web.app", "https://hp-kal.firebaseapp.com"],
   },
   firestoreRules: {
-    status: 'unknown',
+    status: "unknown",
   },
   firestoreIndexes: {
-    status: 'unknown',
+    status: "unknown",
   },
   storageRules: {
-    status: 'unknown',
+    status: "unknown",
   },
   hosting: {
-    status: 'unknown',
+    status: "unknown",
   },
 };

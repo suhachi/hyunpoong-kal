@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
-import { Button } from '../../ui/button';
+} from "../../ui/dialog";
+import { Button } from "../../ui/button";
 
 export interface ModalProps {
   open: boolean;
@@ -16,7 +16,7 @@ export interface ModalProps {
   description?: string;
   children: ReactNode;
   footer?: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export function Modal({
@@ -26,24 +26,22 @@ export function Modal({
   description,
   children,
   footer,
-  size = 'md',
+  size = "md",
 }: ModalProps) {
   const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+    sm: "max-w-md",
+    md: "max-w-lg",
+    lg: "max-w-2xl",
+    xl: "max-w-4xl",
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={sizeClasses[size] + ' !bg-gray-50'}>
+      <DialogContent className={sizeClasses[size] + " !bg-gray-50"}>
         <DialogHeader>
           <DialogTitle className="text-[#333]">{title}</DialogTitle>
           {description && (
-            <DialogDescription className="text-[#8B7355]">
-              {description}
-            </DialogDescription>
+            <DialogDescription className="text-[#8B7355]">{description}</DialogDescription>
           )}
         </DialogHeader>
 
@@ -64,7 +62,7 @@ export interface ConfirmModalProps {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel?: () => void;
-  variant?: 'default' | 'destructive';
+  variant?: "default" | "destructive";
   loading?: boolean;
 }
 
@@ -73,11 +71,11 @@ export function ConfirmModal({
   onOpenChange,
   title,
   description,
-  confirmLabel = '확인',
-  cancelLabel = '취소',
+  confirmLabel = "확인",
+  cancelLabel = "취소",
   onConfirm,
   onCancel,
-  variant = 'default',
+  variant = "default",
   loading,
 }: ConfirmModalProps) {
   return (
@@ -106,9 +104,9 @@ export function ConfirmModal({
             }}
             disabled={loading}
             className={
-              variant === 'destructive'
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-[#D61C1C] hover:bg-[#B91818]'
+              variant === "destructive"
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-[#D61C1C] hover:bg-[#B91818]"
             }
           >
             {confirmLabel}

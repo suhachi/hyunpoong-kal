@@ -1,13 +1,13 @@
 /**
  * 🔒 디자인 토큰 TypeScript 정의
- * 
+ *
  * 이 파일은 디자인 시스템을 TypeScript 레벨에서 강제합니다.
  * - 타입 안전성 보장
  * - 잘못된 값 사용 방지
  * - 자동완성 지원
- * 
+ *
  * ⚠️ 주의: 이 파일의 값을 변경하지 마세요!
- * 
+ *
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
@@ -16,14 +16,14 @@
    ============================================ */
 
 export const BRAND_COLORS = {
-  hyunpungRed: '#D61C1C',
-  shinkalOrange: '#F37021',
-  darkBrown: '#2E1C10',
-  creamBg: '#F9F6F3',
-  brassGold: '#C7A45A',
+  hyunpungRed: "#D61C1C",
+  shinkalOrange: "#F37021",
+  darkBrown: "#2E1C10",
+  creamBg: "#F9F6F3",
+  brassGold: "#C7A45A",
 } as const;
 
-export type BrandColor = typeof BRAND_COLORS[keyof typeof BRAND_COLORS];
+export type BrandColor = (typeof BRAND_COLORS)[keyof typeof BRAND_COLORS];
 
 /* ============================================
    시맨틱 컬러 매핑
@@ -31,27 +31,27 @@ export type BrandColor = typeof BRAND_COLORS[keyof typeof BRAND_COLORS];
 
 export const SEMANTIC_COLORS = {
   primary: BRAND_COLORS.hyunpungRed,
-  primaryHover: '#b71616',
-  primaryLight: 'rgba(214, 28, 28, 0.1)',
-  
+  primaryHover: "#b71616",
+  primaryLight: "rgba(214, 28, 28, 0.1)",
+
   secondary: BRAND_COLORS.shinkalOrange,
-  secondaryHover: '#d45e1a',
-  secondaryLight: 'rgba(243, 112, 33, 0.1)',
-  
+  secondaryHover: "#d45e1a",
+  secondaryLight: "rgba(243, 112, 33, 0.1)",
+
   accent: BRAND_COLORS.brassGold,
-  accentHover: '#b08f4a',
-  accentLight: 'rgba(199, 164, 90, 0.1)',
-  
+  accentHover: "#b08f4a",
+  accentLight: "rgba(199, 164, 90, 0.1)",
+
   textPrimary: BRAND_COLORS.darkBrown,
-  textSecondary: '#5a5a68',
-  textWhite: '#ffffff',
-  
-  background: '#ffffff',
+  textSecondary: "#5a5a68",
+  textWhite: "#ffffff",
+
+  background: "#ffffff",
   backgroundMuted: BRAND_COLORS.creamBg,
   foreground: BRAND_COLORS.darkBrown,
 } as const;
 
-export type SemanticColor = typeof SEMANTIC_COLORS[keyof typeof SEMANTIC_COLORS];
+export type SemanticColor = (typeof SEMANTIC_COLORS)[keyof typeof SEMANTIC_COLORS];
 
 /* ============================================
    타이포그래피 토큰
@@ -63,18 +63,18 @@ export const FONT_FAMILY = {
 } as const;
 
 export const FONT_SIZES = {
-  xs: '0.75rem',    // 12px
-  sm: '0.875rem',   // 14px
-  base: '1rem',     // 16px
-  lg: '1.125rem',   // 18px
-  xl: '1.25rem',    // 20px
-  '2xl': '1.5rem',  // 24px
-  '3xl': '1.875rem',// 30px
-  '4xl': '2.25rem', // 36px
-  '5xl': '3rem',    // 48px
+  xs: "0.75rem", // 12px
+  sm: "0.875rem", // 14px
+  base: "1rem", // 16px
+  lg: "1.125rem", // 18px
+  xl: "1.25rem", // 20px
+  "2xl": "1.5rem", // 24px
+  "3xl": "1.875rem", // 30px
+  "4xl": "2.25rem", // 36px
+  "5xl": "3rem", // 48px
 } as const;
 
-export type FontSize = typeof FONT_SIZES[keyof typeof FONT_SIZES];
+export type FontSize = (typeof FONT_SIZES)[keyof typeof FONT_SIZES];
 
 export const FONT_WEIGHTS = {
   light: 300,
@@ -85,7 +85,7 @@ export const FONT_WEIGHTS = {
   extrabold: 800,
 } as const;
 
-export type FontWeight = typeof FONT_WEIGHTS[keyof typeof FONT_WEIGHTS];
+export type FontWeight = (typeof FONT_WEIGHTS)[keyof typeof FONT_WEIGHTS];
 
 export const LINE_HEIGHTS = {
   none: 1,
@@ -96,53 +96,53 @@ export const LINE_HEIGHTS = {
   loose: 2,
 } as const;
 
-export type LineHeight = typeof LINE_HEIGHTS[keyof typeof LINE_HEIGHTS];
+export type LineHeight = (typeof LINE_HEIGHTS)[keyof typeof LINE_HEIGHTS];
 
 /* ============================================
    Border Radius 토큰
    ============================================ */
 
 export const BORDER_RADIUS = {
-  none: '0',
-  sm: '0.5rem',     // 8px
-  md: '0.75rem',    // 12px
-  lg: '1rem',       // 16px
-  xl: '1.5rem',     // 24px
-  '2xl': '2rem',    // 32px
-  full: '9999px',
+  none: "0",
+  sm: "0.5rem", // 8px
+  md: "0.75rem", // 12px
+  lg: "1rem", // 16px
+  xl: "1.5rem", // 24px
+  "2xl": "2rem", // 32px
+  full: "9999px",
 } as const;
 
-export type BorderRadius = typeof BORDER_RADIUS[keyof typeof BORDER_RADIUS];
+export type BorderRadius = (typeof BORDER_RADIUS)[keyof typeof BORDER_RADIUS];
 
 /* ============================================
    Shadow 토큰
    ============================================ */
 
 export const SHADOWS = {
-  soft1: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  soft2: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  soft3: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  medium: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-  large: '0 20px 40px -10px rgba(0, 0, 0, 0.2)',
+  soft1: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  soft2: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+  soft3: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+  medium: "0 10px 25px -5px rgba(0, 0, 0, 0.15)",
+  large: "0 20px 40px -10px rgba(0, 0, 0, 0.2)",
 } as const;
 
-export type Shadow = typeof SHADOWS[keyof typeof SHADOWS];
+export type Shadow = (typeof SHADOWS)[keyof typeof SHADOWS];
 
 /* ============================================
    Spacing 토큰
    ============================================ */
 
 export const SPACING = {
-  xs: '0.25rem',    // 4px
-  sm: '0.5rem',     // 8px
-  md: '1rem',       // 16px
-  lg: '1.5rem',     // 24px
-  xl: '2rem',       // 32px
-  '2xl': '3rem',    // 48px
-  '3xl': '4rem',    // 64px
+  xs: "0.25rem", // 4px
+  sm: "0.5rem", // 8px
+  md: "1rem", // 16px
+  lg: "1.5rem", // 24px
+  xl: "2rem", // 32px
+  "2xl": "3rem", // 48px
+  "3xl": "4rem", // 64px
 } as const;
 
-export type Spacing = typeof SPACING[keyof typeof SPACING];
+export type Spacing = (typeof SPACING)[keyof typeof SPACING];
 
 /* ============================================
    Z-Index 토큰
@@ -160,46 +160,46 @@ export const Z_INDEX = {
   tooltip: 1200,
 } as const;
 
-export type ZIndex = typeof Z_INDEX[keyof typeof Z_INDEX];
+export type ZIndex = (typeof Z_INDEX)[keyof typeof Z_INDEX];
 
 /* ============================================
    Breakpoint 토큰
    ============================================ */
 
 export const BREAKPOINTS = {
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
-  '2xl': '1536px',
+  sm: "640px",
+  md: "768px",
+  lg: "1024px",
+  xl: "1280px",
+  "2xl": "1536px",
 } as const;
 
-export type Breakpoint = typeof BREAKPOINTS[keyof typeof BREAKPOINTS];
+export type Breakpoint = (typeof BREAKPOINTS)[keyof typeof BREAKPOINTS];
 
 /* ============================================
    Duration 토큰
    ============================================ */
 
 export const DURATIONS = {
-  fast: '150ms',
-  normal: '300ms',
-  slow: '500ms',
+  fast: "150ms",
+  normal: "300ms",
+  slow: "500ms",
 } as const;
 
-export type Duration = typeof DURATIONS[keyof typeof DURATIONS];
+export type Duration = (typeof DURATIONS)[keyof typeof DURATIONS];
 
 /* ============================================
    Easing 토큰
    ============================================ */
 
 export const EASINGS = {
-  linear: 'linear',
-  easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
-  easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
-  easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  linear: "linear",
+  easeIn: "cubic-bezier(0.4, 0, 1, 1)",
+  easeOut: "cubic-bezier(0, 0, 0.2, 1)",
+  easeInOut: "cubic-bezier(0.4, 0, 0.2, 1)",
 } as const;
 
-export type Easing = typeof EASINGS[keyof typeof EASINGS];
+export type Easing = (typeof EASINGS)[keyof typeof EASINGS];
 
 /* ============================================
    유틸리티 함수
@@ -215,11 +215,11 @@ export const cssVar = (token: string): string => `var(--${token})`;
  */
 export const brandColor = (color: keyof typeof BRAND_COLORS): string => {
   const mapping: Record<keyof typeof BRAND_COLORS, string> = {
-    hyunpungRed: 'color-hyunpung-red',
-    shinkalOrange: 'color-shinkal-orange',
-    darkBrown: 'color-dark-brown',
-    creamBg: 'color-cream-bg',
-    brassGold: 'color-brass-gold',
+    hyunpungRed: "color-hyunpung-red",
+    shinkalOrange: "color-shinkal-orange",
+    darkBrown: "color-dark-brown",
+    creamBg: "color-cream-bg",
+    brassGold: "color-brass-gold",
   };
   return cssVar(mapping[color]);
 };
@@ -229,21 +229,21 @@ export const brandColor = (color: keyof typeof BRAND_COLORS): string => {
  */
 export const semanticColor = (color: keyof typeof SEMANTIC_COLORS): string => {
   const mapping: Record<keyof typeof SEMANTIC_COLORS, string> = {
-    primary: 'color-primary',
-    primaryHover: 'color-primary-hover',
-    primaryLight: 'color-primary-light',
-    secondary: 'color-secondary',
-    secondaryHover: 'color-secondary-hover',
-    secondaryLight: 'color-secondary-light',
-    accent: 'color-accent',
-    accentHover: 'color-accent-hover',
-    accentLight: 'color-accent-light',
-    textPrimary: 'color-text-primary',
-    textSecondary: 'color-text-secondary',
-    textWhite: 'color-text-white',
-    background: 'background',
-    backgroundMuted: 'muted',
-    foreground: 'foreground',
+    primary: "color-primary",
+    primaryHover: "color-primary-hover",
+    primaryLight: "color-primary-light",
+    secondary: "color-secondary",
+    secondaryHover: "color-secondary-hover",
+    secondaryLight: "color-secondary-light",
+    accent: "color-accent",
+    accentHover: "color-accent-hover",
+    accentLight: "color-accent-light",
+    textPrimary: "color-text-primary",
+    textSecondary: "color-text-secondary",
+    textWhite: "color-text-white",
+    background: "background",
+    backgroundMuted: "muted",
+    foreground: "foreground",
   };
   return cssVar(mapping[color]);
 };
@@ -264,7 +264,7 @@ export const validateDesignToken = (category: string, value: string): boolean =>
     spacing: Object.values(SPACING),
     borderRadius: Object.values(BORDER_RADIUS),
   };
-  
+
   return categories[category as keyof typeof categories]?.includes(value as any) ?? false;
 };
 

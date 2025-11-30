@@ -3,12 +3,12 @@
  * Daum 주소 검색 API 사용
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { MapPin } from 'lucide-react';
-import type { DeliveryAddress } from '../../types/cart';
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MapPin } from "lucide-react";
+import type { DeliveryAddress } from "@/types/cart";
 
 interface AddressInputProps {
   value?: DeliveryAddress;
@@ -36,18 +36,18 @@ declare global {
 }
 
 export function AddressInput({ value, onChange, required = false }: AddressInputProps) {
-  const [detailAddress, setDetailAddress] = useState(value?.detail || '');
+  const [detailAddress, setDetailAddress] = useState(value?.detail || "");
   const postcodeRef = useRef<HTMLDivElement>(null);
 
   // Daum Postcode 스크립트 로드
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     // 이미 로드되어 있으면 스킵
     if (window.daum?.Postcode) return;
 
-    const script = document.createElement('script');
-    script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    const script = document.createElement("script");
+    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
     document.head.appendChild(script);
 
@@ -59,12 +59,12 @@ export function AddressInput({ value, onChange, required = false }: AddressInput
   // 주소 검색 열기
   const handleOpenPostcode = () => {
     if (!window.daum?.Postcode) {
-      alert('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      alert("주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
     new window.daum.Postcode({
-      oncomplete: (data) => {
+      oncomplete: data => {
         const fullAddress = data.address;
         const address: DeliveryAddress = {
           address: fullAddress,
@@ -72,8 +72,8 @@ export function AddressInput({ value, onChange, required = false }: AddressInput
         };
         onChange(address);
       },
-      width: '100%',
-      height: '100%',
+      width: "100%",
+      height: "100%",
     }).open();
   };
 
@@ -91,23 +91,17 @@ export function AddressInput({ value, onChange, required = false }: AddressInput
 
   return (
     <div className="space-y-2">
-      <Label>
-        배달 주소 {required && <span className="text-red-500">*</span>}
-      </Label>
+      <Label>배달 주소 {required && <span className="text-red-500">*</span>}</Label>
       <div className="space-y-2">
         <div className="flex gap-2">
           <Input
             type="text"
             placeholder="도로명 주소"
-            value={value?.address || ''}
+            value={value?.address || ""}
             readOnly
             className="flex-1"
           />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleOpenPostcode}
-          >
+          <Button type="button" variant="outline" onClick={handleOpenPostcode}>
             <MapPin className="w-4 h-4 mr-1" />
             주소 검색
           </Button>
@@ -130,4 +124,3 @@ export function AddressInput({ value, onChange, required = false }: AddressInput
     </div>
   );
 }
-

@@ -1,45 +1,45 @@
-import { useState, useMemo, memo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
-import { Input } from '../../components/ui/input';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
-import { Badge } from '../../components/ui/badge';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { DEFAULT_MENU_IMAGE } from '../../config/ui';
-import { getMenus } from '../../lib/admin/menus.api';
-import type { Menu, MenuCategory } from '../../types/menu';
-import { formatPrice } from '../../lib/utils';
+import { useState, useMemo, memo, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Search } from "lucide-react";
+import { Input } from "../../components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
+import { Badge } from "../../components/ui/badge";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { DEFAULT_MENU_IMAGE } from "../../config/ui";
+import { getMenus } from "../../lib/admin/menus.api";
+import type { Menu, MenuCategory } from "../../types/menu";
+import { formatPrice } from "../../lib/utils";
 
 const categories: { value: MenuCategory; label: string }[] = [
-  { value: 'noodle', label: '메인' },
-  { value: 'set', label: '세트' },
-  { value: 'side', label: '사이드' },
-  { value: 'drink', label: '음료' },
-  { value: 'alcohol', label: '주류' },
+  { value: "noodle", label: "메인" },
+  { value: "set", label: "세트" },
+  { value: "side", label: "사이드" },
+  { value: "drink", label: "음료" },
+  { value: "alcohol", label: "주류" },
 ];
 
 const badgeStyles = {
-  best: 'bg-[#D61C1C] text-white',
-  signature: 'bg-[#C7A45A] text-white',
-  spicy: 'bg-[#F37021] text-white',
-  cold: 'bg-blue-500 text-white',
-  seasonal: 'bg-green-600 text-white',
+  best: "bg-[#D61C1C] text-white",
+  signature: "bg-[#C7A45A] text-white",
+  spicy: "bg-[#F37021] text-white",
+  cold: "bg-blue-500 text-white",
+  seasonal: "bg-green-600 text-white",
 };
 
 const badgeLabels = {
-  best: '베스트',
-  signature: '시그니처',
-  spicy: '매운맛',
-  cold: '냉메뉴',
-  seasonal: '계절메뉴',
+  best: "베스트",
+  signature: "시그니처",
+  spicy: "매운맛",
+  cold: "냉메뉴",
+  seasonal: "계절메뉴",
 };
 
 export function MenuList() {
-  const [selectedCategory, setSelectedCategory] = useState<MenuCategory>('noodle');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<MenuCategory>("noodle");
+  const [searchQuery, setSearchQuery] = useState("");
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // localStorage에 저장된 메뉴 데이터를 가져옴 (변경사항 반영)
   useEffect(() => {
     const loadMenus = async () => {
@@ -48,7 +48,7 @@ export function MenuList() {
         const loadedMenus = await getMenus({});
         setMenus(loadedMenus);
       } catch (error) {
-        console.error('Failed to load menus:', error);
+        console.error("Failed to load menus:", error);
         setMenus([]);
       } finally {
         setLoading(false);
@@ -56,18 +56,18 @@ export function MenuList() {
     };
     loadMenus();
   }, []);
-  
+
   const filteredMenus = useMemo(() => {
     if (!Array.isArray(menus) || menus.length === 0) {
       return [];
     }
-    return menus.filter((menu) => {
+    return menus.filter(menu => {
       const matchesCategory = menu.category === selectedCategory;
       const matchesSearch = menu.name.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
   }, [menus, selectedCategory, searchQuery]);
-  
+
   return (
     <div className="pb-6" data-testid="menu-list.page">
       {/* 검색 */}
@@ -78,17 +78,17 @@ export function MenuList() {
             type="search"
             placeholder="메뉴 검색..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="pl-10 bg-white"
           />
         </div>
       </div>
-      
+
       {/* 카테고리 탭 */}
-      <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as MenuCategory)}>
+      <Tabs value={selectedCategory} onValueChange={v => setSelectedCategory(v as MenuCategory)}>
         <div className="sticky top-[104px] z-40 bg-[#F9F6F3] px-4 pb-3">
           <TabsList className="w-full justify-start overflow-x-auto bg-white">
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <TabsTrigger
                 key={cat.value}
                 value={cat.value}
@@ -99,21 +99,17 @@ export function MenuList() {
             ))}
           </TabsList>
         </div>
-        
+
         {/* 메뉴 리스트 */}
-        {categories.map((cat) => (
+        {categories.map(cat => (
           <TabsContent key={cat.value} value={cat.value} className="px-4 mt-0">
             {loading ? (
-              <div className="text-center py-12 text-[#2E1C10]/80">
-                로딩 중...
-              </div>
+              <div className="text-center py-12 text-[#2E1C10]/80">로딩 중...</div>
             ) : filteredMenus.length === 0 ? (
-              <div className="text-center py-12 text-[#2E1C10]/80">
-                검색 결과가 없습니다
-              </div>
+              <div className="text-center py-12 text-[#2E1C10]/80">검색 결과가 없습니다</div>
             ) : (
               <div className="grid gap-4" data-testid="menu-list.items">
-                {filteredMenus.map((menu) => (
+                {filteredMenus.map(menu => (
                   <MenuCard key={menu.menuId} menu={menu} />
                 ))}
               </div>
@@ -134,7 +130,7 @@ const MenuCardBase = ({ menu }: MenuCardProps) => {
     <Link to={`/menu/${menu.menuId}`} data-testid="menu-list.item.link">
       <div
         className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
-          !menu.isAvailable ? 'opacity-60' : ''
+          !menu.isAvailable ? "opacity-60" : ""
         }`}
         data-testid="menu-list.item"
       >
@@ -159,7 +155,7 @@ const MenuCardBase = ({ menu }: MenuCardProps) => {
               </div>
             )}
           </div>
-          
+
           {/* 메뉴 정보 */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
@@ -167,31 +163,26 @@ const MenuCardBase = ({ menu }: MenuCardProps) => {
                 {menu.name}
               </h3>
             </div>
-            
+
             {/* 뱃지 */}
             {menu.badges.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
-                {menu.badges.map((badge) => (
-                  <Badge
-                    key={badge}
-                    className={`text-xs ${badgeStyles[badge]}`}
-                  >
+                {menu.badges.map(badge => (
+                  <Badge key={badge} className={`text-xs ${badgeStyles[badge]}`}>
                     {badgeLabels[badge]}
                   </Badge>
                 ))}
               </div>
             )}
-            
+
             {/* 설명 */}
-            <p className="text-sm text-[#2E1C10]/80 line-clamp-2 mb-2">
-              {menu.description}
-            </p>
-            
+            <p className="text-sm text-[#2E1C10]/80 line-clamp-2 mb-2">{menu.description}</p>
+
             {/* 가격 */}
             <p className="text-[#D61C1C]" data-testid="menu-list.item.price">
               {formatPrice(menu.price)}
             </p>
-            
+
             {/* 시간제 안내 */}
             {menu.availableHours && (
               <p className="text-xs text-yellow-600 mt-1">

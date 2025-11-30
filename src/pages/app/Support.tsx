@@ -3,94 +3,75 @@
  * Phase 3-2: Support Chat
  */
 
-import { useEffect, useState, useRef } from 'react';
-import { Send, Image as ImageIcon, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Avatar, AvatarFallback } from '../../components/ui/avatar';
-import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
-import type { ChatSession, ChatMessage, MessageSender } from '../../types/support';
-import { toast } from 'sonner';
+import { useEffect, useState, useRef } from "react";
+import { Send, Image as ImageIcon, Clock, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { FEATURE_FLAGS, USE_FIREBASE } from "@/config/env";
+import type { ChatSession, ChatMessage, MessageSender } from "@/types/support";
+import { toast } from "sonner";
 
 // 운영 시간 체크
 function isBusinessHours(): boolean {
   const now = new Date();
   const hour = now.getHours();
   const day = now.getDay(); // 0 = Sunday, 6 = Saturday
-  
+
   // 월-토: 09:00-21:00
   if (day >= 1 && day <= 6) {
     return hour >= 9 && hour < 21;
   }
-  
+
   // 일요일: 10:00-20:00
   if (day === 0) {
     return hour >= 10 && hour < 20;
   }
-  
+
   return false;
 }
 
 function getAutoReplyMessage(): string {
   const now = new Date();
   const hour = now.getHours();
-  
+
   if (hour < 9) {
-    return '안녕하세요! 현풍닭칼국수입니다. 현재 영업시간 외입니다. 평일·토요일 09:00-21:00, 일요일 10:00-20:00에 문의해 주시면 빠르게 답변드리겠습니다. 🙏';
+    return "안녕하세요! 현풍닭칼국수입니다. 현재 영업시간 외입니다. 평일·토요일 09:00-21:00, 일요일 10:00-20:00에 문의해 주시면 빠르게 답변드리겠습니다. 🙏";
   } else if (hour >= 21) {
-    return '안녕하세요! 현풍닭칼국수입니다. 오늘 영업이 종료되었습니다. 내일 오전 9시 이후 문의해 주시면 빠르게 답변드리겠습니다. 😊';
+    return "안녕하세요! 현풍닭칼국수입니다. 오늘 영업이 종료되었습니다. 내일 오전 9시 이후 문의해 주시면 빠르게 답변드리겠습니다. 😊";
   } else {
-    return '안녕하세요! 현풍닭칼국수입니다. 현재 영업시간 외입니다. 영업시간 내에 문의해 주시면 빠르게 답변드리겠습니다.';
+    return "안녕하세요! 현풍닭칼국수입니다. 현재 영업시간 외입니다. 영업시간 내에 문의해 주시면 빠르게 답변드리겠습니다.";
   }
 }
 
 export function Support() {
+  // 1. Hooks 최상단 선언
   const [session, setSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // 지원 기능 비활성화 체크
-  if (!FEATURE_FLAGS.support) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <AlertCircle className="w-16 h-16 text-[#2E1C10]/40 mb-4" />
-        <h2 className="text-xl text-[#2E1C10] mb-2">
-          고객 지원 준비 중
-        </h2>
-        <p className="text-[#2E1C10]/60 text-center">
-          현재 고객 지원 기능을 준비 중입니다.<br />
-          문의사항은 전화로 연락 부탁드립니다.
-        </p>
-        <Button
-          className="mt-6"
-          onClick={() => (window.location.href = 'tel:010-2068-4732')}
-        >
-          📞 전화 문의하기
-        </Button>
-      </div>
-    );
-  }
-
+  // 2. Effects
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     loadChatSession();
   }, []);
 
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     scrollToBottom();
   }, [messages]);
 
-  // 자동 스크롤
+  // 3. Helper Functions
   function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
-  // 채팅 세션 로드 (없으면 생성)
   async function loadChatSession() {
     try {
       setLoading(true);
@@ -99,14 +80,14 @@ export function Support() {
         // TODO: Firebase 연동
       } else {
         // Mock: localStorage에서 세션 로드
-        const userId = localStorage.getItem('mockUserId') || 'guest_' + Date.now();
-        localStorage.setItem('mockUserId', userId);
+        const userId = localStorage.getItem("mockUserId") || "guest_" + Date.now();
+        localStorage.setItem("mockUserId", userId);
 
-        const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+        const sessionsData = localStorage.getItem("chat_sessions") || "{}";
         const sessions: Record<string, ChatSession> = JSON.parse(sessionsData);
 
         // 기존 세션 찾기 또는 생성
-        let userSession = Object.values(sessions).find((s) => s.userId === userId);
+        let userSession = Object.values(sessions).find(s => s.userId === userId);
 
         if (!userSession) {
           // 새 세션 생성
@@ -119,16 +100,16 @@ export function Support() {
             updatedAt: Date.now(),
           };
           sessions[userSession.id] = userSession;
-          localStorage.setItem('chat_sessions', JSON.stringify(sessions));
+          localStorage.setItem("chat_sessions", JSON.stringify(sessions));
 
           // 환영 메시지 + 운영시간 체크
           const welcomeMessages: ChatMessage[] = [
             {
               id: `msg_${Date.now()}_1`,
               sessionId: userSession.id,
-              from: 'bot',
-              type: 'text',
-              text: '안녕하세요! 현풍닭칼국수입니다. 무엇을 도와드릴까요? 😊',
+              from: "bot",
+              type: "text",
+              text: "안녕하세요! 현풍닭칼국수입니다. 무엇을 도와드릴까요? 😊",
               at: Date.now(),
               readByUser: true,
             },
@@ -138,50 +119,49 @@ export function Support() {
             welcomeMessages.push({
               id: `msg_${Date.now()}_2`,
               sessionId: userSession.id,
-              from: 'bot',
-              type: 'text',
+              from: "bot",
+              type: "text",
               text: getAutoReplyMessage(),
               at: Date.now() + 100,
               readByUser: true,
             });
           }
 
-          const messagesData = localStorage.getItem(`chat_messages_${userSession.id}`) || '[]';
+          const messagesData = localStorage.getItem(`chat_messages_${userSession.id}`) || "[]";
           const existingMessages: ChatMessage[] = JSON.parse(messagesData);
           const allMessages = [...welcomeMessages, ...existingMessages];
           localStorage.setItem(`chat_messages_${userSession.id}`, JSON.stringify(allMessages));
-          
+
           setMessages(allMessages);
         } else {
           // 기존 메시지 로드
-          const messagesData = localStorage.getItem(`chat_messages_${userSession.id}`) || '[]';
+          const messagesData = localStorage.getItem(`chat_messages_${userSession.id}`) || "[]";
           setMessages(JSON.parse(messagesData));
         }
 
         setSession(userSession);
       }
     } catch (error) {
-      console.error('Failed to load chat session:', error);
-      toast.error('채팅을 불러오는데 실패했습니다');
+      console.error("Failed to load chat session:", error);
+      toast.error("채팅을 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
   }
 
-  // 메시지 전송
   async function sendMessage() {
     if (!session || !inputText.trim() || sending) return;
 
     const text = inputText.trim();
-    setInputText('');
+    setInputText("");
     setSending(true);
 
     try {
       const newMessage: ChatMessage = {
         id: `msg_${Date.now()}`,
         sessionId: session.id,
-        from: 'user',
-        type: 'text',
+        from: "user",
+        type: "text",
         text,
         at: Date.now(),
         readByAdmin: false,
@@ -191,15 +171,15 @@ export function Support() {
         // TODO: Firebase에 메시지 추가
       } else {
         // Mock: localStorage에 메시지 추가
-        const messagesData = localStorage.getItem(`chat_messages_${session.id}`) || '[]';
+        const messagesData = localStorage.getItem(`chat_messages_${session.id}`) || "[]";
         const allMessages: ChatMessage[] = JSON.parse(messagesData);
         allMessages.push(newMessage);
         localStorage.setItem(`chat_messages_${session.id}`, JSON.stringify(allMessages));
-        
+
         setMessages(allMessages);
 
         // 세션 업데이트
-        const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+        const sessionsData = localStorage.getItem("chat_sessions") || "{}";
         const sessions: Record<string, ChatSession> = JSON.parse(sessionsData);
         sessions[session.id] = {
           ...session,
@@ -207,18 +187,37 @@ export function Support() {
           lastAt: Date.now(),
           updatedAt: Date.now(),
         };
-        localStorage.setItem('chat_sessions', JSON.stringify(sessions));
+        localStorage.setItem("chat_sessions", JSON.stringify(sessions));
       }
 
-      toast.success('메시지가 전송되었습니다');
+      toast.success("메시지가 전송되었습니다");
     } catch (error) {
-      console.error('Failed to send message:', error);
-      toast.error('메시지 전송에 실패했습니다');
+      console.error("Failed to send message:", error);
+      toast.error("메시지 전송에 실패했습니다");
       setInputText(text); // 복원
     } finally {
       setSending(false);
       inputRef.current?.focus();
     }
+  }
+
+  // 4. Render Logic
+  // 지원 기능 비활성화 체크
+  if (!FEATURE_FLAGS.support) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <AlertCircle className="w-16 h-16 text-[#2E1C10]/40 mb-4" />
+        <h2 className="text-xl text-[#2E1C10] mb-2">고객 지원 준비 중</h2>
+        <p className="text-[#2E1C10]/60 text-center">
+          현재 고객 지원 기능을 준비 중입니다.
+          <br />
+          문의사항은 전화로 연락 부탁드립니다.
+        </p>
+        <Button className="mt-6" onClick={() => (window.location.href = "tel:010-2068-4732")}>
+          📞 전화 문의하기
+        </Button>
+      </div>
+    );
   }
 
   if (loading) {
@@ -240,9 +239,7 @@ export function Support() {
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarFallback className="bg-[#D61C1C] text-white">
-              🍜
-            </AvatarFallback>
+            <AvatarFallback className="bg-[#D61C1C] text-white">🍜</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <h2 className="text-[#2E1C10]">현풍닭칼국수 고객센터</h2>
@@ -271,7 +268,7 @@ export function Support() {
 
       {/* 메시지 목록 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => (
+        {messages.map(msg => (
           <MessageBubble key={msg.id} message={msg} />
         ))}
         <div ref={messagesEndRef} />
@@ -283,9 +280,9 @@ export function Support() {
           <Input
             ref={inputRef}
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+            onChange={e => setInputText(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
               }
@@ -307,9 +304,7 @@ export function Support() {
             )}
           </Button>
         </div>
-        <p className="text-xs text-[#2E1C10]/40 mt-2 text-center">
-          전화 문의: 010-2068-4732
-        </p>
+        <p className="text-xs text-[#2E1C10]/40 mt-2 text-center">전화 문의: 010-2068-4732</p>
       </div>
     </div>
   );
@@ -319,16 +314,16 @@ export function Support() {
  * 메시지 말풍선 컴포넌트
  */
 function MessageBubble({ message }: { message: ChatMessage }) {
-  const isUser = message.from === 'user';
-  const isBot = message.from === 'bot';
+  const isUser = message.from === "user";
+  const isBot = message.from === "bot";
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[75%] ${isUser ? 'order-2' : 'order-1'}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <div className={`max-w-[75%] ${isUser ? "order-2" : "order-1"}`}>
         {/* 보낸 사람 */}
         {!isUser && (
           <p className="text-xs text-[#2E1C10]/60 mb-1 px-1">
-            {isBot ? '🤖 자동 응답' : '👤 관리자'}
+            {isBot ? "🤖 자동 응답" : "👤 관리자"}
           </p>
         )}
 
@@ -336,31 +331,25 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         <div
           className={`rounded-2xl px-4 py-3 ${
             isUser
-              ? 'bg-[#D61C1C] text-white'
+              ? "bg-[#D61C1C] text-white"
               : isBot
-              ? 'bg-blue-50 text-[#2E1C10]'
-              : 'bg-white text-[#2E1C10] border border-gray-200'
+                ? "bg-blue-50 text-[#2E1C10]"
+                : "bg-white text-[#2E1C10] border border-gray-200"
           }`}
         >
-          {message.type === 'text' && (
-            <p className="text-sm whitespace-pre-wrap break-words">
-              {message.text}
-            </p>
+          {message.type === "text" && (
+            <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
           )}
-          {message.type === 'image' && message.imageUrl && (
-            <img
-              src={message.imageUrl}
-              alt="첨부 이미지"
-              className="rounded-lg max-w-full"
-            />
+          {message.type === "image" && message.imageUrl && (
+            <img src={message.imageUrl} alt="첨부 이미지" className="rounded-lg max-w-full" />
           )}
         </div>
 
         {/* 시간 */}
-        <p className={`text-xs text-[#2E1C10]/40 mt-1 px-1 ${isUser ? 'text-right' : 'text-left'}`}>
-          {new Date(message.at).toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
+        <p className={`text-xs text-[#2E1C10]/40 mt-1 px-1 ${isUser ? "text-right" : "text-left"}`}>
+          {new Date(message.at).toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
           })}
         </p>
       </div>

@@ -4,7 +4,7 @@
  * Phase 2-9: KPI 대시보드 + 차트
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   getKPIData,
   getHourlyOrders,
@@ -14,9 +14,9 @@ import {
   HourlyOrders,
   MenuSales,
   DailySales,
-} from '../../lib/admin/analytics.api';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Card } from '../../components/ui/card';
+} from "../../lib/admin/analytics.api";
+import { StatCard } from "../../components/admin/common/StatCard";
+import { Card } from "../../components/ui/card";
 import {
   BarChart,
   Bar,
@@ -28,10 +28,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import { TrendingUp, Users, Star, Download, RefreshCw } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { toast } from 'sonner';
+} from "recharts";
+import { TrendingUp, Users, Star, Download, RefreshCw } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { toast } from "sonner";
 
 export function AdminAnalytics() {
   const [kpi, setKpi] = useState<KPIData | null>(null);
@@ -59,8 +59,8 @@ export function AdminAnalytics() {
       setTopMenus(menuData);
       setDailySales(salesData);
     } catch (error) {
-      console.error('Failed to load analytics:', error);
-      toast.error('데이터를 불러오는데 실패했습니다');
+      console.error("Failed to load analytics:", error);
+      toast.error("데이터를 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -88,9 +88,7 @@ export function AdminAnalytics() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#333] mb-2">관제 대시보드</h1>
-          <p className="text-[#8B7355]">
-            핵심 지표와 퍼널 데이터를 확인하세요
-          </p>
+          <p className="text-[#8B7355]">핵심 지표와 퍼널 데이터를 확인하세요</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={loadData}>
@@ -112,12 +110,7 @@ export function AdminAnalytics() {
           subtitle={`${kpi.todayOrders}건`}
           icon={TrendingUp}
         />
-        <StatCard
-          title="주문 수"
-          value={kpi.todayOrders}
-          subtitle="오늘 주문"
-          variant="success"
-        />
+        <StatCard title="주문 수" value={kpi.todayOrders} subtitle="오늘 주문" variant="success" />
         <StatCard
           title="평균 평점"
           value={kpi.avgRating.toFixed(1)}
@@ -148,17 +141,9 @@ export function AdminAnalytics() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
-            <Tooltip
-              formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`}
-            />
+            <Tooltip formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`} />
             <Legend />
-            <Line
-              type="monotone"
-              dataKey="sales"
-              stroke="#D61C1C"
-              strokeWidth={2}
-              name="매출"
-            />
+            <Line type="monotone" dataKey="sales" stroke="#D61C1C" strokeWidth={2} name="매출" />
           </LineChart>
         </ResponsiveContainer>
       </Card>
@@ -169,9 +154,9 @@ export function AdminAnalytics() {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={hourlyOrders}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="hour" tickFormatter={(h) => `${h}시`} />
+            <XAxis dataKey="hour" tickFormatter={h => `${h}시`} />
             <YAxis />
-            <Tooltip labelFormatter={(h) => `${h}시`} />
+            <Tooltip labelFormatter={h => `${h}시`} />
             <Legend />
             <Bar dataKey="orders" fill="#F37021" name="주문 건수" />
           </BarChart>
@@ -184,11 +169,9 @@ export function AdminAnalytics() {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={topMenus} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" tickFormatter={(v) => `${(v / 10000).toFixed(0)}만원`} />
+            <XAxis type="number" tickFormatter={v => `${(v / 10000).toFixed(0)}만원`} />
             <YAxis type="category" dataKey="menuName" width={120} />
-            <Tooltip
-              formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`}
-            />
+            <Tooltip formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`} />
             <Legend />
             <Bar dataKey="sales" fill="#C7A45A" name="매출" />
           </BarChart>
@@ -201,19 +184,28 @@ export function AdminAnalytics() {
         <div className="space-y-2 text-sm text-[#8B7355]">
           <div className="flex items-start gap-2">
             <span className="text-[#D61C1C]">•</span>
-            <span><strong>실시간 업데이트:</strong> Firebase Firestore onSnapshot (연동 시)</span>
+            <span>
+              <strong>실시간 업데이트:</strong> Firebase Firestore onSnapshot (연동 시)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#F37021]">•</span>
-            <span><strong>주간 리포트:</strong> 매주 월요일 04:00 자동 생성 (Functions)</span>
+            <span>
+              <strong>주간 리포트:</strong> 매주 월요일 04:00 자동 생성 (Functions)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#C7A45A]">•</span>
-            <span><strong>이벤트 로깅:</strong> install_*, menu_view, add_to_cart, payment_*, order_*, review_*</span>
+            <span>
+              <strong>이벤트 로깅:</strong> install_*, menu_view, add_to_cart, payment_*, order_*,
+              review_*
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-gray-400">•</span>
-            <span><strong>알림 (준비):</strong> 결제 실패, 주문 폭증, 평점 급락 등 (FCM)</span>
+            <span>
+              <strong>알림 (준비):</strong> 결제 실패, 주문 폭증, 평점 급락 등 (FCM)
+            </span>
           </div>
         </div>
       </Card>

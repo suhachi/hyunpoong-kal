@@ -4,7 +4,7 @@
  */
 
 // 기간 타입
-export type ReportPeriod = 'daily' | 'weekly' | 'monthly' | 'custom';
+export type ReportPeriod = "daily" | "weekly" | "monthly" | "custom";
 
 // 날짜 범위
 export interface DateRange {
@@ -18,28 +18,28 @@ export interface IntegratedKPI {
   totalSales: number;
   averageOrderValue: number;
   totalOrders: number;
-  
+
   // 고객 지표
   newCustomers: number;
   returningCustomers: number;
   customerRetentionRate: number; // %
-  
+
   // 평점 지표
   averageRating: number;
   totalReviews: number;
   photoReviewRate: number; // %
-  
+
   // 포인트 지표
   totalPointsEarned: number;
   totalPointsSpent: number;
   pointsRedemptionRate: number; // %
-  
+
   // 쿠폰 지표
   totalCouponsIssued: number;
   totalCouponsUsed: number;
   couponUsageRate: number; // %
   totalDiscount: number;
-  
+
   // 전환율 지표
   installRate: number; // A2HS 설치율 %
   cartConversionRate: number; // 장바구니 → 주문 전환율 %
@@ -83,7 +83,7 @@ export interface CustomerBehavior {
   averageOrderValue: number;
   lastOrderDate: Date;
   favoriteMenu: string;
-  loyaltyTier: 'bronze' | 'silver' | 'gold' | 'vip';
+  loyaltyTier: "bronze" | "silver" | "gold" | "vip";
 }
 
 // 쿠폰 효과 분석
@@ -137,11 +137,14 @@ export interface NotificationEffectiveness {
   readRate: number; // %
   clickRate: number; // %
   conversionRate: number; // 알림 클릭 → 주문 전환율 %
-  byType: Record<string, {
-    sent: number;
-    read: number;
-    clicked: number;
-  }>;
+  byType: Record<
+    string,
+    {
+      sent: number;
+      read: number;
+      clicked: number;
+    }
+  >;
 }
 
 // 통합 리포트
@@ -149,19 +152,19 @@ export interface IntegratedReport {
   period: ReportPeriod;
   dateRange: DateRange;
   generatedAt: Date;
-  
+
   kpi: IntegratedKPI;
   hourlyAnalysis: HourlyAnalysis[];
   dayOfWeekAnalysis: DayOfWeekAnalysis[];
   topMenus: MenuPerformance[];
   topCustomers: CustomerBehavior[];
-  
+
   couponEffectiveness: CouponEffectiveness[];
   pointsEffectiveness: PointsEffectiveness;
   reviewAnalysis: ReviewAnalysis;
   deliveryPerformance: DeliveryPerformance;
   notificationEffectiveness: NotificationEffectiveness;
-  
+
   // 추가 지표
   insights: string[]; // AI 인사이트 (선택)
   recommendations: string[]; // 개선 제안
@@ -179,12 +182,12 @@ export interface ChartData {
 }
 
 // 내보내기 형식
-export type ExportFormat = 'csv' | 'excel' | 'pdf' | 'json';
+export type ExportFormat = "csv" | "excel" | "pdf" | "json";
 
 // 리포트 설정
 export interface ReportSettings {
   autoGenerate: boolean; // 자동 생성 여부
-  frequency: 'daily' | 'weekly' | 'monthly';
+  frequency: "daily" | "weekly" | "monthly";
   emailRecipients: string[]; // 이메일 수신자
   includeCharts: boolean; // 차트 포함 여부
   format: ExportFormat;

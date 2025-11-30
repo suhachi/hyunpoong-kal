@@ -1,5 +1,5 @@
-import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 
 export function ColorSystem() {
   const [copiedColor, setCopiedColor] = useState<string | null>(null);
@@ -12,55 +12,55 @@ export function ColorSystem() {
 
   const colors = [
     {
-      role: 'Primary',
-      name: '현풍레드',
-      nameEn: 'Hyunpung Red',
-      hex: '#D61C1C',
-      rgb: '214, 28, 28',
-      cmyk: '0, 87, 87, 16',
+      role: "Primary",
+      name: "현풍레드",
+      nameEn: "Hyunpung Red",
+      hex: "#D61C1C",
+      rgb: "214, 28, 28",
+      cmyk: "0, 87, 87, 16",
       usage: "브랜드 대표색, '닭' 글자, 주요 버튼 및 강조 요소",
-      description: '신뢰와 열정을 상징하는 브랜드의 핵심 컬러'
+      description: "신뢰와 열정을 상징하는 브랜드의 핵심 컬러",
     },
     {
-      role: 'Secondary',
-      name: '신칼오렌지',
-      nameEn: 'ShinKal Orange',
-      hex: '#F37021',
-      rgb: '243, 112, 33',
-      cmyk: '0, 70, 95, 0',
-      usage: 'SHIN KAL 심볼 리본, 보조 강조색',
-      description: '따뜻함과 활력을 전달하는 보조 컬러'
+      role: "Secondary",
+      name: "신칼오렌지",
+      nameEn: "ShinKal Orange",
+      hex: "#F37021",
+      rgb: "243, 112, 33",
+      cmyk: "0, 70, 95, 0",
+      usage: "SHIN KAL 심볼 리본, 보조 강조색",
+      description: "따뜻함과 활력을 전달하는 보조 컬러",
     },
     {
-      role: 'Neutral Dark',
-      name: '흑갈필기',
-      nameEn: 'Dark Brown',
-      hex: '#2E1C10',
-      rgb: '46, 28, 16',
-      cmyk: '0, 39, 65, 82',
-      usage: '한글 로고, 본문 텍스트, 제목',
-      description: '전통과 깊이를 나타내는 다크 컬러'
+      role: "Neutral Dark",
+      name: "흑갈필기",
+      nameEn: "Dark Brown",
+      hex: "#2E1C10",
+      rgb: "46, 28, 16",
+      cmyk: "0, 39, 65, 82",
+      usage: "한글 로고, 본문 텍스트, 제목",
+      description: "전통과 깊이를 나타내는 다크 컬러",
     },
     {
-      role: 'Neutral Light',
-      name: '미색배경',
-      nameEn: 'Cream Background',
-      hex: '#F9F6F3',
-      rgb: '249, 246, 243',
-      cmyk: '0, 1, 2, 3',
-      usage: '배경, 카드, 메뉴판',
-      description: '따뜻하고 청결한 느낌의 배경 컬러'
+      role: "Neutral Light",
+      name: "미색배경",
+      nameEn: "Cream Background",
+      hex: "#F9F6F3",
+      rgb: "249, 246, 243",
+      cmyk: "0, 1, 2, 3",
+      usage: "배경, 카드, 메뉴판",
+      description: "따뜻하고 청결한 느낌의 배경 컬러",
     },
     {
-      role: 'Accent',
-      name: '황동식기색',
-      nameEn: 'Brass Gold',
-      hex: '#C7A45A',
-      rgb: '199, 164, 90',
-      cmyk: '0, 18, 55, 22',
-      usage: '식기, 인테리어 포인트, 프리미엄 요소',
-      description: '전통 황동 식기를 연상시키는 고급스러운 골드'
-    }
+      role: "Accent",
+      name: "황동식기색",
+      nameEn: "Brass Gold",
+      hex: "#C7A45A",
+      rgb: "199, 164, 90",
+      cmyk: "0, 18, 55, 22",
+      usage: "식기, 인테리어 포인트, 프리미엄 요소",
+      description: "전통 황동 식기를 연상시키는 고급스러운 골드",
+    },
   ];
 
   return (
@@ -72,25 +72,25 @@ export function ColorSystem() {
           </div>
           <h2 className="text-[#2E1C10] mb-4">컬러 시스템</h2>
           <p className="text-gray-700 max-w-2xl mx-auto">
-            현풍닭칼국수의 브랜드 정체성을 표현하는 공식 컬러 팔레트입니다.<br/>
-            각 컬러는 브랜드의 가치와 철학을 시각적으로 전달합니다.
+            현풍닭칼국수의 브랜드 정체성을 표현하는 공식 컬러 팔레트입니다.
+            <br />각 컬러는 브랜드의 가치와 철학을 시각적으로 전달합니다.
           </p>
         </div>
 
         <div className="space-y-6">
           {colors.map((color, index) => (
-            <div 
+            <div
               key={index}
               className="bg-[#F9F6F3] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
             >
               <div className="grid md:grid-cols-3 gap-0">
-                <div 
+                <div
                   className="p-12 flex items-center justify-center"
                   style={{ backgroundColor: color.hex }}
                 >
                   <div className="text-center">
                     <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <div 
+                      <div
                         className="w-16 h-16 rounded-full border-4 border-white"
                         style={{ backgroundColor: color.hex }}
                       ></div>
@@ -103,7 +103,9 @@ export function ColorSystem() {
                   <div className="mb-6">
                     <h3 className="text-[#2E1C10] mb-1">{color.name}</h3>
                     <p className="text-gray-500 text-sm mb-4">{color.nameEn}</p>
-                    <p className="text-gray-700 text-sm leading-relaxed mb-4">{color.description}</p>
+                    <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                      {color.description}
+                    </p>
                     <p className="text-sm text-gray-600">
                       <span className="text-[#D61C1C]">사용처:</span> {color.usage}
                     </p>
@@ -135,7 +137,7 @@ export function ColorSystem() {
                       <code className="text-sm text-[#2E1C10]">{color.cmyk}</code>
                     </div>
                     <div className="flex items-end">
-                      <div 
+                      <div
                         className="w-12 h-12 rounded-lg border-2 border-gray-200"
                         style={{ backgroundColor: color.hex }}
                       ></div>

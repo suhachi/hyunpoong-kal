@@ -5,5 +5,4 @@
 
 // 기본 메뉴 이미지 placeholder
 // 실제 이미지 파일이 준비되면 경로를 업데이트
-export const DEFAULT_MENU_IMAGE = '/images/placeholder-menu.png';
-
+export const DEFAULT_MENU_IMAGE = "/images/placeholder-menu.png";

@@ -17,12 +17,12 @@ import {
   Timestamp,
   limit,
   QueryConstraint,
-} from 'firebase/firestore';
-import { db } from '../firebase';
-import type { ChatSession, ChatMessage, MessageSender } from '../../types/support';
+} from "firebase/firestore";
+import { db } from "../firebase";
+import type { ChatSession, ChatMessage, MessageSender } from "../../types/support";
 
-const SESSIONS_COLLECTION = 'support_sessions';
-const MESSAGES_COLLECTION = 'support_messages';
+const SESSIONS_COLLECTION = "support_sessions";
+const MESSAGES_COLLECTION = "support_messages";
 
 /**
  * 모든 채팅 세션 가져오기
@@ -31,20 +31,20 @@ export async function getAllSessions(filters?: {
   open?: boolean;
   assignedTo?: string;
 }): Promise<ChatSession[]> {
-  const constraints: QueryConstraint[] = [orderBy('lastAt', 'desc')];
+  const constraints: QueryConstraint[] = [orderBy("lastAt", "desc")];
 
   if (filters?.open !== undefined) {
-    constraints.push(where('open', '==', filters.open));
+    constraints.push(where("open", "==", filters.open));
   }
 
   if (filters?.assignedTo) {
-    constraints.push(where('assignedTo', '==', filters.assignedTo));
+    constraints.push(where("assignedTo", "==", filters.assignedTo));
   }
 
   const q = query(collection(db, SESSIONS_COLLECTION), ...constraints);
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((doc) => ({
+  return snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data(),
   })) as ChatSession[];
@@ -56,12 +56,12 @@ export async function getAllSessions(filters?: {
 export async function getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
   const q = query(
     collection(db, MESSAGES_COLLECTION),
-    where('sessionId', '==', sessionId),
-    orderBy('at', 'asc')
+    where("sessionId", "==", sessionId),
+    orderBy("at", "asc"),
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
+  return snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data(),
   })) as ChatMessage[];
@@ -73,13 +73,13 @@ export async function getSessionMessages(sessionId: string): Promise<ChatMessage
 export async function sendAdminMessage(
   sessionId: string,
   text: string,
-  adminId: string
+  adminId: string,
 ): Promise<void> {
   // 메시지 추가
   await addDoc(collection(db, MESSAGES_COLLECTION), {
     sessionId,
-    from: 'admin' as MessageSender,
-    type: 'text',
+    from: "admin" as MessageSender,
+    type: "text",
     text,
     at: Date.now(),
     readByAdmin: true,
@@ -102,10 +102,10 @@ export async function sendAdminMessage(
 export async function updateSessionStatus(
   sessionId: string,
   open: boolean,
-  adminId?: string
+  adminId?: string,
 ): Promise<void> {
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionId);
-  const updateData: any = {
+  const updateData: { open: boolean; updatedAt: number; assignedTo?: string } = {
     open,
     updatedAt: Date.now(),
   };
@@ -134,14 +134,12 @@ export async function assignSession(sessionId: string, adminId: string): Promise
 export async function markMessagesAsReadByAdmin(sessionId: string): Promise<void> {
   const q = query(
     collection(db, MESSAGES_COLLECTION),
-    where('sessionId', '==', sessionId),
-    where('readByAdmin', '==', false)
+    where("sessionId", "==", sessionId),
+    where("readByAdmin", "==", false),
   );
 
   const snapshot = await getDocs(q);
-  const updates = snapshot.docs.map((doc) =>
-    updateDoc(doc.ref, { readByAdmin: true })
-  );
+  const updates = snapshot.docs.map(doc => updateDoc(doc.ref, { readByAdmin: true }));
 
   await Promise.all(updates);
 }
@@ -151,18 +149,18 @@ export async function markMessagesAsReadByAdmin(sessionId: string): Promise<void
  */
 export function subscribeToSessions(
   callback: (sessions: ChatSession[]) => void,
-  filters?: { open?: boolean }
+  filters?: { open?: boolean },
 ): () => void {
-  const constraints: QueryConstraint[] = [orderBy('lastAt', 'desc')];
+  const constraints: QueryConstraint[] = [orderBy("lastAt", "desc")];
 
   if (filters?.open !== undefined) {
-    constraints.push(where('open', '==', filters.open));
+    constraints.push(where("open", "==", filters.open));
   }
 
   const q = query(collection(db, SESSIONS_COLLECTION), ...constraints);
 
-  return onSnapshot(q, (snapshot) => {
-    const sessions = snapshot.docs.map((doc) => ({
+  return onSnapshot(q, snapshot => {
+    const sessions = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
     })) as ChatSession[];
@@ -176,16 +174,16 @@ export function subscribeToSessions(
  */
 export function subscribeToMessages(
   sessionId: string,
-  callback: (messages: ChatMessage[]) => void
+  callback: (messages: ChatMessage[]) => void,
 ): () => void {
   const q = query(
     collection(db, MESSAGES_COLLECTION),
-    where('sessionId', '==', sessionId),
-    orderBy('at', 'asc')
+    where("sessionId", "==", sessionId),
+    orderBy("at", "asc"),
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const messages = snapshot.docs.map((doc) => ({
+  return onSnapshot(q, snapshot => {
+    const messages = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
     })) as ChatMessage[];
@@ -200,9 +198,9 @@ export function subscribeToMessages(
 export async function getUnreadCount(sessionId: string): Promise<number> {
   const q = query(
     collection(db, MESSAGES_COLLECTION),
-    where('sessionId', '==', sessionId),
-    where('from', '==', 'user'),
-    where('readByAdmin', '==', false)
+    where("sessionId", "==", sessionId),
+    where("from", "==", "user"),
+    where("readByAdmin", "==", false),
   );
 
   const snapshot = await getDocs(q);
@@ -215,8 +213,8 @@ export async function getUnreadCount(sessionId: string): Promise<number> {
 export async function getPendingSessionsCount(): Promise<number> {
   const q = query(
     collection(db, SESSIONS_COLLECTION),
-    where('open', '==', true),
-    where('assignedTo', '==', null)
+    where("open", "==", true),
+    where("assignedTo", "==", null),
   );
 
   const snapshot = await getDocs(q);
@@ -242,8 +240,8 @@ export async function getTodayCompletedCount(): Promise<number> {
 
   const q = query(
     collection(db, SESSIONS_COLLECTION),
-    where('open', '==', false),
-    where('updatedAt', '>=', todayTimestamp)
+    where("open", "==", false),
+    where("updatedAt", ">=", todayTimestamp),
   );
 
   const snapshot = await getDocs(q);

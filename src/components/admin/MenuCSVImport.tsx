@@ -3,8 +3,8 @@
  * Phase 2-6: CSV 파일로 메뉴 대량 등록
  */
 
-import { useState } from 'react';
-import { Menu } from '../../types/menu';
+import { useState } from "react";
+import { Menu } from "../../types/menu";
 import {
   Dialog,
   DialogContent,
@@ -12,14 +12,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Badge } from '../ui/badge';
-import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { formatPrice } from '../../lib/utils';
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Badge } from "../ui/badge";
+import { Upload, AlertCircle, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+import { formatPrice } from "../../lib/utils";
 
 interface CSVRow {
   name: string;
@@ -45,11 +45,7 @@ interface MenuCSVImportProps {
   onImport: (menus: Partial<Menu>[]) => Promise<void>;
 }
 
-export function MenuCSVImport({
-  open,
-  onOpenChange,
-  onImport,
-}: MenuCSVImportProps) {
+export function MenuCSVImport({ open, onOpenChange, onImport }: MenuCSVImportProps) {
   const [file, setFile] = useState<File | null>(null);
   const [parsedMenus, setParsedMenus] = useState<ParsedMenu[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,8 +55,8 @@ export function MenuCSVImport({
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    if (!selectedFile.name.endsWith('.csv')) {
-      toast.error('CSV 파일만 업로드 가능합니다');
+    if (!selectedFile.name.endsWith(".csv")) {
+      toast.error("CSV 파일만 업로드 가능합니다");
       return;
     }
 
@@ -68,31 +64,31 @@ export function MenuCSVImport({
 
     try {
       const text = await selectedFile.text();
-      const lines = text.split('\n').filter(line => line.trim());
+      const lines = text.split("\n").filter(line => line.trim());
 
       if (lines.length < 2) {
-        toast.error('CSV 파일에 데이터가 없습니다');
+        toast.error("CSV 파일에 데이터가 없습니다");
         return;
       }
 
       // 헤더 확인
-      const headers = lines[0].split(',').map(h => h.trim());
-      const requiredHeaders = ['name', 'category', 'price'];
+      const headers = lines[0].split(",").map(h => h.trim());
+      const requiredHeaders = ["name", "category", "price"];
       const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
 
       if (missingHeaders.length > 0) {
-        toast.error(`필수 컬럼이 누락되었습니다: ${missingHeaders.join(', ')}`);
+        toast.error(`필수 컬럼이 누락되었습니다: ${missingHeaders.join(", ")}`);
         return;
       }
 
       // 데이터 파싱
       const parsed: ParsedMenu[] = [];
-      
+
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
+        const values = lines[i].split(",").map(v => v.trim());
         const row: any = {};
         headers.forEach((header, index) => {
-          row[header] = values[index] || '';
+          row[header] = values[index] || "";
         });
 
         const errors: string[] = [];
@@ -100,15 +96,15 @@ export function MenuCSVImport({
 
         // 이름 검증
         if (!row.name || row.name.length > 50) {
-          errors.push('이름은 필수이며 50자 이내여야 합니다');
+          errors.push("이름은 필수이며 50자 이내여야 합니다");
         } else {
           menuData.name = row.name;
         }
 
         // 카테고리 검증
-        const validCategories = ['noodle', 'set', 'side', 'drink', 'alcohol'];
+        const validCategories = ["noodle", "set", "side", "drink", "alcohol"];
         if (!validCategories.includes(row.category)) {
-          errors.push('유효하지 않은 카테고리입니다');
+          errors.push("유효하지 않은 카테고리입니다");
         } else {
           menuData.category = row.category as any;
         }
@@ -116,7 +112,7 @@ export function MenuCSVImport({
         // 가격 검증
         const price = parseInt(row.price);
         if (isNaN(price) || price < 0) {
-          errors.push('가격은 0 이상의 정수여야 합니다');
+          errors.push("가격은 0 이상의 정수여야 합니다");
         } else {
           menuData.price = price;
         }
@@ -128,7 +124,7 @@ export function MenuCSVImport({
 
         // 배지
         if (row.badges) {
-          const badges = row.badges.split('|').map(b => b.trim());
+          const badges = row.badges.split("|").map(b => b.trim());
           menuData.badges = badges as any;
         }
 
@@ -137,7 +133,7 @@ export function MenuCSVImport({
           try {
             menuData.options = JSON.parse(row.options);
           } catch {
-            errors.push('옵션 JSON 형식이 잘못되었습니다');
+            errors.push("옵션 JSON 형식이 잘못되었습니다");
           }
         }
 
@@ -145,12 +141,12 @@ export function MenuCSVImport({
         if (row.imageUrl) {
           menuData.image = row.imageUrl;
         } else {
-          errors.push('이미지 URL은 필수입니다');
+          errors.push("이미지 URL은 필수입니다");
         }
 
         // 알레르기
         if (row.allergens) {
-          menuData.allergens = row.allergens.split('|').map(a => a.trim());
+          menuData.allergens = row.allergens.split("|").map(a => a.trim());
         }
 
         // 원산지
@@ -171,8 +167,8 @@ export function MenuCSVImport({
       setParsedMenus(parsed);
       toast.success(`${parsed.length}개 메뉴를 확인했습니다`);
     } catch (error) {
-      console.error('CSV parsing error:', error);
-      toast.error('CSV 파일을 읽는데 실패했습니다');
+      console.error("CSV parsing error:", error);
+      toast.error("CSV 파일을 읽는데 실패했습니다");
     }
   };
 
@@ -181,7 +177,7 @@ export function MenuCSVImport({
     const validMenus = parsedMenus.filter(m => m.errors.length === 0);
 
     if (validMenus.length === 0) {
-      toast.error('등록 가능한 메뉴가 없습니다');
+      toast.error("등록 가능한 메뉴가 없습니다");
       return;
     }
 
@@ -189,16 +185,16 @@ export function MenuCSVImport({
 
     try {
       await onImport(validMenus.map(m => m.data));
-      
+
       toast.success(`${validMenus.length}개 메뉴가 등록되었습니다`);
       onOpenChange(false);
-      
+
       // 초기화
       setFile(null);
       setParsedMenus([]);
     } catch (error: any) {
-      console.error('Import error:', error);
-      toast.error(error.message || '일괄 등록에 실패했습니다');
+      console.error("Import error:", error);
+      toast.error(error.message || "일괄 등록에 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -212,9 +208,7 @@ export function MenuCSVImport({
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto !bg-gray-50 rounded-xl p-8 shadow-lg">
         <DialogHeader>
           <DialogTitle>CSV 일괄 등록</DialogTitle>
-          <DialogDescription>
-            CSV 파일로 여러 메뉴를 한 번에 등록합니다
-          </DialogDescription>
+          <DialogDescription>CSV 파일로 여러 메뉴를 한 번에 등록합니다</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -227,19 +221,25 @@ export function MenuCSVImport({
                 name,category,price,description,badges,options,imageUrl,allergens,origin
               </code>
               <div className="mt-3 text-sm space-y-1">
-                <p>• <strong>필수:</strong> name, category, price, imageUrl</p>
-                <p>• <strong>badges:</strong> 파이프(|)로 구분 (예: best|signature)</p>
-                <p>• <strong>options:</strong> JSON 형식</p>
-                <p>• <strong>allergens/origin:</strong> 파이프(|)로 구분</p>
+                <p>
+                  • <strong>필수:</strong> name, category, price, imageUrl
+                </p>
+                <p>
+                  • <strong>badges:</strong> 파이프(|)로 구분 (예: best|signature)
+                </p>
+                <p>
+                  • <strong>options:</strong> JSON 형식
+                </p>
+                <p>
+                  • <strong>allergens/origin:</strong> 파이프(|)로 구분
+                </p>
               </div>
             </AlertDescription>
           </Alert>
 
           {/* 파일 선택 */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              CSV 파일 선택
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">CSV 파일 선택</label>
             <Input
               type="file"
               accept=".csv"
@@ -272,9 +272,9 @@ export function MenuCSVImport({
                   <div
                     key={index}
                     className={`p-4 rounded-lg border ${
-                      menu.errors.length > 0 
-                        ? 'bg-red-50 border-red-200' 
-                        : 'bg-green-50 border-green-200'
+                      menu.errors.length > 0
+                        ? "bg-red-50 border-red-200"
+                        : "bg-green-50 border-green-200"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -285,11 +285,9 @@ export function MenuCSVImport({
                           ) : (
                             <CheckCircle2 className="w-5 h-5 inline mr-2 text-green-600 align-middle" />
                           )}
-                          <span className="font-semibold">
-                            {menu.data.name || '(이름 없음)'}
-                          </span>
+                          <span className="font-semibold">{menu.data.name || "(이름 없음)"}</span>
                           <span className="ml-2 text-[#D61C1C] font-medium">
-                            {menu.data.price ? formatPrice(menu.data.price) : '0원'}
+                            {menu.data.price ? formatPrice(menu.data.price) : "0원"}
                           </span>
                         </p>
                         {menu.data.category && (
@@ -320,8 +318,8 @@ export function MenuCSVImport({
         </div>
 
         <DialogFooter className="gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => onOpenChange(false)}
             className="min-w-[100px]"
             disabled={loading}
@@ -333,7 +331,7 @@ export function MenuCSVImport({
             disabled={loading || validCount === 0}
             className="min-w-[150px]"
           >
-            {loading ? '등록 중...' : `${validCount}개 메뉴 등록`}
+            {loading ? "등록 중..." : `${validCount}개 메뉴 등록`}
           </Button>
         </DialogFooter>
       </DialogContent>

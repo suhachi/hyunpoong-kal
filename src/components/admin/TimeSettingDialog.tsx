@@ -2,8 +2,8 @@
  * 시간제 판매 설정 다이얼로그
  */
 
-import { useState } from 'react';
-import { Menu } from '../../types/menu';
+import { useState } from "react";
+import { Menu } from "../../types/menu";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +11,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Checkbox } from '../ui/checkbox';
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Checkbox } from "../ui/checkbox";
 
 interface TimeSettingDialogProps {
   menu: Menu | null;
@@ -33,8 +33,8 @@ export function TimeSettingDialog({
   loading,
 }: TimeSettingDialogProps) {
   const [enabled, setEnabled] = useState(false);
-  const [startTime, setStartTime] = useState('11:00');
-  const [endTime, setEndTime] = useState('14:00');
+  const [startTime, setStartTime] = useState("11:00");
+  const [endTime, setEndTime] = useState("14:00");
 
   // 다이얼로그 열릴 때 초기값 설정
   const handleOpenChange = (newOpen: boolean) => {
@@ -45,8 +45,8 @@ export function TimeSettingDialog({
         setEndTime(menu.availableHours.end);
       } else {
         setEnabled(false);
-        setStartTime('11:00');
-        setEndTime('14:00');
+        setStartTime("11:00");
+        setEndTime("14:00");
       }
     }
     onOpenChange(newOpen);
@@ -72,9 +72,7 @@ export function TimeSettingDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>시간제 판매 설정</DialogTitle>
-            <DialogDescription>
-              {menu.name}의 판매 시간을 제한합니다
-            </DialogDescription>
+            <DialogDescription>{menu.name}의 판매 시간을 제한합니다</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -83,7 +81,7 @@ export function TimeSettingDialog({
               <Checkbox
                 id="enabled"
                 checked={enabled}
-                onCheckedChange={(checked) => setEnabled(checked as boolean)}
+                onCheckedChange={checked => setEnabled(checked as boolean)}
               />
               <Label htmlFor="enabled" className="cursor-pointer">
                 시간제 판매 사용
@@ -118,7 +116,11 @@ export function TimeSettingDialog({
 
                 <div className="bg-blue-50 border border-blue-200 rounded p-3">
                   <p className="text-xs text-blue-800">
-                    💡 <strong>{startTime} ~ {endTime}</strong> 시간대에만 주문이 가능합니다.
+                    💡{" "}
+                    <strong>
+                      {startTime} ~ {endTime}
+                    </strong>{" "}
+                    시간대에만 주문이 가능합니다.
                     <br />
                     시간 외에는 "시간외" 상태로 표시됩니다.
                   </p>
@@ -137,7 +139,7 @@ export function TimeSettingDialog({
               취소
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? '저장 중...' : '저장'}
+              {loading ? "저장 중..." : "저장"}
             </Button>
           </DialogFooter>
         </form>

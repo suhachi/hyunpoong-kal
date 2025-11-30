@@ -4,8 +4,8 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { loadKakaoMaps } from '../../lib/kakaoMaps';
+import { useEffect, useRef, useState } from "react";
+import { loadKakaoMaps } from "../../lib/kakaoMaps";
 
 type StoreLocationMapProps = {
   lat?: number | null;
@@ -28,7 +28,7 @@ export function StoreLocationMap({ lat, lng, height = 220 }: StoreLocationMapPro
     setError(null);
 
     loadKakaoMaps()
-      .then((kakao) => {
+      .then(kakao => {
         if (!isMounted || !containerRef.current) return;
 
         const center = new kakao.maps.LatLng(lat, lng);
@@ -50,9 +50,9 @@ export function StoreLocationMap({ lat, lng, height = 220 }: StoreLocationMapPro
         markerRef.current = marker;
         setLoading(false);
       })
-      .catch((err) => {
-        console.error('[StoreLocationMap] Failed to load map', err);
-        setError('지도를 불러오지 못했습니다.');
+      .catch(err => {
+        console.error("[StoreLocationMap] Failed to load map", err);
+        setError("지도를 불러오지 못했습니다.");
         setLoading(false);
       });
 
@@ -65,9 +65,7 @@ export function StoreLocationMap({ lat, lng, height = 220 }: StoreLocationMapPro
   if (!lat || !lng) {
     return (
       <div className="flex items-center justify-center py-6 border border-[#E5DDD5] rounded-md bg-[#F9F6F3]/50">
-        <p className="text-sm text-[#8B7355]">
-          지도 정보가 아직 등록되지 않았습니다.
-        </p>
+        <p className="text-sm text-[#8B7355]">지도 정보가 아직 등록되지 않았습니다.</p>
       </div>
     );
   }
@@ -96,4 +94,3 @@ export function StoreLocationMap({ lat, lng, height = 220 }: StoreLocationMapPro
     </div>
   );
 }
-

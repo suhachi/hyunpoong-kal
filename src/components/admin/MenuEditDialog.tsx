@@ -2,8 +2,8 @@
  * 메뉴 편집 다이얼로그 (가격/설명 수정)
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { Menu, MenuCategory, CATEGORY_LABELS } from '../../types/menu';
+import { useState, useEffect, useRef } from "react";
+import { Menu, MenuCategory, CATEGORY_LABELS } from "@/types/menu";
 import {
   Dialog,
   DialogContent,
@@ -11,55 +11,53 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
-import { formatPrice } from '../../lib/utils';
-import { toast } from 'sonner';
-import { Checkbox } from '../ui/checkbox';
-import { Clock } from 'lucide-react';
-import { uploadMenuImage, validateImageFile, deleteImageFromStorage } from '../../lib/storage';
-import { USE_FIREBASE } from '../../config/env';
-import { AdminMenuCustomOptionsEditor } from './AdminMenuCustomOptionsEditor';
-import type { CustomOption } from '../../types/menu';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatPrice } from "@/lib/utils";
+import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Clock } from "lucide-react";
+import { uploadMenuImage, validateImageFile, deleteImageFromStorage } from "@/lib/storage";
+import { USE_FIREBASE } from "@/config/env";
+import { AdminMenuCustomOptionsEditor } from "./AdminMenuCustomOptionsEditor";
+import type { CustomOption } from "@/types/menu";
 
 interface MenuEditDialogProps {
   menu: Menu | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; customOptions?: CustomOption[] | undefined }, reason: string) => void;
+  onSave: (
+    updates: {
+      name?: string;
+      category?: MenuCategory;
+      price?: number;
+      description?: string;
+      image?: string;
+      customOptions?: CustomOption[] | undefined;
+    },
+    reason: string,
+  ) => void;
   loading?: boolean;
 }
 
-export function MenuEditDialog({
-  menu,
-  open,
-  onOpenChange,
-  onSave,
-  loading,
-}: MenuEditDialogProps) {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState<MenuCategory>('noodle');
-  const [price, setPrice] = useState('');
-  const [description, setDescription] = useState('');
-  const [reason, setReason] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+export function MenuEditDialog({ menu, open, onOpenChange, onSave, loading }: MenuEditDialogProps) {
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<MenuCategory>("noodle");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [reason, setReason] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // 시간제 판매 설정
   const [timeLimitEnabled, setTimeLimitEnabled] = useState(false);
-  const [timeLimitStart, setTimeLimitStart] = useState('11:00');
-  const [timeLimitEnd, setTimeLimitEnd] = useState('14:00');
+  const [timeLimitStart, setTimeLimitStart] = useState("11:00");
+  const [timeLimitEnd, setTimeLimitEnd] = useState("14:00");
 
   // 커스텀 옵션 관리
   const [customOptions, setCustomOptions] = useState<CustomOption[]>([]);
@@ -70,9 +68,9 @@ export function MenuEditDialog({
       setName(menu.name);
       setCategory(menu.category);
       setPrice(menu.price.toString());
-      setDescription(menu.description || '');
-      setReason('');
-      setImageUrl(menu.image || '');
+      setDescription(menu.description || "");
+      setReason("");
+      setImageUrl(menu.image || "");
       setImageFile(null);
       // 커스텀 옵션 초기화
       setCustomOptions(menu.customOptions || []);
@@ -83,28 +81,28 @@ export function MenuEditDialog({
         setTimeLimitEnd(menu.availableHours.end);
       } else {
         setTimeLimitEnabled(false);
-        setTimeLimitStart('11:00');
-        setTimeLimitEnd('14:00');
+        setTimeLimitStart("11:00");
+        setTimeLimitEnd("14:00");
       }
       // 파일 입력 필드 리셋
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     } else if (!open) {
       // 다이얼로그가 닫힐 때 상태 초기화
-      setName('');
-      setCategory('noodle');
-      setPrice('');
-      setDescription('');
-      setReason('');
-      setImageUrl('');
+      setName("");
+      setCategory("noodle");
+      setPrice("");
+      setDescription("");
+      setReason("");
+      setImageUrl("");
       setImageFile(null);
       setCustomOptions([]);
       setTimeLimitEnabled(false);
-      setTimeLimitStart('11:00');
-      setTimeLimitEnd('14:00');
+      setTimeLimitStart("11:00");
+      setTimeLimitEnd("14:00");
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   }, [open, menu?.menuId]);
@@ -119,7 +117,7 @@ export function MenuEditDialog({
     const file = e.target.files?.[0];
     if (file) {
       // 이전 blob URL 정리
-      if (imageUrl && imageUrl.startsWith('blob:')) {
+      if (imageUrl && imageUrl.startsWith("blob:")) {
         URL.revokeObjectURL(imageUrl);
       }
       setImageFile(file);
@@ -132,18 +130,18 @@ export function MenuEditDialog({
     // 파일 검증
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      throw new Error(validation.error || '이미지 파일 검증에 실패했습니다.');
+      throw new Error(validation.error || "이미지 파일 검증에 실패했습니다.");
     }
 
     if (USE_FIREBASE && menu?.menuId) {
       // Firebase Storage에 업로드 (기존 이미지 삭제는 나중에 처리)
       try {
         const result = await uploadMenuImage(file, menu.menuId);
-        console.log('[MenuEditDialog] Image uploaded to Firebase Storage:', result.path);
+        console.log("[MenuEditDialog] Image uploaded to Firebase Storage:", result.path);
         return result.url;
       } catch (error: any) {
-        console.error('[MenuEditDialog] Firebase Storage upload failed:', error);
-        throw new Error(error.message || '이미지 업로드에 실패했습니다.');
+        console.error("[MenuEditDialog] Firebase Storage upload failed:", error);
+        throw new Error(error.message || "이미지 업로드에 실패했습니다.");
       }
     } else {
       // Mock 모드 또는 menuId가 없는 경우: Base64로 변환
@@ -154,7 +152,7 @@ export function MenuEditDialog({
           resolve(base64String);
         };
         reader.onerror = () => {
-          reject(new Error('이미지 읽기에 실패했습니다'));
+          reject(new Error("이미지 읽기에 실패했습니다"));
         };
         reader.readAsDataURL(file);
       });
@@ -168,7 +166,15 @@ export function MenuEditDialog({
       return;
     }
 
-    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null; customOptions?: CustomOption[] | undefined } = {};
+    const updates: {
+      name?: string;
+      category?: MenuCategory;
+      price?: number;
+      description?: string;
+      image?: string;
+      availableHours?: { start: string; end: string } | null;
+      customOptions?: CustomOption[] | undefined;
+    } = {};
 
     // 메뉴명 변경
     if (name.trim() !== menu.name) {
@@ -190,20 +196,20 @@ export function MenuEditDialog({
     }
 
     // 이미지 변경 감지 및 저장
-    const currentImageUrl = menu.image || '';
+    const currentImageUrl = menu.image || "";
     const imageUrlChanged = imageUrl && imageUrl !== currentImageUrl;
-    
+
     if (imageFile) {
       // 파일이 선택된 경우 업로드 후 URL 저장
       try {
         const uploadedUrl = await uploadImage(imageFile);
         updates.image = uploadedUrl;
       } catch (error) {
-        console.error('Image upload failed:', error);
-        toast.error('이미지 업로드에 실패했습니다');
+        console.error("Image upload failed:", error);
+        toast.error("이미지 업로드에 실패했습니다");
         return; // 업로드 실패 시 저장 중단
       }
-    } else if (imageUrlChanged && !imageUrl.startsWith('blob:')) {
+    } else if (imageUrlChanged && !imageUrl.startsWith("blob:")) {
       // 파일은 없지만 URL이 변경되었고, blob URL이 아닌 경우 (실제 URL)
       updates.image = imageUrl;
     }
@@ -211,12 +217,12 @@ export function MenuEditDialog({
     // 시간제 판매 설정 변경 감지
     const currentHours = menu.availableHours;
     const newHours = timeLimitEnabled ? { start: timeLimitStart, end: timeLimitEnd } : null;
-    const hoursChanged = 
-      (currentHours?.start !== newHours?.start) ||
-      (currentHours?.end !== newHours?.end) ||
+    const hoursChanged =
+      currentHours?.start !== newHours?.start ||
+      currentHours?.end !== newHours?.end ||
       (currentHours && !newHours) ||
       (!currentHours && newHours);
-    
+
     if (hoursChanged) {
       updates.availableHours = newHours;
     }
@@ -224,10 +230,24 @@ export function MenuEditDialog({
     // 커스텀 옵션 변경 감지
     const currentCustomOptions = menu.customOptions || [];
     const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
-    const customOptionsChanged = 
-      JSON.stringify(currentCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity }))) !==
-      JSON.stringify(validCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity })));
-    
+    const customOptionsChanged =
+      JSON.stringify(
+        currentCustomOptions.map(opt => ({
+          id: opt.id,
+          name: opt.name,
+          price: opt.price,
+          quantity: opt.quantity,
+        })),
+      ) !==
+      JSON.stringify(
+        validCustomOptions.map(opt => ({
+          id: opt.id,
+          name: opt.name,
+          price: opt.price,
+          quantity: opt.quantity,
+        })),
+      );
+
     if (customOptionsChanged) {
       updates.customOptions = validCustomOptions.length > 0 ? validCustomOptions : undefined;
     }
@@ -243,9 +263,23 @@ export function MenuEditDialog({
 
   const currentCustomOptions = menu.customOptions || [];
   const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
-  const customOptionsChanged = 
-    JSON.stringify(currentCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity }))) !==
-    JSON.stringify(validCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity })));
+  const customOptionsChanged =
+    JSON.stringify(
+      currentCustomOptions.map(opt => ({
+        id: opt.id,
+        name: opt.name,
+        price: opt.price,
+        quantity: opt.quantity,
+      })),
+    ) !==
+    JSON.stringify(
+      validCustomOptions.map(opt => ({
+        id: opt.id,
+        name: opt.name,
+        price: opt.price,
+        quantity: opt.quantity,
+      })),
+    );
 
   const hasChanges =
     name.trim() !== menu.name ||
@@ -262,9 +296,7 @@ export function MenuEditDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>메뉴 수정</DialogTitle>
-            <DialogDescription>
-              메뉴명, 가격, 설명, 사진을 수정합니다
-            </DialogDescription>
+            <DialogDescription>메뉴명, 가격, 설명, 사진을 수정합니다</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -281,7 +313,7 @@ export function MenuEditDialog({
               />
               {name.trim() !== menu.name && (
                 <p className="text-xs text-[#F37021]">
-                  {menu.name} → {name.trim() || '(이름 없음)'}
+                  {menu.name} → {name.trim() || "(이름 없음)"}
                 </p>
               )}
             </div>
@@ -289,7 +321,7 @@ export function MenuEditDialog({
             {/* 카테고리 */}
             <div className="space-y-2">
               <Label htmlFor="category">카테고리</Label>
-              <Select value={category} onValueChange={(value) => setCategory(value as MenuCategory)}>
+              <Select value={category} onValueChange={value => setCategory(value as MenuCategory)}>
                 <SelectTrigger id="category">
                   <SelectValue />
                 </SelectTrigger>
@@ -313,9 +345,18 @@ export function MenuEditDialog({
               <Label htmlFor="image">사진</Label>
               <div className="flex items-center gap-4">
                 {imageUrl ? (
-                  <img src={imageUrl} alt="미리보기" className="w-20 h-20 rounded object-cover border" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                  <img
+                    src={imageUrl}
+                    alt="미리보기"
+                    className="w-20 h-20 rounded object-cover border"
+                    onError={e => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
                 ) : (
-                  <div className="w-20 h-20 rounded bg-gray-100 flex items-center justify-center text-gray-400">사진 없음</div>
+                  <div className="w-20 h-20 rounded bg-gray-100 flex items-center justify-center text-gray-400">
+                    사진 없음
+                  </div>
                 )}
                 <input
                   ref={fileInputRef}
@@ -358,9 +399,7 @@ export function MenuEditDialog({
                 maxLength={200}
                 placeholder="메뉴 설명을 입력하세요"
               />
-              <p className="text-xs text-gray-500 text-right">
-                {description.length}/200자
-              </p>
+              <p className="text-xs text-gray-500 text-right">{description.length}/200자</p>
             </div>
 
             {/* 시간제 판매 설정 */}
@@ -373,7 +412,7 @@ export function MenuEditDialog({
                 <Checkbox
                   id="timeLimitEnabled"
                   checked={timeLimitEnabled}
-                  onCheckedChange={(checked) => setTimeLimitEnabled(checked as boolean)}
+                  onCheckedChange={checked => setTimeLimitEnabled(checked as boolean)}
                 />
                 <Label htmlFor="timeLimitEnabled" className="cursor-pointer">
                   시간제 판매 사용
@@ -403,17 +442,18 @@ export function MenuEditDialog({
               )}
               {timeLimitEnabled && (
                 <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-800">
-                  💡 <strong>{timeLimitStart} ~ {timeLimitEnd}</strong> 시간대에만 주문이 가능합니다.
+                  💡{" "}
+                  <strong>
+                    {timeLimitStart} ~ {timeLimitEnd}
+                  </strong>{" "}
+                  시간대에만 주문이 가능합니다.
                 </div>
               )}
             </div>
 
             {/* 커스텀 옵션 관리 */}
             <div className="space-y-2">
-              <AdminMenuCustomOptionsEditor
-                value={customOptions}
-                onChange={setCustomOptions}
-              />
+              <AdminMenuCustomOptionsEditor value={customOptions} onChange={setCustomOptions} />
             </div>
 
             {/* 변경 사유 */}
@@ -439,11 +479,8 @@ export function MenuEditDialog({
             >
               취소
             </Button>
-            <Button
-              type="submit"
-              disabled={!hasChanges || loading}
-            >
-              {loading ? '저장 중...' : '저장'}
+            <Button type="submit" disabled={!hasChanges || loading}>
+              {loading ? "저장 중..." : "저장"}
             </Button>
           </DialogFooter>
         </form>

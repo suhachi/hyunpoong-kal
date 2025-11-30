@@ -3,14 +3,14 @@
  * 메뉴 등록/수정 다이얼로그에서 공통으로 사용
  */
 
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Card, CardContent } from '../ui/card';
-import { Plus, X } from 'lucide-react';
-import { formatPrice } from '../../lib/utils';
-import type { CustomOption } from '../../types/menu';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, X } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
+import type { CustomOption } from "@/types/menu";
 
 interface AdminMenuCustomOptionsEditorProps {
   value: CustomOption[];
@@ -27,7 +27,7 @@ export function AdminMenuCustomOptionsEditor({
   const handleAddCustomOption = () => {
     const newOption: CustomOption = {
       id: `option-${Date.now()}`,
-      name: '',
+      name: "",
       price: 0,
       quantity: 1,
     };
@@ -44,10 +44,12 @@ export function AdminMenuCustomOptionsEditor({
   };
 
   // 옵션 업데이트
-  const handleUpdateCustomOption = (id: string, field: keyof CustomOption, value: string | number) => {
-    const next = customOptions.map(opt =>
-      opt.id === id ? { ...opt, [field]: value } : opt
-    );
+  const handleUpdateCustomOption = (
+    id: string,
+    field: keyof CustomOption,
+    value: string | number,
+  ) => {
+    const next = customOptions.map(opt => (opt.id === id ? { ...opt, [field]: value } : opt));
     setCustomOptions(next);
     // 빈 이름 필터링 후 onChange 호출
     const validOptions = next.filter(opt => opt.name.trim().length > 0);
@@ -58,12 +60,7 @@ export function AdminMenuCustomOptionsEditor({
     <div>
       <div className="flex items-center justify-between mb-3">
         <Label>메뉴 옵션</Label>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddCustomOption}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={handleAddCustomOption}>
           <Plus className="w-4 h-4 mr-1" />
           옵션 추가
         </Button>
@@ -88,9 +85,7 @@ export function AdminMenuCustomOptionsEditor({
                         type="text"
                         placeholder="예: 곱빼기"
                         value={option.name}
-                        onChange={e =>
-                          handleUpdateCustomOption(option.id, 'name', e.target.value)
-                        }
+                        onChange={e => handleUpdateCustomOption(option.id, "name", e.target.value)}
                         className="mt-1"
                       />
                     </div>
@@ -106,8 +101,8 @@ export function AdminMenuCustomOptionsEditor({
                         onChange={e =>
                           handleUpdateCustomOption(
                             option.id,
-                            'price',
-                            parseInt(e.target.value) || 0
+                            "price",
+                            parseInt(e.target.value) || 0,
                           )
                         }
                         min="0"
@@ -126,8 +121,8 @@ export function AdminMenuCustomOptionsEditor({
                         onChange={e =>
                           handleUpdateCustomOption(
                             option.id,
-                            'quantity',
-                            parseInt(e.target.value) || 1
+                            "quantity",
+                            parseInt(e.target.value) || 1,
                           )
                         }
                         min="1"
@@ -153,4 +148,3 @@ export function AdminMenuCustomOptionsEditor({
     </div>
   );
 }
-

@@ -4,8 +4,8 @@
  * Phase 2-6: 목록/검색/필터/품절 토글/시간제 설정/가격·설명 수정
  */
 
-import { useState, useEffect } from 'react';
-import { Menu, MenuCategory, MenuFilters, CATEGORY_LABELS } from '../../types/menu';
+import { useState, useEffect } from "react";
+import { Menu, MenuCategory, MenuFilters, CATEGORY_LABELS } from "@/types/menu";
 import {
   getMenus,
   getMenuStats,
@@ -15,26 +15,26 @@ import {
   updateMenuAvailableHours,
   createMenu,
   deleteMenu,
-} from '../../lib/admin/menus.api';
-import { useAuth } from '../../contexts/AuthContext';
-import { MenuTable } from '../../components/admin/MenuTable';
-import { MenuEditDialog } from '../../components/admin/MenuEditDialog';
-import { MenuCreateDialog } from '../../components/admin/MenuCreateDialog';
-import { MenuCSVImport } from '../../components/admin/MenuCSVImport';
-import { TimeSettingDialog } from '../../components/admin/TimeSettingDialog';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
+} from "@/lib/admin/menus.api";
+import { useAuth } from "@/contexts/AuthContext";
+import { MenuTable } from "@/components/admin/MenuTable";
+import { MenuEditDialog } from "@/components/admin/MenuEditDialog";
+import { MenuCreateDialog } from "@/components/admin/MenuCreateDialog";
+import { MenuCSVImport } from "@/components/admin/MenuCSVImport";
+import { TimeSettingDialog } from "@/components/admin/TimeSettingDialog";
+import { StatCard } from "@/components/admin/common/StatCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { Search, RefreshCw, Plus, Upload } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Search, RefreshCw, Plus, Upload } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,15 +44,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 export function AdminMenus() {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [stats, setStats] = useState<MenuStats | null>(null);
   const [filters, setFilters] = useState<MenuFilters>({
-    category: 'all',
-    search: '',
-    sortBy: 'order',
+    category: "all",
+    search: "",
+    sortBy: "order",
     availableOnly: false,
   });
   const [loading, setLoading] = useState(true);
@@ -85,15 +85,12 @@ export function AdminMenus() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [menusData, statsData] = await Promise.all([
-        getMenus(filters),
-        getMenuStats(),
-      ]);
+      const [menusData, statsData] = await Promise.all([getMenus(filters), getMenuStats()]);
       setMenus(menusData);
       setStats(statsData);
     } catch (error) {
-      console.error('Failed to load menus:', error);
-      toast.error('메뉴 목록을 불러오는데 실패했습니다');
+      console.error("Failed to load menus:", error);
+      toast.error("메뉴 목록을 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -109,22 +106,18 @@ export function AdminMenus() {
 
     setActionLoading(true);
     try {
-      const updated = await toggleMenuAvailability(menuId, user.uid, user.displayName || '관리자');
+      const updated = await toggleMenuAvailability(menuId, user.uid, user.displayName || "관리자");
 
       // UI 즉시 반영
-      setMenus(prev =>
-        prev.map(m => m.menuId === menuId ? updated : m)
-      );
+      setMenus(prev => prev.map(m => (m.menuId === menuId ? updated : m)));
 
-      toast.success(
-        updated.isAvailable ? '판매를 재개했습니다' : '품절 처리했습니다'
-      );
+      toast.success(updated.isAvailable ? "판매를 재개했습니다" : "품절 처리했습니다");
 
       // 통계 갱신
       loadData();
     } catch (error: any) {
-      console.error('Failed to toggle availability:', error);
-      toast.error(error.message || '상태 변경에 실패했습니다');
+      console.error("Failed to toggle availability:", error);
+      toast.error(error.message || "상태 변경에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -137,20 +130,27 @@ export function AdminMenus() {
   };
 
   const handleSaveEdit = async (
-    updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null },
-    reason: string
+    updates: {
+      name?: string;
+      category?: MenuCategory;
+      price?: number;
+      description?: string;
+      image?: string;
+      availableHours?: { start: string; end: string } | null;
+    },
+    reason: string,
   ) => {
     if (!user || !editingMenu) return;
 
     setActionLoading(true);
     try {
       // availableHours가 있으면 별도로 업데이트
-      if ('availableHours' in updates) {
+      if ("availableHours" in updates) {
         await updateMenuAvailableHours(
           editingMenu.menuId,
           updates.availableHours || null,
           user.uid,
-          user.name || '관리자'
+          user.name || "관리자",
         );
         // availableHours를 updates에서 제거
         const { availableHours, ...menuUpdates } = updates;
@@ -159,29 +159,23 @@ export function AdminMenus() {
             editingMenu.menuId,
             menuUpdates,
             user.uid,
-            user.name || '관리자',
-            reason
+            user.name || "관리자",
+            reason,
           );
         }
       } else {
-        await updateMenu(
-          editingMenu.menuId,
-          updates,
-          user.uid,
-          user.name || '관리자',
-          reason
-        );
+        await updateMenu(editingMenu.menuId, updates, user.uid, user.name || "관리자", reason);
       }
 
       // 데이터 다시 로드하여 최신 상태 반영
       await loadData();
 
-      toast.success('메뉴 정보를 수정했습니다');
+      toast.success("메뉴 정보를 수정했습니다");
       setEditingMenu(null);
       setEditDialogOpen(false);
     } catch (error: any) {
-      console.error('Failed to update menu:', error);
-      toast.error(error.message || '메뉴 수정에 실패했습니다');
+      console.error("Failed to update menu:", error);
+      toast.error(error.message || "메뉴 수정에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -193,9 +187,7 @@ export function AdminMenus() {
     setTimeDialogOpen(true);
   };
 
-  const handleSaveTimeLimit = async (
-    hours: { start: string; end: string } | null
-  ) => {
+  const handleSaveTimeLimit = async (hours: { start: string; end: string } | null) => {
     if (!user || !timeSettingMenu) return;
 
     setActionLoading(true);
@@ -204,25 +196,21 @@ export function AdminMenus() {
         timeSettingMenu.menuId,
         hours,
         user.uid,
-        user.name
+        user.name,
       );
 
       // UI 즉시 반영
-      setMenus(prev =>
-        prev.map(m => m.menuId === timeSettingMenu.menuId ? updated : m)
-      );
+      setMenus(prev => prev.map(m => (m.menuId === timeSettingMenu.menuId ? updated : m)));
 
-      toast.success(
-        hours ? '시간제 판매를 설정했습니다' : '시간제 판매를 해제했습니다'
-      );
+      toast.success(hours ? "시간제 판매를 설정했습니다" : "시간제 판매를 해제했습니다");
       setTimeDialogOpen(false);
       setTimeSettingMenu(null);
 
       // 통계 갱신
       loadData();
     } catch (error: any) {
-      console.error('Failed to update time limit:', error);
-      toast.error(error.message || '시간제 설정에 실패했습니다');
+      console.error("Failed to update time limit:", error);
+      toast.error(error.message || "시간제 설정에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -230,17 +218,13 @@ export function AdminMenus() {
 
   // 메뉴 생성
   const handleCreateMenu = async (menuData: Partial<Menu>) => {
-
     if (!user) {
-      console.error('[handleCreateMenu] No user found');
+      console.error("[handleCreateMenu] No user found");
       return;
     }
 
-
     try {
-
-      const newMenu = await createMenu(menuData, user.uid, user.displayName || '관리자');
-
+      const newMenu = await createMenu(menuData, user.uid, user.displayName || "관리자");
 
       // UI 즉시 반영 (최상단 추가)
       setMenus(prev => [newMenu, ...prev]);
@@ -250,17 +234,17 @@ export function AdminMenus() {
       loadData();
 
       // Undo 토스트 (5초)
-      toast.success('메뉴가 등록되었습니다', {
+      toast.success("메뉴가 등록되었습니다", {
         duration: 5000,
         action: {
-          label: '취소',
+          label: "취소",
           onClick: () => handleUndoCreate(newMenu.menuId),
         },
       });
     } catch (error: any) {
       // 에러 메시지는 createMenu에서 이미 명확하게 설정됨
-      console.error('[handleCreateMenu] Menu creation failed:', error);
-      toast.error(error.message || '메뉴 등록에 실패했습니다');
+      console.error("[handleCreateMenu] Menu creation failed:", error);
+      toast.error(error.message || "메뉴 등록에 실패했습니다");
     }
   };
 
@@ -269,19 +253,19 @@ export function AdminMenus() {
     if (!user) return;
 
     try {
-      await deleteMenu(menuId, user.uid, user.displayName || '관리자');
+      await deleteMenu(menuId, user.uid, user.displayName || "관리자");
 
       // UI에서 제거
       setMenus(prev => prev.filter(m => m.menuId !== menuId));
       setLastCreatedMenuId(null);
 
-      toast.success('메뉴 등록이 취소되었습니다');
+      toast.success("메뉴 등록이 취소되었습니다");
 
       // 통계 갱신
       loadData();
     } catch (error: any) {
-      console.error('Failed to undo create:', error);
-      toast.error(error.message || '취소에 실패했습니다');
+      console.error("Failed to undo create:", error);
+      toast.error(error.message || "취소에 실패했습니다");
     }
   };
 
@@ -297,12 +281,12 @@ export function AdminMenus() {
 
     setActionLoading(true);
     try {
-      await deleteMenu(deletingMenuId, user.uid, user.displayName || '관리자');
+      await deleteMenu(deletingMenuId, user.uid, user.displayName || "관리자");
 
       // UI에서 제거
       setMenus(prev => prev.filter(m => m.menuId !== deletingMenuId));
 
-      toast.success('메뉴가 삭제되었습니다');
+      toast.success("메뉴가 삭제되었습니다");
 
       // 통계 갱신
       loadData();
@@ -311,8 +295,8 @@ export function AdminMenus() {
       setDeleteDialogOpen(false);
       setDeletingMenuId(null);
     } catch (error: any) {
-      console.error('Failed to delete menu:', error);
-      toast.error(error.message || '메뉴 삭제에 실패했습니다');
+      console.error("Failed to delete menu:", error);
+      toast.error(error.message || "메뉴 삭제에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -326,10 +310,10 @@ export function AdminMenus() {
 
     for (const menuData of menus) {
       try {
-        const newMenu = await createMenu(menuData, user.uid, user.displayName || '관리자');
+        const newMenu = await createMenu(menuData, user.uid, user.displayName || "관리자");
         createdMenus.push(newMenu);
       } catch (error) {
-        console.error('Failed to create menu:', error);
+        console.error("Failed to create menu:", error);
       }
     }
 
@@ -346,9 +330,7 @@ export function AdminMenus() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#333] mb-2">메뉴 관리</h1>
-          <p className="text-[#8B7355]">
-            메뉴 정보를 관리하고 품절 상태를 변경하세요
-          </p>
+          <p className="text-[#8B7355]">메뉴 정보를 관리하고 품절 상태를 변경하세요</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setCsvImportOpen(true)}>
@@ -365,23 +347,14 @@ export function AdminMenus() {
       {/* 통계 카드 */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            title="전체 메뉴"
-            value={stats.total}
-            subtitle="등록된 메뉴"
-          />
+          <StatCard title="전체 메뉴" value={stats.total} subtitle="등록된 메뉴" />
           <StatCard
             title="판매 중"
             value={stats.available}
             subtitle="현재 주문 가능"
             variant="success"
           />
-          <StatCard
-            title="품절"
-            value={stats.soldout}
-            subtitle="일시 품절"
-            variant="warning"
-          />
+          <StatCard title="품절" value={stats.soldout} subtitle="일시 품절" variant="warning" />
           <StatCard
             title="시간외"
             value={stats.timeLimited}
@@ -395,9 +368,9 @@ export function AdminMenus() {
       <div className="space-y-4">
         {/* 카테고리 탭 */}
         <Tabs
-          value={filters.category || 'all'}
-          onValueChange={(value) =>
-            setFilters(prev => ({ ...prev, category: value as MenuCategory | 'all' }))
+          value={filters.category || "all"}
+          onValueChange={value =>
+            setFilters(prev => ({ ...prev, category: value as MenuCategory | "all" }))
           }
         >
           <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
@@ -417,19 +390,17 @@ export function AdminMenus() {
             <Input
               placeholder="메뉴명, 설명, 태그 검색..."
               value={filters.search}
-              onChange={(e) =>
-                setFilters(prev => ({ ...prev, search: e.target.value }))
-              }
+              onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="pl-10"
             />
           </div>
 
           <Select
             value={filters.sortBy}
-            onValueChange={(value) =>
+            onValueChange={value =>
               setFilters(prev => ({
                 ...prev,
-                sortBy: value as MenuFilters['sortBy'],
+                sortBy: value as MenuFilters["sortBy"],
               }))
             }
           >
@@ -444,13 +415,8 @@ export function AdminMenus() {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={loadData}
-            disabled={loading}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" size="icon" onClick={loadData} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
@@ -513,7 +479,7 @@ export function AdminMenus() {
               disabled={actionLoading}
               className="bg-red-600 hover:bg-red-700"
             >
-              {actionLoading ? '삭제 중...' : '삭제'}
+              {actionLoading ? "삭제 중..." : "삭제"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

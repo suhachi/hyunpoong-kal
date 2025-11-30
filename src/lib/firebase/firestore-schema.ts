@@ -2,15 +2,28 @@
  * Firestore 스키마 정의 및 경로 헬퍼
  * v1.0: 메뉴/주문 중심 Firestore 스키마 1차 구현
  * v1.0 STEP 5: 포인트/쿠폰/리뷰 스키마 확장
- * 
+ *
  * 이 파일은 Firestore 컬렉션 경로와 문서 타입을 정의하여,
  * 이후 STEP 3~5에서 API 구현 시 재사용할 수 있는 스키마 레이어를 제공합니다.
  */
 
-import { collection, doc, type Firestore, type Timestamp, type DocumentReference, type CollectionReference } from 'firebase/firestore';
-import { db } from '../firebase';
-import type { OrderStatus, PaymentMethod, PaymentStatus, OrderItem, DeliveryAddress } from '../../types/order';
-import type { MenuCategory, MenuBadge, CustomOption } from '../../types/menu';
+import {
+  collection,
+  doc,
+  type Firestore,
+  type Timestamp,
+  type DocumentReference,
+  type CollectionReference,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import type {
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+  OrderItem,
+  DeliveryAddress,
+} from "../../types/order";
+import type { MenuCategory, MenuBadge, CustomOption } from "../../types/menu";
 
 // ============================================================================
 // Firestore 문서 타입 정의
@@ -90,7 +103,7 @@ export interface OrderDoc {
   orderId: string;
   storeId: string;
   userId: string; // Auth UID
-  
+
   items: Array<{
     menuId: string;
     menuName: string;
@@ -104,21 +117,21 @@ export interface OrderDoc {
     price: number; // 단가
     subtotal: number; // 수량 * 단가 + 옵션
   }>;
-  
+
   subtotal: number; // 상품 금액 합계
   discount: number; // 할인 금액
   couponId?: string; // 사용한 쿠폰 ID
   deliveryFee: number; // 배달비
   finalAmount: number; // 최종 결제 금액
-  
-  deliveryType: 'delivery' | 'pickup';
+
+  deliveryType: "delivery" | "pickup";
   deliveryAddress?: DeliveryAddress;
   phone: string; // 주문자 전화번호
   email?: string; // 주문자 이메일
   requests?: string; // 요청 사항
-  
+
   status: OrderStatus;
-  
+
   payment: {
     method: PaymentMethod;
     status: PaymentStatus;
@@ -131,7 +144,7 @@ export interface OrderDoc {
     canceledAt?: Timestamp;
     cancelReason?: string;
   };
-  
+
   timeline: {
     pending?: Timestamp; // 접수 대기
     accepted?: Timestamp; // 접수 확인
@@ -140,16 +153,16 @@ export interface OrderDoc {
     completed?: Timestamp; // 완료
     canceled?: Timestamp; // 취소
   };
-  
+
   cashReceipt?: {
-    type: 'personal' | 'business';
+    type: "personal" | "business";
     number: string;
   };
   taxInvoice?: {
     businessNumber: string;
     companyName: string;
   };
-  
+
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -171,7 +184,7 @@ export interface PointsBalanceDoc {
 /**
  * 포인트 거래 타입
  */
-export type PointsTransactionType = 'earn' | 'spend' | 'expire' | 'adjust';
+export type PointsTransactionType = "earn" | "spend" | "expire" | "adjust";
 
 /**
  * 포인트 거래 문서 타입
@@ -185,7 +198,7 @@ export interface PointsTransactionDoc {
   type: PointsTransactionType;
   amount: number; // earn: +, spend/expire: -, adjust: ±
   ref: {
-    kind: 'order' | 'review' | 'admin';
+    kind: "order" | "review" | "admin";
     id: string; // orderId, reviewId, etc.
   };
   note: string;
@@ -196,7 +209,7 @@ export interface PointsTransactionDoc {
 /**
  * 쿠폰 타입
  */
-export type CouponType = 'percentage' | 'fixed';
+export type CouponType = "percentage" | "fixed";
 
 /**
  * 쿠폰 문서 타입
@@ -219,7 +232,7 @@ export interface CouponDoc {
   usageCount: number;
   userLimit?: number;
   // 발급 대상 (신규)
-  targetType?: 'all' | 'user' | 'phone';
+  targetType?: "all" | "user" | "phone";
   targetUserId?: string;
   targetPhone?: string;
   createdAt: Timestamp;
@@ -264,8 +277,7 @@ export interface ReviewDoc {
  * stores 컬렉션 참조
  * @param dbInstance Firestore 인스턴스 (기본값: db)
  */
-export const storesCollection = (dbInstance: Firestore = db) =>
-  collection(dbInstance, 'stores');
+export const storesCollection = (dbInstance: Firestore = db) => collection(dbInstance, "stores");
 
 /**
  * 매장 문서 참조
@@ -281,7 +293,7 @@ export const storeDocRef = (storeId: string, dbInstance: Firestore = db) =>
  * @param dbInstance Firestore 인스턴스 (기본값: db)
  */
 export const storeMenusCollection = (storeId: string, dbInstance: Firestore = db) =>
-  collection(storeDocRef(storeId, dbInstance), 'menus');
+  collection(storeDocRef(storeId, dbInstance), "menus");
 
 /**
  * 매장 메뉴 문서 참조
@@ -298,7 +310,7 @@ export const storeMenuDocRef = (storeId: string, menuId: string, dbInstance: Fir
  * @param dbInstance Firestore 인스턴스 (기본값: db)
  */
 export const storeOrdersCollection = (storeId: string, dbInstance: Firestore = db) =>
-  collection(storeDocRef(storeId, dbInstance), 'orders');
+  collection(storeDocRef(storeId, dbInstance), "orders");
 
 /**
  * 매장 주문 문서 참조
@@ -314,8 +326,11 @@ export const storeOrderDocRef = (storeId: string, orderId: string, dbInstance: F
  * @param userId 사용자 ID
  * @param dbInstance Firestore 인스턴스 (기본값: db)
  */
-export function pointsBalanceDocRef(userId: string, dbInstance: Firestore = db): DocumentReference<PointsBalanceDoc> {
-  return doc(dbInstance, 'pointsBalances', userId) as DocumentReference<PointsBalanceDoc>;
+export function pointsBalanceDocRef(
+  userId: string,
+  dbInstance: Firestore = db,
+): DocumentReference<PointsBalanceDoc> {
+  return doc(dbInstance, "pointsBalances", userId) as DocumentReference<PointsBalanceDoc>;
 }
 
 /**
@@ -329,9 +344,9 @@ export function storePointsTransactionsCollection(
 ): CollectionReference<PointsTransactionDoc> {
   return collection(
     dbInstance,
-    'stores',
+    "stores",
     storeId,
-    'pointsTransactions',
+    "pointsTransactions",
   ) as CollectionReference<PointsTransactionDoc>;
 }
 
@@ -346,7 +361,10 @@ export function storePointsTransactionDocRef(
   txId: string,
   dbInstance: Firestore = db,
 ): DocumentReference<PointsTransactionDoc> {
-  return doc(storePointsTransactionsCollection(storeId, dbInstance), txId) as DocumentReference<PointsTransactionDoc>;
+  return doc(
+    storePointsTransactionsCollection(storeId, dbInstance),
+    txId,
+  ) as DocumentReference<PointsTransactionDoc>;
 }
 
 /**
@@ -358,12 +376,7 @@ export function storeCouponsCollection(
   storeId: string,
   dbInstance: Firestore = db,
 ): CollectionReference<CouponDoc> {
-  return collection(
-    dbInstance,
-    'stores',
-    storeId,
-    'coupons',
-  ) as CollectionReference<CouponDoc>;
+  return collection(dbInstance, "stores", storeId, "coupons") as CollectionReference<CouponDoc>;
 }
 
 /**
@@ -377,13 +390,7 @@ export function storeCouponDocRef(
   couponId: string,
   dbInstance: Firestore = db,
 ): DocumentReference<CouponDoc> {
-  return doc(
-    dbInstance,
-    'stores',
-    storeId,
-    'coupons',
-    couponId,
-  ) as DocumentReference<CouponDoc>;
+  return doc(dbInstance, "stores", storeId, "coupons", couponId) as DocumentReference<CouponDoc>;
 }
 
 /**
@@ -395,12 +402,7 @@ export function storeReviewsCollection(
   storeId: string,
   dbInstance: Firestore = db,
 ): CollectionReference<ReviewDoc> {
-  return collection(
-    dbInstance,
-    'stores',
-    storeId,
-    'reviews',
-  ) as CollectionReference<ReviewDoc>;
+  return collection(dbInstance, "stores", storeId, "reviews") as CollectionReference<ReviewDoc>;
 }
 
 /**
@@ -414,13 +416,7 @@ export function storeReviewDocRef(
   reviewId: string,
   dbInstance: Firestore = db,
 ): DocumentReference<ReviewDoc> {
-  return doc(
-    dbInstance,
-    'stores',
-    storeId,
-    'reviews',
-    reviewId,
-  ) as DocumentReference<ReviewDoc>;
+  return doc(dbInstance, "stores", storeId, "reviews", reviewId) as DocumentReference<ReviewDoc>;
 }
 
 // ============================================================================
@@ -433,11 +429,11 @@ export function storeReviewDocRef(
  */
 export function isValidOrderDoc(doc: Partial<OrderDoc>): doc is OrderDoc {
   return (
-    typeof doc.orderId === 'string' &&
-    typeof doc.storeId === 'string' &&
-    typeof doc.userId === 'string' &&
+    typeof doc.orderId === "string" &&
+    typeof doc.storeId === "string" &&
+    typeof doc.userId === "string" &&
     Array.isArray(doc.items) &&
-    typeof doc.finalAmount === 'number'
+    typeof doc.finalAmount === "number"
   );
 }
 
@@ -445,7 +441,7 @@ export function isValidOrderDoc(doc: Partial<OrderDoc>): doc is OrderDoc {
  * OrderDoc을 Order 도메인 타입으로 변환
  * v1.0 STEP 3: 주문 흐름 Firebase 전환
  */
-import type { Order } from '../../types/order';
+import type { Order } from "../../types/order";
 
 export function buildOrderFromDoc(orderId: string, doc: OrderDoc): Order {
   return {
@@ -504,10 +500,9 @@ export function buildOrderFromDoc(orderId: string, doc: OrderDoc): Order {
  */
 export function isValidMenuDoc(doc: Partial<MenuDoc>): doc is MenuDoc {
   return (
-    typeof doc.menuId === 'string' &&
-    typeof doc.storeId === 'string' &&
-    typeof doc.name === 'string' &&
-    typeof doc.price === 'number'
+    typeof doc.menuId === "string" &&
+    typeof doc.storeId === "string" &&
+    typeof doc.name === "string" &&
+    typeof doc.price === "number"
   );
 }
-

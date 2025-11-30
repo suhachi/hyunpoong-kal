@@ -1,6 +1,6 @@
 # Lib APIs - Full Source Code
 
-**Generated**: 2025-11-30-1717  
+**Generated**: 2025-11-30-1905  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -190,6 +190,13 @@ import type { Order, OrderStatus } from '../types/order';
  * @returns 생성된 주문 객체
  */
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
+  // 배달 주문 시 주소 검증 (절대 통과하지 않아야 함)
+  if (payload.deliveryType === 'delivery' && !payload.deliveryAddress) {
+    const error = new Error('배달 주문은 배달 주소가 필수입니다');
+    console.error('[createOrder] CRITICAL ERROR:', error);
+    throw error;
+  }
+
   if (!USE_FIREBASE) {
     // Mock 모드: localStorage 기반 repository 사용
     return await ordersRepository.createOrder(payload);
@@ -722,7 +729,18 @@ async function issueCouponMock(
 ): Promise<Coupon[]> {
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  const targetUsers = issue.targetUsers || ['user-001'];
+  // targetType에 따라 대상 사용자 결정
+  let targetUsers: string[] = [];
+  if (issue.targetType === 'user' && issue.targetUserId) {
+    targetUsers = [issue.targetUserId];
+  } else if (issue.targetType === 'phone') {
+    // 전화번호로 지정된 경우 Mock에서는 임시 사용자 ID 생성
+    targetUsers = ['user-phone-' + (issue.targetPhone || 'unknown')];
+  } else {
+    // 'all' 또는 기존 targetUsers 사용
+    targetUsers = issue.targetUsers || ['user-001'];
+  }
+
   const expiresAt = Date.now() + issue.expiryDays * 24 * 60 * 60 * 1000;
 
   const issued: Coupon[] = targetUsers.slice(0, issue.issueLimit || 999).map((uid, index) => {
@@ -838,8 +856,11 @@ function buildCouponDocFromEntity(params: {
   isActive: boolean;
   usageLimit?: number;
   userLimit?: number;
+  targetType?: 'all' | 'user' | 'phone';
+  targetUserId?: string;
+  targetPhone?: string;
 }): Omit<CouponDoc, 'createdAt' | 'updatedAt'> {
-  return {
+  const doc: Omit<CouponDoc, 'createdAt' | 'updatedAt'> = {
     couponId: params.couponId,
     storeId: params.storeId,
     code: params.code,
@@ -855,6 +876,19 @@ function buildCouponDocFromEntity(params: {
     usageCount: 0,
     userLimit: params.userLimit,
   };
+
+  // 발급 대상 정보 추가 (있는 경우만)
+  if (params.targetType) {
+    doc.targetType = params.targetType;
+  }
+  if (params.targetUserId) {
+    doc.targetUserId = params.targetUserId;
+  }
+  if (params.targetPhone) {
+    doc.targetPhone = params.targetPhone;
+  }
+
+  return doc;
 }
 
 /**
@@ -1069,7 +1103,11 @@ export async function issueCoupon(
       validUntil,
       isActive: true,
       usageLimit: issue.issueLimit,
-      userLimit: issue.targetUsers?.length,
+      userLimit: issue.targetType === 'user' ? 1 : issue.targetUsers?.length,
+      // 발급 대상 정보 저장
+      targetType: issue.targetType || 'all',
+      targetUserId: issue.targetUserId,
+      targetPhone: issue.targetPhone,
     });
 
     const docRef = await addDoc(colRef, {
@@ -2820,6 +2858,7 @@ export async function checkServiceWorkerStatus(): Promise<DiagnosticCheck> {
 
 /**
  * VAPID 키 확인
+ * 미설정과 실제 오류를 구분
  */
 export function checkVAPIDKey(): DiagnosticCheck {
   const vapidKey = getMetaEnv('VITE_FCM_VAPID_KEY');
@@ -2827,8 +2866,8 @@ export function checkVAPIDKey(): DiagnosticCheck {
   if (!vapidKey) {
     return {
       name: 'VAPID 키',
-      status: 'fail',
-      message: 'VITE_FCM_VAPID_KEY가 설정되지 않았습니다',
+      status: 'info', // 'fail' 대신 'info'로 변경하여 미설정 상태임을 명확히 표시
+      message: '아직 FCM 웹 푸시용 VAPID 키가 설정되지 않았습니다. Firebase 콘솔에서 키 생성 후 .env에 VITE_FCM_VAPID_KEY를 추가해 주세요.',
     };
   }
 
@@ -2938,11 +2977,22 @@ export async function runFCMDiagnostics(): Promise<DiagnosticResult> {
 
   const failCount = checks.filter(c => c.status === 'fail').length;
   const warningCount = checks.filter(c => c.status === 'warning').length;
+  const infoCount = checks.filter(c => c.status === 'info').length;
+
+  // overall 상태 결정: fail > warning > info > pass
+  let overall: 'pass' | 'info' | 'warning' | 'fail' = 'pass';
+  if (failCount > 0) {
+    overall = 'fail';
+  } else if (warningCount > 0) {
+    overall = 'warning';
+  } else if (infoCount > 0) {
+    overall = 'info';
+  }
 
   return {
     category: 'FCM 알림',
     checks,
-    overall: failCount > 0 ? 'fail' : warningCount > 0 ? 'warning' : 'pass',
+    overall,
   };
 }
 

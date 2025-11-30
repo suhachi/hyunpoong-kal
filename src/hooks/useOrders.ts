@@ -4,24 +4,24 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { getOrdersByUser, filterOrdersByStatus } from '../lib/orders.api';
-import type { Order, OrderStatus } from '../types/order';
+import { useState, useEffect, useCallback } from "react";
+import { getOrdersByUser, filterOrdersByStatus } from "../lib/orders.api";
+import type { Order, OrderStatus } from "../types/order";
 
 interface UseOrdersOptions {
   userId?: string;
   autoLoad?: boolean;
-  initialFilter?: OrderStatus | 'all';
+  initialFilter?: OrderStatus | "all";
 }
 
 export function useOrders(options: UseOrdersOptions = {}) {
-  const { userId, autoLoad = true, initialFilter = 'all' } = options;
+  const { userId, autoLoad = true, initialFilter = "all" } = options;
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [filter, setFilter] = useState<OrderStatus | 'all'>(initialFilter);
+  const [filter, setFilter] = useState<OrderStatus | "all">(initialFilter);
 
   // 주문 목록 로드
   const loadOrders = useCallback(async () => {
@@ -33,8 +33,8 @@ export function useOrders(options: UseOrdersOptions = {}) {
       const data = await getOrdersByUser(userId);
       setOrders(data);
     } catch (err) {
-      console.error('주문 목록 로딩 실패:', err);
-      setError(err instanceof Error ? err : new Error('주문 목록 로딩 실패'));
+      console.error("주문 목록 로딩 실패:", err);
+      setError(err instanceof Error ? err : new Error("주문 목록 로딩 실패"));
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ export function useOrders(options: UseOrdersOptions = {}) {
 
   // 필터 적용
   const applyFilter = useCallback(() => {
-    if (filter === 'all') {
+    if (filter === "all") {
       setFilteredOrders(orders);
     } else {
       const filtered = filterOrdersByStatus(orders, filter);

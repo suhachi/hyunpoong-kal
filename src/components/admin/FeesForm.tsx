@@ -2,13 +2,13 @@
  * 배달비/최소주문 설정 폼
  */
 
-import { DeliveryFee } from '../../types/settings';
-import { Card } from '../ui/card';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Plus, Trash2 } from 'lucide-react';
-import { formatPrice } from '../../lib/utils';
+import { DeliveryFee } from "../../types/settings";
+import { Card } from "../ui/card";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Plus, Trash2 } from "lucide-react";
+import { formatPrice } from "../../lib/utils";
 
 interface FeesFormProps {
   deliveryFees: DeliveryFee[];
@@ -47,9 +47,7 @@ export function FeesForm({
   };
 
   const handleFeeChange = (index: number, field: keyof DeliveryFee, value: number) => {
-    const updated = deliveryFees.map((fee, i) =>
-      i === index ? { ...fee, [field]: value } : fee
-    );
+    const updated = deliveryFees.map((fee, i) => (i === index ? { ...fee, [field]: value } : fee));
     onDeliveryFeesChange(updated);
   };
 
@@ -66,7 +64,7 @@ export function FeesForm({
                   <Input
                     type="number"
                     value={fee.minDistance}
-                    onChange={(e) => handleFeeChange(index, 'minDistance', Number(e.target.value))}
+                    onChange={e => handleFeeChange(index, "minDistance", Number(e.target.value))}
                     min="0"
                     step="0.5"
                     className="w-20"
@@ -75,7 +73,7 @@ export function FeesForm({
                   <Input
                     type="number"
                     value={fee.maxDistance}
-                    onChange={(e) => handleFeeChange(index, 'maxDistance', Number(e.target.value))}
+                    onChange={e => handleFeeChange(index, "maxDistance", Number(e.target.value))}
                     min="0"
                     step="0.5"
                     className="w-20"
@@ -85,7 +83,7 @@ export function FeesForm({
                   <Input
                     type="number"
                     value={fee.fee}
-                    onChange={(e) => handleFeeChange(index, 'fee', Number(e.target.value))}
+                    onChange={e => handleFeeChange(index, "fee", Number(e.target.value))}
                     min="0"
                     step="500"
                     className="w-28"
@@ -105,13 +103,7 @@ export function FeesForm({
               </div>
             ))}
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddFee}
-            className="mt-3"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={handleAddFee} className="mt-3">
             <Plus className="w-4 h-4 mr-2" />
             구간 추가
           </Button>
@@ -126,7 +118,7 @@ export function FeesForm({
             id="deliveryRadius"
             type="number"
             value={deliveryRadius}
-            onChange={(e) => onDeliveryRadiusChange(Number(e.target.value))}
+            onChange={e => onDeliveryRadiusChange(Number(e.target.value))}
             min="1"
             step="0.5"
             className="mt-2 w-32"
@@ -145,7 +137,7 @@ export function FeesForm({
             id="minDeliveryOrder"
             type="number"
             value={minDeliveryOrder}
-            onChange={(e) => onMinDeliveryOrderChange(Number(e.target.value))}
+            onChange={e => onMinDeliveryOrderChange(Number(e.target.value))}
             min="0"
             step="1000"
             className="mt-2 w-40"
@@ -164,7 +156,7 @@ export function FeesForm({
             id="minPickupOrder"
             type="number"
             value={minPickupOrder}
-            onChange={(e) => onMinPickupOrderChange(Number(e.target.value))}
+            onChange={e => onMinPickupOrderChange(Number(e.target.value))}
             min="0"
             step="1000"
             className="mt-2 w-40"

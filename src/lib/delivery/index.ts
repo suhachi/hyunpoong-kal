@@ -3,5 +3,5 @@
  * Phase 3-1: GPS Tracking
  */
 
-export { delivery, isDeliveryEnabled, currentProvider } from './provider';
-export { getAllMockTasks, subscribeMockTasks } from './providers/mock';
+export { delivery, isDeliveryEnabled, currentProvider } from "./provider";
+export { getAllMockTasks, subscribeMockTasks } from "./providers/mock";

@@ -4,13 +4,13 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { memo } from 'react';
-import { Card, CardContent } from '../ui/card';
-import { Button } from '../ui/button';
-import { ChevronRight } from 'lucide-react';
-import { OrderStatusBadge } from './OrderStatusBadge';
-import { formatPrice, formatDateTime } from '../../lib/utils';
-import type { Order } from '../../types/order';
+import { memo } from "react";
+import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
+import { ChevronRight } from "lucide-react";
+import { OrderStatusBadge } from "./OrderStatusBadge";
+import { formatPrice, formatDateTime } from "../../lib/utils";
+import type { Order } from "../../types/order";
 
 interface OrderCardProps {
   order: Order;
@@ -25,9 +25,9 @@ export const OrderCard = memo(function OrderCard({
   order,
   onClick,
   showAction = true,
-  actionLabel = '상세보기',
+  actionLabel = "상세보기",
   onAction,
-  className = '',
+  className = "",
 }: OrderCardProps) {
   const handleClick = () => {
     if (onClick) onClick();
@@ -61,9 +61,7 @@ export const OrderCard = memo(function OrderCard({
                 {order.items[0].menuName}
                 {order.items.length > 1 && ` 외 ${order.items.length - 1}개`}
               </p>
-              <p className="text-sm text-[#2E1C10]/60">
-                {formatDateTime(order.createdAt)}
-              </p>
+              <p className="text-sm text-[#2E1C10]/60">{formatDateTime(order.createdAt)}</p>
             </>
           )}
         </div>
@@ -76,11 +74,7 @@ export const OrderCard = memo(function OrderCard({
 
         {/* 액션 버튼 */}
         {showAction && (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleAction}
-          >
+          <Button variant="outline" className="w-full" onClick={handleAction}>
             {actionLabel}
             <ChevronRight className="ml-2 h-4 w-4" />
           </Button>

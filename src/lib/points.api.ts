@@ -2,12 +2,12 @@
  * 포인트 리워드 시스템 API
  * Phase 3-3: Points System
  * v1.0 STEP 5: Firebase 전환 + 트랜잭션 구현
- * 
+ *
  * Mock/Firebase 전환 가능
  */
 
-import { USE_FIREBASE, FEATURE_FLAGS, getEnv } from '../config/env';
-import { db } from './firebase';
+import { USE_FIREBASE, FEATURE_FLAGS, getEnv } from "../config/env";
+import { db } from "./firebase";
 import {
   pointsBalanceDocRef,
   storePointsTransactionsCollection,
@@ -15,7 +15,7 @@ import {
   type PointsBalanceDoc,
   type PointsTransactionDoc,
   type PointsTransactionType,
-} from './firebase/firestore-schema';
+} from "./firebase/firestore-schema";
 import {
   getDoc,
   setDoc,
@@ -29,7 +29,7 @@ import {
   doc,
   collection,
   type Timestamp,
-} from 'firebase/firestore';
+} from "firebase/firestore";
 import type {
   PointsLedger,
   PointsBalance,
@@ -37,7 +37,7 @@ import type {
   EarnPointsParams,
   SpendPointsParams,
   PointsPolicy,
-} from '../types/points';
+} from "../types/points";
 
 /**
  * 포인트 정책 (환경 변수 기반)
@@ -54,15 +54,15 @@ export const POINTS_POLICY: PointsPolicy = {
  * 만료일 계산
  */
 function calculateExpiryDate(): number {
-  return Date.now() + (POINTS_POLICY.expireDays * 24 * 60 * 60 * 1000);
+  return Date.now() + POINTS_POLICY.expireDays * 24 * 60 * 60 * 1000;
 }
 
 // ============================================================================
 // Mock 구현 (localStorage)
 // ============================================================================
 
-const STORAGE_KEY_LEDGER = 'points_ledger';
-const STORAGE_KEY_BALANCE = 'points_balance';
+const STORAGE_KEY_LEDGER = "points_ledger";
+const STORAGE_KEY_BALANCE = "points_balance";
 
 /**
  * Mock: 포인트 원장 저장
@@ -105,7 +105,7 @@ async function mockEarnPoints(params: EarnPointsParams): Promise<PointsLedger> {
   const newEntry: PointsLedger = {
     id: `pts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     uid: params.uid,
-    type: 'earn',
+    type: "earn",
     amount: params.amount,
     ref: params.ref,
     note: params.note,
@@ -141,7 +141,7 @@ async function mockSpendPoints(params: SpendPointsParams): Promise<PointsLedger>
 
   // 잔액 부족 체크
   if (currentBalance < params.amount) {
-    throw new Error('포인트 잔액이 부족합니다');
+    throw new Error("포인트 잔액이 부족합니다");
   }
 
   // 최소 사용 금액 체크
@@ -153,7 +153,7 @@ async function mockSpendPoints(params: SpendPointsParams): Promise<PointsLedger>
   const newEntry: PointsLedger = {
     id: `pts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     uid: params.uid,
-    type: 'spend',
+    type: "spend",
     amount: -params.amount,
     ref: params.ref,
     note: params.note,
@@ -189,9 +189,7 @@ async function mockGetBalance(uid: string): Promise<number> {
  */
 async function mockGetHistory(uid: string): Promise<PointsHistory> {
   const ledger = mockLoadLedger();
-  const userLedger = ledger
-    .filter((entry) => entry.uid === uid)
-    .sort((a, b) => b.at - a.at);
+  const userLedger = ledger.filter(entry => entry.uid === uid).sort((a, b) => b.at - a.at);
 
   const balance = await mockGetBalance(uid);
 
@@ -200,8 +198,8 @@ async function mockGetHistory(uid: string): Promise<PointsHistory> {
   const expiringMap = new Map<number, number>();
 
   userLedger
-    .filter((entry) => entry.type === 'earn' && entry.expiresAt && entry.expiresAt > now)
-    .forEach((entry) => {
+    .filter(entry => entry.type === "earn" && entry.expiresAt && entry.expiresAt > now)
+    .forEach(entry => {
       if (entry.expiresAt) {
         const existing = expiringMap.get(entry.expiresAt) || 0;
         expiringMap.set(entry.expiresAt, existing + entry.amount);
@@ -229,11 +227,11 @@ async function mockExpirePoints(): Promise<void> {
 
   // 만료 대상 찾기
   const toExpire = ledger.filter(
-    (entry) =>
-      entry.type === 'earn' &&
+    entry =>
+      entry.type === "earn" &&
       entry.expiresAt &&
       entry.expiresAt <= now &&
-      !ledger.some((e) => e.ref?.kind === 'admin' && e.ref?.id === entry.id)
+      !ledger.some(e => e.ref?.kind === "admin" && e.ref?.id === entry.id),
   );
 
   if (toExpire.length === 0) {
@@ -241,17 +239,17 @@ async function mockExpirePoints(): Promise<void> {
   }
 
   // 만료 원장 생성
-  toExpire.forEach((entry) => {
+  toExpire.forEach(entry => {
     const expireEntry: PointsLedger = {
       id: `pts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       uid: entry.uid,
-      type: 'expire',
+      type: "expire",
       amount: -entry.amount,
       ref: {
-        kind: 'admin',
+        kind: "admin",
         id: entry.id,
       },
-      note: '포인트 만료',
+      note: "포인트 만료",
       at: now,
     };
 
@@ -273,22 +271,18 @@ async function mockExpirePoints(): Promise<void> {
 /**
  * Mock: 관리자 포인트 조정
  */
-async function mockAdjustPoints(
-  uid: string,
-  amount: number,
-  note: string
-): Promise<PointsLedger> {
+async function mockAdjustPoints(uid: string, amount: number, note: string): Promise<PointsLedger> {
   const ledger = mockLoadLedger();
   const balances = mockLoadBalance();
 
   const newEntry: PointsLedger = {
     id: `pts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     uid,
-    type: 'adjust',
+    type: "adjust",
     amount,
     ref: {
-      kind: 'admin',
-      id: 'admin_adjust',
+      kind: "admin",
+      id: "admin_adjust",
     },
     note,
     at: Date.now(),
@@ -317,8 +311,8 @@ async function mockGetAllBalances(): Promise<
   Array<PointsBalance & { phone?: string; name?: string }>
 > {
   const balances = mockLoadBalance();
-  
-  return Object.values(balances).map((balance) => ({
+
+  return Object.values(balances).map(balance => ({
     ...balance,
     phone: `010-****-****`, // Mock 데이터
     name: `사용자${balance.uid.slice(-4)}`,
@@ -333,7 +327,7 @@ async function mockGetAllBalances(): Promise<
  * storeId 가져오기 헬퍼
  */
 function getStoreId(): string {
-  return getEnv('VITE_STORE_ID', 'hyunpoong_main');
+  return getEnv("VITE_STORE_ID", "hyunpoong_main");
 }
 
 /**
@@ -341,9 +335,9 @@ function getStoreId(): string {
  */
 function timestampToMs(ts: Timestamp | undefined): number {
   if (!ts) return Date.now();
-  if (typeof ts === 'string') return Date.parse(ts);
-  if (typeof ts.toDate === 'function') return ts.toDate().getTime();
-  if ((ts as any).seconds && typeof (ts as any).seconds === 'number') {
+  if (typeof ts === "string") return Date.parse(ts);
+  if (typeof ts.toDate === "function") return ts.toDate().getTime();
+  if ((ts as any).seconds && typeof (ts as any).seconds === "number") {
     return (ts as any).seconds * 1000;
   }
   return Date.now();
@@ -359,7 +353,7 @@ function buildPointsLedgerFromDoc(doc: PointsTransactionDoc, docId: string): Poi
     type: doc.type,
     amount: doc.amount,
     ref: doc.ref,
-    note: doc.note || '',
+    note: doc.note || "",
     at: timestampToMs(doc.at),
     expiresAt: doc.expiresAt ? timestampToMs(doc.expiresAt) : undefined,
   };
@@ -373,14 +367,14 @@ async function firebaseEarnPoints(params: EarnPointsParams): Promise<PointsLedge
   const storeId = getStoreId();
 
   if (amount <= 0) {
-    throw new Error('적립 포인트는 0보다 커야 합니다');
+    throw new Error("적립 포인트는 0보다 커야 합니다");
   }
 
   // 만료일 계산
   const expiresAt = calculateExpiryDate();
   const expiresAtTimestamp = new Date(expiresAt) as any;
 
-  await runTransaction(db, async (tx) => {
+  await runTransaction(db, async tx => {
     const balanceRef = pointsBalanceDocRef(uid);
     const balanceSnap = await tx.get(balanceRef);
 
@@ -409,13 +403,13 @@ async function firebaseEarnPoints(params: EarnPointsParams): Promise<PointsLedge
       txId: txDocRef.id,
       storeId,
       userId: uid,
-      type: 'earn',
+      type: "earn",
       amount,
       ref: {
-        kind: ref.kind === 'order' ? 'order' : ref.kind === 'review' ? 'review' : 'admin',
+        kind: ref.kind === "order" ? "order" : ref.kind === "review" ? "review" : "admin",
         id: ref.id,
       },
-      note: note || '',
+      note: note || "",
       expiresAt: expiresAtTimestamp,
       at: now as any,
     };
@@ -425,12 +419,12 @@ async function firebaseEarnPoints(params: EarnPointsParams): Promise<PointsLedge
 
   // 생성된 거래 문서 읽기 (트랜잭션 완료 후)
   const txCol = storePointsTransactionsCollection(storeId);
-  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const q = query(txCol, where("userId", "==", uid), orderBy("at", "desc"));
   const snapshot = await getDocs(q);
   const latestDoc = snapshot.docs[0];
-  
+
   if (!latestDoc) {
-    throw new Error('포인트 적립 후 거래 내역을 읽을 수 없습니다');
+    throw new Error("포인트 적립 후 거래 내역을 읽을 수 없습니다");
   }
 
   return buildPointsLedgerFromDoc(latestDoc.data() as PointsTransactionDoc, latestDoc.id);
@@ -444,7 +438,7 @@ async function firebaseSpendPoints(params: SpendPointsParams): Promise<PointsLed
   const storeId = getStoreId();
 
   if (amount <= 0) {
-    throw new Error('사용 포인트는 0보다 커야 합니다');
+    throw new Error("사용 포인트는 0보다 커야 합니다");
   }
 
   // 최소 사용 금액 체크
@@ -452,19 +446,19 @@ async function firebaseSpendPoints(params: SpendPointsParams): Promise<PointsLed
     throw new Error(`최소 ${POINTS_POLICY.minUse.toLocaleString()}P부터 사용 가능합니다`);
   }
 
-  await runTransaction(db, async (tx) => {
+  await runTransaction(db, async tx => {
     const balanceRef = pointsBalanceDocRef(uid);
     const balanceSnap = await tx.get(balanceRef);
 
     if (!balanceSnap.exists()) {
-      throw new Error('포인트 잔액이 부족합니다.');
+      throw new Error("포인트 잔액이 부족합니다.");
     }
 
     const prev = balanceSnap.data() as PointsBalanceDoc;
     const current = prev.balance ?? 0;
 
     if (current < amount) {
-      throw new Error('포인트 잔액이 부족합니다.');
+      throw new Error("포인트 잔액이 부족합니다.");
     }
 
     const now = serverTimestamp();
@@ -487,13 +481,13 @@ async function firebaseSpendPoints(params: SpendPointsParams): Promise<PointsLed
       txId: txDocRef.id,
       storeId,
       userId: uid,
-      type: 'spend',
+      type: "spend",
       amount: -amount,
       ref: {
-        kind: ref.kind === 'order' ? 'order' : ref.kind === 'review' ? 'review' : 'admin',
+        kind: ref.kind === "order" ? "order" : ref.kind === "review" ? "review" : "admin",
         id: ref.id,
       },
-      note: note || '',
+      note: note || "",
       at: now as any,
     };
 
@@ -502,12 +496,12 @@ async function firebaseSpendPoints(params: SpendPointsParams): Promise<PointsLed
 
   // 생성된 거래 문서 읽기
   const txCol = storePointsTransactionsCollection(storeId);
-  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const q = query(txCol, where("userId", "==", uid), orderBy("at", "desc"));
   const snapshot = await getDocs(q);
   const latestDoc = snapshot.docs[0];
-  
+
   if (!latestDoc) {
-    throw new Error('포인트 사용 후 거래 내역을 읽을 수 없습니다');
+    throw new Error("포인트 사용 후 거래 내역을 읽을 수 없습니다");
   }
 
   return buildPointsLedgerFromDoc(latestDoc.data() as PointsTransactionDoc, latestDoc.id);
@@ -519,11 +513,11 @@ async function firebaseSpendPoints(params: SpendPointsParams): Promise<PointsLed
 async function firebaseGetBalance(uid: string): Promise<number> {
   const balanceRef = pointsBalanceDocRef(uid);
   const snap = await getDoc(balanceRef);
-  
+
   if (!snap.exists()) {
     return 0;
   }
-  
+
   const data = snap.data() as PointsBalanceDoc;
   return data.balance ?? 0;
 }
@@ -534,10 +528,10 @@ async function firebaseGetBalance(uid: string): Promise<number> {
 async function firebaseGetHistory(uid: string): Promise<PointsHistory> {
   const storeId = getStoreId();
   const txCol = storePointsTransactionsCollection(storeId);
-  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const q = query(txCol, where("userId", "==", uid), orderBy("at", "desc"));
   const snapshot = await getDocs(q);
 
-  const ledger: PointsLedger[] = snapshot.docs.map((docSnap) => {
+  const ledger: PointsLedger[] = snapshot.docs.map(docSnap => {
     const data = docSnap.data() as PointsTransactionDoc;
     return buildPointsLedgerFromDoc(data, docSnap.id);
   });
@@ -549,8 +543,8 @@ async function firebaseGetHistory(uid: string): Promise<PointsHistory> {
   const expiringMap = new Map<number, number>();
 
   ledger
-    .filter((entry) => entry.type === 'earn' && entry.expiresAt && entry.expiresAt > now)
-    .forEach((entry) => {
+    .filter(entry => entry.type === "earn" && entry.expiresAt && entry.expiresAt > now)
+    .forEach(entry => {
       if (entry.expiresAt) {
         const existing = expiringMap.get(entry.expiresAt) || 0;
         expiringMap.set(entry.expiresAt, existing + entry.amount);
@@ -580,8 +574,8 @@ async function firebaseExpirePoints(): Promise<void> {
   // 만료 대상 찾기 (earn 타입이고 expiresAt이 지난 것)
   const q = query(
     txCol,
-    where('type', '==', 'earn'),
-    where('expiresAt', '<=', new Date(now) as any)
+    where("type", "==", "earn"),
+    where("expiresAt", "<=", new Date(now) as any),
   );
   const snapshot = await getDocs(q);
 
@@ -592,7 +586,7 @@ async function firebaseExpirePoints(): Promise<void> {
   // 사용자별로 그룹화하여 만료 처리
   const userExpireMap = new Map<string, number>();
 
-  snapshot.docs.forEach((docSnap) => {
+  snapshot.docs.forEach(docSnap => {
     const data = docSnap.data() as PointsTransactionDoc;
     const userId = data.userId;
     const amount = Math.abs(data.amount);
@@ -602,7 +596,7 @@ async function firebaseExpirePoints(): Promise<void> {
 
   // 각 사용자별로 만료 트랜잭션 실행
   for (const [userId, totalExpireAmount] of userExpireMap.entries()) {
-    await runTransaction(db, async (tx) => {
+    await runTransaction(db, async tx => {
       const balanceRef = pointsBalanceDocRef(userId);
       const balanceSnap = await tx.get(balanceRef);
 
@@ -637,13 +631,13 @@ async function firebaseExpirePoints(): Promise<void> {
         txId: txDocRef.id,
         storeId,
         userId,
-        type: 'expire',
+        type: "expire",
         amount: -actualExpireAmount,
         ref: {
-          kind: 'admin',
-          id: 'expire_batch',
+          kind: "admin",
+          id: "expire_batch",
         },
-        note: '포인트 만료',
+        note: "포인트 만료",
         at: now as any,
       };
 
@@ -658,11 +652,11 @@ async function firebaseExpirePoints(): Promise<void> {
 async function firebaseAdjustPoints(
   uid: string,
   amount: number,
-  note: string
+  note: string,
 ): Promise<PointsLedger> {
   const storeId = getStoreId();
 
-  await runTransaction(db, async (tx) => {
+  await runTransaction(db, async tx => {
     const balanceRef = pointsBalanceDocRef(uid);
     const balanceSnap = await tx.get(balanceRef);
 
@@ -692,11 +686,11 @@ async function firebaseAdjustPoints(
       txId: txDocRef.id,
       storeId,
       userId: uid,
-      type: 'adjust',
+      type: "adjust",
       amount,
       ref: {
-        kind: 'admin',
-        id: 'admin_adjust',
+        kind: "admin",
+        id: "admin_adjust",
       },
       note,
       expiresAt,
@@ -708,12 +702,12 @@ async function firebaseAdjustPoints(
 
   // 생성된 거래 문서 읽기
   const txCol = storePointsTransactionsCollection(storeId);
-  const q = query(txCol, where('userId', '==', uid), orderBy('at', 'desc'));
+  const q = query(txCol, where("userId", "==", uid), orderBy("at", "desc"));
   const snapshot = await getDocs(q);
   const latestDoc = snapshot.docs[0];
-  
+
   if (!latestDoc) {
-    throw new Error('포인트 조정 후 거래 내역을 읽을 수 없습니다');
+    throw new Error("포인트 조정 후 거래 내역을 읽을 수 없습니다");
   }
 
   return buildPointsLedgerFromDoc(latestDoc.data() as PointsTransactionDoc, latestDoc.id);
@@ -727,10 +721,10 @@ async function firebaseGetAllBalances(): Promise<
 > {
   // TODO: users 컬렉션과 조인하여 phone/name 가져오기
   // 현재는 pointsBalances만 조회
-  const balancesRef = collection(db, 'pointsBalances');
+  const balancesRef = collection(db, "pointsBalances");
   const snapshot = await getDocs(balancesRef);
 
-  return snapshot.docs.map((docSnap) => {
+  return snapshot.docs.map(docSnap => {
     const data = docSnap.data() as PointsBalanceDoc;
     return {
       uid: data.userId,
@@ -751,7 +745,7 @@ async function firebaseGetAllBalances(): Promise<
  */
 export async function earnPoints(params: EarnPointsParams): Promise<PointsLedger> {
   if (!FEATURE_FLAGS.points) {
-    throw new Error('포인트 기능이 비활성화되어 있습니다');
+    throw new Error("포인트 기능이 비활성화되어 있습니다");
   }
 
   return USE_FIREBASE ? firebaseEarnPoints(params) : mockEarnPoints(params);
@@ -762,7 +756,7 @@ export async function earnPoints(params: EarnPointsParams): Promise<PointsLedger
  */
 export async function spendPoints(params: SpendPointsParams): Promise<PointsLedger> {
   if (!FEATURE_FLAGS.points) {
-    throw new Error('포인트 기능이 비활성화되어 있습니다');
+    throw new Error("포인트 기능이 비활성화되어 있습니다");
   }
 
   return USE_FIREBASE ? firebaseSpendPoints(params) : mockSpendPoints(params);
@@ -807,10 +801,10 @@ export async function expirePoints(): Promise<void> {
 export async function adjustPoints(
   uid: string,
   amount: number,
-  note: string
+  note: string,
 ): Promise<PointsLedger> {
   if (!FEATURE_FLAGS.points) {
-    throw new Error('포인트 기능이 비활성화되어 있습니다');
+    throw new Error("포인트 기능이 비활성화되어 있습니다");
   }
 
   return USE_FIREBASE

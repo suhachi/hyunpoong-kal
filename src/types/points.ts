@@ -3,17 +3,17 @@
  * Phase 3-3: Points System
  */
 
-export type PointsTransactionType = 
-  | 'earn'      // 적립
-  | 'spend'     // 사용
-  | 'expire'    // 만료
-  | 'adjust';   // 관리자 조정
+export type PointsTransactionType =
+  | "earn" // 적립
+  | "spend" // 사용
+  | "expire" // 만료
+  | "adjust"; // 관리자 조정
 
-export type PointsRefKind = 
-  | 'order'     // 주문
-  | 'review'    // 리뷰
-  | 'admin'     // 관리자
-  | 'promotion'; // 프로모션
+export type PointsRefKind =
+  | "order" // 주문
+  | "review" // 리뷰
+  | "admin" // 관리자
+  | "promotion"; // 프로모션
 
 export interface PointsReference {
   kind: PointsRefKind;
@@ -69,16 +69,16 @@ export interface SpendPointsParams {
 export interface PointsPolicy {
   // 적립률 (주문 금액의 %)
   earnRate: number; // 0.03 = 3%
-  
+
   // 최소 사용 금액
   minUse: number; // 1000 = 1,000원부터 사용 가능
-  
+
   // 만료 기간 (일)
   expireDays: number; // 365 = 1년
-  
+
   // 리뷰 사진 추가 적립
   reviewPhotoBonus: number; // 200 = 200포인트
-  
+
   // 리뷰 텍스트 기본 적립
   reviewTextBonus: number; // 100 = 100포인트
 }

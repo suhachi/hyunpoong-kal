@@ -3,17 +3,23 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Separator } from '../../../components/ui/separator';
-import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from 'lucide-react';
-import { toast } from 'sonner';
-import { runFCMDiagnostics } from '../../../lib/admin/settingsCenter.api';
-import type { DiagnosticResult } from '../../../types/adminSettings';
-import { USE_FIREBASE } from '../../../config/env';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from "lucide-react";
+import { toast } from "sonner";
+import { runFCMDiagnostics } from "@/lib/admin/settingsCenter.api";
+import type { DiagnosticResult } from "@/types/adminSettings";
+import { USE_FIREBASE } from "@/config/env";
 
 export function FCMTab() {
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult | null>(null);
@@ -27,24 +33,24 @@ export function FCMTab() {
       try {
         // Mock 모드용 정보 결과 생성
         const mockResult: DiagnosticResult = {
-          overall: 'info',
+          overall: "info",
           checks: [
             {
-              name: 'Mock 모드',
-              status: 'info',
-              message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+              name: "Mock 모드",
+              status: "info",
+              message: "현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.",
             },
             {
-              name: '실서비스 전환',
-              status: 'info',
-              message: '실서비스 전환 후 Firebase 연결 및 FCM 설정을 진행해 주세요.',
+              name: "실서비스 전환",
+              status: "info",
+              message: "실서비스 전환 후 Firebase 연결 및 FCM 설정을 진행해 주세요.",
             },
           ],
         };
         setDiagnostics(mockResult);
         // Mock 모드에서는 toast를 띄우지 않음
       } catch (error) {
-        console.error('Mock diagnostics failed:', error);
+        console.error("Mock diagnostics failed:", error);
       } finally {
         setRunning(false);
       }
@@ -56,30 +62,30 @@ export function FCMTab() {
     try {
       const result = await runFCMDiagnostics();
       setDiagnostics(result);
-      
+
       // 전체 상태에 따라 다른 메시지 표시
-      if (result.overall === 'pass') {
-        toast.success('모든 FCM 설정이 정상입니다');
-      } else if (result.overall === 'info') {
+      if (result.overall === "pass") {
+        toast.success("모든 FCM 설정이 정상입니다");
+      } else if (result.overall === "info") {
         // 미설정 상태는 정보 메시지로 표시
-        toast.info('FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요');
-      } else if (result.overall === 'warning') {
-        toast.warning('일부 설정을 확인해주세요');
+        toast.info("FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요");
+      } else if (result.overall === "warning") {
+        toast.warning("일부 설정을 확인해주세요");
       } else {
         // 실제 오류만 에러 메시지 표시
         const hasActualError = result.checks.some(
-          check => check.status === 'fail' && check.name !== 'VAPID 키'
+          check => check.status === "fail" && check.name !== "VAPID 키",
         );
         if (hasActualError) {
-          toast.error('FCM 설정에 문제가 있습니다');
+          toast.error("FCM 설정에 문제가 있습니다");
         } else {
           // VAPID 키만 미설정인 경우는 정보 메시지
-          toast.info('FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요');
+          toast.info("FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요");
         }
       }
     } catch (error) {
-      console.error('Diagnostics failed:', error);
-      toast.error('진단 실행에 실패했습니다');
+      console.error("Diagnostics failed:", error);
+      toast.error("진단 실행에 실패했습니다");
     } finally {
       setRunning(false);
     }
@@ -90,19 +96,19 @@ export function FCMTab() {
     if (!USE_FIREBASE) {
       // Mock 모드용 정보 결과만 설정
       const mockResult: DiagnosticResult = {
-        overall: 'info',
+        overall: "info",
         checks: [
           {
-            name: 'Mock 모드',
-            status: 'info',
-            message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+            name: "Mock 모드",
+            status: "info",
+            message: "현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.",
           },
         ],
       };
       setDiagnostics(mockResult);
       return;
     }
-    
+
     // 실서비스 모드에서만 자동 진단 실행
     runDiagnostics();
   }, []);
@@ -113,7 +119,7 @@ export function FCMTab() {
 
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
-    toast.success('명령어가 복사되었습니다');
+    toast.success("명령어가 복사되었습니다");
   };
 
   return (
@@ -130,17 +136,17 @@ export function FCMTab() {
               <span className="text-sm text-[#2E1C10]/80">전체 상태</span>
               {!diagnostics ? (
                 <Badge variant="outline">확인 중...</Badge>
-              ) : diagnostics.overall === 'info' ? (
+              ) : diagnostics.overall === "info" ? (
                 <Badge className="bg-blue-500 gap-1">
                   <AlertCircle className="w-3 h-3" />
                   정보
                 </Badge>
-              ) : diagnostics.overall === 'pass' ? (
+              ) : diagnostics.overall === "pass" ? (
                 <Badge className="bg-green-500 gap-1">
                   <CheckCircle2 className="w-3 h-3" />
                   정상
                 </Badge>
-              ) : diagnostics.overall === 'warning' ? (
+              ) : diagnostics.overall === "warning" ? (
                 <Badge className="bg-yellow-500 gap-1">
                   <AlertCircle className="w-3 h-3" />
                   경고
@@ -161,11 +167,11 @@ export function FCMTab() {
                 <span className="text-xs font-medium text-[#2E1C10]/60">진단 결과</span>
                 {diagnostics.checks.map((check, index) => (
                   <div key={index} className="flex items-start gap-2 text-xs">
-                    {check.status === 'info' ? (
+                    {check.status === "info" ? (
                       <AlertCircle className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
-                    ) : check.status === 'pass' ? (
+                    ) : check.status === "pass" ? (
                       <CheckCircle2 className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
-                    ) : check.status === 'warning' ? (
+                    ) : check.status === "warning" ? (
                       <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
                     ) : (
                       <XCircle className="w-3 h-3 text-red-600 mt-0.5 flex-shrink-0" />
@@ -189,7 +195,7 @@ export function FCMTab() {
               disabled={running}
             >
               <Play className="w-4 h-4 mr-2" />
-              {running ? '진단 중...' : '진단 재실행'}
+              {running ? "진단 중..." : "진단 재실행"}
             </Button>
           </CardContent>
         </Card>
@@ -202,9 +208,12 @@ export function FCMTab() {
           <Alert className="border-blue-200 bg-blue-50">
             <AlertCircle className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-sm text-blue-900">
-              <strong>⚙️ 현재 이 프로젝트는 Mock 모드(USE_FIREBASE=false)입니다.</strong><br />
-              테스트 환경에서는 FCM 푸시를 사용하지 않으며, 아래 경고/진단 결과는 무시해도 됩니다.<br />
-              실서비스 전환 시 Firebase 연결 후 FCM 설정(서버 키, VAPID 키, Service Worker)을 완료해 주세요.
+              <strong>⚙️ 현재 이 프로젝트는 Mock 모드(USE_FIREBASE=false)입니다.</strong>
+              <br />
+              테스트 환경에서는 FCM 푸시를 사용하지 않으며, 아래 경고/진단 결과는 무시해도 됩니다.
+              <br />
+              실서비스 전환 시 Firebase 연결 후 FCM 설정(서버 키, VAPID 키, Service Worker)을 완료해
+              주세요.
             </AlertDescription>
           </Alert>
         )}
@@ -216,9 +225,7 @@ export function FCMTab() {
               <Bell className="w-5 h-5 text-[#FFCA28]" />
               <CardTitle>Firebase Cloud Messaging</CardTitle>
             </div>
-            <CardDescription>
-              푸시 알림을 위한 FCM 설정
-            </CardDescription>
+            <CardDescription>푸시 알림을 위한 FCM 설정</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -231,7 +238,7 @@ export function FCMTab() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('https://console.firebase.google.com', '_blank')}
+                onClick={() => window.open("https://console.firebase.google.com", "_blank")}
               >
                 Firebase Console 열기
               </Button>
@@ -255,19 +262,13 @@ export function FCMTab() {
               <h4 className="text-sm font-medium text-[#2E1C10]">3. 서버 키 설정 (Functions)</h4>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-[#2E1C10]/60">CLI 명령어</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyCommand(fcmCommand)}
-                >
+                <Button variant="outline" size="sm" onClick={() => copyCommand(fcmCommand)}>
                   <Copy className="w-4 h-4 mr-2" />
                   복사
                 </Button>
               </div>
               <pre className="p-3 bg-[#2E1C10]/5 rounded-lg overflow-x-auto">
-                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">
-                  {fcmCommand}
-                </code>
+                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">{fcmCommand}</code>
               </pre>
             </div>
           </CardContent>
@@ -277,15 +278,11 @@ export function FCMTab() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Service Worker</CardTitle>
-            <CardDescription>
-              푸시 알림 수신을 위한 Service Worker 설정
-            </CardDescription>
+            <CardDescription>푸시 알림 수신을 위한 Service Worker 설정</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">
-                firebase-messaging-sw.js
-              </h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">firebase-messaging-sw.js</h4>
               <p className="text-xs text-[#2E1C10]/60">
                 프로젝트 루트(/public)에 다음 파일을 생성하세요:
               </p>
@@ -321,21 +318,17 @@ const messaging = firebase.messaging();`}</code>
           <CardContent>
             <div className="space-y-2">
               {[
-                'Firebase Cloud Messaging API (V1) 활성화',
-                'VAPID 키 발급 및 .env.local 설정',
-                'FCM 서버 키 Functions Config 설정',
-                'Service Worker 파일 생성 (/public/firebase-messaging-sw.js)',
-                'Service Worker 등록 확인',
-                '브라우저 알림 권한 요청 구현',
-                'FCM 토큰 저장 및 관리',
-                '푸시 알림 수신 테스트',
+                "Firebase Cloud Messaging API (V1) 활성화",
+                "VAPID 키 발급 및 .env.local 설정",
+                "FCM 서버 키 Functions Config 설정",
+                "Service Worker 파일 생성 (/public/firebase-messaging-sw.js)",
+                "Service Worker 등록 확인",
+                "브라우저 알림 권한 요청 구현",
+                "FCM 토큰 저장 및 관리",
+                "푸시 알림 수신 테스트",
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    className="mt-1"
-                    disabled
-                  />
+                  <input type="checkbox" className="mt-1" disabled />
                   <span className="text-[#2E1C10]/70">{item}</span>
                 </div>
               ))}

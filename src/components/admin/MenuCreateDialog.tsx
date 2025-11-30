@@ -4,10 +4,18 @@
  * 옵션 그룹을 동적으로 선택하고 사용
  */
 
-import { useState, useEffect } from 'react';
-import { Menu, MenuCategory, MenuBadge, CATEGORY_LABELS, BADGE_LABELS, MenuOptionGroup, CustomOption } from '../../types/menu';
-import { OptionGroup } from '../../types/menu';
-import { getOptionGroups } from '../../lib/admin/optionGroups.api';
+import { useState, useEffect } from "react";
+import {
+  type Menu,
+  type MenuCategory,
+  type MenuBadge,
+  CATEGORY_LABELS,
+  BADGE_LABELS,
+  type MenuOptionGroup,
+  type CustomOption,
+  type OptionGroup,
+} from "@/types/menu";
+import { getOptionGroups } from "@/lib/admin/optionGroups.api";
 import {
   Dialog,
   DialogContent,
@@ -15,28 +23,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
-import { Checkbox } from '../ui/checkbox';
-import { Badge } from '../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Plus, X, Upload, Image as ImageIcon, Trash2, Clock } from 'lucide-react';
-import { toast } from 'sonner';
-import { formatPrice } from '../../lib/utils';
-import { uploadMenuImage, validateImageFile } from '../../lib/storage';
-import { USE_FIREBASE } from '../../config/env';
-import { AdminMenuCustomOptionsEditor } from './AdminMenuCustomOptionsEditor';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, X, Upload, Image as ImageIcon, Trash2, Clock } from "lucide-react";
+import { toast } from "sonner";
+import { formatPrice } from "@/lib/utils";
+import { uploadMenuImage, validateImageFile } from "@/lib/storage";
+import { USE_FIREBASE } from "@/config/env";
+import { AdminMenuCustomOptionsEditor } from "./AdminMenuCustomOptionsEditor";
 
 interface MenuCreateDialogProps {
   open: boolean;
@@ -44,23 +46,19 @@ interface MenuCreateDialogProps {
   onSave: (menuData: Partial<Menu>) => Promise<void>;
 }
 
-export function MenuCreateDialog({
-  open,
-  onOpenChange,
-  onSave,
-}: MenuCreateDialogProps) {
+export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialogProps) {
   // 기본 정보
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState<MenuCategory>('noodle');
-  const [price, setPrice] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<MenuCategory>("noodle");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedBadges, setSelectedBadges] = useState<MenuBadge[]>([]);
-  const [allergens, setAllergens] = useState('');
-  const [origin, setOrigin] = useState('');
+  const [allergens, setAllergens] = useState("");
+  const [origin, setOrigin] = useState("");
   const [isAvailable, setIsAvailable] = useState(true);
 
   // 이미지
-  const [imagePreview, setImagePreview] = useState('');
+  const [imagePreview, setImagePreview] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // 옵션 그룹 관리
@@ -84,16 +82,14 @@ export function MenuCreateDialog({
       const groups = await getOptionGroups();
       setAvailableOptionGroups(groups);
     } catch (error) {
-      console.error('Failed to load option groups:', error);
+      console.error("Failed to load option groups:", error);
     }
   };
 
   // 배지 토글
   const handleToggleBadge = (badge: MenuBadge) => {
     setSelectedBadges(prev =>
-      prev.includes(badge)
-        ? prev.filter(b => b !== badge)
-        : [...prev, badge]
+      prev.includes(badge) ? prev.filter(b => b !== badge) : [...prev, badge],
     );
   };
 
@@ -104,8 +100,8 @@ export function MenuCreateDialog({
       // 파일 검증
       const validation = validateImageFile(file);
       if (!validation.valid) {
-        toast.error(validation.error || '이미지 파일 검증에 실패했습니다.');
-        e.target.value = ''; // 파일 선택 초기화
+        toast.error(validation.error || "이미지 파일 검증에 실패했습니다.");
+        e.target.value = ""; // 파일 선택 초기화
         return;
       }
       setImageFile(file);
@@ -118,18 +114,18 @@ export function MenuCreateDialog({
     // 파일 검증
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      throw new Error(validation.error || '이미지 파일 검증에 실패했습니다.');
+      throw new Error(validation.error || "이미지 파일 검증에 실패했습니다.");
     }
 
     if (USE_FIREBASE) {
       // Firebase Storage에 업로드
       try {
         const result = await uploadMenuImage(file);
-        console.log('[MenuCreateDialog] Image uploaded to Firebase Storage:', result.path);
+        console.log("[MenuCreateDialog] Image uploaded to Firebase Storage:", result.path);
         return result.url;
       } catch (error: any) {
-        console.error('[MenuCreateDialog] Firebase Storage upload failed:', error);
-        throw new Error(error.message || '이미지 업로드에 실패했습니다.');
+        console.error("[MenuCreateDialog] Firebase Storage upload failed:", error);
+        throw new Error(error.message || "이미지 업로드에 실패했습니다.");
       }
     } else {
       // Mock 모드: 임시 blob URL 반환
@@ -140,9 +136,7 @@ export function MenuCreateDialog({
   // 옵션 그룹 선택/해제
   const handleToggleOptionGroup = (groupId: string) => {
     setSelectedOptionGroupIds(prev =>
-      prev.includes(groupId)
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
+      prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId],
     );
   };
 
@@ -153,15 +147,15 @@ export function MenuCreateDialog({
 
   // 폼 초기화
   const resetForm = () => {
-    setName('');
-    setCategory('noodle');
-    setPrice('');
-    setDescription('');
+    setName("");
+    setCategory("noodle");
+    setPrice("");
+    setDescription("");
     setSelectedBadges([]);
-    setAllergens('');
-    setOrigin('');
+    setAllergens("");
+    setOrigin("");
     setIsAvailable(true);
-    setImagePreview('');
+    setImagePreview("");
     setImageFile(null);
     setSelectedOptionGroupIds([]);
     setCustomOptions([]);
@@ -169,58 +163,61 @@ export function MenuCreateDialog({
 
   // 저장 핸들러
   const handleSave = async () => {
-    console.log('[MenuCreateDialog] handleSave called');
+    console.log("[MenuCreateDialog] handleSave called");
     // 검증
     if (!name.trim()) {
-      console.log('[MenuCreateDialog] Validation failed: name is empty');
-      toast.error('메뉴 이름을 입력하세요');
+      console.log("[MenuCreateDialog] Validation failed: name is empty");
+      toast.error("메뉴 이름을 입력하세요");
       return;
     }
     if (!price || parseFloat(price) < 0) {
-      console.log('[MenuCreateDialog] Validation failed: invalid price');
-      toast.error('올바른 가격을 입력하세요');
+      console.log("[MenuCreateDialog] Validation failed: invalid price");
+      toast.error("올바른 가격을 입력하세요");
       return;
     }
     if (!imageFile) {
-      console.log('[MenuCreateDialog] Validation failed: no image file');
-      toast.error('이미지 파일을 선택하세요');
+      console.log("[MenuCreateDialog] Validation failed: no image file");
+      toast.error("이미지 파일을 선택하세요");
       return;
     }
-    console.log('[MenuCreateDialog] Validation passed, starting save process');
+    console.log("[MenuCreateDialog] Validation passed, starting save process");
     setLoading(true);
     try {
       const selectedGroups = availableOptionGroups.filter(group =>
-        selectedOptionGroupIds.includes(group.id)
+        selectedOptionGroupIds.includes(group.id),
       );
-      console.log('[MenuCreateDialog] Selected option groups:', selectedGroups.length);
+      console.log("[MenuCreateDialog] Selected option groups:", selectedGroups.length);
       // 이미지 파일 업로드
-      console.log('[MenuCreateDialog] Uploading image file...');
-      console.log('[MenuCreateDialog] USE_FIREBASE:', USE_FIREBASE);
+      console.log("[MenuCreateDialog] Uploading image file...");
+      console.log("[MenuCreateDialog] USE_FIREBASE:", USE_FIREBASE);
       let finalImageUrl: string;
       if (USE_FIREBASE) {
         try {
           // Firebase 모드: 임시 ID로 업로드 (메뉴 생성 후 실제 ID로 업데이트 필요)
           const tempMenuId = `temp-${Date.now()}`;
-          console.log('[MenuCreateDialog] Calling uploadMenuImage with tempMenuId:', tempMenuId);
+          console.log("[MenuCreateDialog] Calling uploadMenuImage with tempMenuId:", tempMenuId);
           const result = await uploadMenuImage(imageFile!, tempMenuId);
           finalImageUrl = result.url;
-          console.log('[MenuCreateDialog] Image uploaded to Firebase Storage:', result.path);
-          console.log('[MenuCreateDialog] Firebase Storage URL:', finalImageUrl);
+          console.log("[MenuCreateDialog] Image uploaded to Firebase Storage:", result.path);
+          console.log("[MenuCreateDialog] Firebase Storage URL:", finalImageUrl);
         } catch (error: any) {
-          console.error('[MenuCreateDialog] Firebase Storage upload failed:', error);
-          toast.error('이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+          console.error("[MenuCreateDialog] Firebase Storage upload failed:", error);
+          toast.error("이미지 업로드에 실패했습니다. 다시 시도해주세요.");
           setLoading(false);
           return;
         }
       } else {
         // Mock 모드: blob URL 사용
-        console.log('[MenuCreateDialog] Mock mode: using blob URL');
+        console.log("[MenuCreateDialog] Mock mode: using blob URL");
         finalImageUrl = await uploadImage(imageFile!);
       }
-      console.log('[MenuCreateDialog] Image uploaded, URL:', finalImageUrl);
+      console.log("[MenuCreateDialog] Image uploaded, URL:", finalImageUrl);
       // allergens를 string[]로 변환 (쉼표로 구분된 문자열을 배열로 변환)
       const allergensArray = allergens.trim()
-        ? allergens.split(',').map(a => a.trim()).filter(a => a.length > 0)
+        ? allergens
+            .split(",")
+            .map(a => a.trim())
+            .filter(a => a.length > 0)
         : [];
       // 유효한 커스텀 옵션만 필터링 (이름이 있는 것만)
       const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
@@ -232,21 +229,21 @@ export function MenuCreateDialog({
         description: description.trim(),
         badges: selectedBadges,
         allergens: allergensArray,
-        origin: origin.trim() || '국내산',
+        origin: origin.trim() || "국내산",
         isAvailable,
         image: finalImageUrl,
         customOptions: validCustomOptions.length > 0 ? validCustomOptions : undefined,
         optionGroups: selectedGroups,
       };
-      console.log('[MenuCreateDialog] menuData prepared:', menuData);
-      console.log('[MenuCreateDialog] Calling onSave...');
+      console.log("[MenuCreateDialog] menuData prepared:", menuData);
+      console.log("[MenuCreateDialog] Calling onSave...");
       await onSave(menuData);
-      console.log('[MenuCreateDialog] onSave completed successfully');
+      console.log("[MenuCreateDialog] onSave completed successfully");
       resetForm();
       onOpenChange(false);
     } catch (error: any) {
-      console.error('[MenuCreateDialog] Error in handleSave:', error);
-      toast.error(error.message || '메뉴 등록에 실패했습니다');
+      console.error("[MenuCreateDialog] Error in handleSave:", error);
+      toast.error(error.message || "메뉴 등록에 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -262,7 +259,12 @@ export function MenuCreateDialog({
             새로운 메뉴를 등록합니다. 필수 항목(*)을 입력하세요.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleSave();
+          }}
+        >
           <div className="space-y-6">
             {/* 이미지 파일 업로드 */}
             <div>
@@ -274,9 +276,7 @@ export function MenuCreateDialog({
                 onChange={handleImageFileChange}
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">
-                권장: 1600px, WebP 형식, 3MB 이하
-              </p>
+              <p className="text-xs text-gray-500 mt-1">권장: 1600px, WebP 형식, 3MB 이하</p>
               {/* 이미지 미리보기 */}
               {imagePreview && (
                 <div className="mt-3 relative">
@@ -285,9 +285,9 @@ export function MenuCreateDialog({
                     alt="미리보기"
                     className="w-full h-48 object-cover rounded-lg"
                     onError={() => {
-                      setImagePreview('');
+                      setImagePreview("");
                       setImageFile(null);
-                      toast.error('이미지를 불러올 수 없습니다');
+                      toast.error("이미지를 불러올 수 없습니다");
                     }}
                   />
                   <Button
@@ -295,7 +295,7 @@ export function MenuCreateDialog({
                     size="sm"
                     className="absolute top-2 right-2"
                     onClick={() => {
-                      setImagePreview('');
+                      setImagePreview("");
                       setImageFile(null);
                     }}
                   >
@@ -364,19 +364,35 @@ export function MenuCreateDialog({
                   const badgeKey = key as MenuBadge;
                   // 배지별 색상 정의
                   const badgeColors: Record<MenuBadge, { selected: string; unselected: string }> = {
-                    best: { selected: 'bg-red-500 text-white border-red-500', unselected: 'bg-red-50 text-red-600 border-red-200' },
-                    signature: { selected: 'bg-purple-500 text-white border-purple-500', unselected: 'bg-purple-50 text-purple-600 border-purple-200' },
-                    spicy: { selected: 'bg-orange-500 text-white border-orange-500', unselected: 'bg-orange-50 text-orange-600 border-orange-200' },
-                    cold: { selected: 'bg-blue-500 text-white border-blue-500', unselected: 'bg-blue-50 text-blue-600 border-blue-200' },
-                    seasonal: { selected: 'bg-green-500 text-white border-green-500', unselected: 'bg-green-50 text-green-600 border-green-200' },
+                    best: {
+                      selected: "bg-red-500 text-white border-red-500",
+                      unselected: "bg-red-50 text-red-600 border-red-200",
+                    },
+                    signature: {
+                      selected: "bg-purple-500 text-white border-purple-500",
+                      unselected: "bg-purple-50 text-purple-600 border-purple-200",
+                    },
+                    spicy: {
+                      selected: "bg-orange-500 text-white border-orange-500",
+                      unselected: "bg-orange-50 text-orange-600 border-orange-200",
+                    },
+                    cold: {
+                      selected: "bg-blue-500 text-white border-blue-500",
+                      unselected: "bg-blue-50 text-blue-600 border-blue-200",
+                    },
+                    seasonal: {
+                      selected: "bg-green-500 text-white border-green-500",
+                      unselected: "bg-green-50 text-green-600 border-green-200",
+                    },
                   };
                   const colors = badgeColors[badgeKey];
                   return (
                     <Badge
                       key={key}
-                      variant={isSelected ? 'default' : 'outline'}
-                      className={`cursor-pointer border-2 transition-colors ${isSelected ? colors.selected : colors.unselected
-                        }`}
+                      variant={isSelected ? "default" : "outline"}
+                      className={`cursor-pointer border-2 transition-colors ${
+                        isSelected ? colors.selected : colors.unselected
+                      }`}
                       onClick={() => handleToggleBadge(badgeKey)}
                     >
                       {label}
@@ -415,8 +431,20 @@ export function MenuCreateDialog({
               />
             </div>
             <div className="flex justify-end gap-2 mt-6">
-              <Button type="button" variant="outline" onClick={() => { resetForm(); onOpenChange(false); }} disabled={loading}>취소</Button>
-              <Button type="submit" disabled={loading}>등록</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  resetForm();
+                  onOpenChange(false);
+                }}
+                disabled={loading}
+              >
+                취소
+              </Button>
+              <Button type="submit" disabled={loading}>
+                등록
+              </Button>
             </div>
           </div>
         </form>

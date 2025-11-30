@@ -2,11 +2,11 @@
  * 영업시간 설정 폼
  */
 
-import { BusinessHours, DAY_LABELS } from '../../types/settings';
-import { Card } from '../ui/card';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { Switch } from '../ui/switch';
+import { BusinessHours, DAY_LABELS } from "../../types/settings";
+import { Card } from "../ui/card";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Switch } from "../ui/switch";
 
 interface BusinessHoursFormProps {
   value: BusinessHours[];
@@ -15,16 +15,12 @@ interface BusinessHoursFormProps {
 
 export function BusinessHoursForm({ value, onChange }: BusinessHoursFormProps) {
   const handleToggle = (day: string) => {
-    const updated = value.map(h =>
-      h.day === day ? { ...h, isOpen: !h.isOpen } : h
-    );
+    const updated = value.map(h => (h.day === day ? { ...h, isOpen: !h.isOpen } : h));
     onChange(updated);
   };
 
-  const handleTimeChange = (day: string, field: 'openTime' | 'closeTime', time: string) => {
-    const updated = value.map(h =>
-      h.day === day ? { ...h, [field]: time } : h
-    );
+  const handleTimeChange = (day: string, field: "openTime" | "closeTime", time: string) => {
+    const updated = value.map(h => (h.day === day ? { ...h, [field]: time } : h));
     onChange(updated);
   };
 
@@ -49,19 +45,11 @@ export function BusinessHoursForm({ value, onChange }: BusinessHoursFormProps) {
 
         <div className="space-y-3">
           {value.map((hours, index) => (
-            <div
-              key={hours.day}
-              className="flex items-center gap-3 p-3 rounded-lg border bg-white"
-            >
+            <div key={hours.day} className="flex items-center gap-3 p-3 rounded-lg border bg-white">
               {/* 요일 + 토글 */}
               <div className="w-24 flex items-center gap-2">
-                <Switch
-                  checked={hours.isOpen}
-                  onCheckedChange={() => handleToggle(hours.day)}
-                />
-                <Label className="text-sm text-[#333]">
-                  {DAY_LABELS[hours.day]}
-                </Label>
+                <Switch checked={hours.isOpen} onCheckedChange={() => handleToggle(hours.day)} />
+                <Label className="text-sm text-[#333]">{DAY_LABELS[hours.day]}</Label>
               </div>
 
               {/* 시간 입력 */}
@@ -71,14 +59,14 @@ export function BusinessHoursForm({ value, onChange }: BusinessHoursFormProps) {
                     <Input
                       type="time"
                       value={hours.openTime}
-                      onChange={(e) => handleTimeChange(hours.day, 'openTime', e.target.value)}
+                      onChange={e => handleTimeChange(hours.day, "openTime", e.target.value)}
                       className="w-32"
                     />
                     <span className="text-gray-400">~</span>
                     <Input
                       type="time"
                       value={hours.closeTime}
-                      onChange={(e) => handleTimeChange(hours.day, 'closeTime', e.target.value)}
+                      onChange={e => handleTimeChange(hours.day, "closeTime", e.target.value)}
                       className="w-32"
                     />
                   </div>
@@ -101,7 +89,8 @@ export function BusinessHoursForm({ value, onChange }: BusinessHoursFormProps) {
 
         <div className="bg-blue-50 border border-blue-200 rounded p-3 mt-4">
           <p className="text-xs text-blue-800">
-            💡 <strong>전체 적용</strong> 버튼을 누르면 해당 요일의 시간을 모든 요일에 일괄 적용합니다.
+            💡 <strong>전체 적용</strong> 버튼을 누르면 해당 요일의 시간을 모든 요일에 일괄
+            적용합니다.
           </p>
         </div>
       </div>

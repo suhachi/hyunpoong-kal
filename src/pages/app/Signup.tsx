@@ -1,61 +1,77 @@
 ﻿/**
  * 회원가입 페이지
  * 이메일 가입 / 구글 가입 지원
- * 
+ *
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Separator } from '../../components/ui/separator';
-import { Checkbox } from '../../components/ui/checkbox';
-import { ChickenIcon } from '../../components/icons';
-import { UserPlus, Mail, Lock, User, Chrome, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ChickenIcon } from "@/components/icons";
+import {
+  UserPlus,
+  Mail,
+  Lock,
+  User,
+  Chrome,
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
+import { toast } from "sonner";
 
 export function Signup() {
   const navigate = useNavigate();
   const { signUp, signInWithGoogle } = useAuth();
-  
+
   const [formData, setFormData] = useState({
-    displayName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    displayName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // 폼 유효성 검사
   const validateForm = (): string | null => {
     if (!formData.displayName.trim()) {
-      return '이름을 입력해주세요.';
+      return "이름을 입력해주세요.";
     }
     if (formData.displayName.length < 2) {
-      return '이름은 최소 2자 이상이어야 합니다.';
+      return "이름은 최소 2자 이상이어야 합니다.";
     }
-    if (!formData.email.includes('@')) {
-      return '올바른 이메일 형식이 아닙니다.';
+    if (!formData.email.includes("@")) {
+      return "올바른 이메일 형식이 아닙니다.";
     }
     if (formData.password.length < 6) {
-      return '비밀번호는 최소 6자 이상이어야 합니다.';
+      return "비밀번호는 최소 6자 이상이어야 합니다.";
     }
     if (formData.password !== formData.confirmPassword) {
-      return '비밀번호가 일치하지 않습니다.';
+      return "비밀번호가 일치하지 않습니다.";
     }
     if (!agreedToTerms) {
-      return '이용약관에 동의해주세요.';
+      return "이용약관에 동의해주세요.";
     }
     if (!agreedToPrivacy) {
-      return '개인정보 처리방침에 동의해주세요.';
+      return "개인정보 처리방침에 동의해주세요.";
     }
     return null;
   };
@@ -63,7 +79,7 @@ export function Signup() {
   // 이메일 회원가입
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // 유효성 검사
     const validationError = validateForm();
@@ -76,25 +92,30 @@ export function Signup() {
 
     try {
       await signUp(formData.email, formData.password, formData.displayName);
-      toast.success('회원가입 성공!', {
-        description: '현풍닭칼국수에 오신 것을 환영합니다.',
+      toast.success("회원가입 성공!", {
+        description: "현풍닭칼국수에 오신 것을 환영합니다.",
       });
-      navigate('/', { replace: true });
-    } catch (err: any) {
-      console.error('회원가입 실패:', err);
-      
+      navigate("/", { replace: true });
+    } catch (err: unknown) {
+      console.error("회원가입 실패:", err);
+
       // Firebase 에러 메시지 한글화
-      let errorMessage = '회원가입에 실패했습니다.';
-      if (err.code === 'auth/email-already-in-use') {
-        errorMessage = '이미 사용 중인 이메일입니다.';
-      } else if (err.code === 'auth/invalid-email') {
-        errorMessage = '올바른 이메일 형식이 아닙니다.';
-      } else if (err.code === 'auth/weak-password') {
-        errorMessage = '비밀번호가 너무 약합니다. 더 강력한 비밀번호를 사용해주세요.';
+      let errorMessage = "회원가입에 실패했습니다.";
+      if (typeof err === "object" && err !== null && "code" in err) {
+        const code = (err as { code: string }).code;
+        if (code === "auth/email-already-in-use") {
+          errorMessage = "이미 사용 중인 이메일입니다.";
+        } else if (code === "auth/invalid-email") {
+          errorMessage = "올바른 이메일 형식이 아닙니다.";
+        } else if (code === "auth/weak-password") {
+          errorMessage = "비밀번호가 너무 약합니다. 더 강력한 비밀번호를 사용해주세요.";
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
-      toast.error('회원가입 실패', { description: errorMessage });
+      toast.error("회원가입 실패", { description: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -103,23 +124,24 @@ export function Signup() {
   // 구글 회원가입
   const handleGoogleSignup = async () => {
     if (!agreedToTerms || !agreedToPrivacy) {
-      setError('이용약관 및 개인정보 처리방침에 동의해주세요.');
+      setError("이용약관 및 개인정보 처리방침에 동의해주세요.");
       return;
     }
 
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await signInWithGoogle();
-      toast.success('구글 가입 성공!', {
-        description: '현풍닭칼국수에 오신 것을 환영합니다.',
+      toast.success("구글 가입 성공!", {
+        description: "현풍닭칼국수에 오신 것을 환영합니다.",
       });
-      navigate('/', { replace: true });
-    } catch (err: any) {
-      console.error('구글 가입 실패:', err);
-      setError(err.message || '구글 가입에 실패했습니다.');
-      toast.error('구글 가입 실패');
+      navigate("/", { replace: true });
+    } catch (err: unknown) {
+      console.error("구글 가입 실패:", err);
+      const errorMessage = err instanceof Error ? err.message : "구글 가입에 실패했습니다.";
+      setError(errorMessage);
+      toast.error("구글 가입 실패");
     } finally {
       setLoading(false);
     }
@@ -142,12 +164,10 @@ export function Signup() {
               <ChickenIcon className="w-12 h-12 text-white" />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <CardTitle className="text-2xl">회원가입</CardTitle>
-            <CardDescription>
-              새 계정을 만들고 맛있는 칼국수를 즐기세요
-            </CardDescription>
+            <CardDescription>새 계정을 만들고 맛있는 칼국수를 즐기세요</CardDescription>
           </div>
         </CardHeader>
 
@@ -244,7 +264,7 @@ export function Signup() {
                 <Checkbox
                   id="terms"
                   checked={agreedToTerms}
-                  onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+                  onCheckedChange={checked => setAgreedToTerms(checked as boolean)}
                   disabled={loading}
                 />
                 <label
@@ -259,7 +279,7 @@ export function Signup() {
                 <Checkbox
                   id="privacy"
                   checked={agreedToPrivacy}
-                  onCheckedChange={(checked) => setAgreedToPrivacy(checked as boolean)}
+                  onCheckedChange={checked => setAgreedToPrivacy(checked as boolean)}
                   disabled={loading}
                 />
                 <label
@@ -294,9 +314,7 @@ export function Signup() {
           <div className="relative">
             <Separator />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="bg-white px-2 text-xs text-gray-500">
-                또는
-              </span>
+              <span className="bg-white px-2 text-xs text-gray-500">또는</span>
             </div>
           </div>
 
@@ -321,15 +339,12 @@ export function Signup() {
 
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-gray-600">
-            이미 계정이 있으신가요?{' '}
-            <Link
-              to="/login"
-              className="text-[#D61C1C] hover:underline font-medium"
-            >
+            이미 계정이 있으신가요?{" "}
+            <Link to="/login" className="text-[#D61C1C] hover:underline font-medium">
               로그인
             </Link>
           </div>
-          
+
           <div className="text-xs text-center text-gray-500">
             © 2024 KS컴퍼니 (사업자번호: 553-17-00098)
           </div>

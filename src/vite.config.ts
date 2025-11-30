@@ -1,16 +1,16 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './'),
+      "@": path.resolve(__dirname, "./"),
     },
   },
   css: {
-    postcss: './postcss.config.js',
+    postcss: "./postcss.config.js",
   },
   server: {
     port: 5173,
@@ -18,7 +18,7 @@ export default defineConfig({
     strictPort: true, // 5173 포트 강제 사용
   },
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     sourcemap: true,
   },
 });

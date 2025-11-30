@@ -3,7 +3,7 @@
  * Phase 2-9: KPI 및 차트 데이터
  */
 
-import { USE_FIREBASE } from '../../config/env';
+import { USE_FIREBASE } from "../../config/env";
 
 // KPI 데이터
 export interface KPIData {
@@ -41,7 +41,7 @@ export async function getKPIData(): Promise<KPIData> {
   if (USE_FIREBASE) {
     // TODO: Firestore aggregation
     // 임시로 빈 데이터 반환 (에러 대신)
-    console.warn('[Analytics] Firebase aggregation not implemented yet, returning empty data');
+    console.warn("[Analytics] Firebase aggregation not implemented yet, returning empty data");
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -61,7 +61,7 @@ export async function getKPIData(): Promise<KPIData> {
 export async function getHourlyOrders(): Promise<HourlyOrders[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore query
-    console.warn('[Analytics] Firebase query not implemented yet, returning empty data');
+    console.warn("[Analytics] Firebase query not implemented yet, returning empty data");
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -75,7 +75,7 @@ export async function getHourlyOrders(): Promise<HourlyOrders[]> {
 export async function getTopMenuSales(): Promise<MenuSales[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore aggregation
-    console.warn('[Analytics] Firebase aggregation not implemented yet, returning empty data');
+    console.warn("[Analytics] Firebase aggregation not implemented yet, returning empty data");
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -89,7 +89,7 @@ export async function getTopMenuSales(): Promise<MenuSales[]> {
 export async function getDailySales(): Promise<DailySales[]> {
   if (USE_FIREBASE) {
     // TODO: Firestore aggregation
-    console.warn('[Analytics] Firebase aggregation not implemented yet, returning empty data');
+    console.warn("[Analytics] Firebase aggregation not implemented yet, returning empty data");
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));

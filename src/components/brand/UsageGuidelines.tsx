@@ -1,24 +1,25 @@
-import { Check, X } from 'lucide-react';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { Check, X } from "lucide-react";
+import { ImageWithFallback } from "../figma/ImageWithFallback";
 
-const LOGO_SYMBOL_URL = 'https://images.unsplash.com/photo-1726293534804-13edb56db7aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjByZXN0YXVyYW50JTIwbG9nbyUyMHN5bWJvbHxlbnwxfHx8fDE3NjE3MDQ1Nzh8MA&ixlib=rb-4.1.0&q=80&w=1080';
+const LOGO_SYMBOL_URL =
+  "https://images.unsplash.com/photo-1726293534804-13edb56db7aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjByZXN0YXVyYW50JTIwbG9nbyUyMHN5bWJvbHxlbnwxfHx8fDE3NjE3MDQ1Nzh8MA&ixlib=rb-4.1.0&q=80&w=1080";
 
 export function UsageGuidelines() {
   const doList = [
-    '충분한 여백(Clear Space)을 확보하세요',
-    '지정된 컬러 시스템을 사용하세요',
-    '로고의 원본 비율을 유지하세요',
-    '고해상도 원본 파일을 사용하세요',
-    '배경과의 충분한 대비를 확인하세요'
+    "충분한 여백(Clear Space)을 확보하세요",
+    "지정된 컬러 시스템을 사용하세요",
+    "로고의 원본 비율을 유지하세요",
+    "고해상도 원본 파일을 사용하세요",
+    "배경과의 충분한 대비를 확인하세요",
   ];
 
   const dontList = [
-    '로고의 색상을 임의로 변경하지 마세요',
-    '로고의 비율을 왜곡하지 마세요',
-    '그라데이션을 추가하지 마세요',
-    '윤곽선(Outline)을 추가하지 마세요',
-    '로고를 회전시키거나 기울이지 마세요',
-    '복잡한 배경 위에 로고를 배치하지 마세요'
+    "로고의 색상을 임의로 변경하지 마세요",
+    "로고의 비율을 왜곡하지 마세요",
+    "그라데이션을 추가하지 마세요",
+    "윤곽선(Outline)을 추가하지 마세요",
+    "로고를 회전시키거나 기울이지 마세요",
+    "복잡한 배경 위에 로고를 배치하지 마세요",
   ];
 
   return (
@@ -95,7 +96,8 @@ export function UsageGuidelines() {
             </div>
             <h4 className="text-[#2E1C10] mb-2">최소 사이즈</h4>
             <p className="text-sm text-gray-600">
-              인쇄물: 20mm 이상<br/>
+              인쇄물: 20mm 이상
+              <br />
               디지털: 80px 이상
             </p>
           </div>
@@ -106,7 +108,8 @@ export function UsageGuidelines() {
             </div>
             <h4 className="text-[#2E1C10] mb-2">배경 사용</h4>
             <p className="text-sm text-gray-600">
-              화이트, 미색배경 권장<br/>
+              화이트, 미색배경 권장
+              <br />
               복잡한 패턴 배경 금지
             </p>
           </div>
@@ -117,7 +120,8 @@ export function UsageGuidelines() {
             </div>
             <h4 className="text-[#2E1C10] mb-2">파일 형식</h4>
             <p className="text-sm text-gray-600">
-              인쇄: AI, PDF, EPS<br/>
+              인쇄: AI, PDF, EPS
+              <br />
               디지털: PNG, SVG
             </p>
           </div>

@@ -1,65 +1,110 @@
 /**
  * 현풍닭칼국수 PWA - 완전한 라우팅 버전
- * 
+ *
  * 주의: 이 파일은 로컬 개발 환경 전용입니다.
- * 
+ *
  * 사용법:
  * 1. App.tsx를 App.demo.tsx로 백업
  * 2. 이 파일을 App.tsx로 복사
  * 3. npm run dev 실행
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, lazy, Suspense } from 'react';
-import { Toaster } from './components/ui/sonner';
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
-import { ProtectedRoute } from './components/shared/ProtectedRoute';
-import { ensureFcmToken, FCM_TOKEN_KEY } from './lib/fcm';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, lazy, Suspense } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
+import { ensureFcmToken, FCM_TOKEN_KEY } from "@/lib/fcm";
 
 // Layout (레이아웃은 즉시 로드)
-import { AppLayout } from './components/app/AppLayout';
-const AdminLayout = lazy(() => import('./pages/admin/_layout/AdminLayout').then(m => ({ default: m.AdminLayout })));
+import { AppLayout } from "@/components/app/AppLayout";
+const AdminLayout = lazy(() =>
+  import("@/pages/admin/_layout/AdminLayout").then(m => ({ default: m.AdminLayout })),
+);
 
 // 고객 앱 페이지 (lazy load)
-const Home = lazy(() => import('./pages/app/Home').then(m => ({ default: m.Home })));
-const MenuList = lazy(() => import('./pages/app/MenuList').then(m => ({ default: m.MenuList })));
-const MenuDetail = lazy(() => import('./pages/app/MenuDetail').then(m => ({ default: m.MenuDetail })));
-const Cart = lazy(() => import('./pages/app/Cart').then(m => ({ default: m.Cart })));
-const Checkout = lazy(() => import('./pages/app/Checkout').then(m => ({ default: m.Checkout })));
-const My = lazy(() => import('./pages/app/My').then(m => ({ default: m.My })));
-const Login = lazy(() => import('./pages/app/Login').then(m => ({ default: m.Login })));
-const Signup = lazy(() => import('./pages/app/Signup').then(m => ({ default: m.Signup })));
-const OrderTracking = lazy(() => import('./pages/app/OrderTracking').then(m => ({ default: m.OrderTracking })));
-const OrderHistory = lazy(() => import('./pages/app/OrderHistory').then(m => ({ default: m.OrderHistory })));
-const ReviewWrite = lazy(() => import('./pages/app/ReviewWrite').then(m => ({ default: m.ReviewWrite })));
-const ReviewList = lazy(() => import('./pages/app/ReviewList').then(m => ({ default: m.ReviewList })));
-const Points = lazy(() => import('./pages/app/Points').then(m => ({ default: m.Points })));
-const Coupons = lazy(() => import('./pages/app/Coupons').then(m => ({ default: m.Coupons })));
-const Notifications = lazy(() => import('./pages/app/Notifications').then(m => ({ default: m.Notifications })));
-const NotificationSettings = lazy(() => import('./pages/app/NotificationSettings').then(m => ({ default: m.NotificationSettings })));
-const Support = lazy(() => import('./pages/app/Support').then(m => ({ default: m.Support })));
-const InstallGuide = lazy(() => import('./pages/app/InstallGuide').then(m => ({ default: m.InstallGuide })));
+const Home = lazy(() => import("@/pages/app/Home").then(m => ({ default: m.Home })));
+const MenuList = lazy(() => import("@/pages/app/MenuList").then(m => ({ default: m.MenuList })));
+const MenuDetail = lazy(() =>
+  import("@/pages/app/MenuDetail").then(m => ({ default: m.MenuDetail })),
+);
+const Cart = lazy(() => import("@/pages/app/Cart").then(m => ({ default: m.Cart })));
+const Checkout = lazy(() => import("@/pages/app/Checkout").then(m => ({ default: m.Checkout })));
+const My = lazy(() => import("@/pages/app/My").then(m => ({ default: m.My })));
+const Login = lazy(() => import("@/pages/app/Login").then(m => ({ default: m.Login })));
+const Signup = lazy(() => import("@/pages/app/Signup").then(m => ({ default: m.Signup })));
+const OrderTracking = lazy(() =>
+  import("@/pages/app/OrderTracking").then(m => ({ default: m.OrderTracking })),
+);
+const OrderHistory = lazy(() =>
+  import("@/pages/app/OrderHistory").then(m => ({ default: m.OrderHistory })),
+);
+const ReviewWrite = lazy(() =>
+  import("@/pages/app/ReviewWrite").then(m => ({ default: m.ReviewWrite })),
+);
+const ReviewList = lazy(() =>
+  import("@/pages/app/ReviewList").then(m => ({ default: m.ReviewList })),
+);
+const Points = lazy(() => import("@/pages/app/Points").then(m => ({ default: m.Points })));
+const Coupons = lazy(() => import("@/pages/app/Coupons").then(m => ({ default: m.Coupons })));
+const Notifications = lazy(() =>
+  import("@/pages/app/Notifications").then(m => ({ default: m.Notifications })),
+);
+const NotificationSettings = lazy(() =>
+  import("@/pages/app/NotificationSettings").then(m => ({ default: m.NotificationSettings })),
+);
+const Support = lazy(() => import("@/pages/app/Support").then(m => ({ default: m.Support })));
+const InstallGuide = lazy(() =>
+  import("@/pages/app/InstallGuide").then(m => ({ default: m.InstallGuide })),
+);
+const PaymentResult = lazy(() => 
+  import("@/pages/app/PaymentResult").then(m => ({ default: m.PaymentResultPage })),
+);
 
 // 관리자 페이지 (lazy load - Admin 영역 전체 분리)
-const Dashboard = lazy(() => import('./pages/admin/Dashboard').then(m => ({ default: m.Dashboard })));
-const AdminOrders = lazy(() => import('./pages/admin/Orders').then(m => ({ default: m.AdminOrders })));
-const AdminMenus = lazy(() => import('./pages/admin/Menus').then(m => ({ default: m.AdminMenus })));
-const AdminReviews = lazy(() => import('./pages/admin/Reviews').then(m => ({ default: m.AdminReviews })));
-const AdminAnalytics = lazy(() => import('./pages/admin/Analytics').then(m => ({ default: m.AdminAnalytics })));
-const IntegratedAnalytics = lazy(() => import('./pages/admin/IntegratedAnalytics').then(m => ({ default: m.IntegratedAnalytics })));
-const AdminSettingsCenter = lazy(() => import('./pages/admin/Settings').then(m => ({ default: m.AdminSettingsCenter })));
-const AdminSupport = lazy(() => import('./pages/admin/Support').then(m => ({ default: m.AdminSupport })));
-const AdminDelivery = lazy(() => import('./pages/admin/Delivery').then(m => ({ default: m.AdminDelivery })));
-const AdminPromotions = lazy(() => import('./pages/admin/Promotions').then(m => ({ default: m.AdminPromotions })));
-const AdminPoints = lazy(() => import('./pages/admin/Points').then(m => ({ default: m.AdminPoints })));
-const AdminNotices = lazy(() => import('./pages/admin/Notices').then(m => ({ default: m.AdminNotices })));
+const Dashboard = lazy(() =>
+  import("@/pages/admin/Dashboard").then(m => ({ default: m.Dashboard })),
+);
+const AdminOrders = lazy(() =>
+  import("@/pages/admin/Orders").then(m => ({ default: m.AdminOrders })),
+);
+const AdminMenus = lazy(() => import("@/pages/admin/Menus").then(m => ({ default: m.AdminMenus })));
+const AdminReviews = lazy(() =>
+  import("@/pages/admin/Reviews").then(m => ({ default: m.AdminReviews })),
+);
+const AdminAnalytics = lazy(() =>
+  import("@/pages/admin/Analytics").then(m => ({ default: m.AdminAnalytics })),
+);
+const IntegratedAnalytics = lazy(() =>
+  import("@/pages/admin/IntegratedAnalytics").then(m => ({ default: m.IntegratedAnalytics })),
+);
+const AdminSettingsCenter = lazy(() =>
+  import("@/pages/admin/Settings").then(m => ({ default: m.AdminSettingsCenter })),
+);
+const AdminSupport = lazy(() =>
+  import("@/pages/admin/Support").then(m => ({ default: m.AdminSupport })),
+);
+const AdminDelivery = lazy(() =>
+  import("@/pages/admin/Delivery").then(m => ({ default: m.AdminDelivery })),
+);
+const AdminPromotions = lazy(() =>
+  import("@/pages/admin/Promotions").then(m => ({ default: m.AdminPromotions })),
+);
+const AdminPoints = lazy(() =>
+  import("@/pages/admin/Points").then(m => ({ default: m.AdminPoints })),
+);
+const AdminNotices = lazy(() =>
+  import("@/pages/admin/Notices").then(m => ({ default: m.AdminNotices })),
+);
 
 // 개발 도구
-const DevTools = lazy(() => import('./pages/DevTools').then(m => ({ default: m.DevTools })));
+const DevTools = lazy(() => import("@/pages/DevTools").then(m => ({ default: m.DevTools })));
 
 // 관리자 알림 컴포넌트
-const AdminOrderAlert = lazy(() => import('./components/admin/AdminOrderAlert').then(m => ({ default: m.AdminOrderAlert })));
+const AdminOrderAlert = lazy(() =>
+  import("@/components/admin/AdminOrderAlert").then(m => ({ default: m.AdminOrderAlert })),
+);
 
 // 로딩 폴백 컴포넌트
 const LoadingFallback = () => (
@@ -74,10 +119,10 @@ export default function App() {
     try {
       const existing = localStorage.getItem(FCM_TOKEN_KEY);
       if (!existing) {
-        ensureFcmToken().catch((err) => console.error('[FCM] ensureFcmToken error', err));
+        ensureFcmToken().catch(err => console.error("[FCM] ensureFcmToken error", err));
       }
     } catch (e) {
-      console.warn('[FCM] 초기 토큰 확인 실패:', e);
+      console.warn("[FCM] 초기 토큰 확인 실패:", e);
     }
   }, []);
 
@@ -123,6 +168,12 @@ export default function App() {
 
                 {/* 마이페이지 */}
                 <Route path="my" element={<My />} />
+
+                {/* 결제 결과 페이지 */}
+                <Route path="payment">
+                  <Route path="complete" element={<PaymentResult />} />
+                  <Route path="cancel" element={<PaymentResult />} />
+                </Route>
               </Route>
 
               {/* ========================================

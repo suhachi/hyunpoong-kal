@@ -1,12 +1,12 @@
 /**
  * FCM 알림 헬퍼
  * v1.0 STEP 6: Functions 기본 셋업
- * 
+ *
  * 현재는 토큰 스키마 확정 전이라도 골격만 제공
  * 향후 users/{userId}/fcmTokens 컬렉션 구조로 확장 예정
  */
 
-import * as admin from 'firebase-admin';
+import * as admin from "firebase-admin";
 
 interface NotifyUserParams {
   userId: string;
@@ -24,7 +24,7 @@ export async function notifyUser(params: NotifyUserParams): Promise<void> {
 
   // TODO: users/{userId}/fcmTokens 컬렉션에서 토큰 목록을 가져오는 구조로 확장 예정
   // 현재는 토큰 조회 대신 로깅만 수행
-  console.log('[FCM][TODO] notifyUser called', { userId, title, body, data });
+  console.log("[FCM][TODO] notifyUser called", { userId, title, body, data });
 
   // 향후 구현 예시:
   // const tokensSnap = await db
@@ -43,4 +43,3 @@ export async function notifyUser(params: NotifyUserParams): Promise<void> {
   //   data: data || {},
   // });
 }
-

@@ -1,16 +1,22 @@
 ﻿/**
  * 결제 설정 탭 (NICEPAY)
  * KS컴퍼니 (사업자번호: 553-17-00098)
- * 
+ *
  * 주의: 현재 실제 결제 연동은 Phase 3 이후로 보류
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Separator } from '../../../components/ui/separator';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { Separator } from "../../../components/ui/separator";
 import {
   CheckCircle2,
   XCircle,
@@ -20,10 +26,10 @@ import {
   Terminal,
   FileText,
   CreditCard,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { checkFunctionsHealth } from '../../../lib/admin/settingsCenter.api';
-import type { FunctionsHealthCheck } from '../../../types/adminSettings';
+} from "lucide-react";
+import { toast } from "sonner";
+import { checkFunctionsHealth } from "../../../lib/admin/settingsCenter.api";
+import type { FunctionsHealthCheck } from "../../../types/adminSettings";
 
 export function PaymentTab() {
   const [healthCheck, setHealthCheck] = useState<FunctionsHealthCheck | null>(null);
@@ -37,8 +43,8 @@ export function PaymentTab() {
       const result = await checkFunctionsHealth();
       setHealthCheck(result);
     } catch (error) {
-      console.error('Health check failed:', error);
-      toast.error('상태 확인에 실패했습니다');
+      console.error("Health check failed:", error);
+      toast.error("상태 확인에 실패했습니다");
     } finally {
       setChecking(false);
       setLoading(false);
@@ -52,7 +58,7 @@ export function PaymentTab() {
   // CLI 명령어 복사
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
-    toast.success('명령어가 복사되었습니다');
+    toast.success("명령어가 복사되었습니다");
   };
 
   return (
@@ -63,9 +69,9 @@ export function PaymentTab() {
         <AlertDescription>
           <div className="font-medium mb-1">현재 결제 연동 상태</div>
           <div className="text-sm text-[#2E1C10]/70">
-            • 현재 이 프로젝트는 <strong>테스트 결제 및 가상 결제</strong>만 지원합니다.<br />
-            • 실제 PG(결제대행) 연동은 <strong>Phase 3 이후</strong>로 보류되었습니다.<br />
-            • 향후 PG사 선정 시 별도 T코드로 연동 작업이 진행됩니다.
+            • 현재 이 프로젝트는 <strong>테스트 결제 및 가상 결제</strong>만 지원합니다.
+            <br />• 실제 PG(결제대행) 연동은 <strong>Phase 3 이후</strong>로 보류되었습니다.
+            <br />• 향후 PG사 선정 시 별도 T코드로 연동 작업이 진행됩니다.
           </div>
         </AlertDescription>
       </Alert>
@@ -87,9 +93,10 @@ export function PaymentTab() {
             <AlertDescription className="text-xs">
               <div className="font-medium mb-1">⚠️ 주의사항</div>
               <div className="text-[#2E1C10]/60">
-                • 현재 설정은 Mock 모드 테스트용입니다.<br />
-                • 실제 결제 승인/취소는 동작하지 않습니다.<br />
-                • Phase 2 이후 Firebase Functions와 연동하여 테스트 결제가 가능해집니다.
+                • 현재 설정은 Mock 모드 테스트용입니다.
+                <br />
+                • 실제 결제 승인/취소는 동작하지 않습니다.
+                <br />• Phase 2 이후 Firebase Functions와 연동하여 테스트 결제가 가능해집니다.
               </div>
             </AlertDescription>
           </Alert>
@@ -108,12 +115,12 @@ export function PaymentTab() {
 }
 
 // 나이스페이 설정 컴포넌트
-function NicePaySettings({ 
-  healthCheck, 
-  loading, 
-  checking, 
-  onRecheck, 
-  onCopyCommand 
+function NicePaySettings({
+  healthCheck,
+  loading,
+  checking,
+  onRecheck,
+  onCopyCommand,
 }: {
   healthCheck: FunctionsHealthCheck | null;
   loading: boolean;
@@ -168,17 +175,18 @@ function NicePaySettings({
             {/* 필수 키 체크 */}
             <div className="space-y-2">
               <span className="text-xs font-medium text-[#2E1C10]/60">필수 설정</span>
-              
-              {healthCheck?.nicepay?.fields && Object.entries(healthCheck.nicepay.fields).map(([key, value]) => (
-                <div key={key} className="flex items-center justify-between text-xs">
-                  <span className="text-[#2E1C10]/70">{key}</span>
-                  {value ? (
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                  ) : (
-                    <XCircle className="w-3 h-3 text-red-600" />
-                  )}
-                </div>
-              ))}
+
+              {healthCheck?.nicepay?.fields &&
+                Object.entries(healthCheck.nicepay.fields).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between text-xs">
+                    <span className="text-[#2E1C10]/70">{key}</span>
+                    {value ? (
+                      <CheckCircle2 className="w-3 h-3 text-green-600" />
+                    ) : (
+                      <XCircle className="w-3 h-3 text-red-600" />
+                    )}
+                  </div>
+                ))}
             </div>
 
             <Separator />
@@ -191,7 +199,7 @@ function NicePaySettings({
               onClick={onRecheck}
               disabled={checking}
             >
-              {checking ? '확인 중...' : '상태 재확인'}
+              {checking ? "확인 중..." : "상태 재확인"}
             </Button>
           </CardContent>
         </Card>
@@ -200,8 +208,7 @@ function NicePaySettings({
         <Alert>
           <AlertCircle className="w-4 h-4" />
           <AlertDescription className="text-xs">
-            NICEPAY 설정은 Firebase Functions에만 저장됩니다.
-            프론트엔드에는 노출되지 않습니다.
+            NICEPAY 설정은 Firebase Functions에만 저장됩니다. 프론트엔드에는 노출되지 않습니다.
           </AlertDescription>
         </Alert>
       </div>
@@ -223,22 +230,14 @@ function NicePaySettings({
             {/* 명령어 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-[#2E1C10]">
-                  1. 설정 명령어
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onCopyCommand(nicepayCommand)}
-                >
+                <span className="text-sm font-medium text-[#2E1C10]">1. 설정 명령어</span>
+                <Button variant="outline" size="sm" onClick={() => onCopyCommand(nicepayCommand)}>
                   <Copy className="w-4 h-4 mr-2" />
                   복사
                 </Button>
               </div>
               <pre className="p-4 bg-[#2E1C10]/5 rounded-lg overflow-x-auto">
-                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">
-                  {nicepayCommand}
-                </code>
+                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">{nicepayCommand}</code>
               </pre>
             </div>
 
@@ -247,22 +246,14 @@ function NicePaySettings({
             {/* 확인 명령어 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-[#2E1C10]">
-                  2. 설정 확인
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onCopyCommand(getCheckCommand)}
-                >
+                <span className="text-sm font-medium text-[#2E1C10]">2. 설정 확인</span>
+                <Button variant="outline" size="sm" onClick={() => onCopyCommand(getCheckCommand)}>
                   <Copy className="w-4 h-4 mr-2" />
                   복사
                 </Button>
               </div>
               <pre className="p-4 bg-[#2E1C10]/5 rounded-lg">
-                <code className="text-xs text-[#2E1C10]/80">
-                  {getCheckCommand}
-                </code>
+                <code className="text-xs text-[#2E1C10]/80">{getCheckCommand}</code>
               </pre>
             </div>
 
@@ -288,23 +279,19 @@ function NicePaySettings({
               <FileText className="w-5 h-5 text-[#F37021]" />
               <CardTitle>NICEPAY 가이드</CardTitle>
             </div>
-            <CardDescription>
-              NICEPAY 개발자 센터에서 필요한 정보를 확인하세요
-            </CardDescription>
+            <CardDescription>NICEPAY 개발자 센터에서 필요한 정보를 확인하세요</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* MID/KEY 발급 */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">
-                1. MID/KEY 발급
-              </h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">1. MID/KEY 발급</h4>
               <p className="text-xs text-[#2E1C10]/60">
                 NICEPAY 개발자 센터에서 가맹점 ID(MID)와 Key를 발급받으세요.
               </p>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('https://npg.nicepay.co.kr', '_blank')}
+                onClick={() => window.open("https://npg.nicepay.co.kr", "_blank")}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 NICEPAY 개발자 센터
@@ -315,24 +302,18 @@ function NicePaySettings({
 
             {/* Return/Cancel URL */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">
-                2. Return/Cancel URL 등록
-              </h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">2. Return/Cancel URL 등록</h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
                 NICEPAY 관리자 페이지에서 아래 URL을 등록하세요:
               </p>
               <div className="space-y-1 text-xs">
                 <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                   <span className="text-[#2E1C10]/60">Return URL:</span>
-                  <code className="flex-1 text-[#2E1C10]">
-                    https://hp-kal.web.app/pay/return
-                  </code>
+                  <code className="flex-1 text-[#2E1C10]">https://hp-kal.web.app/pay/return</code>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                   <span className="text-[#2E1C10]/60">Cancel URL:</span>
-                  <code className="flex-1 text-[#2E1C10]">
-                    https://hp-kal.web.app/pay/cancel
-                  </code>
+                  <code className="flex-1 text-[#2E1C10]">https://hp-kal.web.app/pay/cancel</code>
                 </div>
               </div>
             </div>

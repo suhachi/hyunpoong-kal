@@ -3,22 +3,22 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
-import { Settings, CreditCard, Truck, Map, Bell, Shield, Store } from 'lucide-react';
-import { useAuth } from '../../../contexts/AuthContext';
-import { USE_FIREBASE } from '../../../config/env';
-import { PaymentTab } from './PaymentTab';
-import { DeliveryTab } from './DeliveryTab';
-import { MapsTab } from './MapsTab';
-import { FCMTab } from './FCMTab';
-import { OperationsTab } from './OperationsTab';
-import { StoreInfoTab } from './StoreInfoTab';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Settings, CreditCard, Truck, Map, Bell, Shield, Store } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { USE_FIREBASE } from "../../../config/env";
+import { PaymentTab } from "./PaymentTab";
+import { DeliveryTab } from "./DeliveryTab";
+import { MapsTab } from "./MapsTab";
+import { FCMTab } from "./FCMTab";
+import { OperationsTab } from "./OperationsTab";
+import { StoreInfoTab } from "./StoreInfoTab";
 
 export function AdminSettingsCenter() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabFromUrl = searchParams.get('tab') || 'storeInfo';
+  const tabFromUrl = searchParams.get("tab") || "storeInfo";
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   // 사용자 정보 가져오기 (AuthContext 사용)
@@ -26,7 +26,7 @@ export function AdminSettingsCenter() {
 
   // URL 쿼리 파라미터 동기화
   useEffect(() => {
-    const tab = searchParams.get('tab');
+    const tab = searchParams.get("tab");
     if (tab) {
       setActiveTab(tab);
     }
@@ -50,12 +50,8 @@ export function AdminSettingsCenter() {
               <Shield className="w-16 h-16 text-[#2E1C10]/20 mx-auto" />
             </div>
             <div>
-              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">
-                로딩 중...
-              </h2>
-              <p className="text-[#2E1C10]/60">
-                사용자 정보를 확인하는 중입니다.
-              </p>
+              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">로딩 중...</h2>
+              <p className="text-[#2E1C10]/60">사용자 정보를 확인하는 중입니다.</p>
             </div>
           </div>
         </div>
@@ -63,21 +59,17 @@ export function AdminSettingsCenter() {
     }
 
     // Firebase 모드: 접근 권한 확인
-    if (user.role !== 'owner' && user.role !== 'admin') {
+    if (user.role !== "owner" && user.role !== "admin") {
       return (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4">
             <Shield className="w-16 h-16 text-[#2E1C10]/20 mx-auto" />
             <div>
-              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">
-                접근 권한이 필요합니다
-              </h2>
+              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">접근 권한이 필요합니다</h2>
               <p className="text-[#2E1C10]/60">
                 설정 센터는 관리자 또는 소유자만 접근할 수 있습니다.
               </p>
-              <p className="text-sm text-[#2E1C10]/40 mt-2">
-                현재 역할: {user.role || '없음'}
-              </p>
+              <p className="text-sm text-[#2E1C10]/40 mt-2">현재 역할: {user.role || "없음"}</p>
             </div>
           </div>
         </div>
@@ -95,9 +87,7 @@ export function AdminSettingsCenter() {
             <Settings className="w-6 h-6 text-[#D61C1C]" />
             <h1 className="text-2xl text-[#2E1C10]">설정 센터</h1>
           </div>
-          <p className="text-[#2E1C10]/60">
-            API 키 및 시스템 설정을 안전하게 관리하세요
-          </p>
+          <p className="text-[#2E1C10]/60">API 키 및 시스템 설정을 안전하게 관리하세요</p>
         </div>
 
         {/* Role 배지 */}
@@ -105,7 +95,7 @@ export function AdminSettingsCenter() {
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#D61C1C]/10 rounded-lg">
             <Shield className="w-4 h-4 text-[#D61C1C]" />
             <span className="text-sm font-medium text-[#D61C1C]">
-              {user.role === 'owner' ? '소유자' : '관리자'}
+              {user.role === "owner" ? "소유자" : "관리자"}
             </span>
           </div>
         )}
@@ -116,12 +106,11 @@ export function AdminSettingsCenter() {
         <div className="flex items-start gap-3">
           <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1 space-y-1">
-            <h3 className="text-sm font-medium text-blue-900">
-              보안 원칙
-            </h3>
+            <h3 className="text-sm font-medium text-blue-900">보안 원칙</h3>
             <p className="text-xs text-blue-800">
-              서버 비밀키는 <code className="px-1 py-0.5 bg-blue-100 rounded">functions:config</code>에만 저장됩니다.
-              클라이언트(.env.local)에는 공개 가능한 키만 저장하세요.
+              서버 비밀키는{" "}
+              <code className="px-1 py-0.5 bg-blue-100 rounded">functions:config</code>에만
+              저장됩니다. 클라이언트(.env.local)에는 공개 가능한 키만 저장하세요.
             </p>
           </div>
         </div>
@@ -130,15 +119,27 @@ export function AdminSettingsCenter() {
       {/* 탭 메뉴 */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="storeInfo" className="gap-2" data-testid="admin-settings-tab-trigger-storeinfo">
+          <TabsTrigger
+            value="storeInfo"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-storeinfo"
+          >
             <Store className="w-4 h-4" />
             <span className="hidden sm:inline">가게 정보</span>
           </TabsTrigger>
-          <TabsTrigger value="payment" className="gap-2" data-testid="admin-settings-tab-trigger-payment">
+          <TabsTrigger
+            value="payment"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-payment"
+          >
             <CreditCard className="w-4 h-4" />
             <span className="hidden sm:inline">결제</span>
           </TabsTrigger>
-          <TabsTrigger value="delivery" className="gap-2" data-testid="admin-settings-tab-trigger-delivery">
+          <TabsTrigger
+            value="delivery"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-delivery"
+          >
             <Truck className="w-4 h-4" />
             <span className="hidden sm:inline">배달대행</span>
           </TabsTrigger>
@@ -150,7 +151,11 @@ export function AdminSettingsCenter() {
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">알림/FCM</span>
           </TabsTrigger>
-          <TabsTrigger value="operations" className="gap-2" data-testid="admin-settings-tab-trigger-operations">
+          <TabsTrigger
+            value="operations"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-operations"
+          >
             <Shield className="w-4 h-4" />
             <span className="hidden sm:inline">운영/보안</span>
           </TabsTrigger>

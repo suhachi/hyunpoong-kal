@@ -4,11 +4,11 @@
  * Phase 3-7: 통합 리포트
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardDescription } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Badge } from '../../components/ui/badge';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardDescription } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Badge } from "../../components/ui/badge";
 import {
   Download,
   RefreshCw,
@@ -21,8 +21,8 @@ import {
   Truck,
   Bell,
   Calendar,
-} from 'lucide-react';
-import { toast } from 'sonner';
+} from "lucide-react";
+import { toast } from "sonner";
 import {
   BarChart,
   Bar,
@@ -37,20 +37,20 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
+} from "recharts";
 import {
   generateIntegratedReport,
   exportReportToCSV,
-} from '../../lib/admin/integrated-analytics.api';
-import type { IntegratedReport, DateRange } from '../../types/analytics';
-import { formatPrice } from '../../lib/utils';
+} from "../../lib/admin/integrated-analytics.api";
+import type { IntegratedReport, DateRange } from "../../types/analytics";
+import { formatPrice } from "../../lib/utils";
 
-const COLORS = ['#D61C1C', '#F37021', '#C7A45A', '#8B7355', '#4A4A4A'];
+const COLORS = ["#D61C1C", "#F37021", "#C7A45A", "#8B7355", "#4A4A4A"];
 
 export function IntegratedAnalytics() {
   const [report, setReport] = useState<IntegratedReport | null>(null);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+  const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
 
   useEffect(() => {
     loadReport();
@@ -59,13 +59,13 @@ export function IntegratedAnalytics() {
   const getDateRange = (): DateRange => {
     const end = new Date();
     const start = new Date();
-    
-    if (period === 'weekly') {
+
+    if (period === "weekly") {
       start.setDate(end.getDate() - 7);
     } else {
       start.setDate(end.getDate() - 30);
     }
-    
+
     return { start, end };
   };
 
@@ -76,8 +76,8 @@ export function IntegratedAnalytics() {
       const data = await generateIntegratedReport(period, dateRange);
       setReport(data);
     } catch (error) {
-      console.error('Failed to load report:', error);
-      toast.error('리포트를 불러오는데 실패했습니다');
+      console.error("Failed to load report:", error);
+      toast.error("리포트를 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -88,38 +88,39 @@ export function IntegratedAnalytics() {
 
     try {
       const csv = exportReportToCSV(report);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `통합리포트_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", `통합리포트_${new Date().toISOString().split("T")[0]}.csv`);
+      link.style.visibility = "hidden";
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
-      toast.success('리포트를 다운로드했습니다');
+
+      toast.success("리포트를 다운로드했습니다");
     } catch (error) {
-      console.error('Failed to export report:', error);
-      toast.error('다운로드에 실패했습니다');
+      console.error("Failed to export report:", error);
+      toast.error("다운로드에 실패했습니다");
     }
   };
 
   // 데이터 존재 여부 확인
-  const hasData = report && (
-    report.kpi.totalOrders > 0 ||
-    report.kpi.totalSales > 0 ||
-    report.hourlyAnalysis.length > 0 ||
-    report.dayOfWeekAnalysis.length > 0 ||
-    report.topMenus.length > 0 ||
-    report.couponEffectiveness.length > 0 ||
-    (report.pointsEffectiveness.totalEarned > 0 || report.pointsEffectiveness.totalSpent > 0) ||
-    report.reviewAnalysis.totalReviews > 0 ||
-    report.deliveryPerformance.totalDeliveries > 0 ||
-    report.notificationEffectiveness.totalSent > 0
-  );
+  const hasData =
+    report &&
+    (report.kpi.totalOrders > 0 ||
+      report.kpi.totalSales > 0 ||
+      report.hourlyAnalysis.length > 0 ||
+      report.dayOfWeekAnalysis.length > 0 ||
+      report.topMenus.length > 0 ||
+      report.couponEffectiveness.length > 0 ||
+      report.pointsEffectiveness.totalEarned > 0 ||
+      report.pointsEffectiveness.totalSpent > 0 ||
+      report.reviewAnalysis.totalReviews > 0 ||
+      report.deliveryPerformance.totalDeliveries > 0 ||
+      report.notificationEffectiveness.totalSent > 0);
 
   if (loading || !report) {
     return (
@@ -184,7 +185,8 @@ export function IntegratedAnalytics() {
         <div>
           <h1 className="text-2xl text-[#333] mb-2">통합 분석</h1>
           <p className="text-[#8B7355]">
-            {report.dateRange.start.toLocaleDateString()} ~ {report.dateRange.end.toLocaleDateString()}
+            {report.dateRange.start.toLocaleDateString()} ~{" "}
+            {report.dateRange.end.toLocaleDateString()}
           </p>
         </div>
         <div className="flex gap-2">
@@ -210,8 +212,7 @@ export function IntegratedAnalytics() {
         <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#D61C1C]" />
-              총 매출
+              <TrendingUp className="w-4 h-4 text-[#D61C1C]" />총 매출
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -230,7 +231,9 @@ export function IntegratedAnalytics() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl">{report.kpi.newCustomers + report.kpi.returningCustomers}명</div>
+            <div className="text-2xl">
+              {report.kpi.newCustomers + report.kpi.returningCustomers}명
+            </div>
             <p className="text-xs text-gray-500 mt-1">
               유지율 {report.kpi.customerRetentionRate.toFixed(1)}%
             </p>
@@ -246,9 +249,7 @@ export function IntegratedAnalytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl">{report.kpi.averageRating.toFixed(1)}점</div>
-            <p className="text-xs text-gray-500 mt-1">
-              리뷰 {report.kpi.totalReviews}개
-            </p>
+            <p className="text-xs text-gray-500 mt-1">리뷰 {report.kpi.totalReviews}개</p>
           </CardContent>
         </Card>
 
@@ -331,12 +332,12 @@ export function IntegratedAnalytics() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={report.hourlyAnalysis}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" tickFormatter={(value) => `${value}시`} />
+                  <XAxis dataKey="hour" tickFormatter={value => `${value}시`} />
                   <YAxis />
                   <Tooltip
                     formatter={(value: any, name: string) => {
-                      if (name === 'orders') return [value, '주문 수'];
-                      if (name === 'sales') return [formatPrice(value), '매출'];
+                      if (name === "orders") return [value, "주문 수"];
+                      if (name === "sales") return [formatPrice(value), "매출"];
                       return [value, name];
                     }}
                   />
@@ -381,7 +382,10 @@ export function IntegratedAnalytics() {
             <CardContent>
               <div className="space-y-3">
                 {(report.topMenus || []).map((menu, index) => (
-                  <div key={menu.menuId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={menu.menuId}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex items-center gap-3">
                       <Badge variant="outline">{index + 1}</Badge>
                       <div>
@@ -410,7 +414,7 @@ export function IntegratedAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {report.couponEffectiveness.map((coupon) => (
+                {report.couponEffectiveness.map(coupon => (
                   <div key={coupon.couponType} className="p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-sm">{coupon.couponType}</p>
@@ -419,7 +423,9 @@ export function IntegratedAnalytics() {
                     <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
                       <div>
                         <p className="text-gray-500">발급/사용</p>
-                        <p>{coupon.totalIssued} / {coupon.totalUsed}건</p>
+                        <p>
+                          {coupon.totalIssued} / {coupon.totalUsed}건
+                        </p>
                       </div>
                       <div>
                         <p className="text-gray-500">사용률</p>
@@ -447,11 +453,15 @@ export function IntegratedAnalytics() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">적립 포인트</p>
-                  <p className="text-lg">{report.pointsEffectiveness.totalEarned.toLocaleString()}P</p>
+                  <p className="text-lg">
+                    {report.pointsEffectiveness.totalEarned.toLocaleString()}P
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">사용 포인트</p>
-                  <p className="text-lg">{report.pointsEffectiveness.totalSpent.toLocaleString()}P</p>
+                  <p className="text-lg">
+                    {report.pointsEffectiveness.totalSpent.toLocaleString()}P
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">사용률</p>
@@ -463,7 +473,8 @@ export function IntegratedAnalytics() {
                 </div>
               </div>
               <p className="text-xs text-gray-600 mt-4">
-                💡 포인트 사용 시 평균 주문 금액이 {formatPrice(report.pointsEffectiveness.orderIncreaseWithPoints)} 증가합니다.
+                💡 포인트 사용 시 평균 주문 금액이{" "}
+                {formatPrice(report.pointsEffectiveness.orderIncreaseWithPoints)} 증가합니다.
               </p>
             </CardContent>
           </Card>
@@ -498,7 +509,7 @@ export function IntegratedAnalytics() {
               <div>
                 <p className="text-xs text-gray-500 mb-2">주요 키워드</p>
                 <div className="flex flex-wrap gap-2">
-                  {report.reviewAnalysis.topKeywords.map((keyword) => (
+                  {report.reviewAnalysis.topKeywords.map(keyword => (
                     <Badge key={keyword.keyword} variant="secondary">
                       {keyword.keyword} ({keyword.count})
                     </Badge>
@@ -526,7 +537,9 @@ export function IntegratedAnalytics() {
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">평균 배달 시간</p>
-                  <p className="text-lg">{report.deliveryPerformance.averageDeliveryTime.toFixed(1)}분</p>
+                  <p className="text-lg">
+                    {report.deliveryPerformance.averageDeliveryTime.toFixed(1)}분
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">정시 배달률</p>
@@ -558,7 +571,9 @@ export function IntegratedAnalytics() {
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">클릭률</p>
-                  <p className="text-lg">{report.notificationEffectiveness.clickRate.toFixed(1)}%</p>
+                  <p className="text-lg">
+                    {report.notificationEffectiveness.clickRate.toFixed(1)}%
+                  </p>
                 </div>
               </div>
 
@@ -566,10 +581,14 @@ export function IntegratedAnalytics() {
                 <p className="text-xs text-gray-500 mb-2">타입별 성과</p>
                 <div className="space-y-2">
                   {Object.entries(report.notificationEffectiveness.byType).map(([type, stats]) => (
-                    <div key={type} className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded">
+                    <div
+                      key={type}
+                      className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded"
+                    >
                       <span className="text-gray-700">{type}</span>
                       <span className="text-gray-500">
-                        {stats.sent}건 · 읽음 {((stats.read / stats.sent) * 100).toFixed(0)}% · 클릭 {((stats.clicked / stats.sent) * 100).toFixed(0)}%
+                        {stats.sent}건 · 읽음 {((stats.read / stats.sent) * 100).toFixed(0)}% · 클릭{" "}
+                        {((stats.clicked / stats.sent) * 100).toFixed(0)}%
                       </span>
                     </div>
                   ))}

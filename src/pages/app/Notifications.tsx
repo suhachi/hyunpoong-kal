@@ -4,28 +4,28 @@
  * Phase 3-6: 푸시 알림 시스템
  */
 
-import { useState, useEffect } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
-import { Card, CardContent, CardHeader } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import { Bell, BellOff, CheckCheck, ArrowLeft, Settings } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { Bell, BellOff, CheckCheck, ArrowLeft, Settings } from "lucide-react";
+import { toast } from "sonner";
 import {
   getNotifications,
   markAsRead,
   markAllAsRead,
   markAsClicked,
-} from '../../lib/notifications.api';
-import type { Notification } from '../../types/notification';
+} from "../../lib/notifications.api";
+import type { Notification } from "../../types/notification";
 
 export function Notifications() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const { user, loading: authLoading } = useAuth();
 
   // 인증 체크
@@ -53,8 +53,8 @@ export function Notifications() {
       const data = await getNotifications(userId, 50);
       setNotifications(data);
     } catch (error) {
-      console.error('Failed to load notifications:', error);
-      toast.error('알림을 불러오는데 실패���습니다');
+      console.error("Failed to load notifications:", error);
+      toast.error("알림을 불러오는데 실패���습니다");
     } finally {
       setLoading(false);
     }
@@ -63,22 +63,20 @@ export function Notifications() {
   const handleMarkAsRead = async (id: string) => {
     try {
       await markAsRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      );
+      setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
     } catch (error) {
-      console.error('Failed to mark as read:', error);
+      console.error("Failed to mark as read:", error);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead(userId);
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      toast.success('모든 알림을 읽음으로 표시했습니다');
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      toast.success("모든 알림을 읽음으로 표시했습니다");
     } catch (error) {
-      console.error('Failed to mark all as read:', error);
-      toast.error('처리 중 오류가 발생했습니다');
+      console.error("Failed to mark all as read:", error);
+      toast.error("처리 중 오류가 발생했습니다");
     }
   };
 
@@ -91,29 +89,29 @@ export function Notifications() {
 
     // 알림 타입에 따라 페이지 이동
     switch (notification.type) {
-      case 'order_received':
-      case 'order_cooking':
-      case 'order_ready':
-      case 'order_delivering':
-      case 'order_completed':
-      case 'order_cancelled':
+      case "order_received":
+      case "order_cooking":
+      case "order_ready":
+      case "order_delivering":
+      case "order_completed":
+      case "order_cancelled":
         if (notification.data?.orderId) {
           navigate(`/order/${notification.data.orderId}`);
         }
         break;
-      case 'coupon_issued':
-        navigate('/coupons');
+      case "coupon_issued":
+        navigate("/coupons");
         break;
-      case 'points_earned':
-        navigate('/points');
+      case "points_earned":
+        navigate("/points");
         break;
-      case 'review_reminder':
+      case "review_reminder":
         if (notification.data?.orderId) {
           navigate(`/review/${notification.data.orderId}`);
         }
         break;
-      case 'review_reply':
-        navigate('/reviews');
+      case "review_reply":
+        navigate("/reviews");
         break;
       default:
         // 기타 알림은 클릭 처리만
@@ -123,34 +121,34 @@ export function Notifications() {
 
   const getNotificationIcon = (type: string) => {
     const icons: Record<string, string> = {
-      order_received: '✅',
-      order_cooking: '👨‍🍳',
-      order_ready: '🍜',
-      order_delivering: '🚚',
-      order_completed: '✅',
-      order_cancelled: '❌',
-      coupon_issued: '🎁',
-      points_earned: '💰',
-      review_reminder: '✍️',
-      review_reply: '💬',
-      promotion: '🎉',
-      system: '📢',
+      order_received: "✅",
+      order_cooking: "👨‍🍳",
+      order_ready: "🍜",
+      order_delivering: "🚚",
+      order_completed: "✅",
+      order_cancelled: "❌",
+      coupon_issued: "🎁",
+      points_earned: "💰",
+      review_reminder: "✍️",
+      review_reply: "💬",
+      promotion: "🎉",
+      system: "📢",
     };
-    return icons[type] || '🔔';
+    return icons[type] || "🔔";
   };
 
   const formatTimeAgo = (date: Date): string => {
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
-    if (seconds < 60) return '방금 전';
+    if (seconds < 60) return "방금 전";
     if (seconds < 3600) return `${Math.floor(seconds / 60)}분 전`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}시간 전`;
     if (seconds < 604800) return `${Math.floor(seconds / 86400)}일 전`;
 
-    return date.toLocaleDateString('ko-KR');
+    return date.toLocaleDateString("ko-KR");
   };
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   if (loading) {
     return (
@@ -165,7 +163,7 @@ export function Notifications() {
         </div>
         <div className="max-w-md mx-auto p-4">
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <div key={i} className="h-20 bg-gray-200 rounded-lg animate-pulse" />
             ))}
           </div>
@@ -193,11 +191,7 @@ export function Notifications() {
             </div>
 
             {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMarkAllAsRead}
-              >
+              <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead}>
                 <CheckCheck className="w-4 h-4 mr-1" />
                 모두 읽음
               </Button>
@@ -217,29 +211,21 @@ export function Notifications() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {notifications.map((notification) => (
+            {notifications.map(notification => (
               <Card
                 key={notification.id}
                 className={`cursor-pointer transition-all ${
-                  notification.read
-                    ? 'bg-white'
-                    : 'bg-blue-50 border-blue-200'
+                  notification.read ? "bg-white" : "bg-blue-50 border-blue-200"
                 }`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 flex-1">
-                      <span className="text-2xl">
-                        {getNotificationIcon(notification.type)}
-                      </span>
+                      <span className="text-2xl">{getNotificationIcon(notification.type)}</span>
                       <div className="flex-1">
-                        <h3 className="text-sm mb-1">
-                          {notification.title}
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          {notification.body}
-                        </p>
+                        <h3 className="text-sm mb-1">{notification.title}</h3>
+                        <p className="text-xs text-gray-600">{notification.body}</p>
                       </div>
                     </div>
 
@@ -249,9 +235,7 @@ export function Notifications() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <p className="text-xs text-gray-400">
-                    {formatTimeAgo(notification.createdAt)}
-                  </p>
+                  <p className="text-xs text-gray-400">{formatTimeAgo(notification.createdAt)}</p>
                 </CardContent>
               </Card>
             ))}

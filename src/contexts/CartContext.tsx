@@ -1,44 +1,46 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
-import type { CartContextType, CartItem, DeliveryType, DeliveryAddress } from '../types/cart';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+  ReactNode,
+} from "react";
+import type { CartContextType, CartItem, DeliveryType, DeliveryAddress } from "@/types/cart";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'hyunpung_cart';
+const STORAGE_KEY = "hyunpung_cart";
 const MIN_ORDER_DELIVERY = 15000;
 const MIN_ORDER_PICKUP = 5000;
 const BASE_DELIVERY_FEE = 3000;
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [deliveryType, setDeliveryTypeState] = useState<DeliveryType>('delivery');
+  const [deliveryType, setDeliveryTypeState] = useState<DeliveryType>("delivery");
   const [deliveryAddress, setDeliveryAddressState] = useState<DeliveryAddress | undefined>();
-  const [requests, setRequestsState] = useState<string>('');
+  const [requests, setRequestsState] = useState<string>("");
   const [couponId, setCouponId] = useState<string | undefined>();
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
-  // T2-15: Cart hydration / storage sync 안정화 리팩터
-  // - Phase 1: Mock/Firebase 공통에서 결정적 초기화 보장 (loadFromStorage 단일화)
-  // - forceReload를 얇은 wrapper로 단순화하여 중복 로직 제거
-  // - 이벤트(storage / visibility / focus) 한 곳에서 바인딩
-  // TODO(T2-15): Phase 2에서 order-flow E2E 재활성화 후 디버그 로그 제거 + 필요 시 testId 기반 개선
-  // 단일 진실: localStorage에서 장바구니 로드 (JSON 파싱 실패 시 안전하게 무시)
   const loadFromStorage = useCallback(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return;
       const data = JSON.parse(stored);
       setItems(data.items || []);
-      setDeliveryTypeState(data.deliveryType || 'delivery');
+      setDeliveryTypeState(data.deliveryType || "delivery");
       setDeliveryAddressState(data.deliveryAddress);
-      setRequestsState(data.requests || '');
+      setRequestsState(data.requests || "");
       setCouponId(data.couponId);
       setCouponDiscount(data.couponDiscount || 0);
     } catch (error) {
-      console.error('Failed to load cart from localStorage:', error);
+      console.error("Failed to load cart from localStorage:", error);
     }
   }, []);
 
-  // 초기 마운트 + 이벤트 바인딩(useEffect 하나만 사용)
   useEffect(() => {
     loadFromStorage();
 
@@ -46,32 +48,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (e.key === STORAGE_KEY) loadFromStorage();
     };
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') loadFromStorage();
+      if (document.visibilityState === "visible") loadFromStorage();
     };
     const handleFocus = () => {
       loadFromStorage();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
+    window.addEventListener("storage", handleStorageChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener("storage", handleStorageChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadFromStorage]);
 
-  // 장바구니 상태 변경 시 로컬 스토리지 저장 (초기 마운트 제외)
   const isInitialMount = useRef(true);
   useEffect(() => {
-    // 초기 마운트 시에는 저장하지 않음 (loadFromStorage가 먼저 실행되도록)
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
-    
+
     try {
       localStorage.setItem(
         STORAGE_KEY,
@@ -82,53 +81,60 @@ export function CartProvider({ children }: { children: ReactNode }) {
           requests,
           couponId,
           couponDiscount,
-        })
+        }),
       );
     } catch (error) {
-      console.error('Failed to save cart to localStorage:', error);
+      console.error("Failed to save cart to localStorage:", error);
     }
   }, [items, deliveryType, deliveryAddress, requests, couponId, couponDiscount]);
 
-  const addItem = (item: CartItem) => {
-    setItems((prev) => {
-      // 동일한 메뉴와 옵션이 있는지 확인
+  const addItem = useCallback((item: CartItem) => {
+    setItems(prev => {
       const existingIndex = prev.findIndex(
-        (i) =>
+        i =>
           i.menuId === item.menuId &&
           i.options.noodle === item.options.noodle &&
           i.options.spicy === item.options.spicy &&
-          JSON.stringify(i.options.toppings?.sort()) === JSON.stringify(item.options.toppings?.sort())
+          JSON.stringify(i.options.toppings?.sort()) ===
+          JSON.stringify(item.options.toppings?.sort()) &&
+          JSON.stringify(i.customOptions?.sort((a, b) => a.id.localeCompare(b.id))) ===
+          JSON.stringify(item.customOptions?.sort((a, b) => a.id.localeCompare(b.id))),
       );
 
       if (existingIndex >= 0) {
-        // 기존 항목 수량 증가
         const updated = [...prev];
         updated[existingIndex].quantity += item.quantity;
-        updated[existingIndex].subtotal = 
-          (item.menuPrice + item.optionPrices.noodle + item.optionPrices.toppings) * 
+        updated[existingIndex].subtotal =
+          (item.menuPrice +
+            item.optionPrices.noodle +
+            item.optionPrices.toppings +
+            (item.optionPrices.custom || 0)) *
           updated[existingIndex].quantity;
         return updated;
       }
 
-      // 새 항목 추가
       return [...prev, item];
     });
-  };
+  }, []);
 
-  const removeItem = (menuId: string) => {
-    setItems((prev) => prev.filter((item) => item.menuId !== menuId));
-  };
+  const removeItem = useCallback((menuId: string) => {
+    setItems(prev => prev.filter(item => item.menuId !== menuId));
+  }, []);
 
-  const updateQuantity = (menuId: string, quantity: number) => {
+  const updateQuantity = useCallback((menuId: string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(menuId);
       return;
     }
 
-    setItems((prev) =>
-      prev.map((item) => {
+    setItems(prev =>
+      prev.map(item => {
         if (item.menuId === menuId) {
-          const unitPrice = item.menuPrice + item.optionPrices.noodle + item.optionPrices.toppings;
+          const unitPrice =
+            item.menuPrice +
+            item.optionPrices.noodle +
+            item.optionPrices.toppings +
+            (item.optionPrices.custom || 0);
           return {
             ...item,
             quantity,
@@ -136,96 +142,122 @@ export function CartProvider({ children }: { children: ReactNode }) {
           };
         }
         return item;
-      })
+      }),
     );
-  };
+  }, [removeItem]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
     setCouponId(undefined);
     setCouponDiscount(0);
-    setRequestsState('');
-  };
+    setRequestsState("");
+  }, []);
 
-  const setDeliveryType = (type: DeliveryType) => {
+  const setDeliveryType = useCallback((type: DeliveryType) => {
     setDeliveryTypeState(type);
-  };
+  }, []);
 
-  const setDeliveryAddress = (address: DeliveryAddress) => {
+  const setDeliveryAddress = useCallback((address: DeliveryAddress) => {
     setDeliveryAddressState(address);
-  };
+  }, []);
 
-  const setRequests = (req: string) => {
+  const setRequests = useCallback((req: string) => {
     setRequestsState(req);
-  };
+  }, []);
 
-  const applyCoupon = (id: string, discount: number) => {
+  const applyCoupon = useCallback((id: string, discount: number) => {
     setCouponId(id);
     setCouponDiscount(discount);
-  };
+  }, []);
 
-  const removeCoupon = () => {
+  const removeCoupon = useCallback(() => {
     setCouponId(undefined);
     setCouponDiscount(0);
-  };
+  }, []);
 
-  const getTotalItems = () => {
+  const getTotalItems = useCallback(() => {
     return items.reduce((total, item) => total + item.quantity, 0);
-  };
+  }, [items]);
 
-  const getSubtotal = () => {
+  const getSubtotal = useCallback(() => {
     return items.reduce((total, item) => total + item.subtotal, 0);
-  };
+  }, [items]);
 
-  const getDeliveryFee = () => {
-    if (deliveryType === 'pickup') return 0;
-    
-    const subtotal = getSubtotal();
-    
-    // 최소 주문 금액 미달 시 배달 불가
+  const getDeliveryFee = useCallback(() => {
+    if (deliveryType === "pickup") return 0;
+
+    const subtotal = items.reduce((total, item) => total + item.subtotal, 0);
+
     if (subtotal < MIN_ORDER_DELIVERY) return 0;
-    
-    // 실제로는 거리 기반 계산
-    // TODO: 주소에서 거리 계산 후 배달비 산정
+
     return BASE_DELIVERY_FEE;
-  };
+  }, [deliveryType, items]);
 
-  const getTotalAmount = () => {
-    const subtotal = getSubtotal();
-    const deliveryFee = getDeliveryFee();
+  const getTotalAmount = useCallback(() => {
+    const subtotal = items.reduce((total, item) => total + item.subtotal, 0);
+    let deliveryFee = 0;
+    
+    if (deliveryType === "delivery" && subtotal >= MIN_ORDER_DELIVERY) {
+        deliveryFee = BASE_DELIVERY_FEE;
+    }
+    
     return subtotal + deliveryFee - couponDiscount;
-  };
+  }, [items, deliveryType, couponDiscount]);
 
-  // forceReload: loadFromStorage thin wrapper (추가 부작용 없이 재동기화 전용)
   const forceReload = useCallback(() => {
     loadFromStorage();
   }, [loadFromStorage]);
 
+  const value = useMemo<CartContextType>(() => ({
+    state: {
+      items,
+      deliveryType,
+      deliveryAddress,
+      requests,
+      couponId,
+      couponDiscount,
+    },
+    actions: {
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      setDeliveryType,
+      setDeliveryAddress,
+      setRequests,
+      applyCoupon,
+      removeCoupon,
+      getTotalItems,
+      getSubtotal,
+      getDeliveryFee,
+      getTotalAmount,
+      forceReload,
+    }
+  }), [
+    items,
+    deliveryType,
+    deliveryAddress,
+    requests,
+    couponId,
+    couponDiscount,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    setDeliveryType,
+    setDeliveryAddress,
+    setRequests,
+    applyCoupon,
+    removeCoupon,
+    getTotalItems,
+    getSubtotal,
+    getDeliveryFee,
+    getTotalAmount,
+    forceReload,
+  ]);
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        deliveryType,
-        deliveryAddress,
-        requests,
-        couponId,
-        couponDiscount,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        setDeliveryType,
-        setDeliveryAddress,
-        setRequests,
-        applyCoupon,
-        removeCoupon,
-        getTotalItems,
-        getSubtotal,
-        getDeliveryFee,
-        getTotalAmount,
-        forceReload,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
@@ -234,7 +266,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within CartProvider');
+    throw new Error("useCart must be used within CartProvider");
   }
   return context;
 }

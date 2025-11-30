@@ -3,12 +3,20 @@
  * localStorage 또는 Firebase에서 주문 데이터 조회/생성
  */
 
-import { db, auth } from './firebase';
-import { USE_FIREBASE } from '../config/env';
-import { ordersRepository, type CreateOrderPayload } from './orders.repository';
-import { collection, query, where, orderBy, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import type { Order, OrderStatus } from '../types/order';
+import { db, auth } from "@/lib/firebase";
+import { USE_FIREBASE } from "@/config/env";
+import { ordersRepository, type CreateOrderPayload } from "@/lib/orders.repository";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import { type Order, OrderStatus, PaymentMethod, PaymentStatus } from "@/types/order";
 
 /**
  * 주문 생성 (Firebase 또는 localStorage)
@@ -17,9 +25,9 @@ import type { Order, OrderStatus } from '../types/order';
  */
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   // 배달 주문 시 주소 검증 (절대 통과하지 않아야 함)
-  if (payload.deliveryType === 'delivery' && !payload.deliveryAddress) {
-    const error = new Error('배달 주문은 배달 주소가 필수입니다');
-    console.error('[createOrder] CRITICAL ERROR:', error);
+  if (payload.deliveryType === "delivery" && !payload.deliveryAddress) {
+    const error = new Error("배달 주문은 배달 주소가 필수입니다");
+    console.error("[createOrder] CRITICAL ERROR:", error);
     throw error;
   }
 
@@ -38,9 +46,9 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
       try {
         await signInAnonymously(auth);
         // sign-in 직후 uid 보장 대기 (최대 2초 폴링)
-        uid = await new Promise<string | null>((resolve) => {
+        uid = await new Promise<string | null>(resolve => {
           let settled = false;
-          const stop = onAuthStateChanged(auth, (user) => {
+          const stop = onAuthStateChanged(auth, user => {
             if (!settled) {
               settled = true;
               stop();
@@ -69,17 +77,19 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
       subtotal: payload.subtotal,
       discount: payload.discount || 0,
       couponId: payload.couponId || null,
+      couponApplied: payload.couponApplied || false,
       deliveryFee: payload.deliveryFee,
       finalAmount: payload.finalAmount,
       deliveryType: payload.deliveryType,
       deliveryAddress: payload.deliveryAddress || null,
+      phoneNumber: payload.phoneNumber || payload.phone,
       phone: payload.phone,
       email: payload.email || null,
       requests: payload.requests || null,
-      status: 'pending' as OrderStatus,
+      status: OrderStatus.PENDING,
       payment: payload.payment || {
-        method: 'meet_card',
-        status: 'pending',
+        method: PaymentMethod.MEET_CARD,
+        status: PaymentStatus.PENDING,
         amount: payload.finalAmount,
       },
       timeline: {
@@ -89,31 +99,31 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(collection(db, 'orders'), orderData);
+    const docRef = await addDoc(collection(db, "orders"), orderData);
 
     // 생성된 주문 객체 반환 (serverTimestamp는 실제 값으로 대체됨)
     const createdOrder: Order = {
       orderId: docRef.id,
       ...orderData,
       timeline: {
-        placed: new Date().toISOString() as any,
+        pending: new Date().toISOString(),
       },
-      createdAt: new Date().toISOString() as any,
-      updatedAt: new Date().toISOString() as any,
-    } as Order;
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as unknown as Order;
 
     return createdOrder;
   } catch (error) {
-    console.error('Failed to create order in Firestore:', error);
+    console.error("Failed to create order in Firestore:", error);
     // 권한 문제 등으로 Firestore 실패 시: 테스트 안정화를 위한 로컬 fallback
     // - E2E(Firebase 모드)에서도 최소 happy-path를 보장
     try {
       const localOrder = await ordersRepository.createOrder(payload);
-      console.warn('[orders.api] Firestore 실패로 localStorage fallback 사용:', localOrder.orderId);
+      console.warn("[orders.api] Firestore 실패로 localStorage fallback 사용:", localOrder.orderId);
       return localOrder;
     } catch (fallbackError) {
-      console.error('Local fallback failed:', fallbackError);
-      throw new Error('주문 생성에 실패했습니다. 다시 시도해주세요.');
+      console.error("Local fallback failed:", fallbackError);
+      throw new Error("주문 생성에 실패했습니다. 다시 시도해주세요.");
     }
   }
 }
@@ -126,21 +136,23 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
     // Mock 모드: localStorage에서 조회 via repository
     try {
       const orderList = await ordersRepository.listOrdersByUser(userId);
-      
+
       // 최신순 정렬
       orderList.sort((a, b) => {
-        const aTime = typeof a.createdAt === 'string' 
-          ? new Date(a.createdAt).getTime()
-          : a.createdAt.seconds * 1000;
-        const bTime = typeof b.createdAt === 'string'
-          ? new Date(b.createdAt).getTime()
-          : b.createdAt.seconds * 1000;
+        const aTime =
+          typeof a.createdAt === "string"
+            ? new Date(a.createdAt).getTime()
+            : a.createdAt.seconds * 1000;
+        const bTime =
+          typeof b.createdAt === "string"
+            ? new Date(b.createdAt).getTime()
+            : b.createdAt.seconds * 1000;
         return bTime - aTime;
       });
 
       return Promise.resolve(orderList);
     } catch (error) {
-      console.error('Failed to load orders from localStorage:', error);
+      console.error("Failed to load orders from localStorage:", error);
       return Promise.resolve([]);
     }
   }
@@ -148,18 +160,18 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
   // Firebase 모드: Firestore에서 조회
   try {
     const q = query(
-      collection(db, 'orders'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      collection(db, "orders"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc"),
     );
-    
+
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       orderId: doc.id,
-      ...doc.data()
+      ...doc.data(),
     })) as Order[];
   } catch (error) {
-    console.error('Failed to fetch orders from Firestore:', error);
+    console.error("Failed to fetch orders from Firestore:", error);
     return [];
   }
 }
@@ -170,30 +182,30 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
 export async function getOrderById(orderId: string): Promise<Order | null> {
   if (!USE_FIREBASE) {
     try {
-      const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+      const orders = JSON.parse(localStorage.getItem("orders") || "{}");
       const found = orders[orderId] || null;
       return Promise.resolve(found);
     } catch (error) {
-      console.error('Failed to load order from localStorage:', error);
+      console.error("Failed to load order from localStorage:", error);
       return Promise.resolve(null);
     }
   }
 
   // Firebase 모드: Firestore에서 조회
   try {
-    const { doc, getDoc } = await import('firebase/firestore');
-    const docRef = doc(db, 'orders', orderId);
+    const { doc, getDoc } = await import("firebase/firestore");
+    const docRef = doc(db, "orders", orderId);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       return {
         orderId: docSnap.id,
-        ...docSnap.data()
+        ...docSnap.data(),
       } as Order;
     }
     return null;
   } catch (error) {
-    console.error('Failed to fetch order from Firestore:', error);
+    console.error("Failed to fetch order from Firestore:", error);
     return null;
   }
 }
@@ -201,8 +213,8 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
 /**
  * 주문 상태별 필터링
  */
-export function filterOrdersByStatus(orders: Order[], status: OrderStatus | 'all'): Order[] {
-  if (status === 'all') {
+export function filterOrdersByStatus(orders: Order[], status: OrderStatus | "all"): Order[] {
+  if (status === "all") {
     return orders;
   }
   return orders.filter(order => order.status === status);
@@ -214,7 +226,9 @@ export function filterOrdersByStatus(orders: Order[], status: OrderStatus | 'all
 export function getReviewableOrders(orders: Order[]): Order[] {
   return orders.filter(order => {
     // 완료된 주문 중 리뷰를 작성하지 않은 주문
-    return (order.status === 'completed' || order.status === 'done') && !hasReview(order);
+    return (
+      (order.status === OrderStatus.COMPLETED || order.status === "done") && !hasReview(order)
+    );
   });
 }
 
@@ -225,8 +239,8 @@ function hasReview(order: Order): boolean {
   // TODO: 실제로는 reviews 컬렉션을 확인해야 함
   // 임시로 localStorage 확인
   try {
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    return reviews.some((review: any) => review.orderId === order.orderId);
+    const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
+    return reviews.some((review: { orderId: string }) => review.orderId === order.orderId);
   } catch {
     return false;
   }
@@ -247,16 +261,17 @@ export interface OrderStatistics {
 export function calculateOrderStatistics(orders: Order[]): OrderStatistics {
   return {
     total: orders.length,
-    pending: orders.filter(o => o.status === 'pending').length,
-    inProgress: orders.filter(o => 
-      o.status === 'accepted' || 
-      o.status === 'cooking' || 
-      o.status === 'delivering'
+    pending: orders.filter(o => o.status === OrderStatus.PENDING).length,
+    inProgress: orders.filter(
+      o =>
+        o.status === OrderStatus.ACCEPTED ||
+        o.status === OrderStatus.COOKING ||
+        o.status === OrderStatus.DELIVERING,
     ).length,
-    completed: orders.filter(o => o.status === 'completed').length,
-    canceled: orders.filter(o => o.status === 'cancelled').length,
+    completed: orders.filter(o => o.status === OrderStatus.COMPLETED).length,
+    canceled: orders.filter(o => o.status === OrderStatus.CANCELLED).length,
     totalSpent: orders
-      .filter(o => o.status !== 'cancelled')
+      .filter(o => o.status !== OrderStatus.CANCELLED)
       .reduce((sum, o) => sum + o.finalAmount, 0),
   };
 }

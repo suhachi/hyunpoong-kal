@@ -7,7 +7,7 @@
  * 가격 포맷팅
  */
 export function formatPrice(amount: number): string {
-  return `${amount.toLocaleString('ko-KR')}원`;
+  return `${amount.toLocaleString("ko-KR")}원`;
 }
 
 /**
@@ -15,26 +15,26 @@ export function formatPrice(amount: number): string {
  * @example formatPhoneNumber('01012345678') => '010-1234-5678'
  */
 export function formatPhoneNumber(phone: string): string {
-  if (!phone) return '';
-  
+  if (!phone) return "";
+
   // 숫자만 추출
-  const cleaned = phone.replace(/\D/g, '');
-  
+  const cleaned = phone.replace(/\D/g, "");
+
   // 010-1234-5678 형식으로 변환
   if (cleaned.length === 11) {
     return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7)}`;
   }
-  
+
   // 02-123-4567 형식 (서울)
-  if (cleaned.length === 10 && cleaned.startsWith('02')) {
+  if (cleaned.length === 10 && cleaned.startsWith("02")) {
     return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}-${cleaned.slice(5)}`;
   }
-  
+
   // 031-123-4567 형식 (지역번호)
   if (cleaned.length === 10) {
     return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
   }
-  
+
   return phone;
 }
 
@@ -43,14 +43,14 @@ export function formatPhoneNumber(phone: string): string {
  * @example formatBusinessNumber('5531700098') => '553-17-00098'
  */
 export function formatBusinessNumber(number: string): string {
-  if (!number) return '';
-  
-  const cleaned = number.replace(/\D/g, '');
-  
+  if (!number) return "";
+
+  const cleaned = number.replace(/\D/g, "");
+
   if (cleaned.length === 10) {
     return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5)}`;
   }
-  
+
   return number;
 }
 
@@ -80,7 +80,7 @@ export function formatDistance(meters: number): string {
 export function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  
+
   if (hours > 0 && mins > 0) {
     return `${hours}시간 ${mins}분`;
   }
@@ -96,15 +96,15 @@ export function formatDuration(minutes: number): string {
  */
 export function formatNumberToKorean(num: number): string {
   if (num < 10000) {
-    return num.toLocaleString('ko-KR');
+    return num.toLocaleString("ko-KR");
   }
-  
+
   const man = Math.floor(num / 10000);
   const rest = num % 10000;
-  
+
   if (rest === 0) {
     return `${man}만`;
   }
-  
-  return `${man}만 ${rest.toLocaleString('ko-KR')}`;
+
+  return `${man}만 ${rest.toLocaleString("ko-KR")}`;
 }

@@ -4,9 +4,9 @@
  * USE_FIREBASE=true: Firebase Auth 사용
  */
 
-import { USE_FIREBASE } from '../config/env';
+import { USE_FIREBASE } from "../config/env";
 
-export type UserRole = 'customer' | 'owner' | 'admin';
+export type UserRole = "customer" | "owner" | "admin";
 
 export interface AuthUser {
   uid: string;
@@ -20,18 +20,18 @@ export interface AuthUser {
  * Mock 인증 사용자 (개발용)
  */
 const MOCK_ADMIN: AuthUser = {
-  uid: 'admin-001',
-  email: 'admin@hyunpoongkalguksu.com',
-  displayName: '관리자',
-  role: 'owner',
-  storeId: 'store-hyunpung',
+  uid: "admin-001",
+  email: "admin@hyunpoongkalguksu.com",
+  displayName: "관리자",
+  role: "owner",
+  storeId: "store-hyunpung",
 };
 
 const MOCK_CUSTOMER: AuthUser = {
-  uid: 'user-001',
-  email: 'customer@example.com',
-  displayName: '김고객',
-  role: 'customer',
+  uid: "user-001",
+  email: "customer@example.com",
+  displayName: "김고객",
+  role: "customer",
 };
 
 /**
@@ -49,7 +49,7 @@ export function getCurrentUser(): AuthUser | null {
 
   // Mock: localStorage에서 mockUser를 먼저 확인 (E2E 테스트 대비)
   try {
-    const mockUserData = localStorage.getItem('mockUser');
+    const mockUserData = localStorage.getItem("mockUser");
     if (mockUserData) {
       const parsed = JSON.parse(mockUserData) as AuthUser;
       // 최소 필수 필드 검증
@@ -58,12 +58,12 @@ export function getCurrentUser(): AuthUser | null {
       }
     }
   } catch (error) {
-    console.warn('[getCurrentUser] Failed to parse mockUser:', error);
+    console.warn("[getCurrentUser] Failed to parse mockUser:", error);
   }
 
   // mockUser가 없으면 mockRole로 fallback (하위 호환성)
-  const mockRole = localStorage.getItem('mockRole') || 'owner';
-  return mockRole === 'owner' || mockRole === 'admin' ? MOCK_ADMIN : MOCK_CUSTOMER;
+  const mockRole = localStorage.getItem("mockRole") || "owner";
+  return mockRole === "owner" || mockRole === "admin" ? MOCK_ADMIN : MOCK_CUSTOMER;
 }
 
 /**
@@ -85,22 +85,22 @@ export function hasRole(user: AuthUser | null, roles: UserRole[]): boolean {
  * 관리자 권한 확인
  */
 export function isAdmin(user: AuthUser | null): boolean {
-  return hasRole(user, ['owner', 'admin']);
+  return hasRole(user, ["owner", "admin"]);
 }
 
 /**
  * 고객 권한 확인
  */
 export function isCustomer(user: AuthUser | null): boolean {
-  return hasRole(user, ['customer']);
+  return hasRole(user, ["customer"]);
 }
 
 /**
  * Mock 로그인 (테스트용)
  */
 export function mockLogin(role: UserRole): void {
-  const mockUser = role === 'owner' || role === 'admin' ? MOCK_ADMIN : MOCK_CUSTOMER;
-  localStorage.setItem('mockUser', JSON.stringify(mockUser));
+  const mockUser = role === "owner" || role === "admin" ? MOCK_ADMIN : MOCK_CUSTOMER;
+  localStorage.setItem("mockUser", JSON.stringify(mockUser));
   window.location.reload();
 }
 
@@ -108,7 +108,7 @@ export function mockLogin(role: UserRole): void {
  * Mock 로그아웃 (테스트용)
  */
 export function mockLogout(): void {
-  localStorage.removeItem('mockUser');
+  localStorage.removeItem("mockUser");
   window.location.reload();
 }
 
@@ -118,12 +118,12 @@ export function mockLogout(): void {
  */
 export async function requireAdmin(): Promise<AuthUser> {
   const user = getCurrentUser();
-  
+
   if (!isAdmin(user)) {
     // 관리자가 아니면 홈으로 이동
-    window.location.href = '/';
-    throw new Error('Unauthorized');
+    window.location.href = "/";
+    throw new Error("Unauthorized");
   }
-  
+
   return user!;
 }

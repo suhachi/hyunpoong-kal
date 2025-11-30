@@ -1,34 +1,34 @@
 export type MenuCategory =
-  | 'noodle'        // 칼국수/메인메뉴
-  | 'set'           // 세트메뉴
-  | 'side'          // 사이드메뉴
-  | 'drink'         // 음료
-  | 'alcohol';      // 주류
+  | "noodle" // 칼국수/메인메뉴
+  | "set" // 세트메뉴
+  | "side" // 사이드메뉴
+  | "drink" // 음료
+  | "alcohol"; // 주류
 
 export type MenuBadge =
-  | 'best'      // 베스트
-  | 'signature' // 시그니처
-  | 'spicy'     // 매운맛
-  | 'cold'      // 냉메뉴
-  | 'seasonal'; // 계절메뉴
+  | "best" // 베스트
+  | "signature" // 시그니처
+  | "spicy" // 매운맛
+  | "cold" // 냉메뉴
+  | "seasonal"; // 계절메뉴
 
 // 옵션 항목 (옵션명-수량-가격)
 export interface OptionItem {
   id: string;
-  name: string;       // 옵션 이름 (예: "보통", "곱빼기", "순한맛")
-  quantity: number;   // 수량
-  price: number;      // 추가 가격
+  name: string; // 옵션 이름 (예: "보통", "곱빼기", "순한맛")
+  quantity: number; // 수량
+  price: number; // 추가 가격
 }
 
 // 옵션 그룹 (관리자가 생성)
 export interface OptionGroup {
   id: string;
-  name: string;           // 옵션 그룹 이름 (예: "면양", "맵기", "토핑")
-  required: boolean;      // 필수 선택 여부
-  multiSelect: boolean;   // 다중 선택 가능 여부
-  maxSelect?: number;     // 최대 선택 개수 (multiSelect=true일 때)
-  items: OptionItem[];    // 옵션 항목들
-  order: number;          // 표시 순서
+  name: string; // 옵션 그룹 이름 (예: "면양", "맵기", "토핑")
+  required: boolean; // 필수 선택 여부
+  multiSelect: boolean; // 다중 선택 가능 여부
+  maxSelect?: number; // 최대 선택 개수 (multiSelect=true일 때)
+  items: OptionItem[]; // 옵션 항목들
+  order: number; // 표시 순서
 }
 
 // 메뉴에 연결된 옵션 그룹
@@ -39,10 +39,10 @@ export interface MenuOptionGroup extends OptionGroup {
 // 커스텀 옵션 (관리자가 메뉴별로 직접 정의)
 export interface CustomOption {
   id: string;
-  name: string;       // 옵션 이름 (예: "곱빼기", "순한맛", "계란 추가")
-  price: number;      // 추가 가격
-  quantity: number;   // 기본 수량 (대부분 1)
-  category?: string;  // 옵션 카테고리 (예: "면양", "맵기", "토핑") - 선택사항
+  name: string; // 옵션 이름 (예: "곱빼기", "순한맛", "계란 추가")
+  price: number; // 추가 가격
+  quantity: number; // 기본 수량 (대부분 1)
+  category?: string; // 옵션 카테고리 (예: "면양", "맵기", "토핑") - 선택사항
 }
 
 export interface Menu {
@@ -53,21 +53,23 @@ export interface Menu {
   description: string;
   image: string;
   badges: MenuBadge[];
-  options?: {               // 간단한 옵션 구조 (기존 호환성)
+  options?: {
+    // 간단한 옵션 구조 (기존 호환성)
     noodle?: { label: string; price: number }[];
     spicy?: { label: string; price: number }[];
     toppings?: { label: string; price: number }[];
   };
-  customOptions?: CustomOption[];    // 관리자가 직접 정의한 커스텀 옵션들 (신규)
-  optionGroups?: MenuOptionGroup[];  // 이 메뉴에 적용된 옵션 그룹들 (고급)
-  allergens: string[];      // 알레르기 유발 성분
-  origin: string;           // 원산지
-  isAvailable: boolean;     // 판매 가능 여부
-  availableHours?: {        // 시간제 판매
+  customOptions?: CustomOption[]; // 관리자가 직접 정의한 커스텀 옵션들 (신규)
+  optionGroups?: MenuOptionGroup[]; // 이 메뉴에 적용된 옵션 그룹들 (고급)
+  allergens: string[]; // 알레르기 유발 성분
+  origin: string; // 원산지
+  isAvailable: boolean; // 판매 가능 여부
+  availableHours?: {
+    // 시간제 판매
     start: string;
     end: string;
   };
-  order: number;            // 정렬 순서
+  order: number; // 정렬 순서
 }
 
 export interface MenuItem extends Menu {
@@ -82,9 +84,9 @@ export interface MenuItem extends Menu {
 
 // 관리자용 메뉴 필터
 export interface MenuFilters {
-  category?: MenuCategory | 'all';
+  category?: MenuCategory | "all";
   search?: string;
-  sortBy?: 'name' | 'price-asc' | 'price-desc' | 'order';
+  sortBy?: "name" | "price-asc" | "price-desc" | "order";
   availableOnly?: boolean;
 }
 
@@ -93,8 +95,8 @@ export interface MenuLog {
   id: string;
   menuId: string;
   field: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   by: string;
   byName: string;
   at: Date;
@@ -103,25 +105,25 @@ export interface MenuLog {
 
 // 메뉴 상태 (시간제 판매 고려)
 export type MenuStatus =
-  | 'available'     // 판매 중
-  | 'soldout'       // 품절
-  | 'time-limited'  // 시간제 (현재 시간 밖)
-  | 'hidden';       // 숨김
+  | "available" // 판매 중
+  | "soldout" // 품절
+  | "time-limited" // 시간제 (현재 시간 밖)
+  | "hidden"; // 숨김
 
 // 카테고리 라벨 맵
 export const CATEGORY_LABELS: Record<MenuCategory, string> = {
-  noodle: '메인',
-  set: '세트',
-  side: '사이드',
-  drink: '음료',
-  alcohol: '주류',
+  noodle: "메인",
+  set: "세트",
+  side: "사이드",
+  drink: "음료",
+  alcohol: "주류",
 };
 
 // 배지 라벨 맵
 export const BADGE_LABELS: Record<MenuBadge, string> = {
-  best: '베스트',
-  signature: '시그니처',
-  spicy: '매운맛',
-  cold: '냉메뉴',
-  seasonal: '계절메뉴',
+  best: "베스트",
+  signature: "시그니처",
+  spicy: "매운맛",
+  cold: "냉메뉴",
+  seasonal: "계절메뉴",
 };

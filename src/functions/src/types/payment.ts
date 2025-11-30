@@ -20,4 +20,3 @@ export interface PaymentResult {
   cardName?: string;
   cardNum?: string;
 }
-

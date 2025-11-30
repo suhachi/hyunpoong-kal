@@ -1,20 +1,20 @@
 ﻿// Route: /admin/reviews
-import { useState, useEffect } from 'react';
-import { Star, Image as ImageIcon, Filter, SortAsc } from 'lucide-react';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
+import { useState, useEffect } from "react";
+import { Star, Image as ImageIcon, Filter, SortAsc } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { ReviewCard } from '../../components/admin/ReviewCard';
-import { ReplyModal } from '../../components/admin/ReplyModal';
-import { ReportDialog } from '../../components/admin/ReportDialog';
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReviewCard } from "@/components/admin/ReviewCard";
+import { ReplyModal } from "@/components/admin/ReplyModal";
+import { ReportDialog } from "@/components/admin/ReportDialog";
 import {
   getReviews,
   getReviewStats,
@@ -22,14 +22,14 @@ import {
   deleteReviewReply,
   reportReview,
   hideReview,
-} from '../../lib/admin/reviews.api';
-import { getCurrentUser } from '../../lib/auth';
-import type { Review, ReviewStats } from '../../types/review';
-import type { ReviewReportReason } from '../../types/review';
-import { toast } from 'sonner';
+} from "@/lib/admin/reviews.api";
+import { getCurrentUser } from "@/lib/auth";
+import type { Review, ReviewStats } from "@/types/review";
+import type { ReviewReportReason } from "@/types/review";
+import { toast } from "sonner";
 
-type FilterType = 'all' | 'photo' | 'reported';
-type SortType = 'latest' | 'rating_high' | 'rating_low';
+type FilterType = "all" | "photo" | "reported";
+type SortType = "latest" | "rating_high" | "rating_low";
 
 export function AdminReviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -39,8 +39,8 @@ export function AdminReviews() {
   const [hasMore, setHasMore] = useState(false);
 
   // 필터/정렬
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [sortBy, setSortBy] = useState<SortType>('latest');
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [sortBy, setSortBy] = useState<SortType>("latest");
 
   // 모달
   const [replyModalOpen, setReplyModalOpen] = useState(false);
@@ -48,7 +48,7 @@ export function AdminReviews() {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
 
-  const storeId = 'store-hyunpung';
+  const storeId = "store-hyunpung";
 
   useEffect(() => {
     loadData();
@@ -60,8 +60,8 @@ export function AdminReviews() {
       const [reviewsData, statsData] = await Promise.all([
         getReviews({
           storeId,
-          photoOnly: filter === 'photo',
-          reported: filter === 'reported',
+          photoOnly: filter === "photo",
+          reported: filter === "reported",
           sortBy,
           limit: 10,
           offset: 0,
@@ -73,8 +73,8 @@ export function AdminReviews() {
       setHasMore(reviewsData.hasMore);
       setStats(statsData);
     } catch (error) {
-      console.error('리뷰 로딩 실패:', error);
-      toast.error('리뷰를 불러오는데 실패했습니다.');
+      console.error("리뷰 로딩 실패:", error);
+      toast.error("리뷰를 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -87,8 +87,8 @@ export function AdminReviews() {
     try {
       const data = await getReviews({
         storeId,
-        photoOnly: filter === 'photo',
-        reported: filter === 'reported',
+        photoOnly: filter === "photo",
+        reported: filter === "reported",
         sortBy,
         limit: 10,
         offset: reviews.length,
@@ -97,15 +97,15 @@ export function AdminReviews() {
       setReviews([...reviews, ...data.reviews]);
       setHasMore(data.hasMore);
     } catch (error) {
-      console.error('리뷰 로딩 실패:', error);
-      toast.error('리뷰를 불러오는데 실패했습니다.');
+      console.error("리뷰 로딩 실패:", error);
+      toast.error("리뷰를 불러오는데 실패했습니다.");
     } finally {
       setLoadingMore(false);
     }
   }
 
   function handleReply(reviewId: string) {
-    const review = (reviews || []).find((r) => r.id === reviewId);
+    const review = (reviews || []).find(r => r.id === reviewId);
     if (!review) return;
 
     setSelectedReview(review);
@@ -114,7 +114,7 @@ export function AdminReviews() {
 
   async function handleReplySubmit(reviewId: string, text: string) {
     const user = await getCurrentUser();
-    if (!user) throw new Error('인증 필요');
+    if (!user) throw new Error("인증 필요");
 
     await addReviewReply(reviewId, {
       text,
@@ -123,7 +123,7 @@ export function AdminReviews() {
 
     // UI 업데이트
     setReviews(
-      reviews.map((r) =>
+      reviews.map(r =>
         r.id === reviewId
           ? {
               ...r,
@@ -133,8 +133,8 @@ export function AdminReviews() {
                 at: Date.now(),
               },
             }
-          : r
-      )
+          : r,
+      ),
     );
   }
 
@@ -143,13 +143,13 @@ export function AdminReviews() {
 
     // UI 업데이트
     setReviews(
-      reviews.map((r) => {
+      reviews.map(r => {
         if (r.id === reviewId) {
           const { reply, ...rest } = r;
           return rest;
         }
         return r;
-      })
+      }),
     );
   }
 
@@ -161,20 +161,18 @@ export function AdminReviews() {
   async function handleReportSubmit(
     reviewId: string,
     reason: ReviewReportReason,
-    description?: string
+    description?: string,
   ) {
     const user = await getCurrentUser();
-    if (!user) throw new Error('인증 필요');
+    if (!user) throw new Error("인증 필요");
 
     await reportReview(reviewId, reason, user.uid, description);
 
     // UI 업데이트
     setReviews(
-      reviews.map((r) =>
-        r.id === reviewId
-          ? { ...r, reportedCount: (r.reportedCount || 0) + 1 }
-          : r
-      )
+      reviews.map(r =>
+        r.id === reviewId ? { ...r, reportedCount: (r.reportedCount || 0) + 1 } : r,
+      ),
     );
   }
 
@@ -183,14 +181,12 @@ export function AdminReviews() {
       await hideReview(reviewId, hidden);
 
       // UI 업데이트
-      setReviews(
-        reviews.map((r) => (r.id === reviewId ? { ...r, isHidden: hidden } : r))
-      );
+      setReviews(reviews.map(r => (r.id === reviewId ? { ...r, isHidden: hidden } : r)));
 
-      toast.success(hidden ? '리뷰를 숨겼습니다.' : '리뷰를 표시했습니다.');
+      toast.success(hidden ? "리뷰를 숨겼습니다." : "리뷰를 표시했습니다.");
     } catch (error) {
-      console.error('리뷰 숨김 처리 실패:', error);
-      toast.error('리뷰 숨김 처리에 실패했습니다.');
+      console.error("리뷰 숨김 처리 실패:", error);
+      toast.error("리뷰 숨김 처리에 실패했습니다.");
     }
   }
 
@@ -199,9 +195,7 @@ export function AdminReviews() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl text-[#333] mb-2">리뷰 관리</h1>
-        <p className="text-[#8B7355]">
-          고객 리뷰를 확인하고 답글을 작성하세요
-        </p>
+        <p className="text-[#8B7355]">고객 리뷰를 확인하고 답글을 작성하세요</p>
       </div>
 
       {/* 통계 */}
@@ -220,9 +214,7 @@ export function AdminReviews() {
               <span className="text-[#8B7355]">평균 평점</span>
               <Star className="w-5 h-5 text-[#F37021] fill-current" />
             </div>
-            <p className="text-2xl text-[#333]">
-              {stats.averageRating.toFixed(1)}
-            </p>
+            <p className="text-2xl text-[#333]">{stats.averageRating.toFixed(1)}</p>
           </Card>
 
           <Card className="p-6">
@@ -243,7 +235,7 @@ export function AdminReviews() {
               <span className="text-[#8B7355]">별점 분포</span>
             </div>
             <div className="space-y-1">
-              {[5, 4, 3, 2, 1].map((rating) => (
+              {[5, 4, 3, 2, 1].map(rating => (
                 <div key={rating} className="flex items-center gap-2">
                   <span className="text-[#8B7355] w-3">{rating}</span>
                   <div className="flex-1 h-2 bg-[#E5DDD5] rounded-full overflow-hidden">
@@ -251,7 +243,9 @@ export function AdminReviews() {
                       className="h-full bg-[#F37021]"
                       style={{
                         width: `${
-                          (stats.ratingDistribution[rating as keyof typeof stats.ratingDistribution] /
+                          (stats.ratingDistribution[
+                            rating as keyof typeof stats.ratingDistribution
+                          ] /
                             stats.totalCount) *
                           100
                         }%`,
@@ -271,7 +265,7 @@ export function AdminReviews() {
       {/* 필터 & 정렬 */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         {/* 필터 탭 */}
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
+        <Tabs value={filter} onValueChange={v => setFilter(v as FilterType)}>
           <TabsList>
             <TabsTrigger value="all">
               전체
@@ -291,9 +285,9 @@ export function AdminReviews() {
             </TabsTrigger>
             <TabsTrigger value="reported">
               신고됨
-              {reviews.filter((r) => (r.reportedCount || 0) > 0).length > 0 && (
+              {reviews.filter(r => (r.reportedCount || 0) > 0).length > 0 && (
                 <Badge variant="destructive" className="ml-2">
-                  {reviews.filter((r) => (r.reportedCount || 0) > 0).length}
+                  {reviews.filter(r => (r.reportedCount || 0) > 0).length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -303,7 +297,7 @@ export function AdminReviews() {
         {/* 정렬 */}
         <div className="flex items-center gap-2 ml-auto">
           <SortAsc className="w-4 h-4 text-[#8B7355]" />
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortType)}>
+          <Select value={sortBy} onValueChange={v => setSortBy(v as SortType)}>
             <SelectTrigger className="w-[160px]">
               <SelectValue />
             </SelectTrigger>
@@ -335,13 +329,11 @@ export function AdminReviews() {
             <Star className="w-8 h-8 text-[#F37021]" />
           </div>
           <p className="text-[#8B7355] mb-2">리뷰가 없습니다</p>
-          <p className="text-[#8B7355]">
-            고객이 리뷰를 남기면 여기에 표시됩니다
-          </p>
+          <p className="text-[#8B7355]">고객이 리뷰를 남기면 여기에 표시됩니다</p>
         </Card>
       ) : (
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {reviews.map(review => (
             <ReviewCard
               key={review.id}
               review={review}
@@ -360,7 +352,7 @@ export function AdminReviews() {
                 disabled={loadingMore}
                 className="min-w-[200px]"
               >
-                {loadingMore ? '로딩 중...' : '더 보기'}
+                {loadingMore ? "로딩 중..." : "더 보기"}
               </Button>
             </div>
           )}

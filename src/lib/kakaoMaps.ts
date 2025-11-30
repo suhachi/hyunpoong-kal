@@ -3,29 +3,37 @@
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { KAKAO_MAP_APP_KEY } from '../config/env';
+import { KAKAO_MAP_APP_KEY } from "../config/env";
+
+interface KakaoSDK {
+  maps: {
+    load: (callback: () => void) => void;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
 
 declare global {
   interface Window {
-    kakao?: any;
+    kakao?: KakaoSDK;
   }
 }
 
-let kakaoMapsPromise: Promise<typeof window.kakao> | null = null;
+let kakaoMapsPromise: Promise<KakaoSDK> | null = null;
 
 /**
  * Kakao Maps SDK를 로드합니다.
  * 이미 로드된 경우 기존 Promise를 반환합니다.
  */
-export function loadKakaoMaps(): Promise<typeof window.kakao> {
+export function loadKakaoMaps(): Promise<KakaoSDK> {
   if (kakaoMapsPromise) {
     return kakaoMapsPromise;
   }
 
   kakaoMapsPromise = new Promise((resolve, reject) => {
     if (!KAKAO_MAP_APP_KEY) {
-      console.error('[loadKakaoMaps] Missing KAKAO_MAP_APP_KEY');
-      reject(new Error('Kakao Map app key is not configured'));
+      console.error("[loadKakaoMaps] Missing KAKAO_MAP_APP_KEY");
+      reject(new Error("Kakao Map app key is not configured"));
       return;
     }
 
@@ -36,25 +44,25 @@ export function loadKakaoMaps(): Promise<typeof window.kakao> {
     }
 
     // 스크립트 동적 로드
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_APP_KEY}&autoload=false&libraries=services`;
     script.async = true;
-    
+
     script.onload = () => {
       if (!window.kakao) {
-        reject(new Error('Kakao object not found on window'));
+        reject(new Error("Kakao object not found on window"));
         return;
       }
-      
+
       // autoload=false이므로 수동으로 로드
       window.kakao.maps.load(() => {
         resolve(window.kakao!);
       });
     };
 
-    script.onerror = (err) => {
-      console.error('[loadKakaoMaps] Failed to load script', err);
-      reject(new Error('Failed to load Kakao Maps script'));
+    script.onerror = err => {
+      console.error("[loadKakaoMaps] Failed to load script", err);
+      reject(new Error("Failed to load Kakao Maps script"));
     };
 
     document.head.appendChild(script);
@@ -62,4 +70,3 @@ export function loadKakaoMaps(): Promise<typeof window.kakao> {
 
   return kakaoMapsPromise;
 }
-

@@ -1,31 +1,28 @@
-// Firebase Timestamp 타입 (선택적)
-// Firebase 사용 시: Timestamp
-// Mock 모드 시: { seconds: number; nanoseconds: number }
-type FirebaseTimestamp = {
-  seconds: number;
-  nanoseconds: number;
-  toDate?: () => Date;
-};
+import { FirestoreTimestamp } from "./common";
 
-export type OrderStatus =
-  | 'pending'     // 접수대기
-  | 'accepted'    // 접수확인
-  | 'cooking'     // 조리중
-  | 'delivering'  // 배달중
-  | 'completed'   // 완료
-  | 'cancelled';  // 취소
+export enum OrderStatus {
+  PENDING = "pending", // 접수대기
+  ACCEPTED = "accepted", // 접수확인
+  COOKING = "cooking", // 조리중
+  DELIVERING = "delivering", // 배달중
+  COMPLETED = "completed", // 완료
+  CANCELLED = "cancelled", // 취소
+}
 
-export type PaymentMethod =
-  | 'app_card'   // 앱 내 카드 선결제 (PG 연동용, 지금은 준비 중)
-  | 'meet_card'  // 만나서 카드 결제 (배달 기사 또는 매장에서 카드 단말기로 결제)
-  | 'meet_cash'; // 만나서 현금 결제 (배달 기사 또는 매장에서 현금으로 결제)
+export enum PaymentMethod {
+  APP_CARD = "app_card", // 앱 내 카드 선결제
+  MEET_CARD = "meet_card", // 만나서 카드 결제
+  MEET_CASH = "meet_cash", // 만나서 현금 결제
+}
 
-export type PaymentStatus =
-  | 'pending'     // 결제 대기
-  | 'authorized'  // 인증됨 (승인 전)
-  | 'approved'    // 승인됨
-  | 'failed'      // 실패
-  | 'refunded';   // 환불
+export enum PaymentStatus {
+  PENDING = "pending",
+  AUTHORIZED = "authorized", // PG 인증 완료 (승인 전)
+  APPROVED = "approved", // 결제 승인 완료 (PAID)
+  FAILED = "failed",
+  REFUNDED = "refunded",
+  CANCELLED = "cancelled",
+}
 
 export interface OrderItem {
   menuId: string;
@@ -48,18 +45,47 @@ export interface DeliveryAddress {
   lng?: number;
 }
 
-export interface PaymentInfo {
+export interface OrderPaymentInfo {
   method: PaymentMethod;
   status: PaymentStatus;
-  tid?: string;           // NICEPAY 거래 ID
-  authToken?: string;     // 인증 토큰
-  cardName?: string;      // 카드사명
-  cardNum?: string;       // 카드번호 (마스킹)
-  paidAt?: Timestamp;
-  canceledAt?: Timestamp;
-  cancelReason?: string;
   amount: number;
+  
+  // PG 관련 정보 (App 결제 시)
+  pgProvider?: 'nicepay' | 'mock';
+  pgOrderId?: string; // PG 거래 ID (TID)
+  pgTid?: string; // PG Transaction ID
+  pgReceiptUrl?: string;
+  
+  // 카드 정보
+  cardName?: string;
+  cardNum?: string;
+  
+  // 타임스탬프
+  requestedAt?: FirestoreTimestamp;
+  approvedAt?: FirestoreTimestamp;
+  cancelledAt?: FirestoreTimestamp;
+  failedAt?: FirestoreTimestamp;
+  
+  // 실패/취소 사유
+  failCode?: string;
+  failReason?: string;
+  cancelReason?: string;
+
+  // 현금영수증/세금계산서 (기존 유지)
+  cashReceipt?: {
+    type: "personal" | "business";
+    number: string;
+    issuedAt?: FirestoreTimestamp;
+    receiptNo?: string;
+  };
+  taxInvoice?: {
+    businessNumber: string;
+    companyName: string;
+  };
 }
+
+// 하위 호환성을 위해 PaymentInfo Alias 유지 (필요시 deprecated 처리)
+export type PaymentInfo = OrderPaymentInfo;
 
 export interface Order {
   orderId: string;
@@ -70,68 +96,61 @@ export interface Order {
 
   subtotal: number;
   discount: number;
-  couponId?: string;
+  couponId: string | null;
+  couponApplied: boolean;
   deliveryFee: number;
   finalAmount: number;
 
-  deliveryType: 'delivery' | 'pickup';
-  deliveryAddress?: DeliveryAddress;
-  phone: string;
+  deliveryType: "delivery" | "pickup";
+  deliveryAddress: DeliveryAddress | null;
+  phoneNumber: string;
   email?: string;
   requests?: string;
 
   status: OrderStatus;
-  payment: PaymentInfo;
+  payment: OrderPaymentInfo;
+  
+  // 멱등성 키 (중복 결제 방지)
+  clientOrderId?: string;
 
   timeline: {
-    pending?: Timestamp;
-    accepted?: Timestamp;
-    preparing?: Timestamp;
-    completed?: Timestamp;
-    canceled?: Timestamp;
+    pending?: FirestoreTimestamp;
+    accepted?: FirestoreTimestamp;
+    preparing?: FirestoreTimestamp;
+    completed?: FirestoreTimestamp;
+    cancelled?: FirestoreTimestamp;
+    [key: string]: FirestoreTimestamp | undefined;
   };
 
-  // 현금영수증/세금계산서
-  cashReceipt?: {
-    type: 'personal' | 'business';
-    number: string;
-  };
-  taxInvoice?: {
-    businessNumber: string;
-    companyName: string;
-  };
-
-  // 리뷰 미러링 (Step 5)
+  // 리뷰 미러링
   reviewed?: boolean;
   reviewId?: string;
   reviewRating?: number;
   reviewContent?: string;
 
-  // Firestore uses FirebaseTimestamp, local mock uses ISO string
-  createdAt: FirebaseTimestamp | string;
-  updatedAt: FirebaseTimestamp | string;
+  createdAt: FirestoreTimestamp;
+  updatedAt: FirestoreTimestamp;
 }
 
-// 주문 로그 (감사 추적)
+// 주문 로그
 export interface OrderLog {
   logId: string;
   orderId: string;
-  action: 'created' | 'status_changed' | 'canceled' | 'refunded' | 'note_added';
-  by: string;           // userId or 'system'
-  byName?: string;      // 사용자 이름
-  at: Timestamp;
+  action: "created" | "status_changed" | "canceled" | "refunded" | "note_added";
+  by: string;
+  byName?: string;
+  at: FirestoreTimestamp;
   from?: OrderStatus;
   to?: OrderStatus;
-  reason?: string;      // 취소/환불 사유
-  note?: string;        // 추가 메모
+  reason?: string;
+  note?: string;
 }
 
-// 주문 상태 전이 가드
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  pending: ['accepted', 'cancelled'],
-  accepted: ['cooking', 'cancelled'],
-  cooking: ['delivering', 'cancelled'],
-  delivering: ['completed', 'cancelled'],
-  completed: [],
-  cancelled: [],
+  [OrderStatus.PENDING]: [OrderStatus.ACCEPTED, OrderStatus.CANCELLED],
+  [OrderStatus.ACCEPTED]: [OrderStatus.COOKING, OrderStatus.CANCELLED],
+  [OrderStatus.COOKING]: [OrderStatus.DELIVERING, OrderStatus.CANCELLED],
+  [OrderStatus.DELIVERING]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
+  [OrderStatus.COMPLETED]: [],
+  [OrderStatus.CANCELLED]: [],
 };

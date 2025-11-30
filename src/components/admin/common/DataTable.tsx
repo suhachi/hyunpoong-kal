@@ -1,13 +1,6 @@
-import { ReactNode } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../ui/table';
-import { Skeleton } from '../../ui/skeleton';
+import { ReactNode } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
+import { Skeleton } from "../../ui/skeleton";
 
 export interface Column<T> {
   key: string;
@@ -28,7 +21,7 @@ export function DataTable<T extends { id?: string }>({
   columns,
   data,
   loading,
-  emptyMessage = '데이터가 없습니다.',
+  emptyMessage = "데이터가 없습니다.",
   onRowClick,
 }: DataTableProps<T>) {
   if (loading) {
@@ -37,7 +30,7 @@ export function DataTable<T extends { id?: string }>({
         <Table>
           <TableHeader>
             <TableRow>
-              {columns.map((col) => (
+              {columns.map(col => (
                 <TableHead key={col.key} style={{ width: col.width }}>
                   {col.label}
                 </TableHead>
@@ -47,7 +40,7 @@ export function DataTable<T extends { id?: string }>({
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={i}>
-                {columns.map((col) => (
+                {columns.map(col => (
                   <TableCell key={col.key}>
                     <Skeleton className="h-5 w-full" />
                   </TableCell>
@@ -73,7 +66,7 @@ export function DataTable<T extends { id?: string }>({
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map((col) => (
+            {columns.map(col => (
               <TableHead key={col.key} style={{ width: col.width }}>
                 {col.label}
               </TableHead>
@@ -85,13 +78,11 @@ export function DataTable<T extends { id?: string }>({
             <TableRow
               key={item.id || index}
               onClick={() => onRowClick?.(item)}
-              className={onRowClick ? 'cursor-pointer hover:bg-[#F9F6F3]' : ''}
+              className={onRowClick ? "cursor-pointer hover:bg-[#F9F6F3]" : ""}
             >
-              {columns.map((col) => (
+              {columns.map(col => (
                 <TableCell key={col.key}>
-                  {col.render
-                    ? col.render(item)
-                    : String((item as any)[col.key] || '-')}
+                  {col.render ? col.render(item) : String((item as any)[col.key] || "-")}
                 </TableCell>
               ))}
             </TableRow>

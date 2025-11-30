@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-11-30-1717  
+**Generated**: 2025-11-30-1905  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -15,6 +15,170 @@ Complete source code of reusable components.
 
 ```tsx
  
+```
+
+---
+
+## src\components\admin\AdminMenuCustomOptionsEditor.tsx
+
+```tsx
+/**
+ * 메뉴 커스텀 옵션 편집 컴포넌트
+ * 메뉴 등록/수정 다이얼로그에서 공통으로 사용
+ */
+
+import { useState } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Card, CardContent } from '../ui/card';
+import { Plus, X } from 'lucide-react';
+import { formatPrice } from '../../lib/utils';
+import type { CustomOption } from '../../types/menu';
+
+interface AdminMenuCustomOptionsEditorProps {
+  value: CustomOption[];
+  onChange: (next: CustomOption[]) => void;
+}
+
+export function AdminMenuCustomOptionsEditor({
+  value,
+  onChange,
+}: AdminMenuCustomOptionsEditorProps) {
+  const [customOptions, setCustomOptions] = useState<CustomOption[]>(value);
+
+  // 옵션 추가
+  const handleAddCustomOption = () => {
+    const newOption: CustomOption = {
+      id: `option-${Date.now()}`,
+      name: '',
+      price: 0,
+      quantity: 1,
+    };
+    const next = [...customOptions, newOption];
+    setCustomOptions(next);
+    onChange(next);
+  };
+
+  // 옵션 제거
+  const handleRemoveCustomOption = (id: string) => {
+    const next = customOptions.filter(opt => opt.id !== id);
+    setCustomOptions(next);
+    onChange(next);
+  };
+
+  // 옵션 업데이트
+  const handleUpdateCustomOption = (id: string, field: keyof CustomOption, value: string | number) => {
+    const next = customOptions.map(opt =>
+      opt.id === id ? { ...opt, [field]: value } : opt
+    );
+    setCustomOptions(next);
+    // 빈 이름 필터링 후 onChange 호출
+    const validOptions = next.filter(opt => opt.name.trim().length > 0);
+    onChange(validOptions);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <Label>메뉴 옵션</Label>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAddCustomOption}
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          옵션 추가
+        </Button>
+      </div>
+      {customOptions.length === 0 ? (
+        <p className="text-sm text-gray-500 py-4 text-center border-2 border-dashed rounded-lg">
+          옵션을 추가하려면 "옵션 추가" 버튼을 클릭하세요
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {customOptions.map((option, index) => (
+            <Card key={option.id} className="bg-white">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 grid grid-cols-3 gap-3">
+                    <div>
+                      <Label htmlFor={`option-name-${option.id}`} className="text-xs">
+                        옵션명 *
+                      </Label>
+                      <Input
+                        id={`option-name-${option.id}`}
+                        type="text"
+                        placeholder="예: 곱빼기"
+                        value={option.name}
+                        onChange={e =>
+                          handleUpdateCustomOption(option.id, 'name', e.target.value)
+                        }
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`option-price-${option.id}`} className="text-xs">
+                        추가 가격 (원)
+                      </Label>
+                      <Input
+                        id={`option-price-${option.id}`}
+                        type="number"
+                        placeholder="0"
+                        value={option.price}
+                        onChange={e =>
+                          handleUpdateCustomOption(
+                            option.id,
+                            'price',
+                            parseInt(e.target.value) || 0
+                          )
+                        }
+                        min="0"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`option-quantity-${option.id}`} className="text-xs">
+                        수량
+                      </Label>
+                      <Input
+                        id={`option-quantity-${option.id}`}
+                        type="number"
+                        placeholder="1"
+                        value={option.quantity}
+                        onChange={e =>
+                          handleUpdateCustomOption(
+                            option.id,
+                            'quantity',
+                            parseInt(e.target.value) || 1
+                          )
+                        }
+                        min="1"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveCustomOption(option.id)}
+                    className="mt-6"
+                  >
+                    <X className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 ```
 
 ---
@@ -1111,6 +1275,7 @@ import { toast } from 'sonner';
 import { formatPrice } from '../../lib/utils';
 import { uploadMenuImage, validateImageFile } from '../../lib/storage';
 import { USE_FIREBASE } from '../../config/env';
+import { AdminMenuCustomOptionsEditor } from './AdminMenuCustomOptionsEditor';
 
 interface MenuCreateDialogProps {
   open: boolean;
@@ -1220,29 +1385,9 @@ export function MenuCreateDialog({
     );
   };
 
-  // 커스텀 옵션 추가
-  const handleAddCustomOption = () => {
-    const newOption: CustomOption = {
-      id: `option-${Date.now()}`,
-      name: '',
-      price: 0,
-      quantity: 1,
-    };
-    setCustomOptions(prev => [...prev, newOption]);
-  };
-
-  // 커스텀 옵션 제거
-  const handleRemoveCustomOption = (id: string) => {
-    setCustomOptions(prev => prev.filter(opt => opt.id !== id));
-  };
-
-  // 커스텀 옵션 업데이트
-  const handleUpdateCustomOption = (id: string, field: keyof CustomOption, value: string | number) => {
-    setCustomOptions(prev =>
-      prev.map(opt =>
-        opt.id === id ? { ...opt, [field]: value } : opt
-      )
-    );
+  // 커스텀 옵션 변경 핸들러
+  const handleCustomOptionsChange = (next: CustomOption[]) => {
+    setCustomOptions(next);
   };
 
   // 폼 초기화
@@ -1480,102 +1625,10 @@ export function MenuCreateDialog({
               </div>
             </div>
             {/* 커스텀 옵션 관리 */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <Label>메뉴 옵션</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddCustomOption}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  옵션 추가
-                </Button>
-              </div>
-              {customOptions.length === 0 ? (
-                <p className="text-sm text-gray-500 py-4 text-center border-2 border-dashed rounded-lg">
-                  옵션을 추가하려면 "옵션 추가" 버튼을 클릭하세요
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {customOptions.map((option, index) => (
-                    <Card key={option.id} className="bg-white">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1 grid grid-cols-3 gap-3">
-                            <div>
-                              <Label htmlFor={`option-name-${option.id}`} className="text-xs">
-                                옵션명 *
-                              </Label>
-                              <Input
-                                id={`option-name-${option.id}`}
-                                type="text"
-                                placeholder="예: 곱빼기"
-                                value={option.name}
-                                onChange={e =>
-                                  handleUpdateCustomOption(option.id, 'name', e.target.value)
-                                }
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor={`option-price-${option.id}`} className="text-xs">
-                                추가 가격 (원)
-                              </Label>
-                              <Input
-                                id={`option-price-${option.id}`}
-                                type="number"
-                                placeholder="0"
-                                value={option.price}
-                                onChange={e =>
-                                  handleUpdateCustomOption(
-                                    option.id,
-                                    'price',
-                                    parseInt(e.target.value) || 0
-                                  )
-                                }
-                                min="0"
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor={`option-quantity-${option.id}`} className="text-xs">
-                                수량
-                              </Label>
-                              <Input
-                                id={`option-quantity-${option.id}`}
-                                type="number"
-                                placeholder="1"
-                                value={option.quantity}
-                                onChange={e =>
-                                  handleUpdateCustomOption(
-                                    option.id,
-                                    'quantity',
-                                    parseInt(e.target.value) || 1
-                                  )
-                                }
-                                min="1"
-                                className="mt-1"
-                              />
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveCustomOption(option.id)}
-                            className="mt-6"
-                          >
-                            <X className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+            <AdminMenuCustomOptionsEditor
+              value={customOptions}
+              onChange={handleCustomOptionsChange}
+            />
 
             {/* 알레르기 정보 */}
             <div>
@@ -1999,12 +2052,14 @@ import { Checkbox } from '../ui/checkbox';
 import { Clock } from 'lucide-react';
 import { uploadMenuImage, validateImageFile, deleteImageFromStorage } from '../../lib/storage';
 import { USE_FIREBASE } from '../../config/env';
+import { AdminMenuCustomOptionsEditor } from './AdminMenuCustomOptionsEditor';
+import type { CustomOption } from '../../types/menu';
 
 interface MenuEditDialogProps {
   menu: Menu | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string }, reason: string) => void;
+  onSave: (updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; customOptions?: CustomOption[] | undefined }, reason: string) => void;
   loading?: boolean;
 }
 
@@ -2029,6 +2084,9 @@ export function MenuEditDialog({
   const [timeLimitStart, setTimeLimitStart] = useState('11:00');
   const [timeLimitEnd, setTimeLimitEnd] = useState('14:00');
 
+  // 커스텀 옵션 관리
+  const [customOptions, setCustomOptions] = useState<CustomOption[]>([]);
+
   // 다이얼로그 열릴 때 또는 menu가 변경될 때 초기값 설정
   useEffect(() => {
     if (open && menu) {
@@ -2039,6 +2097,8 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl(menu.image || '');
       setImageFile(null);
+      // 커스텀 옵션 초기화
+      setCustomOptions(menu.customOptions || []);
       // 시간제 판매 설정 초기화
       if (menu.availableHours) {
         setTimeLimitEnabled(true);
@@ -2062,6 +2122,7 @@ export function MenuEditDialog({
       setReason('');
       setImageUrl('');
       setImageFile(null);
+      setCustomOptions([]);
       setTimeLimitEnabled(false);
       setTimeLimitStart('11:00');
       setTimeLimitEnd('14:00');
@@ -2130,7 +2191,7 @@ export function MenuEditDialog({
       return;
     }
 
-    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null } = {};
+    const updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null; customOptions?: CustomOption[] | undefined } = {};
 
     // 메뉴명 변경
     if (name.trim() !== menu.name) {
@@ -2183,6 +2244,17 @@ export function MenuEditDialog({
       updates.availableHours = newHours;
     }
 
+    // 커스텀 옵션 변경 감지
+    const currentCustomOptions = menu.customOptions || [];
+    const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
+    const customOptionsChanged = 
+      JSON.stringify(currentCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity }))) !==
+      JSON.stringify(validCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity })));
+    
+    if (customOptionsChanged) {
+      updates.customOptions = validCustomOptions.length > 0 ? validCustomOptions : undefined;
+    }
+
     if (Object.keys(updates).length === 0) {
       return;
     }
@@ -2192,13 +2264,20 @@ export function MenuEditDialog({
 
   if (!menu) return null;
 
+  const currentCustomOptions = menu.customOptions || [];
+  const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
+  const customOptionsChanged = 
+    JSON.stringify(currentCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity }))) !==
+    JSON.stringify(validCustomOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, quantity: opt.quantity })));
+
   const hasChanges =
     name.trim() !== menu.name ||
     category !== menu.category ||
     (parseInt(price) !== menu.price && !isNaN(parseInt(price))) ||
     description.trim() !== menu.description ||
     imageFile !== null ||
-    (imageUrl && imageUrl !== (menu.image || ""));
+    (imageUrl && imageUrl !== (menu.image || "")) ||
+    customOptionsChanged;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -2350,6 +2429,14 @@ export function MenuEditDialog({
                   💡 <strong>{timeLimitStart} ~ {timeLimitEnd}</strong> 시간대에만 주문이 가능합니다.
                 </div>
               )}
+            </div>
+
+            {/* 커스텀 옵션 관리 */}
+            <div className="space-y-2">
+              <AdminMenuCustomOptionsEditor
+                value={customOptions}
+                onChange={setCustomOptions}
+              />
             </div>
 
             {/* 변경 사유 */}
@@ -3306,6 +3393,7 @@ export function OrderActionBar({ order, onUpdate }: OrderActionBarProps) {
   };
 
   return (
+    <div className="flex items-center gap-2">
       <div className="flex items-center gap-1 mr-auto">
         {getStatusList(order.deliveryType).map((status) => (
           <Button
@@ -3355,7 +3443,7 @@ export function OrderActionBar({ order, onUpdate }: OrderActionBarProps) {
         <Download className="w-4 h-4" />
         영수증
       </Button>
-    </div >
+    </div>
   );
 }
 
@@ -3906,72 +3994,78 @@ export function OrderTable({ orders, onViewDetail, onUpdateStatus, isLoading }: 
                       data-testid="admin.orders.item.detail-button"
                     >
                       <Eye className="w-4 h-4" />
-                      상세 보기
-                    </DropdownMenuItem>
-                    {order.status === 'pending' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'accepted')}
-                        >
-                          접수하기
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {order.status === 'accepted' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cooking')}
-                        >
-                          조리중
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {order.status === 'cooking' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'delivering')}
-                        >
-                          배달
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {order.status === 'delivering' && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'completed')}
-                        >
-                          완료
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onUpdateStatus(order, 'cancelled')}
-                          className="text-red-600"
-                        >
-                          주문 취소
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              </TableCell>
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {order.status === 'pending' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'accepted')}
+                            >
+                              접수하기
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'accepted' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cooking')}
+                            >
+                              조리중
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'cooking' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'delivering')}
+                            >
+                              배달
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {order.status === 'delivering' && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'completed')}
+                            >
+                              완료
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onUpdateStatus(order, 'cancelled')}
+                              className="text-red-600"
+                            >
+                              주문 취소
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
         </TableRow>
             ))}
       </TableBody>
@@ -5114,6 +5208,200 @@ export function TimeSettingDialog({
 
 ---
 
+## src\components\admin\UserSearchDialog.tsx
+
+```tsx
+/**
+ * 사용자 검색 다이얼로그
+ * 쿠폰 발급 시 특정 사용자를 선택하기 위한 컴포넌트
+ */
+
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Search, Loader2 } from 'lucide-react';
+import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { toast } from 'sonner';
+import { USE_FIREBASE } from '../../config/env';
+
+interface User {
+  uid: string;
+  email?: string;
+  displayName?: string;
+  phoneNumber?: string;
+}
+
+interface UserSearchDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelect: (user: User) => void;
+}
+
+export function UserSearchDialog({
+  open,
+  onOpenChange,
+  onSelect,
+}: UserSearchDialogProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // 검색 실행
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      toast.error('검색어를 입력하세요');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (!USE_FIREBASE) {
+        // Mock 모드: 샘플 데이터 반환
+        setUsers([
+          { uid: 'user-001', email: 'user1@example.com', displayName: '홍길동', phoneNumber: '010-1234-5678' },
+          { uid: 'user-002', email: 'user2@example.com', displayName: '김철수', phoneNumber: '010-2345-6789' },
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // Firebase 모드: users 컬렉션에서 검색
+      const usersRef = collection(db, 'users');
+      const searchLower = searchQuery.toLowerCase().trim();
+
+      // 이름, 이메일, 전화번호로 검색 (OR 조건)
+      // Firestore는 OR 쿼리를 직접 지원하지 않으므로 여러 쿼리 실행 후 합치기
+      const queries = [
+        query(usersRef, where('displayName', '>=', searchQuery), where('displayName', '<=', searchQuery + '\uf8ff'), limit(10)),
+        query(usersRef, where('email', '>=', searchQuery), where('email', '<=', searchQuery + '\uf8ff'), limit(10)),
+        query(usersRef, where('phoneNumber', '>=', searchQuery), where('phoneNumber', '<=', searchQuery + '\uf8ff'), limit(10)),
+      ];
+
+      const results = await Promise.all(queries.map(q => getDocs(q)));
+      const userMap = new Map<string, User>();
+
+      results.forEach(snapshot => {
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          userMap.set(doc.id, {
+            uid: doc.id,
+            email: data.email,
+            displayName: data.displayName || data.name,
+            phoneNumber: data.phoneNumber || data.phone,
+          });
+        });
+      });
+
+      const userList = Array.from(userMap.values());
+      setUsers(userList);
+
+      if (userList.length === 0) {
+        toast.info('검색 결과가 없습니다');
+      }
+    } catch (error) {
+      console.error('Failed to search users:', error);
+      toast.error('사용자 검색에 실패했습니다');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 다이얼로그 닫을 때 초기화
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery('');
+      setUsers([]);
+    }
+  }, [open]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>사용자 검색</DialogTitle>
+          <DialogDescription>
+            이름, 이메일, 전화번호로 검색하세요
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          {/* 검색 입력 */}
+          <div className="space-y-2">
+            <Label>검색어</Label>
+            <div className="flex gap-2">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="이름, 이메일, 전화번호"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+              />
+              <Button onClick={handleSearch} disabled={loading}>
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Search className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* 검색 결과 */}
+          {users.length > 0 && (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              <Label>검색 결과 ({users.length}명)</Label>
+              <div className="space-y-2">
+                {users.map((user) => (
+                  <div
+                    key={user.uid}
+                    className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      onSelect(user);
+                      onOpenChange(false);
+                    }}
+                  >
+                    <div className="font-medium text-sm">{user.displayName || '이름 없음'}</div>
+                    {user.email && (
+                      <div className="text-xs text-gray-500">{user.email}</div>
+                    )}
+                    {user.phoneNumber && (
+                      <div className="text-xs text-gray-500">{user.phoneNumber}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            닫기
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+```
+
+---
+
 ## src\components\admin\common\DataTable.tsx
 
 ```tsx
@@ -5422,6 +5710,147 @@ export function StatCard({ title, value, icon: Icon, trend, subtitle, loading, v
     </Card>
   );
 }
+
+```
+
+---
+
+## src\components\app\AddressInput.tsx
+
+```tsx
+/**
+ * 주소 입력 컴포넌트
+ * Daum 주소 검색 API 사용
+ */
+
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { MapPin } from 'lucide-react';
+import type { DeliveryAddress } from '../../types/cart';
+
+interface AddressInputProps {
+  value?: DeliveryAddress;
+  onChange: (address: DeliveryAddress) => void;
+  required?: boolean;
+}
+
+declare global {
+  interface Window {
+    daum: {
+      Postcode: new (options: {
+        oncomplete: (data: {
+          address: string;
+          addressType: string;
+          bname: string;
+          buildingName: string;
+        }) => void;
+        width?: string;
+        height?: string;
+      }) => {
+        open: () => void;
+      };
+    };
+  }
+}
+
+export function AddressInput({ value, onChange, required = false }: AddressInputProps) {
+  const [detailAddress, setDetailAddress] = useState(value?.detail || '');
+  const postcodeRef = useRef<HTMLDivElement>(null);
+
+  // Daum Postcode 스크립트 로드
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // 이미 로드되어 있으면 스킵
+    if (window.daum?.Postcode) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      // 컴포넌트 언마운트 시 스크립트 제거하지 않음 (다른 컴포넌트에서도 사용 가능)
+    };
+  }, []);
+
+  // 주소 검색 열기
+  const handleOpenPostcode = () => {
+    if (!window.daum?.Postcode) {
+      alert('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    new window.daum.Postcode({
+      oncomplete: (data) => {
+        const fullAddress = data.address;
+        const address: DeliveryAddress = {
+          address: fullAddress,
+          detail: detailAddress,
+        };
+        onChange(address);
+      },
+      width: '100%',
+      height: '100%',
+    }).open();
+  };
+
+  // 상세 주소 변경
+  const handleDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const detail = e.target.value;
+    setDetailAddress(detail);
+    if (value?.address) {
+      onChange({
+        ...value,
+        detail,
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label>
+        배달 주소 {required && <span className="text-red-500">*</span>}
+      </Label>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            placeholder="도로명 주소"
+            value={value?.address || ''}
+            readOnly
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleOpenPostcode}
+          >
+            <MapPin className="w-4 h-4 mr-1" />
+            주소 검색
+          </Button>
+        </div>
+        {value?.address && (
+          <Input
+            type="text"
+            placeholder="상세 주소 (동/호수 등)"
+            value={detailAddress}
+            onChange={handleDetailChange}
+            required={required}
+          />
+        )}
+      </div>
+      {value?.address && (
+        <div className="text-sm text-gray-600">
+          {value.address} {value.detail}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 ```
 
