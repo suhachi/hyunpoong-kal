@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-11-30-1429  
+**Generated**: 2025-11-30-1558  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -785,6 +785,8 @@ export function Cart() {
   );
 }
 
+import type { CustomOption } from '../../types/menu';
+
 interface CartItemCardProps {
   item: {
     menuId: string;
@@ -800,7 +802,9 @@ interface CartItemCardProps {
     optionPrices: {
       noodle: number;
       toppings: number;
+      custom?: number;
     };
+    customOptions?: CustomOption[];
     subtotal: number;
   };
   onUpdateQuantity: (quantity: number) => void;
@@ -848,8 +852,15 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
 
           {/* 옵션 */}
           {optionsText && (
-            <p className="text-sm text-[#2E1C10]/60 mb-2" data-testid="cart.item.options">
+            <p className="text-sm text-[#2E1C10]/60 mb-1" data-testid="cart.item.options">
               {optionsText}
+            </p>
+          )}
+
+          {/* 커스텀 옵션 */}
+          {item.customOptions && item.customOptions.length > 0 && (
+            <p className="text-sm text-[#2E1C10]/60 mb-2" data-testid="cart.item.custom-options">
+              {item.customOptions.map(opt => `${opt.name}(+${formatPrice(opt.price)})`).join(', ')}
             </p>
           )}
 

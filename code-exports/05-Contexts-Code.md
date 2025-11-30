@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-11-30-1429  
+**Generated**: 2025-11-30-1558  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -439,6 +439,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const updatedUser = { ...user, ...data };
       localStorage.setItem('mockUser', JSON.stringify(updatedUser));
       setUser(updatedUser);
+    }
+  };
+
+  // 인증 코드 전송
+  const sendPhoneVerificationCode = async (phone: string): Promise<ConfirmationResult> => {
+    if (USE_FIREBASE) {
+      const normalizedPhone = normalizePhoneNumber(phone);
+      return await sendVerificationCode(normalizedPhone);
+    } else {
+      console.warn('[Auth] Mock sendPhoneVerificationCode called', phone);
+      // Mock 모드에서는 가짜 확인 결과 반환
+      return {
+        verificationId: 'mock-verification-id',
+        confirm: async (code: string) => {
+          if (code === '123456') {
+            return {
+              user: {
+                uid: `phone-${Date.now()}`,
+                phoneNumber: phone,
+              }
+            } as any;
+          }
+          throw new Error('Invalid code');
+        }
+      } as ConfirmationResult;
+    }
+  };
+
+  // 인증 코드 확인 및 로그인
+  const verifyAndSignInWithPhone = async (
+    confirmationResult: ConfirmationResult,
+    code: string
+  ): Promise<void> => {
+    if (USE_FIREBASE) {
+      await verifyPhoneCode(confirmationResult, code);
+      // verifyPhoneCode 내부에서 signInWithCredential을 호출하므로
+      // onAuthStateChanged가 트리거되어 사용자 상태가 업데이트됨
+    } else {
+      console.warn('[Auth] Mock verifyAndSignInWithPhone called', code);
+      if (code !== '123456') {
+        throw new Error('인증번호가 올바르지 않습니다.');
+      }
+      // Mock 로그인 처리
+      await signInWithPhone('01012345678', code);
     }
   };
 

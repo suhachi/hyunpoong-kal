@@ -1,6 +1,6 @@
 # Types & Constants - Full Source Code
 
-**Generated**: 2025-11-30-1429  
+**Generated**: 2025-11-30-1558  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -459,6 +459,8 @@ export interface ReportSettings {
 ## src\types\cart.ts
 
 ```typescript
+import type { CustomOption } from './menu';
+
 export interface CartItem {
   menuId: string;
   menuName: string;
@@ -473,7 +475,9 @@ export interface CartItem {
   optionPrices: {
     noodle: number;
     toppings: number;
+    custom?: number;  // 커스텀 옵션 총액
   };
+  customOptions?: CustomOption[];  // 선택된 커스텀 옵션 목록
   subtotal: number;
 }
 
@@ -802,14 +806,14 @@ export interface WebhookEvent {
 ## src\types\menu.ts
 
 ```typescript
-export type MenuCategory = 
+export type MenuCategory =
   | 'noodle'        // 칼국수/메인메뉴
   | 'set'           // 세트메뉴
   | 'side'          // 사이드메뉴
   | 'drink'         // 음료
   | 'alcohol';      // 주류
 
-export type MenuBadge = 
+export type MenuBadge =
   | 'best'      // 베스트
   | 'signature' // 시그니처
   | 'spicy'     // 매운맛
@@ -840,6 +844,15 @@ export interface MenuOptionGroup extends OptionGroup {
   // 메뉴별로 옵션 그룹을 커스터마이즈할 수 있도록
 }
 
+// 커스텀 옵션 (관리자가 메뉴별로 직접 정의)
+export interface CustomOption {
+  id: string;
+  name: string;       // 옵션 이름 (예: "곱빼기", "순한맛", "계란 추가")
+  price: number;      // 추가 가격
+  quantity: number;   // 기본 수량 (대부분 1)
+  category?: string;  // 옵션 카테고리 (예: "면양", "맵기", "토핑") - 선택사항
+}
+
 export interface Menu {
   menuId: string;
   category: MenuCategory;
@@ -853,6 +866,7 @@ export interface Menu {
     spicy?: { label: string; price: number }[];
     toppings?: { label: string; price: number }[];
   };
+  customOptions?: CustomOption[];    // 관리자가 직접 정의한 커스텀 옵션들 (신규)
   optionGroups?: MenuOptionGroup[];  // 이 메뉴에 적용된 옵션 그룹들 (고급)
   allergens: string[];      // 알레르기 유발 성분
   origin: string;           // 원산지
@@ -896,7 +910,7 @@ export interface MenuLog {
 }
 
 // 메뉴 상태 (시간제 판매 고려)
-export type MenuStatus = 
+export type MenuStatus =
   | 'available'     // 판매 중
   | 'soldout'       // 품절
   | 'time-limited'  // 시간제 (현재 시간 밖)
