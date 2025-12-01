@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-11-30-1905  
+**Generated**: 2025-12-01-2219  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -14,21 +14,21 @@ Complete source code of 9 user-facing pages.
 ## src\pages\app\Home.tsx
 
 ```tsx
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect, memo, useCallback } from 'react';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import { ChevronRight, CloudSun, Star, Gift, Ticket } from 'lucide-react';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { FEATURE_FLAGS } from '../../config/env';
-import { DEFAULT_MENU_IMAGE } from '../../config/ui';
-import { formatPrice } from '../../lib/utils';
-import { getMenus } from '../../lib/admin/menus.api';
-import { getActiveNotices } from '../../lib/admin/notices.api';
-import { getRecentReviews } from '../../lib/reviews.api';
-import type { Menu } from '../../types/menu';
-import type { Notice } from '../../types/notice';
-import type { Review } from '../../types/review';
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, memo, useCallback } from "react";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { ChevronRight, CloudSun, Star, Gift, Ticket } from "lucide-react";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { FEATURE_FLAGS } from "../../config/env";
+import { DEFAULT_MENU_IMAGE } from "../../config/ui";
+import { formatPrice } from "../../lib/utils";
+import { getMenus } from "../../lib/admin/menus.api";
+import { getActiveNotices } from "../../lib/admin/notices.api";
+import { getRecentReviews } from "../../lib/reviews.api";
+import type { Menu } from "../../types/menu";
+import type { Notice } from "../../types/notice";
+import type { Review } from "../../types/review";
 
 export function Home() {
   const navigate = useNavigate();
@@ -41,9 +41,7 @@ export function Home() {
       try {
         // 추천 메뉴 로드
         const menus = await getMenus({});
-        const bestMenus = menus
-          .filter(m => m.badges.includes('best'))
-          .slice(0, 2);
+        const bestMenus = menus.filter(m => m.badges.includes("best")).slice(0, 2);
         setRecommendedMenus(bestMenus.length >= 2 ? bestMenus : menus.slice(0, 2));
 
         // 공지사항 로드
@@ -54,16 +52,19 @@ export function Home() {
         const reviews = await getRecentReviews(3);
         setRecentReviews(reviews);
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error("Failed to load data:", error);
       }
     };
     loadData();
   }, []);
 
   // 추천 메뉴 클릭 핸들러
-  const handleMenuClick = useCallback((menuId: string) => {
-    navigate(`/menu/${menuId}`);
-  }, [navigate]);
+  const handleMenuClick = useCallback(
+    (menuId: string) => {
+      navigate(`/menu/${menuId}`);
+    },
+    [navigate],
+  );
 
   return (
     <div className="space-y-6">
@@ -75,7 +76,7 @@ export function Home() {
             정성껏 끓여낸 진한 국물과 쫄깃한 수타면
           </p>
           <Button
-            onClick={() => navigate('/menu')}
+            onClick={() => navigate("/menu")}
             size="lg"
             className="mt-6 bg-white text-[#D61C1C] hover:bg-gray-100"
           >
@@ -90,12 +91,8 @@ export function Home() {
           <div className="flex items-center justify-center w-3 h-3">
             <span className="w-full h-full bg-green-500 rounded-full animate-pulse" />
           </div>
-          <span className="text-sm text-[#2E1C10]">
-            영업중
-          </span>
-          <span className="text-sm text-[#2E1C10]/80">
-            10:00 - 22:00
-          </span>
+          <span className="text-sm text-[#2E1C10]">영업중</span>
+          <span className="text-sm text-[#2E1C10]/80">10:00 - 22:00</span>
         </div>
 
         {/* 빠른 액션 */}
@@ -131,12 +128,10 @@ export function Home() {
         <section>
           <div className="flex items-center gap-2 mb-3">
             <CloudSun className="w-5 h-5 text-[#F37021]" />
-            <h2 className="text-[#2E1C10]">
-              오늘의 추천 메뉴
-            </h2>
+            <h2 className="text-[#2E1C10]">오늘의 추천 메뉴</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {recommendedMenus.map((menu) => (
+            {recommendedMenus.map(menu => (
               <RecommendCard
                 key={menu.menuId}
                 menu={menu}
@@ -161,7 +156,7 @@ export function Home() {
 
           {recentReviews.length > 0 ? (
             <div className="space-y-3">
-              {recentReviews.map((review) => (
+              {recentReviews.map(review => (
                 <div key={review.id} className="bg-white rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-[#2E1C10]">{review.userName}님</span>
@@ -179,17 +174,13 @@ export function Home() {
                       />
                     </div>
                   )}
-                  <p className="text-sm text-[#2E1C10]/80 line-clamp-2">
-                    {review.content}
-                  </p>
+                  <p className="text-sm text-[#2E1C10]/80 line-clamp-2">{review.content}</p>
                 </div>
               ))}
             </div>
           ) : (
             <div className="bg-white rounded-2xl p-4 shadow-sm">
-              <p className="text-sm text-[#2E1C10] mb-1">
-                아직 등록된 리뷰가 없습니다.
-              </p>
+              <p className="text-sm text-[#2E1C10] mb-1">아직 등록된 리뷰가 없습니다.</p>
               <p className="text-xs text-[#2E1C10]/80">
                 첫 리뷰를 남겨주시면 더 많은 손님들이 참고할 수 있어요.
               </p>
@@ -201,18 +192,18 @@ export function Home() {
         {notices.length > 0 && (
           <section
             className="p-4 bg-[#F37021]/10 rounded-2xl cursor-pointer hover:bg-[#F37021]/15 transition-colors"
-            onClick={() => navigate('/notices')}
+            onClick={() => navigate("/notices")}
           >
             {notices.map(notice => {
               const typeColors = {
-                notice: 'border-[#F37021] text-[#F37021]',
-                event: 'border-blue-500 text-blue-600',
-                promotion: 'border-purple-500 text-purple-600',
+                notice: "border-[#F37021] text-[#F37021]",
+                event: "border-blue-500 text-blue-600",
+                promotion: "border-purple-500 text-purple-600",
               };
               const typeLabels = {
-                notice: '공지',
-                event: '이벤트',
-                promotion: '프로모션',
+                notice: "공지",
+                event: "이벤트",
+                promotion: "프로모션",
               };
               return (
                 <div key={notice.id} className="flex items-start justify-between gap-3">
@@ -222,19 +213,18 @@ export function Home() {
                         {typeLabels[notice.type]}
                       </Badge>
                       <span className="text-xs text-[#2E1C10]/80">
-                        {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                        }).replace(/\./g, '.').replace(/\s/g, '')}
+                        {new Date(notice.createdAt)
+                          .toLocaleDateString("ko-KR", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          })
+                          .replace(/\./g, ".")
+                          .replace(/\s/g, "")}
                       </span>
                     </div>
-                    <h3 className="text-sm text-[#2E1C10] mb-1">
-                      {notice.title}
-                    </h3>
-                    <p className="text-sm text-[#2E1C10]/80">
-                      {notice.content}
-                    </p>
+                    <h3 className="text-sm text-[#2E1C10] mb-1">{notice.title}</h3>
+                    <p className="text-sm text-[#2E1C10]/80">{notice.content}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-[#2E1C10]/40 flex-shrink-0" />
                 </div>
@@ -245,10 +235,7 @@ export function Home() {
 
         {/* CTA 버튼 */}
         <Link to="/menu">
-          <Button
-            size="lg"
-            className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
-          >
+          <Button size="lg" className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90">
             메뉴 보기
           </Button>
         </Link>
@@ -264,14 +251,14 @@ interface RecommendCardProps {
 
 const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
   const badgeLabels: Record<string, string> = {
-    best: '베스트',
-    signature: '시그니처',
-    spicy: '매운맛',
-    cold: '냉메뉴',
-    seasonal: '계절메뉴',
+    best: "베스트",
+    signature: "시그니처",
+    spicy: "매운맛",
+    cold: "냉메뉴",
+    seasonal: "계절메뉴",
   };
 
-  const hasBestBadge = menu.badges.includes('best');
+  const hasBestBadge = menu.badges.includes("best");
 
   return (
     <div
@@ -289,18 +276,10 @@ const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
       </div>
       <div className="p-3">
         <div className="flex items-center gap-2 mb-1">
-          {hasBestBadge && (
-            <Badge className="bg-[#D61C1C] text-white text-xs">
-              베스트
-            </Badge>
-          )}
+          {hasBestBadge && <Badge className="bg-[#D61C1C] text-white text-xs">베스트</Badge>}
         </div>
-        <h3 className="text-sm text-[#2E1C10] mb-1">
-          {menu.name}
-        </h3>
-        <p className="text-[#D61C1C]">
-          {formatPrice(menu.price)}
-        </p>
+        <h3 className="text-sm text-[#2E1C10] mb-1">{menu.name}</h3>
+        <p className="text-[#D61C1C]">{formatPrice(menu.price)}</p>
       </div>
     </div>
   );
@@ -315,48 +294,48 @@ const RecommendCard = memo(RecommendCardBase);
 ## src\pages\app\MenuList.tsx
 
 ```tsx
-import { useState, useMemo, memo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
-import { Input } from '../../components/ui/input';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
-import { Badge } from '../../components/ui/badge';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { DEFAULT_MENU_IMAGE } from '../../config/ui';
-import { getMenus } from '../../lib/admin/menus.api';
-import type { Menu, MenuCategory } from '../../types/menu';
-import { formatPrice } from '../../lib/utils';
+import { useState, useMemo, memo, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Search } from "lucide-react";
+import { Input } from "../../components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
+import { Badge } from "../../components/ui/badge";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { DEFAULT_MENU_IMAGE } from "../../config/ui";
+import { getMenus } from "../../lib/admin/menus.api";
+import type { Menu, MenuCategory } from "../../types/menu";
+import { formatPrice } from "../../lib/utils";
 
 const categories: { value: MenuCategory; label: string }[] = [
-  { value: 'noodle', label: '메인' },
-  { value: 'set', label: '세트' },
-  { value: 'side', label: '사이드' },
-  { value: 'drink', label: '음료' },
-  { value: 'alcohol', label: '주류' },
+  { value: "noodle", label: "메인" },
+  { value: "set", label: "세트" },
+  { value: "side", label: "사이드" },
+  { value: "drink", label: "음료" },
+  { value: "alcohol", label: "주류" },
 ];
 
 const badgeStyles = {
-  best: 'bg-[#D61C1C] text-white',
-  signature: 'bg-[#C7A45A] text-white',
-  spicy: 'bg-[#F37021] text-white',
-  cold: 'bg-blue-500 text-white',
-  seasonal: 'bg-green-600 text-white',
+  best: "bg-[#D61C1C] text-white",
+  signature: "bg-[#C7A45A] text-white",
+  spicy: "bg-[#F37021] text-white",
+  cold: "bg-blue-500 text-white",
+  seasonal: "bg-green-600 text-white",
 };
 
 const badgeLabels = {
-  best: '베스트',
-  signature: '시그니처',
-  spicy: '매운맛',
-  cold: '냉메뉴',
-  seasonal: '계절메뉴',
+  best: "베스트",
+  signature: "시그니처",
+  spicy: "매운맛",
+  cold: "냉메뉴",
+  seasonal: "계절메뉴",
 };
 
 export function MenuList() {
-  const [selectedCategory, setSelectedCategory] = useState<MenuCategory>('noodle');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<MenuCategory>("noodle");
+  const [searchQuery, setSearchQuery] = useState("");
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // localStorage에 저장된 메뉴 데이터를 가져옴 (변경사항 반영)
   useEffect(() => {
     const loadMenus = async () => {
@@ -365,7 +344,7 @@ export function MenuList() {
         const loadedMenus = await getMenus({});
         setMenus(loadedMenus);
       } catch (error) {
-        console.error('Failed to load menus:', error);
+        console.error("Failed to load menus:", error);
         setMenus([]);
       } finally {
         setLoading(false);
@@ -373,18 +352,18 @@ export function MenuList() {
     };
     loadMenus();
   }, []);
-  
+
   const filteredMenus = useMemo(() => {
     if (!Array.isArray(menus) || menus.length === 0) {
       return [];
     }
-    return menus.filter((menu) => {
+    return menus.filter(menu => {
       const matchesCategory = menu.category === selectedCategory;
       const matchesSearch = menu.name.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
   }, [menus, selectedCategory, searchQuery]);
-  
+
   return (
     <div className="pb-6" data-testid="menu-list.page">
       {/* 검색 */}
@@ -395,17 +374,17 @@ export function MenuList() {
             type="search"
             placeholder="메뉴 검색..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="pl-10 bg-white"
           />
         </div>
       </div>
-      
+
       {/* 카테고리 탭 */}
-      <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as MenuCategory)}>
+      <Tabs value={selectedCategory} onValueChange={v => setSelectedCategory(v as MenuCategory)}>
         <div className="sticky top-[104px] z-40 bg-[#F9F6F3] px-4 pb-3">
           <TabsList className="w-full justify-start overflow-x-auto bg-white">
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <TabsTrigger
                 key={cat.value}
                 value={cat.value}
@@ -416,21 +395,17 @@ export function MenuList() {
             ))}
           </TabsList>
         </div>
-        
+
         {/* 메뉴 리스트 */}
-        {categories.map((cat) => (
+        {categories.map(cat => (
           <TabsContent key={cat.value} value={cat.value} className="px-4 mt-0">
             {loading ? (
-              <div className="text-center py-12 text-[#2E1C10]/80">
-                로딩 중...
-              </div>
+              <div className="text-center py-12 text-[#2E1C10]/80">로딩 중...</div>
             ) : filteredMenus.length === 0 ? (
-              <div className="text-center py-12 text-[#2E1C10]/80">
-                검색 결과가 없습니다
-              </div>
+              <div className="text-center py-12 text-[#2E1C10]/80">검색 결과가 없습니다</div>
             ) : (
               <div className="grid gap-4" data-testid="menu-list.items">
-                {filteredMenus.map((menu) => (
+                {filteredMenus.map(menu => (
                   <MenuCard key={menu.menuId} menu={menu} />
                 ))}
               </div>
@@ -451,7 +426,7 @@ const MenuCardBase = ({ menu }: MenuCardProps) => {
     <Link to={`/menu/${menu.menuId}`} data-testid="menu-list.item.link">
       <div
         className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
-          !menu.isAvailable ? 'opacity-60' : ''
+          !menu.isAvailable ? "opacity-60" : ""
         }`}
         data-testid="menu-list.item"
       >
@@ -476,7 +451,7 @@ const MenuCardBase = ({ menu }: MenuCardProps) => {
               </div>
             )}
           </div>
-          
+
           {/* 메뉴 정보 */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
@@ -484,31 +459,26 @@ const MenuCardBase = ({ menu }: MenuCardProps) => {
                 {menu.name}
               </h3>
             </div>
-            
+
             {/* 뱃지 */}
             {menu.badges.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
-                {menu.badges.map((badge) => (
-                  <Badge
-                    key={badge}
-                    className={`text-xs ${badgeStyles[badge]}`}
-                  >
+                {menu.badges.map(badge => (
+                  <Badge key={badge} className={`text-xs ${badgeStyles[badge]}`}>
                     {badgeLabels[badge]}
                   </Badge>
                 ))}
               </div>
             )}
-            
+
             {/* 설명 */}
-            <p className="text-sm text-[#2E1C10]/80 line-clamp-2 mb-2">
-              {menu.description}
-            </p>
-            
+            <p className="text-sm text-[#2E1C10]/80 line-clamp-2 mb-2">{menu.description}</p>
+
             {/* 가격 */}
             <p className="text-[#D61C1C]" data-testid="menu-list.item.price">
               {formatPrice(menu.price)}
             </p>
-            
+
             {/* 시간제 안내 */}
             {menu.availableHours && (
               <p className="text-xs text-yellow-600 mt-1">
@@ -531,105 +501,109 @@ const MenuCard = memo(MenuCardBase);
 ## src\pages\app\Cart.tsx
 
 ```tsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, Truck, AlertCircle } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { Label } from '../../components/ui/label';
-import { Textarea } from '../../components/ui/textarea';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Separator } from '../../components/ui/separator';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { DEFAULT_MENU_IMAGE } from '../../config/ui';
-import { useCart } from '../../contexts/CartContext';
-import { UpsellSection } from '../../components/app/UpsellSection';
-import { PriceBreakdown } from '../../components/shared/PriceBreakdown';
-import { ORDER_LIMITS } from '../../constants';
-import type { Menu } from '../../types/menu';
-import { formatPrice } from '../../lib/utils';
-import { AddressInput } from '../../components/app/AddressInput';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Trash2, Plus, Minus, ShoppingBag, Truck, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
+import { DEFAULT_MENU_IMAGE } from "@/config/ui";
+import { useCart } from "@/contexts/CartContext";
+import { UpsellSection } from "@/components/app/UpsellSection";
+import { PriceBreakdown } from "@/components/shared/PriceBreakdown";
+import { ORDER_LIMITS } from "@/constants";
+import type { Menu } from "@/types/menu";
+import { formatPrice } from "@/lib/utils";
+import { AddressInput } from "@/components/app/AddressInput";
+import { toast } from "sonner";
 
 // 실제 음식 이미지 매핑
 const menuImages: Record<string, string> = {
-  'menu-001': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-002': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-003': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-004': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-005': 'https://images.unsplash.com/photo-1608120073766-c80051eccbf6?w=200',
-  'menu-006': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-007': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-008': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-013': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-014': 'https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200',
-  'menu-021': 'https://images.unsplash.com/photo-1645530656505-1b8a4057889b?w=200',
-  'menu-022': 'https://images.unsplash.com/photo-1645530656505-1b8a4057889b?w=200',
-  'menu-023': 'https://images.unsplash.com/photo-1645530656505-1b8a4057889b?w=200',
-  'menu-024': 'https://images.unsplash.com/photo-1608120073766-c80051eccbf6?w=200',
-  'menu-025': 'https://images.unsplash.com/photo-1616627077891-a4780e730b7e?w=200',
+  "menu-001": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-002": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-003": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-004": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-005": "https://images.unsplash.com/photo-1608120073766-c80051eccbf6?w=200",
+  "menu-006": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-007": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-008": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-013": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-014": "https://images.unsplash.com/photo-1676686997059-fb817ebbb2b5?w=200",
+  "menu-021": "https://images.unsplash.com/photo-1645530656505-1b8a4057889b?w=200",
+  "menu-022": "https://images.unsplash.com/photo-1645530656505-1b8a4057889b?w=200",
+  "menu-023": "https://images.unsplash.com/photo-1645530656505-1b8a4057889b?w=200",
+  "menu-024": "https://images.unsplash.com/photo-1608120073766-c80051eccbf6?w=200",
+  "menu-025": "https://images.unsplash.com/photo-1616627077891-a4780e730b7e?w=200",
 };
 
 export function Cart() {
   const navigate = useNavigate();
   const {
-    items,
-    deliveryType,
-    deliveryAddress,
-    requests,
-    couponDiscount,
-    removeItem,
-    updateQuantity,
-    setDeliveryType,
-    setDeliveryAddress,
-    setRequests,
-    getSubtotal,
-    getDeliveryFee,
-    getTotalAmount,
-    addToCart,
-    forceReload,
+    state: {
+      items,
+      deliveryType,
+      deliveryAddress,
+      requests,
+      couponDiscount,
+    },
+    actions: {
+      removeItem,
+      updateQuantity,
+      setDeliveryType,
+      setDeliveryAddress,
+      setRequests,
+      getSubtotal,
+      getDeliveryFee,
+      getTotalAmount,
+      addItem: addToCart,
+      forceReload,
+    }
   } = useCart();
 
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
   // T2-16: Cart 페이지 hydration 완전 제거
-  // - CartContext의 items를 즉시 신뢰하고 렌더링
-  // - localStorage 동기화는 CartContext에서 이미 처리됨
-  // - isHydrating 플래그 제거로 불필요한 로딩 상태 회피
   const [isHydrating] = useState(false);
 
   const subtotal = getSubtotal();
   const deliveryFee = getDeliveryFee();
   const totalAmount = getTotalAmount();
 
-  const minOrderAmount = deliveryType === 'delivery' ? ORDER_LIMITS.MIN_AMOUNT_DELIVERY : ORDER_LIMITS.MIN_AMOUNT_PICKUP;
+  const minOrderAmount =
+    deliveryType === "delivery" ? ORDER_LIMITS.MIN_AMOUNT_DELIVERY : ORDER_LIMITS.MIN_AMOUNT_PICKUP;
   const canProceed = subtotal >= minOrderAmount;
   const missingAmount = minOrderAmount - subtotal;
 
   // 메뉴 데이터 로드 (추천용)
-  // T2-13: UpsellSection 메뉴 로딩은 선택적 기능이므로 당분간 비활성화
-  // public/data/menus.json이 준비되면 주석 해제
   useEffect(() => {
     // loadMenus();
   }, []);
 
   async function loadMenus() {
     try {
-      const response = await fetch('/data/menus.json');
+      const response = await fetch("/data/menus.json");
       const data = await response.json();
-      setAllMenus(data.map((item: any) => ({
-        id: item.menuId,
-        name: item.name,
-        price: item.price,
-        description: item.description,
-        imageUrl: item.image,
-        category: item.category,
-        available: item.isAvailable !== false,
-        soldOut: item.isAvailable === false,
-        isPopular: item.badges?.includes('best'),
-        rating: 4.5, // Mock data
-        reviewCount: 100,
-      })));
+      setAllMenus(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data.map((item: any) => ({
+          id: item.menuId,
+          name: item.name,
+          price: item.price,
+          description: item.description,
+          imageUrl: item.image,
+          category: item.category,
+          available: item.isAvailable !== false,
+          soldOut: item.isAvailable === false,
+          isPopular: item.badges?.includes("best"),
+          rating: 4.5, // Mock data
+          reviewCount: 100,
+        })),
+      );
     } catch (error) {
-      console.error('Failed to load menus:', error);
+      console.error("Failed to load menus:", error);
     }
   }
 
@@ -637,17 +611,25 @@ export function Cart() {
     addToCart({
       menuId: menu.id,
       menuName: menu.name,
-      price: menu.price,
+      menuImage: menu.image,
+      menuPrice: menu.price,
       quantity: 1,
-      options: [],
+      options: {
+        noodle: "보통",
+        spicy: "보통",
+      },
+      optionPrices: { noodle: 0, toppings: 0 },
       subtotal: menu.price,
     });
   }
 
-  // 로딩 상태 (현재는 사용하지 않지만 향후 필요 시 활성화 가능)
+  // 로딩 상태
   if (isHydrating) {
     return (
-      <div data-testid="cart.loading" className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      <div
+        data-testid="cart.loading"
+        className="flex flex-col items-center justify-center min-h-[60vh] px-4"
+      >
         <div className="w-16 h-16 border-4 border-[#D61C1C]/30 border-t-[#D61C1C] rounded-full animate-spin"></div>
         <p className="mt-4 text-[#2E1C10]/60">장바구니를 불러오는 중...</p>
       </div>
@@ -656,20 +638,16 @@ export function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4" data-testid="cart.empty">
+      <div
+        className="flex flex-col items-center justify-center min-h-[60vh] px-4"
+        data-testid="cart.empty"
+      >
         <div className="w-24 h-24 mb-6 rounded-full bg-[#2E1C10]/5 flex items-center justify-center">
           <ShoppingBag className="w-12 h-12 text-[#2E1C10]/40" />
         </div>
-        <h2 className="text-xl text-[#2E1C10] mb-2">
-          장바구니가 비어있어요
-        </h2>
-        <p className="text-[#2E1C10]/60 mb-6 text-center">
-          맛있는 메뉴를 담아보세요
-        </p>
-        <Button
-          onClick={() => navigate('/menu')}
-          className="bg-[#D61C1C] hover:bg-[#D61C1C]/90"
-        >
+        <h2 className="text-xl text-[#2E1C10] mb-2">장바구니가 비어있어요</h2>
+        <p className="text-[#2E1C10]/60 mb-6 text-center">맛있는 메뉴를 담아보세요</p>
+        <Button onClick={() => navigate("/menu")} className="bg-[#D61C1C] hover:bg-[#D61C1C]/90">
           메뉴 보러가기
         </Button>
       </div>
@@ -681,12 +659,8 @@ export function Cart() {
       <div className="px-4 py-6 space-y-6">
         {/* 장바구니 헤더 */}
         <div data-testid="cart.header">
-          <h1 className="text-2xl text-[#2E1C10] mb-1">
-            장바구니
-          </h1>
-          <p className="text-[#2E1C10]/60">
-            {items.length}개 메뉴
-          </p>
+          <h1 className="text-2xl text-[#2E1C10] mb-1">장바구니</h1>
+          <p className="text-[#2E1C10]/60">{items.length}개 메뉴</p>
         </div>
 
         {/* 장바구니 아이템 */}
@@ -695,7 +669,7 @@ export function Cart() {
             <CartItemCard
               key={`${item.menuId}-${index}`}
               item={item}
-              onUpdateQuantity={(qty) => updateQuantity(item.menuId, qty)}
+              onUpdateQuantity={qty => updateQuantity(item.menuId, qty)}
               onRemove={() => removeItem(item.menuId)}
             />
           ))}
@@ -705,12 +679,17 @@ export function Cart() {
 
         {/* 배달/포장 선택 */}
         <div data-testid="cart.method">
-          <h2 className="text-[#2E1C10] mb-3">
-            주문 방식
-          </h2>
-          <RadioGroup value={deliveryType} onValueChange={(v) => setDeliveryType(v as 'delivery' | 'pickup')}>
+          <h2 className="text-[#2E1C10] mb-3">주문 방식</h2>
+          <RadioGroup
+            value={deliveryType}
+            onValueChange={v => setDeliveryType(v as "delivery" | "pickup")}
+          >
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10">
-              <RadioGroupItem value="delivery" id="delivery" data-testid="cart.method.radio-delivery" />
+              <RadioGroupItem
+                value="delivery"
+                id="delivery"
+                data-testid="cart.method.radio-delivery"
+              />
               <Label htmlFor="delivery" className="flex items-center gap-2 cursor-pointer flex-1">
                 <Truck className="w-5 h-5 text-[#D61C1C]" />
                 <div>
@@ -720,10 +699,8 @@ export function Cart() {
                   </p>
                 </div>
               </Label>
-              {deliveryType === 'delivery' && (
-                <span className="text-sm text-[#D61C1C]">
-                  +{formatPrice(deliveryFee)}
-                </span>
+              {deliveryType === "delivery" && (
+                <span className="text-sm text-[#D61C1C]">+{formatPrice(deliveryFee)}</span>
               )}
             </div>
 
@@ -738,27 +715,19 @@ export function Cart() {
                   </p>
                 </div>
               </Label>
-              {deliveryType === 'pickup' && (
-                <span className="text-sm text-[#C7A45A]">무료</span>
-              )}
+              {deliveryType === "pickup" && <span className="text-sm text-[#C7A45A]">무료</span>}
             </div>
           </RadioGroup>
         </div>
 
         {/* 배달 주소 설정 (배달 선택 시 필수) */}
-        {deliveryType === 'delivery' && (
+        {deliveryType === "delivery" && (
           <div className="space-y-2">
-            <AddressInput
-              value={deliveryAddress}
-              onChange={setDeliveryAddress}
-              required
-            />
+            <AddressInput value={deliveryAddress} onChange={setDeliveryAddress} required />
             {!deliveryAddress?.address && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  배달 주문은 주소를 먼저 설정해야 합니다.
-                </AlertDescription>
+                <AlertDescription>배달 주문은 주소를 먼저 설정해야 합니다.</AlertDescription>
               </Alert>
             )}
           </div>
@@ -766,20 +735,16 @@ export function Cart() {
 
         {/* 요청사항 */}
         <div>
-          <h2 className="text-[#2E1C10] mb-3">
-            요청사항 (선택)
-          </h2>
+          <h2 className="text-[#2E1C10] mb-3">요청사항 (선택)</h2>
           <Textarea
             data-testid="cart.input.requests"
             placeholder="예) 면 부드럽게 해주세요"
             value={requests}
-            onChange={(e) => setRequests(e.target.value)}
+            onChange={e => setRequests(e.target.value)}
             maxLength={150}
             className="resize-none"
           />
-          <p className="text-xs text-[#2E1C10]/60 mt-1">
-            {requests?.length || 0}/150자
-          </p>
+          <p className="text-xs text-[#2E1C10]/60 mt-1">{requests?.length || 0}/150자</p>
         </div>
 
         {/* 최소 주문 금액 경고 + 업셀 섹션 */}
@@ -788,11 +753,9 @@ export function Cart() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {deliveryType === 'delivery' ? '배달' : '포장'}은{' '}
-                {formatPrice(minOrderAmount)} 이상부터 가능해요.{' '}
-                <span className="font-medium">
-                  {formatPrice(missingAmount)} 더 담아주세요.
-                </span>
+                {deliveryType === "delivery" ? "배달" : "포장"}은 {formatPrice(minOrderAmount)}{" "}
+                이상부터 가능해요.{" "}
+                <span className="font-medium">{formatPrice(missingAmount)} 더 담아주세요.</span>
               </AlertDescription>
             </Alert>
 
@@ -805,25 +768,20 @@ export function Cart() {
             />
           </div>
         )}
-
-        {/* 쿠폰 (나중에 구현) */}
-        {/* <div>
-          <Button variant="outline" className="w-full justify-between">
-            <span>쿠폰 선택하기</span>
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div> */}
       </div>
 
       {/* 하단 고정 결제 영역 */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-[#2E1C10]/10 px-4 py-4 space-y-3" data-testid="cart.summary">
+      <div
+        className="fixed bottom-16 left-0 right-0 bg-white border-t border-[#2E1C10]/10 px-4 py-4 space-y-3"
+        data-testid="cart.summary"
+      >
         {/* 금액 상세 - PriceBreakdown 컴포넌트 사용 */}
         <PriceBreakdown
           subtotal={subtotal}
-          deliveryFee={deliveryType === 'delivery' ? deliveryFee : 0}
+          deliveryFee={deliveryType === "delivery" ? deliveryFee : 0}
           couponDiscount={couponDiscount}
           total={totalAmount}
-          showDeliveryFee={deliveryType === 'delivery'}
+          showDeliveryFee={deliveryType === "delivery"}
         />
 
         {/* 결제하기 버튼 */}
@@ -831,19 +789,19 @@ export function Cart() {
           data-testid="cart.button.submit"
           size="lg"
           className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
-          disabled={!canProceed || (deliveryType === 'delivery' && !deliveryAddress?.address)}
+          disabled={!canProceed || (deliveryType === "delivery" && !deliveryAddress?.address)}
           onClick={() => {
-            if (deliveryType === 'delivery' && !deliveryAddress?.address) {
-              toast.error('배달 주소를 먼저 설정해주세요');
+            if (deliveryType === "delivery" && !deliveryAddress?.address) {
+              toast.error("배달 주소를 먼저 설정해주세요");
               return;
             }
-            navigate('/checkout');
+            navigate("/checkout");
           }}
         >
           {!canProceed
-            ? '최소 주문 금액 미달'
-            : deliveryType === 'delivery' && !deliveryAddress?.address
-              ? '배달 주소를 설정해주세요'
+            ? "최소 주문 금액 미달"
+            : deliveryType === "delivery" && !deliveryAddress?.address
+              ? "배달 주소를 설정해주세요"
               : `${formatPrice(totalAmount)} 결제하기`}
         </Button>
       </div>
@@ -851,7 +809,7 @@ export function Cart() {
   );
 }
 
-import type { CustomOption } from '../../types/menu';
+import type { CustomOption } from "@/types/menu";
 
 interface CartItemCardProps {
   item: {
@@ -881,8 +839,12 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
   const optionsText = [
     item.options.noodle && `면양: ${item.options.noodle}`,
     item.options.spicy && `맵기: ${item.options.spicy}`,
-    item.options.toppings && item.options.toppings.length > 0 && `토핑: ${item.options.toppings.join(', ')}`,
-  ].filter(Boolean).join(' · ');
+    item.options.toppings &&
+      item.options.toppings.length > 0 &&
+      `토핑: ${item.options.toppings.join(", ")}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   const imageUrl = menuImages[item.menuId];
 
@@ -926,7 +888,7 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
           {/* 커스텀 옵션 */}
           {item.customOptions && item.customOptions.length > 0 && (
             <p className="text-sm text-[#2E1C10]/60 mb-2" data-testid="cart.item.custom-options">
-              {item.customOptions.map(opt => `${opt.name}(+${formatPrice(opt.price)})`).join(', ')}
+              {item.customOptions.map(opt => `${opt.name}(+${formatPrice(opt.price)})`).join(", ")}
             </p>
           )}
 
@@ -942,7 +904,10 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
               >
                 <Minus className="w-3 h-3" />
               </button>
-              <span className="w-10 text-center text-sm text-[#2E1C10]" data-testid="cart.item.quantity">
+              <span
+                className="w-10 text-center text-sm text-[#2E1C10]"
+                data-testid="cart.item.quantity"
+              >
                 {item.quantity}
               </span>
               <button
@@ -978,50 +943,55 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
  * 고객의 모든 주문을 시간순으로 표시하고 상태별 필터링 제공
  */
 
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Button } from '../../components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Skeleton } from '../../components/ui/skeleton';
-import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import { useState, useEffect } from "react";
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import {
   ShoppingBag,
   ChevronRight,
   Clock,
   CheckCircle2,
-  XCircle,
-  Loader2,
   Star,
-  Package
-} from 'lucide-react';
-import { getOrdersByUser, filterOrdersByStatus, getReviewableOrders } from '../../lib/orders.api';
-import type { Order, OrderStatus } from '../../types/order';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { formatPrice } from '../../lib/utils';
-import { toast } from 'sonner';
+  Package,
+} from "lucide-react";
+import { getOrdersByUser, filterOrdersByStatus, getReviewableOrders } from "@/lib/orders.api";
+import { type Order, OrderStatus } from "@/types/order";
+import type { FirestoreTimestamp } from "@/types/common";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
+import { formatPrice } from "@/lib/utils";
+import { toast } from "sonner";
 
-type FilterStatus = OrderStatus | 'all' | 'reviewable';
+type FilterStatus = OrderStatus | "all" | "reviewable";
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
-  pending: { label: '결제대기', variant: 'outline', color: 'text-gray-500' },
-  accepted: { label: '접수완료', variant: 'default', color: 'text-green-600' },
-  preparing: { label: '조리중', variant: 'secondary', color: 'text-orange-600' },
-  completed: { label: '완료', variant: 'default', color: 'text-green-600' },
-  canceled: { label: '취소', variant: 'destructive', color: 'text-gray-400' },
+const statusConfig: Record<
+  string,
+  { label: string; variant: "default" | "secondary" | "destructive" | "outline"; color: string }
+> = {
+  [OrderStatus.PENDING]: { label: "결제대기", variant: "outline", color: "text-gray-500" },
+  [OrderStatus.ACCEPTED]: { label: "접수완료", variant: "default", color: "text-green-600" },
+  preparing: { label: "조리중", variant: "secondary", color: "text-orange-600" },
+  [OrderStatus.COMPLETED]: { label: "완료", variant: "default", color: "text-green-600" },
+  [OrderStatus.CANCELLED]: { label: "취소", variant: "destructive", color: "text-gray-400" },
 };
 
 // OrderTracking 페이지와 동일한 상태 설정
-const extendedStatusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
+const extendedStatusConfig: Record<
+  string,
+  { label: string; variant: "default" | "secondary" | "destructive" | "outline"; color: string }
+> = {
   ...statusConfig,
-  placed: { label: '주문접수', variant: 'default', color: 'text-green-600' },
-  cooking: { label: '조리중', variant: 'secondary', color: 'text-orange-600' },
-  out_for_delivery: { label: '배달중', variant: 'secondary', color: 'text-blue-600' },
-  pickup_ready: { label: '포장완료', variant: 'default', color: 'text-green-600' },
-  done: { label: '완료', variant: 'default', color: 'text-green-600' },
-  payment_failed: { label: '결제실패', variant: 'destructive', color: 'text-red-500' },
+  placed: { label: "주문접수", variant: "default", color: "text-green-600" },
+  [OrderStatus.COOKING]: { label: "조리중", variant: "secondary", color: "text-orange-600" },
+  [OrderStatus.DELIVERING]: { label: "배달중", variant: "secondary", color: "text-blue-600" },
+  pickup_ready: { label: "포장완료", variant: "default", color: "text-green-600" },
+  done: { label: "완료", variant: "default", color: "text-green-600" },
+  payment_failed: { label: "결제실패", variant: "destructive", color: "text-red-500" },
 };
 
 export function OrderHistory() {
@@ -1030,7 +1000,7 @@ export function OrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterStatus>('all');
+  const [filter, setFilter] = useState<FilterStatus>("all");
 
   // 인증 체크
   if (authLoading) {
@@ -1065,8 +1035,8 @@ export function OrderHistory() {
       const data = await getOrdersByUser(userId);
       setOrders(data);
     } catch (error) {
-      console.error('주문 목록 로딩 실패:', error);
-      toast.error('주문 내역을 불러오는데 실패했습니다. 다시 시도해주세요.');
+      console.error("주문 목록 로딩 실패:", error);
+      toast.error("주문 내역을 불러오는데 실패했습니다. 다시 시도해주세요.");
       setOrders([]);
     } finally {
       setLoading(false);
@@ -1074,27 +1044,27 @@ export function OrderHistory() {
   }
 
   function applyFilter() {
-    if (filter === 'all') {
+    if (filter === "all") {
       setFilteredOrders(orders);
-    } else if (filter === 'reviewable') {
+    } else if (filter === "reviewable") {
       setFilteredOrders(getReviewableOrders(orders));
     } else {
       setFilteredOrders(filterOrdersByStatus(orders, filter));
     }
   }
 
-  function formatDate(timestamp: any): string {
+  function formatDate(timestamp: FirestoreTimestamp | string): string {
     try {
       let date: Date;
 
-      if (typeof timestamp === 'string') {
+      if (typeof timestamp === "string") {
         date = new Date(timestamp);
-      } else if (timestamp?.seconds) {
+      } else if (typeof timestamp === "object" && "seconds" in timestamp) {
         date = new Date(timestamp.seconds * 1000);
-      } else if (timestamp?.toDate) {
+      } else if (typeof timestamp === "object" && "toDate" in timestamp) {
         date = timestamp.toDate();
       } else {
-        return '-';
+        return "-";
       }
 
       const now = new Date();
@@ -1102,22 +1072,22 @@ export function OrderHistory() {
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
       if (days === 0) {
-        return '오늘 ' + date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        return "오늘 " + date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
       } else if (days === 1) {
-        return '어제 ' + date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        return "어제 " + date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
       } else if (days < 7) {
         return `${days}일 전`;
       } else {
-        return date.toLocaleDateString('ko-KR', {
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+        return date.toLocaleDateString("ko-KR", {
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
         });
       }
     } catch (error) {
-      console.error('날짜 포맷 에러:', error);
-      return '-';
+      console.error("날짜 포맷 에러:", error);
+      return "-";
     }
   }
 
@@ -1134,7 +1104,7 @@ export function OrderHistory() {
         <h1 className="text-xl text-[#2E1C10] mb-4">주문내역</h1>
 
         {/* 필터 탭 */}
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
+        <Tabs value={filter} onValueChange={v => setFilter(v as FilterStatus)}>
           <TabsList className="w-full grid grid-cols-3 bg-white">
             <TabsTrigger value="all" className="text-sm">
               전체
@@ -1146,13 +1116,16 @@ export function OrderHistory() {
               진행중
               {!loading && (
                 <span className="ml-1 text-xs opacity-60">
-                  ({orders.filter(o =>
-                    o.status === 'accepted' ||
-                    o.status === 'preparing' ||
-                    o.status === 'cooking' ||
-                    o.status === 'out_for_delivery' ||
-                    o.status === 'placed'
-                  ).length})
+                  (
+                  {
+                    orders.filter(
+                      o =>
+                        o.status === OrderStatus.ACCEPTED ||
+                        o.status === OrderStatus.COOKING ||
+                        o.status === OrderStatus.DELIVERING,
+                    ).length
+                  }
+                  )
                 </span>
               )}
             </TabsTrigger>
@@ -1172,7 +1145,7 @@ export function OrderHistory() {
         {loading ? (
           // 로딩 스켈레톤
           <>
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Card key={i} className="rounded-2xl border-[#E5DDD5]">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
@@ -1193,14 +1166,14 @@ export function OrderHistory() {
           <Card className="rounded-2xl border-[#E5DDD5] p-12 text-center">
             <ShoppingBag className="w-16 h-16 text-[#2E1C10]/20 mx-auto mb-4" />
             <p className="text-[#2E1C10]/60 mb-4">
-              {filter === 'all'
-                ? '주문 내역이 없습니다'
-                : filter === 'reviewable'
-                  ? '리뷰 작성 가능한 주문이 없습니다'
-                  : '해당 상태의 주문이 없습니다'}
+              {filter === "all"
+                ? "주문 내역이 없습니다"
+                : filter === "reviewable"
+                  ? "리뷰 작성 가능한 주문이 없습니다"
+                  : "해당 상태의 주문이 없습니다"}
             </p>
             <Button
-              onClick={() => navigate('/menu')}
+              onClick={() => navigate("/menu")}
               className="bg-[#D61C1C] hover:bg-[#D61C1C]/90"
             >
               메뉴 둘러보기
@@ -1208,7 +1181,7 @@ export function OrderHistory() {
           </Card>
         ) : (
           // 주문 목록
-          filteredOrders.map((order) => (
+          filteredOrders.map(order => (
             <OrderCard
               key={order.orderId}
               order={order}
@@ -1225,15 +1198,15 @@ export function OrderHistory() {
 interface OrderCardProps {
   order: Order;
   hasReview: boolean;
-  formatDate: (timestamp: any) => string;
+  formatDate: (timestamp: FirestoreTimestamp | string) => string;
 }
 
 function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
   const navigate = useNavigate();
 
-  const statusInfo = extendedStatusConfig[order.status] || statusConfig.completed;
-  const isCompleted = order.status === 'completed' || order.status === 'done';
-  const isCanceled = order.status === 'canceled';
+  const statusInfo = extendedStatusConfig[order.status] || statusConfig[OrderStatus.COMPLETED];
+  const isCompleted = order.status === OrderStatus.COMPLETED;
+  const isCanceled = order.status === OrderStatus.CANCELLED;
   const canReview = isCompleted && !hasReview;
 
   // 대표 이미지 (첫 번째 아이템) - 안전한 배열 접근
@@ -1244,9 +1217,7 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
   if (!firstItem || totalItems === 0) {
     return (
       <Card className="rounded-2xl border-[#E5DDD5]">
-        <CardContent className="p-4 text-center text-gray-500">
-          주문 항목이 없습니다
-        </CardContent>
+        <CardContent className="p-4 text-center text-gray-500">주문 항목이 없습니다</CardContent>
       </Card>
     );
   }
@@ -1258,16 +1229,12 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
           <div className="flex justify-between items-start mb-2">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm text-[#2E1C10]/60">
-                  {formatDate(order.createdAt)}
-                </span>
+                <span className="text-sm text-[#2E1C10]/60">{formatDate(order.createdAt)}</span>
                 <Badge variant={statusInfo.variant} className="text-xs">
                   {statusInfo.label}
                 </Badge>
               </div>
-              <p className="text-xs text-[#2E1C10]/40">
-                주문번호: {order.orderId}
-              </p>
+              <p className="text-xs text-[#2E1C10]/40">주문번호: {order.orderId}</p>
             </div>
             <ChevronRight className="w-5 h-5 text-[#2E1C10]/40 flex-shrink-0" />
           </div>
@@ -1295,13 +1262,9 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
                   <span className="text-[#2E1C10]/60"> × {firstItem.quantity}</span>
                 )}
               </p>
-              {totalItems > 1 && (
-                <p className="text-sm text-[#2E1C10]/60">
-                  외 {totalItems - 1}개
-                </p>
-              )}
+              {totalItems > 1 && <p className="text-sm text-[#2E1C10]/60">외 {totalItems - 1}개</p>}
               <div className="flex items-center gap-2 mt-2">
-                {order.deliveryType === 'delivery' ? (
+                {order.deliveryType === "delivery" ? (
                   <Badge variant="outline" className="text-xs border-[#F37021]/30 text-[#F37021]">
                     <Package className="w-3 h-3 mr-1" />
                     배달
@@ -1317,7 +1280,9 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
 
             {/* 금액 */}
             <div className="text-right flex-shrink-0">
-              <p className={`text-lg ${isCanceled ? 'text-[#2E1C10]/40 line-through' : 'text-[#D61C1C]'}`}>
+              <p
+                className={`text-lg ${isCanceled ? "text-[#2E1C10]/40 line-through" : "text-[#D61C1C]"}`}
+              >
                 {formatPrice(order.finalAmount)}
               </p>
             </div>
@@ -1329,7 +1294,7 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
               size="sm"
               variant="outline"
               className="flex-1"
-              onClick={(e) => {
+              onClick={e => {
                 e.preventDefault();
                 navigate(`/order/${order.orderId}`);
               }}
@@ -1342,7 +1307,7 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
               <Button
                 size="sm"
                 className="flex-1 bg-[#D61C1C] hover:bg-[#D61C1C]/90 text-white"
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault();
                   navigate(`/review/${order.orderId}`);
                 }}
@@ -1382,28 +1347,35 @@ function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
  * Phase 2-8: 쿠폰 목록 및 상태별 필터
  */
 
-import { useState, useEffect } from 'react';
-import { Coupon, CouponStatus, getCouponStatus, COUPON_TYPE_LABELS } from '../../types/coupon';
-import { getCoupons } from '../../lib/coupons.api';
-import { getCurrentUser } from '../../lib/auth';
-import { CouponCard } from '../../components/app/CouponCard';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
-import { Ticket, Plus } from 'lucide-react';
-import { toast } from 'sonner';
-import { formatPrice } from '../../lib/utils';
+import { useState, useEffect } from "react";
+import { Coupon, CouponStatus, getCouponStatus, COUPON_TYPE_LABELS } from "../../types/coupon";
+import { getCoupons } from "../../lib/coupons.api";
+import { getCurrentUser } from "../../lib/auth";
+import { CouponCard } from "../../components/app/CouponCard";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
+import { Ticket, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { formatPrice } from "../../lib/utils";
 
 export function Coupons() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [filteredCoupons, setFilteredCoupons] = useState<Coupon[]>([]);
-  const [statusFilter, setStatusFilter] = useState<CouponStatus | 'all'>('available');
+  const [statusFilter, setStatusFilter] = useState<CouponStatus | "all">("available");
   const [loading, setLoading] = useState(true);
-  
+
   // 쿠폰 코드 입력
   const [codeDialogOpen, setCodeDialogOpen] = useState(false);
-  const [couponCode, setCouponCode] = useState('');
+  const [couponCode, setCouponCode] = useState("");
   const [applying, setApplying] = useState(false);
 
   const user = getCurrentUser();
@@ -1413,7 +1385,7 @@ export function Coupons() {
   }, []);
 
   useEffect(() => {
-    if (statusFilter === 'all') {
+    if (statusFilter === "all") {
       setFilteredCoupons(coupons);
     } else {
       setFilteredCoupons(coupons.filter(c => getCouponStatus(c) === statusFilter));
@@ -1428,7 +1400,7 @@ export function Coupons() {
       const data = await getCoupons(user.uid);
       setCoupons(data);
     } catch (error) {
-      console.error('Failed to load coupons:', error);
+      console.error("Failed to load coupons:", error);
     } finally {
       setLoading(false);
     }
@@ -1437,7 +1409,7 @@ export function Coupons() {
   const handleApplyCouponCode = async () => {
     if (!user) return;
     if (!couponCode.trim()) {
-      toast.error('쿠폰 코드를 입력하세요');
+      toast.error("쿠폰 코드를 입력하세요");
       return;
     }
 
@@ -1445,26 +1417,26 @@ export function Coupons() {
     try {
       // Mock: 쿠폰 코드 검증 및 발급
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // 임시 쿠폰 코드 검증 (실제로는 서버에서 처리)
       const validCodes: Record<string, { title: string; amount: number; minSpend: number }> = {
-        'WELCOME2025': { title: '신년 맞이 특별 할인', amount: 10000, minSpend: 30000 },
-        'FIRSTORDER': { title: '첫 주문 감사 쿠폰', amount: 5000, minSpend: 15000 },
-        'REVIEW500': { title: '리뷰 이벤트 쿠폰', amount: 3000, minSpend: 10000 },
+        WELCOME2025: { title: "신년 맞이 특별 할인", amount: 10000, minSpend: 30000 },
+        FIRSTORDER: { title: "첫 주문 감사 쿠폰", amount: 5000, minSpend: 15000 },
+        REVIEW500: { title: "리뷰 이벤트 쿠폰", amount: 3000, minSpend: 10000 },
       };
 
       const codeUpper = couponCode.toUpperCase().trim();
       const couponData = validCodes[codeUpper];
 
       if (!couponData) {
-        toast.error('유효하지 않은 쿠폰 코드입니다');
+        toast.error("유효하지 않은 쿠폰 코드입니다");
         return;
       }
 
       // 이미 등록된 코드인지 확인
       const alreadyHas = coupons.some(c => c.title === couponData.title);
       if (alreadyHas) {
-        toast.error('이미 등록된 쿠폰입니다');
+        toast.error("이미 등록된 쿠폰입니다");
         return;
       }
 
@@ -1472,7 +1444,7 @@ export function Coupons() {
       const newCoupon: Coupon = {
         id: `coupon-code-${Date.now()}`,
         uid: user.uid,
-        type: 'code',
+        type: "code",
         amount: couponData.amount,
         minSpend: couponData.minSpend,
         issuedAt: Date.now(),
@@ -1485,18 +1457,18 @@ export function Coupons() {
       setCoupons([newCoupon, ...coupons]);
       toast.success(`🎉 ${couponData.title} 쿠폰이 등록되었습니다!`);
       setCodeDialogOpen(false);
-      setCouponCode('');
+      setCouponCode("");
     } catch (error) {
-      console.error('Failed to apply coupon code:', error);
-      toast.error('쿠폰 등록에 실패했습니다');
+      console.error("Failed to apply coupon code:", error);
+      toast.error("쿠폰 등록에 실패했습니다");
     } finally {
       setApplying(false);
     }
   };
 
-  const availableCount = coupons.filter(c => getCouponStatus(c) === 'available').length;
-  const usedCount = coupons.filter(c => getCouponStatus(c) === 'used').length;
-  const expiredCount = coupons.filter(c => getCouponStatus(c) === 'expired').length;
+  const availableCount = coupons.filter(c => getCouponStatus(c) === "available").length;
+  const usedCount = coupons.filter(c => getCouponStatus(c) === "used").length;
+  const expiredCount = coupons.filter(c => getCouponStatus(c) === "expired").length;
 
   return (
     <div className="min-h-screen bg-[#F9F6F3] pb-20">
@@ -1504,32 +1476,21 @@ export function Coupons() {
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-xl text-[#333] flex items-center gap-2">
-            <Ticket className="w-6 h-6 text-[#D61C1C]" />
-            내 쿠폰
+            <Ticket className="w-6 h-6 text-[#D61C1C]" />내 쿠폰
           </h1>
-          <p className="text-sm text-[#8B7355] mt-1">
-            사용 가능한 쿠폰 {availableCount}장
-          </p>
+          <p className="text-sm text-[#8B7355] mt-1">사용 가능한 쿠폰 {availableCount}장</p>
         </div>
       </div>
 
       {/* 탭 필터 */}
       <div className="bg-white border-b sticky top-[73px] z-10">
         <div className="container mx-auto px-4 py-3">
-          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+          <Tabs value={statusFilter} onValueChange={v => setStatusFilter(v as any)}>
             <TabsList className="w-full justify-start">
-              <TabsTrigger value="available">
-                사용가능 ({availableCount})
-              </TabsTrigger>
-              <TabsTrigger value="used">
-                사용완료 ({usedCount})
-              </TabsTrigger>
-              <TabsTrigger value="expired">
-                만료됨 ({expiredCount})
-              </TabsTrigger>
-              <TabsTrigger value="all">
-                전체 ({coupons.length})
-              </TabsTrigger>
+              <TabsTrigger value="available">사용가능 ({availableCount})</TabsTrigger>
+              <TabsTrigger value="used">사용완료 ({usedCount})</TabsTrigger>
+              <TabsTrigger value="expired">만료됨 ({expiredCount})</TabsTrigger>
+              <TabsTrigger value="all">전체 ({coupons.length})</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -1568,7 +1529,9 @@ export function Coupons() {
             <ul className="space-y-2 text-sm text-[#8B7355]">
               <li className="flex items-start gap-2">
                 <span className="text-[#D61C1C]">•</span>
-                <span>주문 후 <strong>사진 리뷰</strong>를 남기면 3,000원 쿠폰</span>
+                <span>
+                  주문 후 <strong>사진 리뷰</strong>를 남기면 3,000원 쿠폰
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#F37021]">•</span>
@@ -1596,7 +1559,7 @@ export function Coupons() {
 /**
  * 마이페이지
  * 고객 정보 및 주요 기능 접근 허브
- * 
+ *
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
@@ -1607,8 +1570,22 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
-import { User, ShoppingBag, Ticket, Gift, Bell, MessageSquare, LogOut, Settings, Store, Phone, MapPin, Clock, Loader2 } from "lucide-react";
-import { toast } from 'sonner';
+import {
+  User,
+  ShoppingBag,
+  Ticket,
+  Gift,
+  Bell,
+  MessageSquare,
+  LogOut,
+  Settings,
+  Store,
+  Phone,
+  MapPin,
+  Clock,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
 import { LoadingSkeleton } from "../../components/shared/LoadingSkeleton";
 import { getDoc } from "firebase/firestore";
 import { storeDocRef, type StoreDoc } from "../../lib/firebase/firestore-schema";
@@ -1640,11 +1617,11 @@ export function My() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success('로그아웃되었습니다.');
-      navigate('/');
+      toast.success("로그아웃되었습니다.");
+      navigate("/");
     } catch (error) {
-      console.error('로그아웃 실패:', error);
-      toast.error('로그아웃에 실패했습니다.');
+      console.error("로그아웃 실패:", error);
+      toast.error("로그아웃에 실패했습니다.");
     }
   };
 
@@ -1662,11 +1639,11 @@ export function My() {
         const data = docSnap.data() as StoreDoc;
         setStoreInfo(data);
       } else {
-        toast.error('가게 정보를 찾을 수 없습니다');
+        toast.error("가게 정보를 찾을 수 없습니다");
       }
     } catch (error: any) {
-      console.error('[My] Failed to load store info:', error);
-      toast.error('가게 정보를 불러오는데 실패했습니다');
+      console.error("[My] Failed to load store info:", error);
+      toast.error("가게 정보를 불러오는데 실패했습니다");
     } finally {
       setLoadingStoreInfo(false);
     }
@@ -1685,8 +1662,8 @@ export function My() {
       <Card className="rounded-2xl border-[#E5DDD5] bg-gradient-to-br from-white to-[#F9F6F3]">
         <CardHeader className="flex flex-row items-center gap-4">
           {user?.photoURL ? (
-            <img 
-              src={user.photoURL} 
+            <img
+              src={user.photoURL}
               alt={userName}
               className="w-16 h-16 rounded-full object-cover"
             />
@@ -1702,8 +1679,11 @@ export function My() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex gap-2 items-center">
-            <Badge variant="secondary" className="bg-[#D61C1C]/10 text-[#D61C1C] border-[#D61C1C]/20">
-              {user?.role === 'owner' || user?.role === 'admin' ? '관리자' : '고객'}
+            <Badge
+              variant="secondary"
+              className="bg-[#D61C1C]/10 text-[#D61C1C] border-[#D61C1C]/20"
+            >
+              {user?.role === "owner" || user?.role === "admin" ? "관리자" : "고객"}
             </Badge>
             <Badge variant="outline" className="border-[#C7A45A]/30 text-[#8B7355]">
               PWA 설치됨
@@ -1712,24 +1692,19 @@ export function My() {
               누적 주문 <span className="text-[#D61C1C] font-semibold">{recentOrdersCount}회</span>
             </span>
           </div>
-          
+
           {/* 로그아웃 버튼 */}
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={handleSignOut}
-            >
+            <Button variant="outline" size="sm" className="flex-1" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
               로그아웃
             </Button>
-            {(user?.role === 'owner' || user?.role === 'admin') && (
+            {(user?.role === "owner" || user?.role === "admin") && (
               <Button
                 variant="outline"
                 size="sm"
                 className="flex-1"
-                onClick={() => navigate('/admin')}
+                onClick={() => navigate("/admin")}
               >
                 <Settings className="w-4 h-4 mr-2" />
                 관리자
@@ -1818,10 +1793,7 @@ export function My() {
         </Link>
 
         {/* 가게 정보 */}
-        <button
-          onClick={handleStoreInfoClick}
-          className="block text-left"
-        >
+        <button onClick={handleStoreInfoClick} className="block text-left">
           <Card className="rounded-2xl hover:shadow-md transition-all hover:scale-[1.02] border-[#E5DDD5] h-full">
             <CardHeader className="pb-3">
               <div className="w-12 h-12 rounded-full bg-[#D61C1C]/10 flex items-center justify-center mb-2">
@@ -1863,9 +1835,15 @@ export function My() {
       <Card className="rounded-2xl border-[#E5DDD5] bg-[#F9F6F3]/50">
         <CardContent className="py-4">
           <div className="text-sm text-[#8B7355] space-y-1">
-            <p>📱 <span className="font-medium text-[#2E1C10]">PWA 앱</span>으로 더 빠르게</p>
-            <p>🎁 리뷰 작성 시 <span className="font-medium text-[#D61C1C]">포인트 적립</span></p>
-            <p>🔔 주문 상태를 <span className="font-medium text-[#2E1C10]">실시간 알림</span></p>
+            <p>
+              📱 <span className="font-medium text-[#2E1C10]">PWA 앱</span>으로 더 빠르게
+            </p>
+            <p>
+              🎁 리뷰 작성 시 <span className="font-medium text-[#D61C1C]">포인트 적립</span>
+            </p>
+            <p>
+              🔔 주문 상태를 <span className="font-medium text-[#2E1C10]">실시간 알림</span>
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -1879,7 +1857,7 @@ export function My() {
               가게 정보
             </DialogTitle>
           </DialogHeader>
-          
+
           {loadingStoreInfo ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-[#D61C1C]" />
@@ -1889,7 +1867,7 @@ export function My() {
               {/* 가게 이름 */}
               <div>
                 <h3 className="text-lg font-semibold text-[#2E1C10] mb-2">
-                  {storeInfo.name || '가게 이름'}
+                  {storeInfo.name || "가게 이름"}
                 </h3>
               </div>
 
@@ -1937,11 +1915,13 @@ export function My() {
                       {storeInfo.businessHours.open} - {storeInfo.businessHours.close}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className={`w-2 h-2 rounded-full ${
-                        storeInfo.isOpen ? 'bg-green-500' : 'bg-gray-400'
-                      }`} />
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          storeInfo.isOpen ? "bg-green-500" : "bg-gray-400"
+                        }`}
+                      />
                       <span className="text-sm text-[#8B7355]">
-                        {storeInfo.isOpen ? '영업 중' : '영업 종료'}
+                        {storeInfo.isOpen ? "영업 중" : "영업 종료"}
                       </span>
                     </div>
                   </div>

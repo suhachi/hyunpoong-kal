@@ -1,4 +1,4 @@
-import type { FTimestamp } from "./common";
+import type { FirestoreTimestamp } from "./common";
 
 export interface Review {
   id: string;
@@ -12,13 +12,13 @@ export interface Review {
 
   menuNames: string[]; // 주문한 메뉴 이름들 (표시용)
 
-  createdAt: FTimestamp;
-  updatedAt?: FTimestamp;
+  createdAt: FirestoreTimestamp;
+  updatedAt?: FirestoreTimestamp;
 
   // 관리자 답글
   reply?: {
     content: string;
-    createdAt: FTimestamp;
+    createdAt: FirestoreTimestamp;
   };
 
   isDeleted?: boolean;
@@ -46,19 +46,27 @@ export interface ReviewReport {
   reportedBy: string;
   reason: ReviewReportReason;
   description?: string;
-  createdAt: FTimestamp;
+  createdAt: FirestoreTimestamp;
   status: "pending" | "resolved" | "dismissed";
 }
 
 export interface ReviewReply {
   content: string;
-  createdAt: FTimestamp;
-  updatedAt?: FTimestamp;
+  createdAt: FirestoreTimestamp;
+  updatedAt?: FirestoreTimestamp;
 }
+
+export type ReviewSortOption = "latest" | "rating_high" | "rating_low";
 
 export interface ReviewStats {
   total: number;
-  averageRating: number;
-  byRating: Record<number, number>;
   withPhotos: number;
+  averageRating: number;
+  byRating: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
 }

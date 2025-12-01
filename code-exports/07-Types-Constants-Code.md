@@ -1,6 +1,6 @@
 # Types & Constants - Full Source Code
 
-**Generated**: 2025-11-30-1905  
+**Generated**: 2025-12-01-2219  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -22,7 +22,7 @@ Complete source code of TypeScript type definitions and constants.
 /**
  * 설정 상태
  */
-export type ConfigStatus = 'connected' | 'not-set' | 'error' | 'unknown';
+export type ConfigStatus = "connected" | "not-set" | "error" | "unknown";
 
 export interface ConfigStatusInfo {
   status: ConfigStatus;
@@ -63,7 +63,7 @@ export interface FunctionsHealthCheck {
  * NICEPAY 설정
  */
 export interface NicepaySettings {
-  mode: 'test' | 'production';
+  mode: "test" | "production";
   endpoint: string;
   mid: string;
   returnUrl: string;
@@ -74,12 +74,12 @@ export interface NicepaySettings {
  * 배달 대행사 설정
  */
 export interface DeliverySettings {
-  provider: 'mock' | 'providerA' | 'custom';
+  provider: "mock" | "providerA" | "custom";
   maxDistanceKm: number;
   feeTable: DeliveryFeeZone[];
   nightSurcharge: number;
   nightStartHour: number; // 21
-  nightEndHour: number;   // 6
+  nightEndHour: number; // 6
 }
 
 export interface DeliveryFeeZone {
@@ -91,7 +91,7 @@ export interface DeliveryFeeZone {
  * 지도/지오코딩 설정
  */
 export interface MapsSettings {
-  provider: 'kakao' | 'google' | 'both';
+  provider: "kakao" | "google" | "both";
   kakaoApiKey?: string;
   googleApiKey?: string;
 }
@@ -122,19 +122,19 @@ export interface OperationsSettings {
   };
   firestoreRules: {
     lastDeployed?: Date;
-    status: 'up-to-date' | 'outdated' | 'unknown';
+    status: "up-to-date" | "outdated" | "unknown";
   };
   firestoreIndexes: {
     lastDeployed?: Date;
-    status: 'up-to-date' | 'outdated' | 'unknown';
+    status: "up-to-date" | "outdated" | "unknown";
   };
   storageRules: {
     lastDeployed?: Date;
-    status: 'up-to-date' | 'outdated' | 'unknown';
+    status: "up-to-date" | "outdated" | "unknown";
   };
   hosting: {
     lastDeployed?: Date;
-    status: 'deployed' | 'not-deployed' | 'unknown';
+    status: "deployed" | "not-deployed" | "unknown";
   };
 }
 
@@ -147,7 +147,7 @@ export interface AdminSettings {
   fcm: FCMSettings;
   points: PointsSettings;
   operations: OperationsSettings;
-  
+
   // 메타데이터
   updatedAt: Date;
   updatedBy: string;
@@ -195,12 +195,12 @@ export interface DeployScript {
 export interface DiagnosticResult {
   category?: string;
   checks: DiagnosticCheck[];
-  overall: 'pass' | 'warning' | 'fail' | 'info';
+  overall: "pass" | "warning" | "fail" | "info";
 }
 
 export interface DiagnosticCheck {
   name: string;
-  status: 'pass' | 'warning' | 'fail' | 'info';
+  status: "pass" | "warning" | "fail" | "info";
   message: string;
   details?: string;
 }
@@ -209,7 +209,7 @@ export interface DiagnosticCheck {
  * 기본값
  */
 export const DEFAULT_DELIVERY_SETTINGS: DeliverySettings = {
-  provider: 'mock',
+  provider: "mock",
   maxDistanceKm: 5,
   feeTable: [
     { toKm: 1, fee: 2000 },
@@ -222,12 +222,12 @@ export const DEFAULT_DELIVERY_SETTINGS: DeliverySettings = {
 };
 
 export const DEFAULT_MAPS_SETTINGS: MapsSettings = {
-  provider: 'kakao',
+  provider: "kakao",
 };
 
 export const DEFAULT_FCM_SETTINGS: FCMSettings = {
   enabled: false,
-  serviceWorkerPath: '/firebase-messaging-sw.js',
+  serviceWorkerPath: "/firebase-messaging-sw.js",
 };
 
 export const DEFAULT_POINTS_SETTINGS: PointsSettings = {
@@ -237,19 +237,19 @@ export const DEFAULT_POINTS_SETTINGS: PointsSettings = {
 export const DEFAULT_OPERATIONS_SETTINGS: OperationsSettings = {
   cors: {
     configured: false,
-    allowedOrigins: ['https://hp-kal.web.app', 'https://hp-kal.firebaseapp.com'],
+    allowedOrigins: ["https://hp-kal.web.app", "https://hp-kal.firebaseapp.com"],
   },
   firestoreRules: {
-    status: 'unknown',
+    status: "unknown",
   },
   firestoreIndexes: {
-    status: 'unknown',
+    status: "unknown",
   },
   storageRules: {
-    status: 'unknown',
+    status: "unknown",
   },
   hosting: {
-    status: 'unknown',
+    status: "unknown",
   },
 };
 
@@ -266,7 +266,7 @@ export const DEFAULT_OPERATIONS_SETTINGS: OperationsSettings = {
  */
 
 // 기간 타입
-export type ReportPeriod = 'daily' | 'weekly' | 'monthly' | 'custom';
+export type ReportPeriod = "daily" | "weekly" | "monthly" | "custom";
 
 // 날짜 범위
 export interface DateRange {
@@ -280,28 +280,28 @@ export interface IntegratedKPI {
   totalSales: number;
   averageOrderValue: number;
   totalOrders: number;
-  
+
   // 고객 지표
   newCustomers: number;
   returningCustomers: number;
   customerRetentionRate: number; // %
-  
+
   // 평점 지표
   averageRating: number;
   totalReviews: number;
   photoReviewRate: number; // %
-  
+
   // 포인트 지표
   totalPointsEarned: number;
   totalPointsSpent: number;
   pointsRedemptionRate: number; // %
-  
+
   // 쿠폰 지표
   totalCouponsIssued: number;
   totalCouponsUsed: number;
   couponUsageRate: number; // %
   totalDiscount: number;
-  
+
   // 전환율 지표
   installRate: number; // A2HS 설치율 %
   cartConversionRate: number; // 장바구니 → 주문 전환율 %
@@ -345,7 +345,7 @@ export interface CustomerBehavior {
   averageOrderValue: number;
   lastOrderDate: Date;
   favoriteMenu: string;
-  loyaltyTier: 'bronze' | 'silver' | 'gold' | 'vip';
+  loyaltyTier: "bronze" | "silver" | "gold" | "vip";
 }
 
 // 쿠폰 효과 분석
@@ -399,11 +399,14 @@ export interface NotificationEffectiveness {
   readRate: number; // %
   clickRate: number; // %
   conversionRate: number; // 알림 클릭 → 주문 전환율 %
-  byType: Record<string, {
-    sent: number;
-    read: number;
-    clicked: number;
-  }>;
+  byType: Record<
+    string,
+    {
+      sent: number;
+      read: number;
+      clicked: number;
+    }
+  >;
 }
 
 // 통합 리포트
@@ -411,19 +414,19 @@ export interface IntegratedReport {
   period: ReportPeriod;
   dateRange: DateRange;
   generatedAt: Date;
-  
+
   kpi: IntegratedKPI;
   hourlyAnalysis: HourlyAnalysis[];
   dayOfWeekAnalysis: DayOfWeekAnalysis[];
   topMenus: MenuPerformance[];
   topCustomers: CustomerBehavior[];
-  
+
   couponEffectiveness: CouponEffectiveness[];
   pointsEffectiveness: PointsEffectiveness;
   reviewAnalysis: ReviewAnalysis;
   deliveryPerformance: DeliveryPerformance;
   notificationEffectiveness: NotificationEffectiveness;
-  
+
   // 추가 지표
   insights: string[]; // AI 인사이트 (선택)
   recommendations: string[]; // 개선 제안
@@ -441,12 +444,12 @@ export interface ChartData {
 }
 
 // 내보내기 형식
-export type ExportFormat = 'csv' | 'excel' | 'pdf' | 'json';
+export type ExportFormat = "csv" | "excel" | "pdf" | "json";
 
 // 리포트 설정
 export interface ReportSettings {
   autoGenerate: boolean; // 자동 생성 여부
-  frequency: 'daily' | 'weekly' | 'monthly';
+  frequency: "daily" | "weekly" | "monthly";
   emailRecipients: string[]; // 이메일 수신자
   includeCharts: boolean; // 차트 포함 여부
   format: ExportFormat;
@@ -456,10 +459,39 @@ export interface ReportSettings {
 
 ---
 
+## src\types\auth.ts
+
+```typescript
+import { FirestoreTimestamp } from "./common";
+
+export type UserRole = "owner" | "admin" | "customer";
+
+export interface AuthUser {
+  uid: string;
+  email: string | null;
+  phoneNumber: string; // 필수
+  displayName: string | null;
+  photoURL: string | null;
+  role: UserRole; // Enum 강제
+  createdAt: FirestoreTimestamp;
+  lastLoginAt: FirestoreTimestamp;
+  
+  // 마케팅 동의
+  agreements?: {
+    marketing: boolean;
+    push: boolean;
+  };
+}
+
+
+```
+
+---
+
 ## src\types\cart.ts
 
 ```typescript
-import type { CustomOption } from './menu';
+import type { CustomOption } from "./menu";
 
 export interface CartItem {
   menuId: string;
@@ -475,13 +507,13 @@ export interface CartItem {
   optionPrices: {
     noodle: number;
     toppings: number;
-    custom?: number;  // 커스텀 옵션 총액
+    custom?: number; // 커스텀 옵션 총액
   };
-  customOptions?: CustomOption[];  // 선택된 커스텀 옵션 목록
+  customOptions?: CustomOption[]; // 선택된 커스텀 옵션 목록
   subtotal: number;
 }
 
-export type DeliveryType = 'delivery' | 'pickup';
+export type DeliveryType = "delivery" | "pickup";
 
 export interface DeliveryAddress {
   address: string;
@@ -499,7 +531,7 @@ export interface CartState {
   couponDiscount: number;
 }
 
-export interface CartContextType extends CartState {
+export interface CartActions {
   addItem: (item: CartItem) => void;
   removeItem: (menuId: string) => void;
   updateQuantity: (menuId: string, quantity: number) => void;
@@ -509,11 +541,20 @@ export interface CartContextType extends CartState {
   setRequests: (requests: string) => void;
   applyCoupon: (couponId: string, discount: number) => void;
   removeCoupon: () => void;
+  
+  // Computed / Getters
   getTotalItems: () => number;
   getSubtotal: () => number;
   getDeliveryFee: () => number;
   getTotalAmount: () => number;
+  
+  // Utils
   forceReload: () => void;
+}
+
+export interface CartContextType {
+  state: CartState;
+  actions: CartActions;
 }
 
 ```
@@ -523,92 +564,9 @@ export interface CartContextType extends CartState {
 ## src\types\common.ts
 
 ```typescript
-/**
- * 공통 타입 정의
- * KS컴퍼니 (사업자번호: 553-17-00098)
- */
+import { Timestamp } from "firebase/firestore";
 
-import { Timestamp } from 'firebase/firestore';
-
-/**
- * 기본 아이템 인터페이스 (주문/장바구니 공통)
- */
-export interface BaseItem {
-  menuId: string;
-  menuName: string;
-  menuImage?: string;
-  quantity: number;
-  price: number;
-  options?: Record<string, any>;
-}
-
-/**
- * 타임스탬프 타입
- */
-export type TimestampType = Timestamp | Date | { seconds: number; nanoseconds: number };
-
-/**
- * 주소 정보
- */
-export interface Address {
-  address: string;
-  detail?: string;
-  zipCode?: string;
-  lat?: number;
-  lng?: number;
-}
-
-/**
- * 페이지네이션 응답
- */
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
-}
-
-/**
- * API 응답 기본 형식
- */
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-/**
- * 기본 엔티티 (ID + 타임스탬프)
- */
-export interface BaseEntity {
-  id: string;
-  createdAt: TimestampType;
-  updatedAt: TimestampType;
-}
-
-/**
- * 필터 옵션
- */
-export interface FilterOptions {
-  search?: string;
-  status?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-/**
- * 통계 데이터
- */
-export interface Stats {
-  label: string;
-  value: number;
-  change?: number;
-  changeType?: 'increase' | 'decrease';
-}
+export type FirestoreTimestamp = Timestamp | { seconds: number; nanoseconds: number };
 
 ```
 
@@ -619,8 +577,8 @@ export interface Stats {
 ```typescript
 // 쿠폰 시스템 타입 정의
 
-export type CouponType = 'photo_review' | 'welcome' | 'event' | 'compensation' | 'admin';
-export type CouponStatus = 'available' | 'used' | 'expired';
+export type CouponType = "photo_review" | "welcome" | "event" | "compensation" | "admin";
+export type CouponStatus = "available" | "used" | "expired";
 
 export interface Coupon {
   id?: string;
@@ -655,7 +613,7 @@ export interface CouponIssue {
   targetUsers?: string[]; // 특정 사용자 타게팅 (deprecated: targetType 사용)
   issueLimit?: number; // 발급 상한
   // 발급 대상 (신규)
-  targetType?: 'all' | 'user' | 'phone'; // 'all': 전체 고객, 'user': 특정 고객, 'phone': 전화번호
+  targetType?: "all" | "user" | "phone"; // 'all': 전체 고객, 'user': 특정 고객, 'phone': 전화번호
   targetUserId?: string; // targetType === 'user'일 때 사용자 ID
   targetPhone?: string; // targetType === 'phone'일 때 전화번호
 }
@@ -664,27 +622,27 @@ export interface CouponIssue {
 export interface CouponFilters {
   status?: CouponStatus;
   type?: CouponType;
-  sortBy?: 'issuedAt' | 'expiresAt' | 'amount';
+  sortBy?: "issuedAt" | "expiresAt" | "amount";
 }
 
 // 쿠폰 타입 라벨
 export const COUPON_TYPE_LABELS: Record<CouponType, string> = {
-  photo_review: '사진 리뷰 보상',
-  welcome: '신규 가입',
-  event: '이벤트',
-  compensation: '보상',
-  admin: '관리자 발급',
+  photo_review: "사진 리뷰 보상",
+  welcome: "신규 가입",
+  event: "이벤트",
+  compensation: "보상",
+  admin: "관리자 발급",
 };
 
 // 쿠폰 상태 계산
 export function getCouponStatus(coupon: Coupon): CouponStatus {
   if (coupon.used) {
-    return 'used';
+    return "used";
   }
   if (Date.now() > coupon.expiresAt) {
-    return 'expired';
+    return "expired";
   }
-  return 'available';
+  return "available";
 }
 
 ```
@@ -705,12 +663,12 @@ export interface Coordinates {
   at: number; // timestamp
 }
 
-export type DeliveryStatus = 
-  | 'assigned'      // 배정됨
-  | 'picked_up'     // 픽업 완료
-  | 'delivering'    // 배달 중
-  | 'completed'     // 배달 완료
-  | 'canceled';     // 취소됨
+export type DeliveryStatus =
+  | "assigned" // 배정됨
+  | "picked_up" // 픽업 완료
+  | "delivering" // 배달 중
+  | "completed" // 배달 완료
+  | "canceled"; // 취소됨
 
 export interface DeliveryTask {
   taskId: string;
@@ -723,11 +681,11 @@ export interface DeliveryTask {
   updatedAt: number;
 }
 
-export type DriverStatus = 
-  | 'idle'          // 대기 중
-  | 'assigned'      // 배정됨
-  | 'delivering'    // 배달 중
-  | 'offline';      // 오프라인
+export type DriverStatus =
+  | "idle" // 대기 중
+  | "assigned" // 배정됨
+  | "delivering" // 배달 중
+  | "offline"; // 오프라인
 
 export interface Driver {
   driverId: string;
@@ -767,12 +725,12 @@ export interface DeliveryProvider {
    * 배달 태스크 생성
    */
   createTask(params: CreateTaskParams): Promise<CreateTaskResult>;
-  
+
   /**
    * 배달 태스크 조회
    */
   getTask(taskId: string): Promise<DeliveryTask>;
-  
+
   /**
    * 배달 태스크 취소
    */
@@ -782,14 +740,14 @@ export interface DeliveryProvider {
 /**
  * Webhook 이벤트 타입
  */
-export type WebhookEventType = 
-  | 'task.created'
-  | 'task.assigned'
-  | 'task.picked_up'
-  | 'task.delivering'
-  | 'task.completed'
-  | 'task.canceled'
-  | 'driver.location';
+export type WebhookEventType =
+  | "task.created"
+  | "task.assigned"
+  | "task.picked_up"
+  | "task.delivering"
+  | "task.completed"
+  | "task.canceled"
+  | "driver.location";
 
 export interface WebhookEvent {
   type: WebhookEventType;
@@ -811,36 +769,36 @@ export interface WebhookEvent {
 
 ```typescript
 export type MenuCategory =
-  | 'noodle'        // 칼국수/메인메뉴
-  | 'set'           // 세트메뉴
-  | 'side'          // 사이드메뉴
-  | 'drink'         // 음료
-  | 'alcohol';      // 주류
+  | "noodle" // 칼국수/메인메뉴
+  | "set" // 세트메뉴
+  | "side" // 사이드메뉴
+  | "drink" // 음료
+  | "alcohol"; // 주류
 
 export type MenuBadge =
-  | 'best'      // 베스트
-  | 'signature' // 시그니처
-  | 'spicy'     // 매운맛
-  | 'cold'      // 냉메뉴
-  | 'seasonal'; // 계절메뉴
+  | "best" // 베스트
+  | "signature" // 시그니처
+  | "spicy" // 매운맛
+  | "cold" // 냉메뉴
+  | "seasonal"; // 계절메뉴
 
 // 옵션 항목 (옵션명-수량-가격)
 export interface OptionItem {
   id: string;
-  name: string;       // 옵션 이름 (예: "보통", "곱빼기", "순한맛")
-  quantity: number;   // 수량
-  price: number;      // 추가 가격
+  name: string; // 옵션 이름 (예: "보통", "곱빼기", "순한맛")
+  quantity: number; // 수량
+  price: number; // 추가 가격
 }
 
 // 옵션 그룹 (관리자가 생성)
 export interface OptionGroup {
   id: string;
-  name: string;           // 옵션 그룹 이름 (예: "면양", "맵기", "토핑")
-  required: boolean;      // 필수 선택 여부
-  multiSelect: boolean;   // 다중 선택 가능 여부
-  maxSelect?: number;     // 최대 선택 개수 (multiSelect=true일 때)
-  items: OptionItem[];    // 옵션 항목들
-  order: number;          // 표시 순서
+  name: string; // 옵션 그룹 이름 (예: "면양", "맵기", "토핑")
+  required: boolean; // 필수 선택 여부
+  multiSelect: boolean; // 다중 선택 가능 여부
+  maxSelect?: number; // 최대 선택 개수 (multiSelect=true일 때)
+  items: OptionItem[]; // 옵션 항목들
+  order: number; // 표시 순서
 }
 
 // 메뉴에 연결된 옵션 그룹
@@ -851,10 +809,10 @@ export interface MenuOptionGroup extends OptionGroup {
 // 커스텀 옵션 (관리자가 메뉴별로 직접 정의)
 export interface CustomOption {
   id: string;
-  name: string;       // 옵션 이름 (예: "곱빼기", "순한맛", "계란 추가")
-  price: number;      // 추가 가격
-  quantity: number;   // 기본 수량 (대부분 1)
-  category?: string;  // 옵션 카테고리 (예: "면양", "맵기", "토핑") - 선택사항
+  name: string; // 옵션 이름 (예: "곱빼기", "순한맛", "계란 추가")
+  price: number; // 추가 가격
+  quantity: number; // 기본 수량 (대부분 1)
+  category?: string; // 옵션 카테고리 (예: "면양", "맵기", "토핑") - 선택사항
 }
 
 export interface Menu {
@@ -865,21 +823,23 @@ export interface Menu {
   description: string;
   image: string;
   badges: MenuBadge[];
-  options?: {               // 간단한 옵션 구조 (기존 호환성)
+  options?: {
+    // 간단한 옵션 구조 (기존 호환성)
     noodle?: { label: string; price: number }[];
     spicy?: { label: string; price: number }[];
     toppings?: { label: string; price: number }[];
   };
-  customOptions?: CustomOption[];    // 관리자가 직접 정의한 커스텀 옵션들 (신규)
-  optionGroups?: MenuOptionGroup[];  // 이 메뉴에 적용된 옵션 그룹들 (고급)
-  allergens: string[];      // 알레르기 유발 성분
-  origin: string;           // 원산지
-  isAvailable: boolean;     // 판매 가능 여부
-  availableHours?: {        // 시간제 판매
+  customOptions?: CustomOption[]; // 관리자가 직접 정의한 커스텀 옵션들 (신규)
+  optionGroups?: MenuOptionGroup[]; // 이 메뉴에 적용된 옵션 그룹들 (고급)
+  allergens: string[]; // 알레르기 유발 성분
+  origin: string; // 원산지
+  isAvailable: boolean; // 판매 가능 여부
+  availableHours?: {
+    // 시간제 판매
     start: string;
     end: string;
   };
-  order: number;            // 정렬 순서
+  order: number; // 정렬 순서
 }
 
 export interface MenuItem extends Menu {
@@ -894,9 +854,9 @@ export interface MenuItem extends Menu {
 
 // 관리자용 메뉴 필터
 export interface MenuFilters {
-  category?: MenuCategory | 'all';
+  category?: MenuCategory | "all";
   search?: string;
-  sortBy?: 'name' | 'price-asc' | 'price-desc' | 'order';
+  sortBy?: "name" | "price-asc" | "price-desc" | "order";
   availableOnly?: boolean;
 }
 
@@ -905,8 +865,8 @@ export interface MenuLog {
   id: string;
   menuId: string;
   field: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   by: string;
   byName: string;
   at: Date;
@@ -915,27 +875,27 @@ export interface MenuLog {
 
 // 메뉴 상태 (시간제 판매 고려)
 export type MenuStatus =
-  | 'available'     // 판매 중
-  | 'soldout'       // 품절
-  | 'time-limited'  // 시간제 (현재 시간 밖)
-  | 'hidden';       // 숨김
+  | "available" // 판매 중
+  | "soldout" // 품절
+  | "time-limited" // 시간제 (현재 시간 밖)
+  | "hidden"; // 숨김
 
 // 카테고리 라벨 맵
 export const CATEGORY_LABELS: Record<MenuCategory, string> = {
-  noodle: '메인',
-  set: '세트',
-  side: '사이드',
-  drink: '음료',
-  alcohol: '주류',
+  noodle: "메인",
+  set: "세트",
+  side: "사이드",
+  drink: "음료",
+  alcohol: "주류",
 };
 
 // 배지 라벨 맵
 export const BADGE_LABELS: Record<MenuBadge, string> = {
-  best: '베스트',
-  signature: '시그니처',
-  spicy: '매운맛',
-  cold: '냉메뉴',
-  seasonal: '계절메뉴',
+  best: "베스트",
+  signature: "시그니처",
+  spicy: "매운맛",
+  cold: "냉메뉴",
+  seasonal: "계절메뉴",
 };
 
 ```
@@ -953,7 +913,7 @@ export interface Notice {
   id: string;
   title: string;
   content: string;
-  type: 'notice' | 'event' | 'promotion';
+  type: "notice" | "event" | "promotion";
   isActive: boolean;
   priority: number; // 우선순위 (높을수록 먼저 표시)
   createdAt: Date;
@@ -963,11 +923,10 @@ export interface Notice {
 }
 
 export interface NoticeFilters {
-  type?: 'notice' | 'event' | 'promotion' | 'all';
+  type?: "notice" | "event" | "promotion" | "all";
   isActive?: boolean;
   search?: string;
 }
-
 
 ```
 
@@ -983,21 +942,21 @@ export interface NoticeFilters {
 
 // 알림 타입
 export type NotificationType =
-  | 'order_received' // 주문 접수
-  | 'order_cooking' // 조리 시작
-  | 'order_ready' // 조리 완료 (픽업 준비)
-  | 'order_delivering' // 배달 시작
-  | 'order_completed' // 주문 완료
-  | 'order_cancelled' // 주문 취소
-  | 'coupon_issued' // 쿠폰 발급
-  | 'points_earned' // 포인트 적립
-  | 'review_reminder' // 리뷰 작성 요청
-  | 'review_reply' // 리뷰 답글
-  | 'promotion' // 프로모션/이벤트
-  | 'system'; // 시스템 공지
+  | "order_received" // 주문 접수
+  | "order_cooking" // 조리 시작
+  | "order_ready" // 조리 완료 (픽업 준비)
+  | "order_delivering" // 배달 시작
+  | "order_completed" // 주문 완료
+  | "order_cancelled" // 주문 취소
+  | "coupon_issued" // 쿠폰 발급
+  | "points_earned" // 포인트 적립
+  | "review_reminder" // 리뷰 작성 요청
+  | "review_reply" // 리뷰 답글
+  | "promotion" // 프로모션/이벤트
+  | "system"; // 시스템 공지
 
 // 알림 우선순위
-export type NotificationPriority = 'high' | 'normal' | 'low';
+export type NotificationPriority = "high" | "normal" | "low";
 
 // 알림 데이터
 export interface Notification {
@@ -1045,7 +1004,7 @@ export interface PushPayload {
 export interface FCMToken {
   userId: string;
   token: string;
-  platform: 'web' | 'android' | 'ios';
+  platform: "web" | "android" | "ios";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -1076,34 +1035,31 @@ export interface NotificationStats {
 ## src\types\order.ts
 
 ```typescript
-// Firebase Timestamp 타입 (선택적)
-// Firebase 사용 시: Timestamp
-// Mock 모드 시: { seconds: number; nanoseconds: number }
-type FirebaseTimestamp = {
-  seconds: number;
-  nanoseconds: number;
-  toDate?: () => Date;
-};
+import { FirestoreTimestamp } from "./common";
 
-export type OrderStatus =
-  | 'pending'     // 접수대기
-  | 'accepted'    // 접수확인
-  | 'cooking'     // 조리중
-  | 'delivering'  // 배달중
-  | 'completed'   // 완료
-  | 'cancelled';  // 취소
+export enum OrderStatus {
+  PENDING = "pending", // 접수대기
+  ACCEPTED = "accepted", // 접수확인
+  COOKING = "cooking", // 조리중
+  DELIVERING = "delivering", // 배달중
+  COMPLETED = "completed", // 완료
+  CANCELLED = "cancelled", // 취소
+}
 
-export type PaymentMethod =
-  | 'app_card'   // 앱 내 카드 선결제 (PG 연동용, 지금은 준비 중)
-  | 'meet_card'  // 만나서 카드 결제 (배달 기사 또는 매장에서 카드 단말기로 결제)
-  | 'meet_cash'; // 만나서 현금 결제 (배달 기사 또는 매장에서 현금으로 결제)
+export enum PaymentMethod {
+  APP_CARD = "app_card", // 앱 내 카드 선결제
+  MEET_CARD = "meet_card", // 만나서 카드 결제
+  MEET_CASH = "meet_cash", // 만나서 현금 결제
+}
 
-export type PaymentStatus =
-  | 'pending'     // 결제 대기
-  | 'authorized'  // 인증됨 (승인 전)
-  | 'approved'    // 승인됨
-  | 'failed'      // 실패
-  | 'refunded';   // 환불
+export enum PaymentStatus {
+  PENDING = "pending",
+  AUTHORIZED = "authorized", // PG 인증 완료 (승인 전)
+  APPROVED = "approved", // 결제 승인 완료 (PAID)
+  FAILED = "failed",
+  REFUNDED = "refunded",
+  CANCELLED = "cancelled",
+}
 
 export interface OrderItem {
   menuId: string;
@@ -1126,18 +1082,47 @@ export interface DeliveryAddress {
   lng?: number;
 }
 
-export interface PaymentInfo {
+export interface OrderPaymentInfo {
   method: PaymentMethod;
   status: PaymentStatus;
-  tid?: string;           // NICEPAY 거래 ID
-  authToken?: string;     // 인증 토큰
-  cardName?: string;      // 카드사명
-  cardNum?: string;       // 카드번호 (마스킹)
-  paidAt?: Timestamp;
-  canceledAt?: Timestamp;
-  cancelReason?: string;
   amount: number;
+  
+  // PG 관련 정보 (App 결제 시)
+  pgProvider?: 'nicepay' | 'mock';
+  pgOrderId?: string; // PG 거래 ID (TID)
+  pgTid?: string; // PG Transaction ID
+  pgReceiptUrl?: string;
+  
+  // 카드 정보
+  cardName?: string;
+  cardNum?: string;
+  
+  // 타임스탬프
+  requestedAt?: FirestoreTimestamp;
+  approvedAt?: FirestoreTimestamp;
+  cancelledAt?: FirestoreTimestamp;
+  failedAt?: FirestoreTimestamp;
+  
+  // 실패/취소 사유
+  failCode?: string;
+  failReason?: string;
+  cancelReason?: string;
+
+  // 현금영수증/세금계산서 (기존 유지)
+  cashReceipt?: {
+    type: "personal" | "business";
+    number: string;
+    issuedAt?: FirestoreTimestamp;
+    receiptNo?: string;
+  };
+  taxInvoice?: {
+    businessNumber: string;
+    companyName: string;
+  };
 }
+
+// 하위 호환성을 위해 PaymentInfo Alias 유지 (필요시 deprecated 처리)
+export type PaymentInfo = OrderPaymentInfo;
 
 export interface Order {
   orderId: string;
@@ -1148,70 +1133,63 @@ export interface Order {
 
   subtotal: number;
   discount: number;
-  couponId?: string;
+  couponId: string | null;
+  couponApplied: boolean;
   deliveryFee: number;
   finalAmount: number;
 
-  deliveryType: 'delivery' | 'pickup';
-  deliveryAddress?: DeliveryAddress;
-  phone: string;
+  deliveryType: "delivery" | "pickup";
+  deliveryAddress: DeliveryAddress | null;
+  phoneNumber: string;
   email?: string;
   requests?: string;
 
   status: OrderStatus;
-  payment: PaymentInfo;
+  payment: OrderPaymentInfo;
+  
+  // 멱등성 키 (중복 결제 방지)
+  clientOrderId?: string;
 
   timeline: {
-    pending?: Timestamp;
-    accepted?: Timestamp;
-    preparing?: Timestamp;
-    completed?: Timestamp;
-    canceled?: Timestamp;
+    pending?: FirestoreTimestamp;
+    accepted?: FirestoreTimestamp;
+    preparing?: FirestoreTimestamp;
+    completed?: FirestoreTimestamp;
+    cancelled?: FirestoreTimestamp;
+    [key: string]: FirestoreTimestamp | undefined;
   };
 
-  // 현금영수증/세금계산서
-  cashReceipt?: {
-    type: 'personal' | 'business';
-    number: string;
-  };
-  taxInvoice?: {
-    businessNumber: string;
-    companyName: string;
-  };
-
-  // 리뷰 미러링 (Step 5)
+  // 리뷰 미러링
   reviewed?: boolean;
   reviewId?: string;
   reviewRating?: number;
   reviewContent?: string;
 
-  // Firestore uses FirebaseTimestamp, local mock uses ISO string
-  createdAt: FirebaseTimestamp | string;
-  updatedAt: FirebaseTimestamp | string;
+  createdAt: FirestoreTimestamp;
+  updatedAt: FirestoreTimestamp;
 }
 
-// 주문 로그 (감사 추적)
+// 주문 로그
 export interface OrderLog {
   logId: string;
   orderId: string;
-  action: 'created' | 'status_changed' | 'canceled' | 'refunded' | 'note_added';
-  by: string;           // userId or 'system'
-  byName?: string;      // 사용자 이름
-  at: Timestamp;
+  action: "created" | "status_changed" | "canceled" | "refunded" | "note_added";
+  by: string;
+  byName?: string;
+  at: FirestoreTimestamp;
   from?: OrderStatus;
   to?: OrderStatus;
-  reason?: string;      // 취소/환불 사유
-  note?: string;        // 추가 메모
+  reason?: string;
+  note?: string;
 }
 
-// 주문 상태 전이 가드
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  pending: ['accepted', 'cancelled'],
-  accepted: ['cooking', 'cancelled'],
-  cooking: ['delivering', 'cancelled'],
-  delivering: ['completed', 'cancelled'],
-  completed: [],
-  cancelled: [],
+  [OrderStatus.PENDING]: [OrderStatus.ACCEPTED, OrderStatus.CANCELLED],
+  [OrderStatus.ACCEPTED]: [OrderStatus.COOKING, OrderStatus.CANCELLED],
+  [OrderStatus.COOKING]: [OrderStatus.DELIVERING, OrderStatus.CANCELLED],
+  [OrderStatus.DELIVERING]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
+  [OrderStatus.COMPLETED]: [],
+  [OrderStatus.CANCELLED]: [],
 };
 
 ```
@@ -1223,59 +1201,59 @@ export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 ```typescript
 // NICEPAY 결제 요청 파라미터
 export interface NicePayAuthRequest {
-  MID: string;              // 상점 ID
-  Amt: string;              // 결제 금액
-  Moid: string;             // 주문번호 (orderId)
-  GoodsName: string;        // 상품명
-  BuyerName: string;        // 구매자명
-  BuyerTel: string;         // 구매자 전화번호
-  BuyerEmail: string;       // 구매자 이메일
-  ReturnURL: string;        // 결제 결과 수신 URL
-  VbankExpDate?: string;    // 가상계좌 입금마감일
-  EdiDate: string;          // 전문 생성일시 (YYYYMMDDhhmmss)
-  SignData: string;         // 해시값 (위변조 검증)
+  MID: string; // 상점 ID
+  Amt: string; // 결제 금액
+  Moid: string; // 주문번호 (orderId)
+  GoodsName: string; // 상품명
+  BuyerName: string; // 구매자명
+  BuyerTel: string; // 구매자 전화번호
+  BuyerEmail: string; // 구매자 이메일
+  ReturnURL: string; // 결제 결과 수신 URL
+  VbankExpDate?: string; // 가상계좌 입금마감일
+  EdiDate: string; // 전문 생성일시 (YYYYMMDDhhmmss)
+  SignData: string; // 해시값 (위변조 검증)
 }
 
 // NICEPAY 결제 승인 요청
 export interface NicePayApproveRequest {
-  TID: string;              // 거래 ID
-  AuthToken: string;        // 인증 토큰
-  Amt: string;              // 결제 금액
-  MID: string;              // 상점 ID
-  Moid: string;             // 주문번호
-  SignData: string;         // 해시값
-  EdiDate: string;          // 전문 생성일시
+  TID: string; // 거래 ID
+  AuthToken: string; // 인증 토큰
+  Amt: string; // 결제 금액
+  MID: string; // 상점 ID
+  Moid: string; // 주문번호
+  SignData: string; // 해시값
+  EdiDate: string; // 전문 생성일시
 }
 
 // NICEPAY 응답
 export interface NicePayResponse {
-  ResultCode: string;       // 결과코드 (0000: 성공)
-  ResultMsg: string;        // 결과메시지
-  TID?: string;             // 거래 ID
-  Moid?: string;            // 주문번호
-  Amt?: string;             // 결제 금액
-  AuthToken?: string;       // 인증 토큰
-  CardName?: string;        // 카드사명
-  CardQuota?: string;       // 할부개월
-  CardNum?: string;         // 카드번호 (마스킹)
-  PayMethod?: string;       // 결제수단
-  GoodsName?: string;       // 상품명
-  BuyerName?: string;       // 구매자명
-  BuyerTel?: string;        // 구매자 전화번호
-  BuyerEmail?: string;      // 구매자 이메일
-  AuthDate?: string;        // 승인일시
+  ResultCode: string; // 결과코드 (0000: 성공)
+  ResultMsg: string; // 결과메시지
+  TID?: string; // 거래 ID
+  Moid?: string; // 주문번호
+  Amt?: string; // 결제 금액
+  AuthToken?: string; // 인증 토큰
+  CardName?: string; // 카드사명
+  CardQuota?: string; // 할부개월
+  CardNum?: string; // 카드번호 (마스킹)
+  PayMethod?: string; // 결제수단
+  GoodsName?: string; // 상품명
+  BuyerName?: string; // 구매자명
+  BuyerTel?: string; // 구매자 전화번호
+  BuyerEmail?: string; // 구매자 이메일
+  AuthDate?: string; // 승인일시
 }
 
 // NICEPAY 취소 요청
 export interface NicePayCancelRequest {
-  TID: string;              // 거래 ID
-  MID: string;              // 상점 ID
-  Moid: string;             // 주문번호
-  CancelAmt: string;        // 취소 금액
-  CancelMsg: string;        // 취소 사유
+  TID: string; // 거래 ID
+  MID: string; // 상점 ID
+  Moid: string; // 주문번호
+  CancelAmt: string; // 취소 금액
+  CancelMsg: string; // 취소 사유
   PartialCancelCode?: string; // 부분취소 코드
-  EdiDate: string;          // 전문 생성일시
-  SignData: string;         // 해시값
+  EdiDate: string; // 전문 생성일시
+  SignData: string; // 해시값
 }
 
 // 클라이언트 결제 요청 데이터
@@ -1313,17 +1291,17 @@ export interface PaymentResult {
  * Phase 3-3: Points System
  */
 
-export type PointsTransactionType = 
-  | 'earn'      // 적립
-  | 'spend'     // 사용
-  | 'expire'    // 만료
-  | 'adjust';   // 관리자 조정
+export type PointsTransactionType =
+  | "earn" // 적립
+  | "spend" // 사용
+  | "expire" // 만료
+  | "adjust"; // 관리자 조정
 
-export type PointsRefKind = 
-  | 'order'     // 주문
-  | 'review'    // 리뷰
-  | 'admin'     // 관리자
-  | 'promotion'; // 프로모션
+export type PointsRefKind =
+  | "order" // 주문
+  | "review" // 리뷰
+  | "admin" // 관리자
+  | "promotion"; // 프로모션
 
 export interface PointsReference {
   kind: PointsRefKind;
@@ -1379,16 +1357,16 @@ export interface SpendPointsParams {
 export interface PointsPolicy {
   // 적립률 (주문 금액의 %)
   earnRate: number; // 0.03 = 3%
-  
+
   // 최소 사용 금액
   minUse: number; // 1000 = 1,000원부터 사용 가능
-  
+
   // 만료 기간 (일)
   expireDays: number; // 365 = 1년
-  
+
   // 리뷰 사진 추가 적립
   reviewPhotoBonus: number; // 200 = 200포인트
-  
+
   // 리뷰 텍스트 기본 적립
   reviewTextBonus: number; // 100 = 100포인트
 }
@@ -1412,7 +1390,7 @@ export interface PointsHistory {
 ## src\types\review.ts
 
 ```typescript
-import type { Timestamp } from 'firebase/firestore';
+import type { FirestoreTimestamp } from "./common";
 
 export interface Review {
   id: string;
@@ -1420,19 +1398,19 @@ export interface Review {
   userId: string;
   userName?: string;
 
-  rating: number;  // 1-5
+  rating: number; // 1-5
   content: string;
   images?: string[];
 
   menuNames: string[]; // 주문한 메뉴 이름들 (표시용)
 
-  createdAt: Timestamp;
-  updatedAt?: Timestamp;
+  createdAt: FirestoreTimestamp;
+  updatedAt?: FirestoreTimestamp;
 
   // 관리자 답글
   reply?: {
     content: string;
-    createdAt: Timestamp;
+    createdAt: FirestoreTimestamp;
   };
 
   isDeleted?: boolean;
@@ -1445,13 +1423,13 @@ export interface ReviewFormData {
 }
 
 // 리뷰 신고 관련
-export type ReviewReportReason = 'spam' | 'abuse' | 'advertisement' | 'other';
+export type ReviewReportReason = "spam" | "abuse" | "advertisement" | "other";
 
 export const REPORT_REASON_LABELS: Record<ReviewReportReason, string> = {
-  spam: '스팸/홍보',
-  abuse: '욕설/비방',
-  advertisement: '광고성 내용',
-  other: '기타',
+  spam: "스팸/홍보",
+  abuse: "욕설/비방",
+  advertisement: "광고성 내용",
+  other: "기타",
 };
 
 export interface ReviewReport {
@@ -1460,22 +1438,31 @@ export interface ReviewReport {
   reportedBy: string;
   reason: ReviewReportReason;
   description?: string;
-  createdAt: Timestamp;
-  status: 'pending' | 'resolved' | 'dismissed';
+  createdAt: FirestoreTimestamp;
+  status: "pending" | "resolved" | "dismissed";
 }
 
 export interface ReviewReply {
   content: string;
-  createdAt: Timestamp;
-  updatedAt?: Timestamp;
+  createdAt: FirestoreTimestamp;
+  updatedAt?: FirestoreTimestamp;
 }
+
+export type ReviewSortOption = "latest" | "rating_high" | "rating_low";
 
 export interface ReviewStats {
   total: number;
-  averageRating: number;
-  byRating: Record<number, number>;
   withPhotos: number;
+  averageRating: number;
+  byRating: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
 }
+
 ```
 
 ---
@@ -1487,41 +1474,41 @@ export interface ReviewStats {
  * 관리자 설정 타입
  */
 
-export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+export type DayOfWeek = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 
 export interface BusinessHours {
   day: DayOfWeek;
   isOpen: boolean;
-  openTime: string;   // "09:00"
-  closeTime: string;  // "22:00"
+  openTime: string; // "09:00"
+  closeTime: string; // "22:00"
 }
 
 export interface DeliveryFee {
-  minDistance: number;  // km
-  maxDistance: number;  // km
-  fee: number;          // 원
+  minDistance: number; // km
+  maxDistance: number; // km
+  fee: number; // 원
 }
 
 export interface StoreSettings {
   storeId: string;
-  
+
   // 영업시간
   businessHours: BusinessHours[];
-  
+
   // 배달 설정
   deliveryFees: DeliveryFee[];
-  deliveryRadius: number;     // 최대 배달 반경 (km)
-  minDeliveryOrder: number;   // 최소 배달 주문 금액 (원)
-  
+  deliveryRadius: number; // 최대 배달 반경 (km)
+  minDeliveryOrder: number; // 최소 배달 주문 금액 (원)
+
   // 배달대행사 설정
   deliveryProvider?: DeliveryProviderSettings;
-  
+
   // 포장 설정
-  minPickupOrder: number;     // 최소 포장 주문 금액 (원)
-  
+  minPickupOrder: number; // 최소 포장 주문 금액 (원)
+
   // 휴무일
-  holidays: string[];         // ["2025-01-01", "2025-02-09"]
-  
+  holidays: string[]; // ["2025-01-01", "2025-02-09"]
+
   // 업데이트 정보
   updatedAt: Date;
   updatedBy: string;
@@ -1529,23 +1516,23 @@ export interface StoreSettings {
 }
 
 export const DAY_LABELS: Record<DayOfWeek, string> = {
-  mon: '월요일',
-  tue: '화요일',
-  wed: '수요일',
-  thu: '목요일',
-  fri: '금요일',
-  sat: '토요일',
-  sun: '일요일',
+  mon: "월요일",
+  tue: "화요일",
+  wed: "수요일",
+  thu: "목요일",
+  fri: "금요일",
+  sat: "토요일",
+  sun: "일요일",
 };
 
 export const DEFAULT_BUSINESS_HOURS: BusinessHours[] = [
-  { day: 'mon', isOpen: true, openTime: '10:00', closeTime: '22:00' },
-  { day: 'tue', isOpen: true, openTime: '10:00', closeTime: '22:00' },
-  { day: 'wed', isOpen: true, openTime: '10:00', closeTime: '22:00' },
-  { day: 'thu', isOpen: true, openTime: '10:00', closeTime: '22:00' },
-  { day: 'fri', isOpen: true, openTime: '10:00', closeTime: '22:00' },
-  { day: 'sat', isOpen: true, openTime: '10:00', closeTime: '22:00' },
-  { day: 'sun', isOpen: true, openTime: '10:00', closeTime: '22:00' },
+  { day: "mon", isOpen: true, openTime: "10:00", closeTime: "22:00" },
+  { day: "tue", isOpen: true, openTime: "10:00", closeTime: "22:00" },
+  { day: "wed", isOpen: true, openTime: "10:00", closeTime: "22:00" },
+  { day: "thu", isOpen: true, openTime: "10:00", closeTime: "22:00" },
+  { day: "fri", isOpen: true, openTime: "10:00", closeTime: "22:00" },
+  { day: "sat", isOpen: true, openTime: "10:00", closeTime: "22:00" },
+  { day: "sun", isOpen: true, openTime: "10:00", closeTime: "22:00" },
 ];
 
 export const DEFAULT_DELIVERY_FEES: DeliveryFee[] = [
@@ -1557,12 +1544,12 @@ export const DEFAULT_DELIVERY_FEES: DeliveryFee[] = [
 /**
  * 배달대행사 Provider 설정
  */
-export type DeliveryProviderType = 'mock' | 'providerA' | 'custom';
+export type DeliveryProviderType = "mock" | "providerA" | "custom";
 
 export interface DeliveryProviderSettings {
   enabled: boolean;
   provider: DeliveryProviderType;
-  
+
   // Provider A 설정
   providerA?: {
     apiUrl: string;
@@ -1570,7 +1557,7 @@ export interface DeliveryProviderSettings {
     merchantId: string;
     webhookSecret?: string;
   };
-  
+
   // Custom Provider 설정
   custom?: {
     name: string;
@@ -1583,7 +1570,7 @@ export interface DeliveryProviderSettings {
 
 export const DEFAULT_DELIVERY_PROVIDER_SETTINGS: DeliveryProviderSettings = {
   enabled: false,
-  provider: 'mock',
+  provider: "mock",
 };
 
 ```
@@ -1611,9 +1598,9 @@ export interface ChatSession {
   updatedAt: number;
 }
 
-export type MessageSender = 'user' | 'admin' | 'bot';
+export type MessageSender = "user" | "admin" | "bot";
 
-export type MessageType = 'text' | 'image';
+export type MessageType = "text" | "image";
 
 export interface ChatMessage {
   id: string;
@@ -1640,7 +1627,7 @@ export interface SendMessageParams {
  */
 export interface BusinessHours {
   start: string; // "09:00"
-  end: string;   // "21:00"
+  end: string; // "21:00"
 }
 
 export interface AutoReply {
@@ -1665,67 +1652,67 @@ export interface AutoReply {
  * 브랜드 메인 컬러
  */
 export const BRAND_COLORS = {
-  primary: '#D61C1C',      // 현풍레드
-  secondary: '#F37021',    // 신칼오렌지
-  accent: '#C7A45A',       // 황동식기색
-  
+  primary: "#D61C1C", // 현풍레드
+  secondary: "#F37021", // 신칼오렌지
+  accent: "#C7A45A", // 황동식기색
+
   // 그레이스케일
-  black: '#1A1A1A',
-  darkGray: '#4A4A4A',
-  gray: '#8B7355',
-  lightGray: '#D4C5B9',
-  background: '#F8F6F3',
-  white: '#FFFFFF',
+  black: "#1A1A1A",
+  darkGray: "#4A4A4A",
+  gray: "#8B7355",
+  lightGray: "#D4C5B9",
+  background: "#F8F6F3",
+  white: "#FFFFFF",
 } as const;
 
 /**
  * 상태 컬러
  */
 export const STATUS_COLORS = {
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+  info: "#3B82F6",
 } as const;
 
 /**
  * 주문 상태별 컬러
  */
 export const ORDER_STATUS_COLORS = {
-  pending: '#F59E0B',      // 주황
-  accepted: '#3B82F6',     // 파랑
-  preparing: '#8B5CF6',    // 보라
-  ready: '#06B6D4',        // 청록
-  delivering: '#10B981',   // 녹색
-  completed: '#22C55E',    // 연녹
-  canceled: '#EF4444',     // 빨강
+  pending: "#F59E0B", // 주황
+  accepted: "#3B82F6", // 파랑
+  preparing: "#8B5CF6", // 보라
+  ready: "#06B6D4", // 청록
+  delivering: "#10B981", // 녹색
+  completed: "#22C55E", // 연녹
+  canceled: "#EF4444", // 빨강
 } as const;
 
 /**
  * 배달 상태별 컬러
  */
 export const DELIVERY_STATUS_COLORS = {
-  pending: '#F59E0B',
-  assigned: '#3B82F6',
-  pickupReady: '#8B5CF6',
-  pickedUp: '#06B6D4',
-  delivering: '#10B981',
-  delivered: '#22C55E',
-  failed: '#EF4444',
+  pending: "#F59E0B",
+  assigned: "#3B82F6",
+  pickupReady: "#8B5CF6",
+  pickedUp: "#06B6D4",
+  delivering: "#10B981",
+  delivered: "#22C55E",
+  failed: "#EF4444",
 } as const;
 
 /**
  * 차트 컬러 팔레트
  */
 export const CHART_COLORS = [
-  '#D61C1C',  // 현풍레드
-  '#F37021',  // 신칼오렌지
-  '#C7A45A',  // 황동식기색
-  '#8B5CF6',  // 보라
-  '#10B981',  // 녹색
-  '#3B82F6',  // 파랑
-  '#F59E0B',  // 주황
-  '#EF4444',  // 빨강
+  "#D61C1C", // 현풍레드
+  "#F37021", // 신칼오렌지
+  "#C7A45A", // 황동식기색
+  "#8B5CF6", // 보라
+  "#10B981", // 녹색
+  "#3B82F6", // 파랑
+  "#F59E0B", // 주황
+  "#EF4444", // 빨강
 ] as const;
 
 ```
@@ -1737,14 +1724,14 @@ export const CHART_COLORS = [
 ```typescript
 /**
  * 🔒 디자인 토큰 TypeScript 정의
- * 
+ *
  * 이 파일은 디자인 시스템을 TypeScript 레벨에서 강제합니다.
  * - 타입 안전성 보장
  * - 잘못된 값 사용 방지
  * - 자동완성 지원
- * 
+ *
  * ⚠️ 주의: 이 파일의 값을 변경하지 마세요!
- * 
+ *
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
@@ -1753,14 +1740,14 @@ export const CHART_COLORS = [
    ============================================ */
 
 export const BRAND_COLORS = {
-  hyunpungRed: '#D61C1C',
-  shinkalOrange: '#F37021',
-  darkBrown: '#2E1C10',
-  creamBg: '#F9F6F3',
-  brassGold: '#C7A45A',
+  hyunpungRed: "#D61C1C",
+  shinkalOrange: "#F37021",
+  darkBrown: "#2E1C10",
+  creamBg: "#F9F6F3",
+  brassGold: "#C7A45A",
 } as const;
 
-export type BrandColor = typeof BRAND_COLORS[keyof typeof BRAND_COLORS];
+export type BrandColor = (typeof BRAND_COLORS)[keyof typeof BRAND_COLORS];
 
 /* ============================================
    시맨틱 컬러 매핑
@@ -1768,27 +1755,27 @@ export type BrandColor = typeof BRAND_COLORS[keyof typeof BRAND_COLORS];
 
 export const SEMANTIC_COLORS = {
   primary: BRAND_COLORS.hyunpungRed,
-  primaryHover: '#b71616',
-  primaryLight: 'rgba(214, 28, 28, 0.1)',
-  
+  primaryHover: "#b71616",
+  primaryLight: "rgba(214, 28, 28, 0.1)",
+
   secondary: BRAND_COLORS.shinkalOrange,
-  secondaryHover: '#d45e1a',
-  secondaryLight: 'rgba(243, 112, 33, 0.1)',
-  
+  secondaryHover: "#d45e1a",
+  secondaryLight: "rgba(243, 112, 33, 0.1)",
+
   accent: BRAND_COLORS.brassGold,
-  accentHover: '#b08f4a',
-  accentLight: 'rgba(199, 164, 90, 0.1)',
-  
+  accentHover: "#b08f4a",
+  accentLight: "rgba(199, 164, 90, 0.1)",
+
   textPrimary: BRAND_COLORS.darkBrown,
-  textSecondary: '#5a5a68',
-  textWhite: '#ffffff',
-  
-  background: '#ffffff',
+  textSecondary: "#5a5a68",
+  textWhite: "#ffffff",
+
+  background: "#ffffff",
   backgroundMuted: BRAND_COLORS.creamBg,
   foreground: BRAND_COLORS.darkBrown,
 } as const;
 
-export type SemanticColor = typeof SEMANTIC_COLORS[keyof typeof SEMANTIC_COLORS];
+export type SemanticColor = (typeof SEMANTIC_COLORS)[keyof typeof SEMANTIC_COLORS];
 
 /* ============================================
    타이포그래피 토큰
@@ -1800,18 +1787,18 @@ export const FONT_FAMILY = {
 } as const;
 
 export const FONT_SIZES = {
-  xs: '0.75rem',    // 12px
-  sm: '0.875rem',   // 14px
-  base: '1rem',     // 16px
-  lg: '1.125rem',   // 18px
-  xl: '1.25rem',    // 20px
-  '2xl': '1.5rem',  // 24px
-  '3xl': '1.875rem',// 30px
-  '4xl': '2.25rem', // 36px
-  '5xl': '3rem',    // 48px
+  xs: "0.75rem", // 12px
+  sm: "0.875rem", // 14px
+  base: "1rem", // 16px
+  lg: "1.125rem", // 18px
+  xl: "1.25rem", // 20px
+  "2xl": "1.5rem", // 24px
+  "3xl": "1.875rem", // 30px
+  "4xl": "2.25rem", // 36px
+  "5xl": "3rem", // 48px
 } as const;
 
-export type FontSize = typeof FONT_SIZES[keyof typeof FONT_SIZES];
+export type FontSize = (typeof FONT_SIZES)[keyof typeof FONT_SIZES];
 
 export const FONT_WEIGHTS = {
   light: 300,
@@ -1822,7 +1809,7 @@ export const FONT_WEIGHTS = {
   extrabold: 800,
 } as const;
 
-export type FontWeight = typeof FONT_WEIGHTS[keyof typeof FONT_WEIGHTS];
+export type FontWeight = (typeof FONT_WEIGHTS)[keyof typeof FONT_WEIGHTS];
 
 export const LINE_HEIGHTS = {
   none: 1,
@@ -1833,53 +1820,53 @@ export const LINE_HEIGHTS = {
   loose: 2,
 } as const;
 
-export type LineHeight = typeof LINE_HEIGHTS[keyof typeof LINE_HEIGHTS];
+export type LineHeight = (typeof LINE_HEIGHTS)[keyof typeof LINE_HEIGHTS];
 
 /* ============================================
    Border Radius 토큰
    ============================================ */
 
 export const BORDER_RADIUS = {
-  none: '0',
-  sm: '0.5rem',     // 8px
-  md: '0.75rem',    // 12px
-  lg: '1rem',       // 16px
-  xl: '1.5rem',     // 24px
-  '2xl': '2rem',    // 32px
-  full: '9999px',
+  none: "0",
+  sm: "0.5rem", // 8px
+  md: "0.75rem", // 12px
+  lg: "1rem", // 16px
+  xl: "1.5rem", // 24px
+  "2xl": "2rem", // 32px
+  full: "9999px",
 } as const;
 
-export type BorderRadius = typeof BORDER_RADIUS[keyof typeof BORDER_RADIUS];
+export type BorderRadius = (typeof BORDER_RADIUS)[keyof typeof BORDER_RADIUS];
 
 /* ============================================
    Shadow 토큰
    ============================================ */
 
 export const SHADOWS = {
-  soft1: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  soft2: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  soft3: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  medium: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-  large: '0 20px 40px -10px rgba(0, 0, 0, 0.2)',
+  soft1: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  soft2: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+  soft3: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+  medium: "0 10px 25px -5px rgba(0, 0, 0, 0.15)",
+  large: "0 20px 40px -10px rgba(0, 0, 0, 0.2)",
 } as const;
 
-export type Shadow = typeof SHADOWS[keyof typeof SHADOWS];
+export type Shadow = (typeof SHADOWS)[keyof typeof SHADOWS];
 
 /* ============================================
    Spacing 토큰
    ============================================ */
 
 export const SPACING = {
-  xs: '0.25rem',    // 4px
-  sm: '0.5rem',     // 8px
-  md: '1rem',       // 16px
-  lg: '1.5rem',     // 24px
-  xl: '2rem',       // 32px
-  '2xl': '3rem',    // 48px
-  '3xl': '4rem',    // 64px
+  xs: "0.25rem", // 4px
+  sm: "0.5rem", // 8px
+  md: "1rem", // 16px
+  lg: "1.5rem", // 24px
+  xl: "2rem", // 32px
+  "2xl": "3rem", // 48px
+  "3xl": "4rem", // 64px
 } as const;
 
-export type Spacing = typeof SPACING[keyof typeof SPACING];
+export type Spacing = (typeof SPACING)[keyof typeof SPACING];
 
 /* ============================================
    Z-Index 토큰
@@ -1897,46 +1884,46 @@ export const Z_INDEX = {
   tooltip: 1200,
 } as const;
 
-export type ZIndex = typeof Z_INDEX[keyof typeof Z_INDEX];
+export type ZIndex = (typeof Z_INDEX)[keyof typeof Z_INDEX];
 
 /* ============================================
    Breakpoint 토큰
    ============================================ */
 
 export const BREAKPOINTS = {
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
-  '2xl': '1536px',
+  sm: "640px",
+  md: "768px",
+  lg: "1024px",
+  xl: "1280px",
+  "2xl": "1536px",
 } as const;
 
-export type Breakpoint = typeof BREAKPOINTS[keyof typeof BREAKPOINTS];
+export type Breakpoint = (typeof BREAKPOINTS)[keyof typeof BREAKPOINTS];
 
 /* ============================================
    Duration 토큰
    ============================================ */
 
 export const DURATIONS = {
-  fast: '150ms',
-  normal: '300ms',
-  slow: '500ms',
+  fast: "150ms",
+  normal: "300ms",
+  slow: "500ms",
 } as const;
 
-export type Duration = typeof DURATIONS[keyof typeof DURATIONS];
+export type Duration = (typeof DURATIONS)[keyof typeof DURATIONS];
 
 /* ============================================
    Easing 토큰
    ============================================ */
 
 export const EASINGS = {
-  linear: 'linear',
-  easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
-  easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
-  easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  linear: "linear",
+  easeIn: "cubic-bezier(0.4, 0, 1, 1)",
+  easeOut: "cubic-bezier(0, 0, 0.2, 1)",
+  easeInOut: "cubic-bezier(0.4, 0, 0.2, 1)",
 } as const;
 
-export type Easing = typeof EASINGS[keyof typeof EASINGS];
+export type Easing = (typeof EASINGS)[keyof typeof EASINGS];
 
 /* ============================================
    유틸리티 함수
@@ -1952,11 +1939,11 @@ export const cssVar = (token: string): string => `var(--${token})`;
  */
 export const brandColor = (color: keyof typeof BRAND_COLORS): string => {
   const mapping: Record<keyof typeof BRAND_COLORS, string> = {
-    hyunpungRed: 'color-hyunpung-red',
-    shinkalOrange: 'color-shinkal-orange',
-    darkBrown: 'color-dark-brown',
-    creamBg: 'color-cream-bg',
-    brassGold: 'color-brass-gold',
+    hyunpungRed: "color-hyunpung-red",
+    shinkalOrange: "color-shinkal-orange",
+    darkBrown: "color-dark-brown",
+    creamBg: "color-cream-bg",
+    brassGold: "color-brass-gold",
   };
   return cssVar(mapping[color]);
 };
@@ -1966,21 +1953,21 @@ export const brandColor = (color: keyof typeof BRAND_COLORS): string => {
  */
 export const semanticColor = (color: keyof typeof SEMANTIC_COLORS): string => {
   const mapping: Record<keyof typeof SEMANTIC_COLORS, string> = {
-    primary: 'color-primary',
-    primaryHover: 'color-primary-hover',
-    primaryLight: 'color-primary-light',
-    secondary: 'color-secondary',
-    secondaryHover: 'color-secondary-hover',
-    secondaryLight: 'color-secondary-light',
-    accent: 'color-accent',
-    accentHover: 'color-accent-hover',
-    accentLight: 'color-accent-light',
-    textPrimary: 'color-text-primary',
-    textSecondary: 'color-text-secondary',
-    textWhite: 'color-text-white',
-    background: 'background',
-    backgroundMuted: 'muted',
-    foreground: 'foreground',
+    primary: "color-primary",
+    primaryHover: "color-primary-hover",
+    primaryLight: "color-primary-light",
+    secondary: "color-secondary",
+    secondaryHover: "color-secondary-hover",
+    secondaryLight: "color-secondary-light",
+    accent: "color-accent",
+    accentHover: "color-accent-hover",
+    accentLight: "color-accent-light",
+    textPrimary: "color-text-primary",
+    textSecondary: "color-text-secondary",
+    textWhite: "color-text-white",
+    background: "background",
+    backgroundMuted: "muted",
+    foreground: "foreground",
   };
   return cssVar(mapping[color]);
 };
@@ -2001,7 +1988,7 @@ export const validateDesignToken = (category: string, value: string): boolean =>
     spacing: Object.values(SPACING),
     borderRadius: Object.values(BORDER_RADIUS),
   };
-  
+
   return categories[category as keyof typeof categories]?.includes(value as any) ?? false;
 };
 
@@ -2072,16 +2059,16 @@ export {
  */
 
 // 레이블
-export * from './labels';
+export * from "./labels";
 
 // 상태
-export * from './status';
+export * from "./status";
 
 // 컬러
-export * from './colors';
+export * from "./colors";
 
 // 유효성 검증
-export * from './validation';
+export * from "./validation";
 
 ```
 
@@ -2099,135 +2086,135 @@ export * from './validation';
  * 쿠폰 타입 레이블
  */
 export const COUPON_TYPE_LABELS = {
-  amount: '금액할인',
-  percent: '퍼센트할인',
-  freeDelivery: '무료배달',
-  freeItem: '무료증정',
+  amount: "금액할인",
+  percent: "퍼센트할인",
+  freeDelivery: "무료배달",
+  freeItem: "무료증정",
 } as const;
 
 /**
  * 주문 상태 레이블
  */
 export const ORDER_STATUS_LABELS = {
-  pending: '주문 대기',
-  accepted: '접수 확인',
-  preparing: '조리 중',
-  ready: '배달 준비',
-  delivering: '배달 중',
-  completed: '배달 완료',
-  canceled: '주문 취소',
+  pending: "주문 대기",
+  accepted: "접수 확인",
+  preparing: "조리 중",
+  ready: "배달 준비",
+  delivering: "배달 중",
+  completed: "배달 완료",
+  canceled: "주문 취소",
 } as const;
 
 /**
  * 결제 상태 레이블
  */
 export const PAYMENT_STATUS_LABELS = {
-  pending: '결제 대기',
-  completed: '결제 완료',
-  failed: '결제 실패',
-  canceled: '결제 취소',
-  refunded: '환불 완료',
+  pending: "결제 대기",
+  completed: "결제 완료",
+  failed: "결제 실패",
+  canceled: "결제 취소",
+  refunded: "환불 완료",
 } as const;
 
 /**
  * 배달 상태 레이블
  */
 export const DELIVERY_STATUS_LABELS = {
-  pending: '배달 대기',
-  assigned: '배달원 배정',
-  pickupReady: '픽업 준비',
-  pickedUp: '픽업 완료',
-  delivering: '배달 중',
-  delivered: '배달 완료',
-  failed: '배달 실패',
+  pending: "배달 대기",
+  assigned: "배달원 배정",
+  pickupReady: "픽업 준비",
+  pickedUp: "픽업 완료",
+  delivering: "배달 중",
+  delivered: "배달 완료",
+  failed: "배달 실패",
 } as const;
 
 /**
  * 리뷰 상태 레이블
  */
 export const REVIEW_STATUS_LABELS = {
-  pending: '대기',
-  approved: '승인',
-  rejected: '거부',
-  reported: '신고됨',
+  pending: "대기",
+  approved: "승인",
+  rejected: "거부",
+  reported: "신고됨",
 } as const;
 
 /**
  * 쿠폰 상태 레이블
  */
 export const COUPON_STATUS_LABELS = {
-  active: '사용 가능',
-  used: '사용 완료',
-  expired: '기간 만료',
-  disabled: '사용 불가',
+  active: "사용 가능",
+  used: "사용 완료",
+  expired: "기간 만료",
+  disabled: "사용 불가",
 } as const;
 
 /**
  * 포인트 타입 레이블
  */
 export const POINT_TYPE_LABELS = {
-  earn: '적립',
-  use: '사용',
-  refund: '환불',
-  expire: '소멸',
-  admin: '관리자 지급',
+  earn: "적립",
+  use: "사용",
+  refund: "환불",
+  expire: "소멸",
+  admin: "관리자 지급",
 } as const;
 
 /**
  * 알림 타입 레이블
  */
 export const NOTIFICATION_TYPE_LABELS = {
-  order: '주문',
-  delivery: '배달',
-  payment: '결제',
-  review: '리뷰',
-  promotion: '프로모션',
-  system: '시스템',
+  order: "주문",
+  delivery: "배달",
+  payment: "결제",
+  review: "리뷰",
+  promotion: "프로모션",
+  system: "시스템",
 } as const;
 
 /**
  * 고객지원 상태 레이블
  */
 export const SUPPORT_STATUS_LABELS = {
-  open: '문의 접수',
-  inProgress: '답변 중',
-  resolved: '해결 완료',
-  closed: '종료',
+  open: "문의 접수",
+  inProgress: "답변 중",
+  resolved: "해결 완료",
+  closed: "종료",
 } as const;
 
 /**
  * 고객지원 카테고리 레이블
  */
 export const SUPPORT_CATEGORY_LABELS = {
-  order: '주문 문의',
-  delivery: '배달 문의',
-  payment: '결제 문의',
-  menu: '메뉴 문의',
-  refund: '환불 문의',
-  etc: '기타 문의',
+  order: "주문 문의",
+  delivery: "배달 문의",
+  payment: "결제 문의",
+  menu: "메뉴 문의",
+  refund: "환불 문의",
+  etc: "기타 문의",
 } as const;
 
 /**
  * 요일 레이블
  */
 export const DAY_LABELS = {
-  mon: '월',
-  tue: '화',
-  wed: '수',
-  thu: '목',
-  fri: '금',
-  sat: '토',
-  sun: '일',
+  mon: "월",
+  tue: "화",
+  wed: "수",
+  thu: "목",
+  fri: "금",
+  sat: "토",
+  sun: "일",
 } as const;
 
 /**
  * 메뉴 카테고리 레이블
  */
 export const MENU_CATEGORY_LABELS = {
-  signature: '시그니처',
-  kalguksu: '칼국수',
-  side: '사이드',
-  beverage: '음료',
+  signature: "시그니처",
+  kalguksu: "칼국수",
+  side: "사이드",
+  beverage: "음료",
 } as const;
 
 ```
@@ -2246,13 +2233,13 @@ export const MENU_CATEGORY_LABELS = {
  * 주문 상태
  */
 export const ORDER_STATUSES = [
-  'pending',
-  'accepted',
-  'preparing',
-  'ready',
-  'delivering',
-  'completed',
-  'canceled',
+  "pending",
+  "accepted",
+  "preparing",
+  "ready",
+  "delivering",
+  "completed",
+  "canceled",
 ] as const;
 
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -2260,13 +2247,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 /**
  * 결제 상태
  */
-export const PAYMENT_STATUSES = [
-  'pending',
-  'completed',
-  'failed',
-  'canceled',
-  'refunded',
-] as const;
+export const PAYMENT_STATUSES = ["pending", "completed", "failed", "canceled", "refunded"] as const;
 
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
@@ -2274,13 +2255,13 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
  * 배달 상태
  */
 export const DELIVERY_STATUSES = [
-  'pending',
-  'assigned',
-  'pickupReady',
-  'pickedUp',
-  'delivering',
-  'delivered',
-  'failed',
+  "pending",
+  "assigned",
+  "pickupReady",
+  "pickedUp",
+  "delivering",
+  "delivered",
+  "failed",
 ] as const;
 
 export type DeliveryStatus = (typeof DELIVERY_STATUSES)[number];
@@ -2288,36 +2269,21 @@ export type DeliveryStatus = (typeof DELIVERY_STATUSES)[number];
 /**
  * 리뷰 상태
  */
-export const REVIEW_STATUSES = [
-  'pending',
-  'approved',
-  'rejected',
-  'reported',
-] as const;
+export const REVIEW_STATUSES = ["pending", "approved", "rejected", "reported"] as const;
 
 export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 
 /**
  * 쿠폰 상태
  */
-export const COUPON_STATUSES = [
-  'active',
-  'used',
-  'expired',
-  'disabled',
-] as const;
+export const COUPON_STATUSES = ["active", "used", "expired", "disabled"] as const;
 
 export type CouponStatus = (typeof COUPON_STATUSES)[number];
 
 /**
  * 고객지원 상태
  */
-export const SUPPORT_STATUSES = [
-  'open',
-  'inProgress',
-  'resolved',
-  'closed',
-] as const;
+export const SUPPORT_STATUSES = ["open", "inProgress", "resolved", "closed"] as const;
 
 export type SupportStatus = (typeof SUPPORT_STATUSES)[number];
 
@@ -2337,42 +2303,42 @@ export type SupportStatus = (typeof SUPPORT_STATUSES)[number];
  * 주문 관련 제한
  */
 export const ORDER_LIMITS = {
-  MIN_AMOUNT: 10000,        // 최소 주문 금액
+  MIN_AMOUNT: 10000, // 최소 주문 금액
   MIN_AMOUNT_DELIVERY: 15000, // 배달 최소 주문 금액
-  MIN_AMOUNT_PICKUP: 5000,    // 픽업 최소 주문 금액
-  MAX_AMOUNT: 500000,       // 최대 주문 금액
-  MIN_DELIVERY_TIME: 30,    // 최소 배달 시간 (분)
-  MAX_DELIVERY_TIME: 90,    // 최대 배달 시간 (분)
+  MIN_AMOUNT_PICKUP: 5000, // 픽업 최소 주문 금액
+  MAX_AMOUNT: 500000, // 최대 주문 금액
+  MIN_DELIVERY_TIME: 30, // 최소 배달 시간 (분)
+  MAX_DELIVERY_TIME: 90, // 최대 배달 시간 (분)
 } as const;
 
 /**
  * 포인트 관련 제한
  */
 export const POINT_LIMITS = {
-  MIN_USE: 1000,            // 최소 사용 포인트
-  MAX_USE_RATE: 0.5,        // 최대 사용 비율 (50%)
-  EARN_RATE: 0.03,          // 적립률 (3%)
-  EXPIRE_DAYS: 365,         // 유효기간 (일)
+  MIN_USE: 1000, // 최소 사용 포인트
+  MAX_USE_RATE: 0.5, // 최대 사용 비율 (50%)
+  EARN_RATE: 0.03, // 적립률 (3%)
+  EXPIRE_DAYS: 365, // 유효기간 (일)
 } as const;
 
 /**
  * 리뷰 관련 제한
  */
 export const REVIEW_LIMITS = {
-  MIN_LENGTH: 10,           // 최소 글자 수
-  MAX_LENGTH: 500,          // 최대 글자 수
-  MAX_IMAGES: 5,            // 최대 이미지 수
-  MIN_RATING: 1,            // 최소 별점
-  MAX_RATING: 5,            // 최대 별점
+  MIN_LENGTH: 10, // 최소 글자 수
+  MAX_LENGTH: 500, // 최대 글자 수
+  MAX_IMAGES: 5, // 최대 이미지 수
+  MIN_RATING: 1, // 최소 별점
+  MAX_RATING: 5, // 최대 별점
 } as const;
 
 /**
  * 쿠폰 관련 제한
  */
 export const COUPON_LIMITS = {
-  CODE_MIN_LENGTH: 6,       // 쿠폰 코드 최소 길이
-  CODE_MAX_LENGTH: 12,      // 쿠폰 코드 최대 길이
-  MAX_DISCOUNT_RATE: 0.5,   // 최대 할인율 (50%)
+  CODE_MIN_LENGTH: 6, // 쿠폰 코드 최소 길이
+  CODE_MAX_LENGTH: 12, // 쿠폰 코드 최대 길이
+  MAX_DISCOUNT_RATE: 0.5, // 최대 할인율 (50%)
   MAX_DISCOUNT_AMOUNT: 50000, // 최대 할인 금액
 } as const;
 
@@ -2380,23 +2346,23 @@ export const COUPON_LIMITS = {
  * 배달 관련 제한
  */
 export const DELIVERY_LIMITS = {
-  MAX_DISTANCE: 5000,       // 최대 배달 거리 (m)
-  BASE_DISTANCE: 3000,      // 기본 배달 거리 (m)
-  BASE_FEE: 3000,           // 기본 배달비
-  EXTRA_FEE_PER_KM: 1000,   // km당 추가 배달비
-  NIGHT_FEE: 2000,          // 야간 할증
+  MAX_DISTANCE: 5000, // 최대 배달 거리 (m)
+  BASE_DISTANCE: 3000, // 기본 배달 거리 (m)
+  BASE_FEE: 3000, // 기본 배달비
+  EXTRA_FEE_PER_KM: 1000, // km당 추가 배달비
+  NIGHT_FEE: 2000, // 야간 할증
 } as const;
 
 /**
  * 영업 시간
  */
 export const BUSINESS_HOURS = {
-  OPEN: '10:00',
-  CLOSE: '21:00',
-  BREAK_START: '15:00',
-  BREAK_END: '17:00',
-  NIGHT_START: '22:00',
-  NIGHT_END: '06:00',
+  OPEN: "10:00",
+  CLOSE: "21:00",
+  BREAK_START: "15:00",
+  BREAK_END: "17:00",
+  NIGHT_START: "22:00",
+  NIGHT_END: "06:00",
 } as const;
 
 /**
@@ -2414,8 +2380,8 @@ export const REGEX_PATTERNS = {
  * 파일 업로드 제한
  */
 export const FILE_LIMITS = {
-  MAX_SIZE: 5 * 1024 * 1024,  // 5MB
-  ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
+  MAX_SIZE: 5 * 1024 * 1024, // 5MB
+  ALLOWED_TYPES: ["image/jpeg", "image/png", "image/webp"],
   MAX_FILES: 5,
 } as const;
 
@@ -2432,10 +2398,10 @@ export const PAGINATION = {
  * 캐시 시간 (초)
  */
 export const CACHE_DURATION = {
-  SHORT: 60,          // 1분
-  MEDIUM: 300,        // 5분
-  LONG: 3600,         // 1시간
-  DAY: 86400,         // 24시간
+  SHORT: 60, // 1분
+  MEDIUM: 300, // 5분
+  LONG: 3600, // 1시간
+  DAY: 86400, // 24시간
 } as const;
 
 ```

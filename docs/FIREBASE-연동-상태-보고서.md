@@ -66,3 +66,4 @@
 - CLI를 통한 배포(`firebase deploy`)가 가능한 상태입니다.
 - 단, Firestore 보안 규칙(`firestore.rules`)이 현재 **개발용(Open)** 상태이므로, 실제 운영 전에는 반드시 보안 규칙을 강화해야 합니다.
 
+

@@ -1,6 +1,6 @@
 # Admin Pages - Full Source Code
 
-**Generated**: 2025-11-30-1905  
+**Generated**: 2025-12-01-2219  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -15,12 +15,12 @@ Complete source code of 11 admin pages.
 
 ```tsx
 // Route: /admin
-import { useState, useEffect } from 'react';
-import { DollarSign, ShoppingBag, Star, TrendingUp } from 'lucide-react';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Card } from '../../components/ui/card';
-import { formatPrice } from '../../lib/utils';
-import { getDashboardStats } from '../../lib/admin/stats.api';
+import { useState, useEffect } from "react";
+import { DollarSign, ShoppingBag, Star, TrendingUp } from "lucide-react";
+import { StatCard } from "@/components/admin/common/StatCard";
+import { Card } from "@/components/ui/card";
+import { formatPrice } from "@/lib/utils";
+import { getDashboardStats } from "@/lib/admin/stats.api";
 
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ export function Dashboard() {
       const data = await getDashboardStats();
       setStats(data);
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error("Failed to load stats:", error);
     } finally {
       setLoading(false);
     }
@@ -51,9 +51,7 @@ export function Dashboard() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl text-[#333] mb-2">대시보드</h1>
-        <p className="text-[#8B7355]">
-          현풍닭칼국수 운영 현황을 한눈에 확인하세요
-        </p>
+        <p className="text-[#8B7355]">현풍닭칼국수 운영 현황을 한눈에 확인하세요</p>
       </div>
 
       {/* KPI Cards */}
@@ -106,12 +104,8 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-[#8B7355]">
-                  새로운 주문이 없습니다
-                </p>
-                <p className="text-[#8B7355] mt-1">
-                  주문이 들어오면 여기에 표시됩니다
-                </p>
+                <p className="text-[#8B7355]">새로운 주문이 없습니다</p>
+                <p className="text-[#8B7355] mt-1">주문이 들어오면 여기에 표시됩니다</p>
               </div>
             )}
           </div>
@@ -127,12 +121,8 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-[#8B7355]">
-                  최근 리뷰가 없습니다
-                </p>
-                <p className="text-[#8B7355] mt-1">
-                  고객이 리뷰를 남기면 여기에 표시됩니다
-                </p>
+                <p className="text-[#8B7355]">최근 리뷰가 없습니다</p>
+                <p className="text-[#8B7355] mt-1">고객이 리뷰를 남기면 여기에 표시됩니다</p>
               </div>
             )}
           </div>
@@ -143,9 +133,7 @@ export function Dashboard() {
       <Card className="p-6">
         <h2 className="text-[#333] mb-4">시간대별 주문 현황</h2>
         <div className="h-64 flex items-center justify-center border-2 border-dashed border-[#E5DDD5] rounded-lg">
-          <p className="text-[#8B7355]">
-            차트가 여기에 표시됩니다 (Phase 2-9에서 구현 예정)
-          </p>
+          <p className="text-[#8B7355]">차트가 여기에 표시됩니다 (Phase 2-9에서 구현 예정)</p>
         </div>
       </Card>
 
@@ -175,21 +163,22 @@ export function Dashboard() {
 
 ```tsx
 // Route: /admin/orders
-import React, { useState, useEffect, useRef } from 'react';
-import type { Order, OrderStatus } from '../../types/order';
-import { ORDER_STATUS_TRANSITIONS } from '../../types/order';
-import { Card } from '../../components/ui/card';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Button } from '../../components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Input } from '../../components/ui/input';
+import React, { useState, useEffect, useRef } from "react";
+import { OrderStatus } from "@/types/order";
+import { ORDER_STATUS_TRANSITIONS, type Order } from "@/types/order";
+import type { FirestoreTimestamp } from "@/types/common";
+import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -197,35 +186,49 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
-import { Label } from '../../components/ui/label';
-import { Textarea } from '../../components/ui/textarea';
-import { OrderTable } from '../../components/admin/OrderTable';
-import { OrderDetailDrawer } from '../../components/admin/OrderDetailDrawer';
-import { PrintableOrder } from '../../components/admin/PrintableOrder';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { OrderTable } from "@/components/admin/OrderTable";
+import { OrderDetailDrawer } from "@/components/admin/OrderDetailDrawer";
+import { PrintableOrder } from "@/components/admin/PrintableOrder";
 import {
   fetchOrders,
   updateOrderStatus,
   type OrderFilters,
   type OrderSortField,
   type OrderSortDirection,
-} from '../../lib/admin/orders.api';
-import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
-import { toast } from 'sonner';
-import { getOrdersFallback } from '../../lib/fallback';
-import { getOrderStatusLabelForAdmin } from '../../lib/orders.utils';
-import { formatPrice } from '../../lib/utils';
+} from "@/lib/admin/orders.api";
+import { Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
+import { getOrdersFallback } from "@/lib/fallback";
+import { formatPrice } from "@/lib/utils";
 
 // 주문 상태 탭 정의
-type OrderStatusTab = 'all' | 'pending' | 'accepted' | 'cooking' | 'completed' | 'cancelled';
+type OrderStatusTab = "all" | OrderStatus;
 
 const ORDER_STATUS_TABS: { id: OrderStatusTab; label: string; statuses: OrderStatus[] }[] = [
-  { id: 'all', label: '전체', statuses: ['pending', 'accepted', 'cooking', 'delivering', 'completed', 'cancelled'] },
-  { id: 'pending', label: '접수대기', statuses: ['pending'] },
-  { id: 'accepted', label: '접수확인', statuses: ['accepted'] },
-  { id: 'cooking', label: '조리중', statuses: ['cooking', 'delivering'] },
-  { id: 'completed', label: '완료', statuses: ['completed'] },
-  { id: 'cancelled', label: '취소', statuses: ['cancelled'] },
+  {
+    id: "all",
+    label: "전체",
+    statuses: [
+      OrderStatus.PENDING,
+      OrderStatus.ACCEPTED,
+      OrderStatus.COOKING,
+      OrderStatus.DELIVERING,
+      OrderStatus.COMPLETED,
+      OrderStatus.CANCELLED,
+    ],
+  },
+  { id: OrderStatus.PENDING, label: "접수대기", statuses: [OrderStatus.PENDING] },
+  { id: OrderStatus.ACCEPTED, label: "접수확인", statuses: [OrderStatus.ACCEPTED] },
+  {
+    id: OrderStatus.COOKING,
+    label: "조리중",
+    statuses: [OrderStatus.COOKING, OrderStatus.DELIVERING],
+  },
+  { id: OrderStatus.COMPLETED, label: "완료", statuses: [OrderStatus.COMPLETED] },
+  { id: OrderStatus.CANCELLED, label: "취소", statuses: [OrderStatus.CANCELLED] },
 ];
 
 export function AdminOrders() {
@@ -236,19 +239,19 @@ export function AdminOrders() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // 필터/정렬 상태
-  const [currentTabId, setCurrentTabId] = useState<OrderStatusTab>('pending');
-  const currentTab = ORDER_STATUS_TABS.find((t) => t.id === currentTabId)!;
-  const [searchQuery, setSearchQuery] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState<string>('all');
-  const [sortField, setSortField] = useState<OrderSortField>('createdAt');
-  const [sortDirection, setSortDirection] = useState<OrderSortDirection>('desc');
+  const [currentTabId, setCurrentTabId] = useState<OrderStatusTab>(OrderStatus.PENDING);
+  const currentTab = ORDER_STATUS_TABS.find(t => t.id === currentTabId)!;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<OrderSortField>("createdAt");
+  const [sortDirection, setSortDirection] = useState<OrderSortDirection>("desc");
 
   // 취소 다이얼로그
   const [cancelDialog, setCancelDialog] = useState<{
     open: boolean;
     order: Order | null;
   }>({ open: false, order: null });
-  const [cancelReason, setCancelReason] = useState('');
+  const [cancelReason, setCancelReason] = useState("");
 
   // 새 주문 알림
   const [newOrderAlert, setNewOrderAlert] = useState<{
@@ -256,7 +259,6 @@ export function AdminOrders() {
     order: Order | null;
   }>({ open: false, order: null });
   const [processedOrderIds, setProcessedOrderIds] = useState<Set<string>>(new Set());
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const previousOrdersRef = useRef<Order[]>([]);
 
   // 데이터 로드
@@ -264,67 +266,68 @@ export function AdminOrders() {
     setLoading(true);
     try {
       const filters: OrderFilters = {
-        paymentMethod: paymentFilter === 'all' ? undefined : paymentFilter,
+        paymentMethod: paymentFilter === "all" ? undefined : paymentFilter,
         searchQuery: searchQuery || undefined,
       };
 
-      const data = await fetchOrders('store-hyunpung', filters, sortField, sortDirection);
-      
+      const data = await fetchOrders("store-hyunpung", filters, sortField, sortDirection);
+
       // 새 주문 감지 (pending 상태인 주문만)
       const previousOrders = previousOrdersRef.current;
       const newPendingOrders = data.filter(
-        (order) =>
-          order.status === 'pending' &&
+        order =>
+          order.status === OrderStatus.PENDING &&
           !processedOrderIds.has(order.orderId) &&
-          !previousOrders.some((prev) => prev.orderId === order.orderId)
+          !previousOrders.some(prev => prev.orderId === order.orderId),
       );
 
       // 새 주문이 있으면 알림
       if (newPendingOrders.length > 0) {
         const latestOrder = newPendingOrders[0]; // 가장 최신 주문
         setNewOrderAlert({ open: true, order: latestOrder });
-        setProcessedOrderIds((prev) => {
+        setProcessedOrderIds(prev => {
           const newSet = new Set(prev);
-          newPendingOrders.forEach((o) => newSet.add(o.orderId));
+          newPendingOrders.forEach(o => newSet.add(o.orderId));
           return newSet;
         });
 
         // 알림음 재생
         try {
           // 간단한 beep 소리 생성 (Web Audio API)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
           const oscillator = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
-          
+
           oscillator.connect(gainNode);
           gainNode.connect(audioContext.destination);
-          
+
           oscillator.frequency.value = 800; // 800Hz
-          oscillator.type = 'sine';
-          
+          oscillator.type = "sine";
+
           gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
           gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-          
+
           oscillator.start(audioContext.currentTime);
           oscillator.stop(audioContext.currentTime + 0.5);
         } catch (error) {
-          console.warn('알림음 재생 실패:', error);
+          console.warn("알림음 재생 실패:", error);
         }
       }
 
       previousOrdersRef.current = data;
       setOrders(data);
-      
+
       // 탭별 필터링
-      const filtered = data.filter((order) => currentTab.statuses.includes(order.status));
+      const filtered = data.filter(order => currentTab.statuses.includes(order.status));
       setFilteredOrders(filtered);
     } catch (error) {
-      console.error('주문 로드 실패:', error);
-      toast.error('주문 목록을 불러오는데 실패했습니다 (fallback 적용)');
+      console.error("주문 로드 실패:", error);
+      toast.error("주문 목록을 불러오는데 실패했습니다 (fallback 적용)");
       // Firestore 권한 실패 시 localStorage 기반 fallback (E2E 안정화)
       const arr = getOrdersFallback();
       setOrders(arr);
-      const filtered = arr.filter((order) => currentTab.statuses.includes(order.status));
+      const filtered = arr.filter(order => currentTab.statuses.includes(order.status));
       setFilteredOrders(filtered);
     } finally {
       setLoading(false);
@@ -333,25 +336,25 @@ export function AdminOrders() {
 
   useEffect(() => {
     loadOrders();
-    
+
     // 주기적으로 새 주문 확인 (5초마다)
     const interval = setInterval(() => {
       loadOrders();
     }, 5000);
-    
+
     return () => clearInterval(interval);
   }, [currentTabId, paymentFilter, searchQuery, sortField, sortDirection]);
 
   // 탭 변경 시 필터링
   useEffect(() => {
-    const filtered = orders.filter((order) => currentTab.statuses.includes(order.status));
+    const filtered = orders.filter(order => currentTab.statuses.includes(order.status));
     setFilteredOrders(filtered);
   }, [orders, currentTab]);
 
   // 상태 변경 처리
   const handleUpdateStatus = async (order: Order, newStatus: OrderStatus) => {
     // 취소 처리는 사유 입력 모달 표시
-    if (newStatus === 'cancelled') {
+    if (newStatus === OrderStatus.CANCELLED) {
       setCancelDialog({ open: true, order });
       return;
     }
@@ -359,7 +362,7 @@ export function AdminOrders() {
     // 상태 전이 검증
     const allowedTransitions = ORDER_STATUS_TRANSITIONS[order.status];
     if (!allowedTransitions.includes(newStatus)) {
-      toast.error('상태 변경 불가', {
+      toast.error("상태 변경 불가", {
         description: `${order.status} 상태에서 ${newStatus}로 변경할 수 없습니다`,
       });
       return;
@@ -368,50 +371,50 @@ export function AdminOrders() {
     try {
       const result = await updateOrderStatus(order.orderId, newStatus);
       if (result.success) {
-        toast.success('상태가 변경되었습니다', {
+        toast.success("상태가 변경되었습니다", {
           description: `주문번호: ${order.orderId}`,
         });
         loadOrders();
       } else {
-        toast.error('상태 변경 실패', {
+        toast.error("상태 변경 실패", {
           description: result.error,
         });
       }
     } catch (error) {
-      console.error('상태 변경 실패:', error);
-      toast.error('상태 변경 중 오류가 발생했습니다');
+      console.error("상태 변경 실패:", error);
+      toast.error("상태 변경 중 오류가 발생했습니다");
     }
   };
 
   // 취소 확인
   const handleCancelConfirm = async () => {
     if (!cancelDialog.order || !cancelReason.trim()) {
-      toast.error('취소 사유를 입력해주세요');
+      toast.error("취소 사유를 입력해주세요");
       return;
     }
 
     try {
       const result = await updateOrderStatus(
         cancelDialog.order.orderId,
-        'canceled',
-        cancelReason
+        OrderStatus.CANCELLED,
+        cancelReason,
       );
 
       if (result.success) {
-        toast.success('주문이 취소되었습니다', {
+        toast.success("주문이 취소되었습니다", {
           description: `주문번호: ${cancelDialog.order.orderId}`,
         });
         setCancelDialog({ open: false, order: null });
-        setCancelReason('');
+        setCancelReason("");
         loadOrders();
       } else {
-        toast.error('주문 취소 실패', {
+        toast.error("주문 취소 실패", {
           description: result.error,
         });
       }
     } catch (error) {
-      console.error('주문 취소 실패:', error);
-      toast.error('주문 취소 중 오류가 발생했습니다');
+      console.error("주문 취소 실패:", error);
+      toast.error("주문 취소 중 오류가 발생했습니다");
     }
   };
 
@@ -421,24 +424,24 @@ export function AdminOrders() {
     setDrawerOpen(true);
   };
 
-  // 정렬 토글
-  const toggleSort = (field: OrderSortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  };
-
   // 통계
   const stats = {
     total: orders.length,
-    pending: orders.filter((o) => o.status === 'pending').length,
-    accepted: orders.filter((o) => o.status === 'accepted').length,
-    cooking: orders.filter((o) => o.status === 'cooking' || o.status === 'delivering').length,
-    completed: orders.filter((o) => o.status === 'completed').length,
-    cancelled: orders.filter((o) => o.status === 'cancelled').length,
+    pending: orders.filter(o => o.status === OrderStatus.PENDING).length,
+    accepted: orders.filter(o => o.status === OrderStatus.ACCEPTED).length,
+    cooking: orders.filter(
+      o => o.status === OrderStatus.COOKING || o.status === OrderStatus.DELIVERING,
+    ).length,
+    completed: orders.filter(o => o.status === OrderStatus.COMPLETED).length,
+    cancelled: orders.filter(o => o.status === OrderStatus.CANCELLED).length,
+  };
+
+  const getOrderDate = (order: Order) => {
+    const ts = order.createdAt as FTimestamp | string;
+    if (typeof ts === "string") return new Date(ts);
+    if (ts && "toDate" in ts) return ts.toDate();
+    if (ts && "seconds" in ts) return new Date(ts.seconds * 1000);
+    return new Date();
   };
 
   return (
@@ -449,7 +452,8 @@ export function AdminOrders() {
         <p className="text-[#8B7355]">실시간 주문 현황을 확인하고 상태를 관리하세요</p>
         <div className="mt-2">
           <Alert className="border-blue-100 bg-blue-50 text-sm">
-            현재 결제 관련 기능은 Phase 3 이후 PG 연동으로 대체될 예정이며, 이 화면은 Mock/로컬 주문으로 동작합니다.
+            현재 결제 관련 기능은 Phase 3 이후 PG 연동으로 대체될 예정이며, 이 화면은 Mock/로컬
+            주문으로 동작합니다.
           </Alert>
         </div>
       </div>
@@ -486,9 +490,9 @@ export function AdminOrders() {
       <Card className="p-4">
         <div className="space-y-4">
           {/* 상태 탭 */}
-          <Tabs value={currentTabId} onValueChange={(v) => setCurrentTabId(v as OrderStatusTab)}>
+          <Tabs value={currentTabId} onValueChange={v => setCurrentTabId(v as OrderStatusTab)}>
             <TabsList className="w-full justify-start overflow-x-auto">
-              {ORDER_STATUS_TABS.map((tab) => (
+              {ORDER_STATUS_TABS.map(tab => (
                 <TabsTrigger key={tab.id} value={tab.id}>
                   {tab.label}
                 </TabsTrigger>
@@ -503,7 +507,7 @@ export function AdminOrders() {
               <Input
                 placeholder="주문번호, 전화번호, 메뉴명 검색..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
@@ -529,8 +533,8 @@ export function AdminOrders() {
 
               <Select
                 value={`${sortField}-${sortDirection}`}
-                onValueChange={(v) => {
-                  const [field, dir] = v.split('-');
+                onValueChange={v => {
+                  const [field, dir] = v.split("-");
                   setSortField(field as OrderSortField);
                   setSortDirection(dir as OrderSortDirection);
                 }}
@@ -578,7 +582,7 @@ export function AdminOrders() {
       {/* 새 주문 알림 다이얼로그 */}
       <Dialog
         open={newOrderAlert.open}
-        onOpenChange={(open) => {
+        onOpenChange={open => {
           if (!open) {
             setNewOrderAlert({ open: false, order: null });
           }
@@ -589,9 +593,7 @@ export function AdminOrders() {
             <DialogTitle className="text-2xl text-[#D61C1C] flex items-center gap-2">
               🔔 새 주문이 들어왔습니다!
             </DialogTitle>
-            <DialogDescription>
-              주문 확인 후 접수하기 버튼을 눌러주세요.
-            </DialogDescription>
+            <DialogDescription>주문 확인 후 접수하기 버튼을 눌러주세요.</DialogDescription>
           </DialogHeader>
           {newOrderAlert.order && (
             <div className="space-y-4 py-4">
@@ -605,7 +607,7 @@ export function AdminOrders() {
                 <div>
                   <Label className="text-sm text-[#8B7355]">주문 시간</Label>
                   <p className="text-lg font-semibold text-[#2E1C10]">
-                    {new Date((newOrderAlert.order.createdAt as any)?.toDate?.() || newOrderAlert.order.createdAt).toLocaleTimeString('ko-KR')}
+                    {getOrderDate(newOrderAlert.order).toLocaleTimeString("ko-KR")}
                   </p>
                 </div>
               </div>
@@ -643,7 +645,7 @@ export function AdminOrders() {
                   <Button
                     onClick={() => {
                       if (newOrderAlert.order) {
-                        handleUpdateStatus(newOrderAlert.order, 'accepted');
+                        handleUpdateStatus(newOrderAlert.order, OrderStatus.ACCEPTED);
                         setNewOrderAlert({ open: false, order: null });
                       }
                     }}
@@ -661,10 +663,10 @@ export function AdminOrders() {
       {/* 취소 확인 다이얼로그 */}
       <Dialog
         open={cancelDialog.open}
-        onOpenChange={(open) => {
+        onOpenChange={open => {
           if (!open) {
             setCancelDialog({ open: false, order: null });
-            setCancelReason('');
+            setCancelReason("");
           }
         }}
       >
@@ -685,12 +687,12 @@ export function AdminOrders() {
                 id="cancel-reason"
                 placeholder="예: 재료 소진으로 인한 취소"
                 value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
+                onChange={e => setCancelReason(e.target.value)}
                 rows={4}
               />
             </div>
 
-            {cancelDialog.order?.payment?.method === 'app_card' && (
+            {cancelDialog.order?.payment?.method === "app_card" && (
               <div className="p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
                 ⚠️ 결제가 승인된 주문입니다. 취소 시 자동으로 환불 처리됩니다.
               </div>
@@ -702,7 +704,7 @@ export function AdminOrders() {
               variant="outline"
               onClick={() => {
                 setCancelDialog({ open: false, order: null });
-                setCancelReason('');
+                setCancelReason("");
               }}
             >
               닫기
@@ -734,8 +736,8 @@ export function AdminOrders() {
  * Phase 2-6: 목록/검색/필터/품절 토글/시간제 설정/가격·설명 수정
  */
 
-import { useState, useEffect } from 'react';
-import { Menu, MenuCategory, MenuFilters, CATEGORY_LABELS } from '../../types/menu';
+import { useState, useEffect } from "react";
+import { Menu, MenuCategory, MenuFilters, CATEGORY_LABELS } from "@/types/menu";
 import {
   getMenus,
   getMenuStats,
@@ -745,26 +747,26 @@ import {
   updateMenuAvailableHours,
   createMenu,
   deleteMenu,
-} from '../../lib/admin/menus.api';
-import { useAuth } from '../../contexts/AuthContext';
-import { MenuTable } from '../../components/admin/MenuTable';
-import { MenuEditDialog } from '../../components/admin/MenuEditDialog';
-import { MenuCreateDialog } from '../../components/admin/MenuCreateDialog';
-import { MenuCSVImport } from '../../components/admin/MenuCSVImport';
-import { TimeSettingDialog } from '../../components/admin/TimeSettingDialog';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
+} from "@/lib/admin/menus.api";
+import { useAuth } from "@/contexts/AuthContext";
+import { MenuTable } from "@/components/admin/MenuTable";
+import { MenuEditDialog } from "@/components/admin/MenuEditDialog";
+import { MenuCreateDialog } from "@/components/admin/MenuCreateDialog";
+import { MenuCSVImport } from "@/components/admin/MenuCSVImport";
+import { TimeSettingDialog } from "@/components/admin/TimeSettingDialog";
+import { StatCard } from "@/components/admin/common/StatCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { Search, RefreshCw, Plus, Upload } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Search, RefreshCw, Plus, Upload } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -774,15 +776,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 export function AdminMenus() {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [stats, setStats] = useState<MenuStats | null>(null);
   const [filters, setFilters] = useState<MenuFilters>({
-    category: 'all',
-    search: '',
-    sortBy: 'order',
+    category: "all",
+    search: "",
+    sortBy: "order",
     availableOnly: false,
   });
   const [loading, setLoading] = useState(true);
@@ -815,15 +817,12 @@ export function AdminMenus() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [menusData, statsData] = await Promise.all([
-        getMenus(filters),
-        getMenuStats(),
-      ]);
+      const [menusData, statsData] = await Promise.all([getMenus(filters), getMenuStats()]);
       setMenus(menusData);
       setStats(statsData);
     } catch (error) {
-      console.error('Failed to load menus:', error);
-      toast.error('메뉴 목록을 불러오는데 실패했습니다');
+      console.error("Failed to load menus:", error);
+      toast.error("메뉴 목록을 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -839,22 +838,18 @@ export function AdminMenus() {
 
     setActionLoading(true);
     try {
-      const updated = await toggleMenuAvailability(menuId, user.uid, user.displayName || '관리자');
+      const updated = await toggleMenuAvailability(menuId, user.uid, user.displayName || "관리자");
 
       // UI 즉시 반영
-      setMenus(prev =>
-        prev.map(m => m.menuId === menuId ? updated : m)
-      );
+      setMenus(prev => prev.map(m => (m.menuId === menuId ? updated : m)));
 
-      toast.success(
-        updated.isAvailable ? '판매를 재개했습니다' : '품절 처리했습니다'
-      );
+      toast.success(updated.isAvailable ? "판매를 재개했습니다" : "품절 처리했습니다");
 
       // 통계 갱신
       loadData();
     } catch (error: any) {
-      console.error('Failed to toggle availability:', error);
-      toast.error(error.message || '상태 변경에 실패했습니다');
+      console.error("Failed to toggle availability:", error);
+      toast.error(error.message || "상태 변경에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -867,20 +862,27 @@ export function AdminMenus() {
   };
 
   const handleSaveEdit = async (
-    updates: { name?: string; category?: MenuCategory; price?: number; description?: string; image?: string; availableHours?: { start: string; end: string } | null },
-    reason: string
+    updates: {
+      name?: string;
+      category?: MenuCategory;
+      price?: number;
+      description?: string;
+      image?: string;
+      availableHours?: { start: string; end: string } | null;
+    },
+    reason: string,
   ) => {
     if (!user || !editingMenu) return;
 
     setActionLoading(true);
     try {
       // availableHours가 있으면 별도로 업데이트
-      if ('availableHours' in updates) {
+      if ("availableHours" in updates) {
         await updateMenuAvailableHours(
           editingMenu.menuId,
           updates.availableHours || null,
           user.uid,
-          user.name || '관리자'
+          user.name || "관리자",
         );
         // availableHours를 updates에서 제거
         const { availableHours, ...menuUpdates } = updates;
@@ -889,29 +891,23 @@ export function AdminMenus() {
             editingMenu.menuId,
             menuUpdates,
             user.uid,
-            user.name || '관리자',
-            reason
+            user.name || "관리자",
+            reason,
           );
         }
       } else {
-        await updateMenu(
-          editingMenu.menuId,
-          updates,
-          user.uid,
-          user.name || '관리자',
-          reason
-        );
+        await updateMenu(editingMenu.menuId, updates, user.uid, user.name || "관리자", reason);
       }
 
       // 데이터 다시 로드하여 최신 상태 반영
       await loadData();
 
-      toast.success('메뉴 정보를 수정했습니다');
+      toast.success("메뉴 정보를 수정했습니다");
       setEditingMenu(null);
       setEditDialogOpen(false);
     } catch (error: any) {
-      console.error('Failed to update menu:', error);
-      toast.error(error.message || '메뉴 수정에 실패했습니다');
+      console.error("Failed to update menu:", error);
+      toast.error(error.message || "메뉴 수정에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -923,9 +919,7 @@ export function AdminMenus() {
     setTimeDialogOpen(true);
   };
 
-  const handleSaveTimeLimit = async (
-    hours: { start: string; end: string } | null
-  ) => {
+  const handleSaveTimeLimit = async (hours: { start: string; end: string } | null) => {
     if (!user || !timeSettingMenu) return;
 
     setActionLoading(true);
@@ -934,25 +928,21 @@ export function AdminMenus() {
         timeSettingMenu.menuId,
         hours,
         user.uid,
-        user.name
+        user.name,
       );
 
       // UI 즉시 반영
-      setMenus(prev =>
-        prev.map(m => m.menuId === timeSettingMenu.menuId ? updated : m)
-      );
+      setMenus(prev => prev.map(m => (m.menuId === timeSettingMenu.menuId ? updated : m)));
 
-      toast.success(
-        hours ? '시간제 판매를 설정했습니다' : '시간제 판매를 해제했습니다'
-      );
+      toast.success(hours ? "시간제 판매를 설정했습니다" : "시간제 판매를 해제했습니다");
       setTimeDialogOpen(false);
       setTimeSettingMenu(null);
 
       // 통계 갱신
       loadData();
     } catch (error: any) {
-      console.error('Failed to update time limit:', error);
-      toast.error(error.message || '시간제 설정에 실패했습니다');
+      console.error("Failed to update time limit:", error);
+      toast.error(error.message || "시간제 설정에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -960,17 +950,13 @@ export function AdminMenus() {
 
   // 메뉴 생성
   const handleCreateMenu = async (menuData: Partial<Menu>) => {
-
     if (!user) {
-      console.error('[handleCreateMenu] No user found');
+      console.error("[handleCreateMenu] No user found");
       return;
     }
 
-
     try {
-
-      const newMenu = await createMenu(menuData, user.uid, user.displayName || '관리자');
-
+      const newMenu = await createMenu(menuData, user.uid, user.displayName || "관리자");
 
       // UI 즉시 반영 (최상단 추가)
       setMenus(prev => [newMenu, ...prev]);
@@ -980,17 +966,17 @@ export function AdminMenus() {
       loadData();
 
       // Undo 토스트 (5초)
-      toast.success('메뉴가 등록되었습니다', {
+      toast.success("메뉴가 등록되었습니다", {
         duration: 5000,
         action: {
-          label: '취소',
+          label: "취소",
           onClick: () => handleUndoCreate(newMenu.menuId),
         },
       });
     } catch (error: any) {
       // 에러 메시지는 createMenu에서 이미 명확하게 설정됨
-      console.error('[handleCreateMenu] Menu creation failed:', error);
-      toast.error(error.message || '메뉴 등록에 실패했습니다');
+      console.error("[handleCreateMenu] Menu creation failed:", error);
+      toast.error(error.message || "메뉴 등록에 실패했습니다");
     }
   };
 
@@ -999,19 +985,19 @@ export function AdminMenus() {
     if (!user) return;
 
     try {
-      await deleteMenu(menuId, user.uid, user.displayName || '관리자');
+      await deleteMenu(menuId, user.uid, user.displayName || "관리자");
 
       // UI에서 제거
       setMenus(prev => prev.filter(m => m.menuId !== menuId));
       setLastCreatedMenuId(null);
 
-      toast.success('메뉴 등록이 취소되었습니다');
+      toast.success("메뉴 등록이 취소되었습니다");
 
       // 통계 갱신
       loadData();
     } catch (error: any) {
-      console.error('Failed to undo create:', error);
-      toast.error(error.message || '취소에 실패했습니다');
+      console.error("Failed to undo create:", error);
+      toast.error(error.message || "취소에 실패했습니다");
     }
   };
 
@@ -1027,12 +1013,12 @@ export function AdminMenus() {
 
     setActionLoading(true);
     try {
-      await deleteMenu(deletingMenuId, user.uid, user.displayName || '관리자');
+      await deleteMenu(deletingMenuId, user.uid, user.displayName || "관리자");
 
       // UI에서 제거
       setMenus(prev => prev.filter(m => m.menuId !== deletingMenuId));
 
-      toast.success('메뉴가 삭제되었습니다');
+      toast.success("메뉴가 삭제되었습니다");
 
       // 통계 갱신
       loadData();
@@ -1041,8 +1027,8 @@ export function AdminMenus() {
       setDeleteDialogOpen(false);
       setDeletingMenuId(null);
     } catch (error: any) {
-      console.error('Failed to delete menu:', error);
-      toast.error(error.message || '메뉴 삭제에 실패했습니다');
+      console.error("Failed to delete menu:", error);
+      toast.error(error.message || "메뉴 삭제에 실패했습니다");
     } finally {
       setActionLoading(false);
     }
@@ -1056,10 +1042,10 @@ export function AdminMenus() {
 
     for (const menuData of menus) {
       try {
-        const newMenu = await createMenu(menuData, user.uid, user.displayName || '관리자');
+        const newMenu = await createMenu(menuData, user.uid, user.displayName || "관리자");
         createdMenus.push(newMenu);
       } catch (error) {
-        console.error('Failed to create menu:', error);
+        console.error("Failed to create menu:", error);
       }
     }
 
@@ -1076,9 +1062,7 @@ export function AdminMenus() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#333] mb-2">메뉴 관리</h1>
-          <p className="text-[#8B7355]">
-            메뉴 정보를 관리하고 품절 상태를 변경하세요
-          </p>
+          <p className="text-[#8B7355]">메뉴 정보를 관리하고 품절 상태를 변경하세요</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setCsvImportOpen(true)}>
@@ -1095,23 +1079,14 @@ export function AdminMenus() {
       {/* 통계 카드 */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            title="전체 메뉴"
-            value={stats.total}
-            subtitle="등록된 메뉴"
-          />
+          <StatCard title="전체 메뉴" value={stats.total} subtitle="등록된 메뉴" />
           <StatCard
             title="판매 중"
             value={stats.available}
             subtitle="현재 주문 가능"
             variant="success"
           />
-          <StatCard
-            title="품절"
-            value={stats.soldout}
-            subtitle="일시 품절"
-            variant="warning"
-          />
+          <StatCard title="품절" value={stats.soldout} subtitle="일시 품절" variant="warning" />
           <StatCard
             title="시간외"
             value={stats.timeLimited}
@@ -1125,9 +1100,9 @@ export function AdminMenus() {
       <div className="space-y-4">
         {/* 카테고리 탭 */}
         <Tabs
-          value={filters.category || 'all'}
-          onValueChange={(value) =>
-            setFilters(prev => ({ ...prev, category: value as MenuCategory | 'all' }))
+          value={filters.category || "all"}
+          onValueChange={value =>
+            setFilters(prev => ({ ...prev, category: value as MenuCategory | "all" }))
           }
         >
           <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
@@ -1147,19 +1122,17 @@ export function AdminMenus() {
             <Input
               placeholder="메뉴명, 설명, 태그 검색..."
               value={filters.search}
-              onChange={(e) =>
-                setFilters(prev => ({ ...prev, search: e.target.value }))
-              }
+              onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="pl-10"
             />
           </div>
 
           <Select
             value={filters.sortBy}
-            onValueChange={(value) =>
+            onValueChange={value =>
               setFilters(prev => ({
                 ...prev,
-                sortBy: value as MenuFilters['sortBy'],
+                sortBy: value as MenuFilters["sortBy"],
               }))
             }
           >
@@ -1174,13 +1147,8 @@ export function AdminMenus() {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={loadData}
-            disabled={loading}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" size="icon" onClick={loadData} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
@@ -1243,7 +1211,7 @@ export function AdminMenus() {
               disabled={actionLoading}
               className="bg-red-600 hover:bg-red-700"
             >
-              {actionLoading ? '삭제 중...' : '삭제'}
+              {actionLoading ? "삭제 중..." : "삭제"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1260,22 +1228,22 @@ export function AdminMenus() {
 
 ```tsx
 // Route: /admin/reviews
-import { useState, useEffect } from 'react';
-import { Star, Image as ImageIcon, Filter, SortAsc } from 'lucide-react';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
+import { useState, useEffect } from "react";
+import { Star, Image as ImageIcon, Filter, SortAsc } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { ReviewCard } from '../../components/admin/ReviewCard';
-import { ReplyModal } from '../../components/admin/ReplyModal';
-import { ReportDialog } from '../../components/admin/ReportDialog';
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReviewCard } from "@/components/admin/ReviewCard";
+import { ReplyModal } from "@/components/admin/ReplyModal";
+import { ReportDialog } from "@/components/admin/ReportDialog";
 import {
   getReviews,
   getReviewStats,
@@ -1283,14 +1251,14 @@ import {
   deleteReviewReply,
   reportReview,
   hideReview,
-} from '../../lib/admin/reviews.api';
-import { getCurrentUser } from '../../lib/auth';
-import type { Review, ReviewStats } from '../../types/review';
-import type { ReviewReportReason } from '../../types/review';
-import { toast } from 'sonner';
+} from "@/lib/admin/reviews.api";
+import { getCurrentUser } from "@/lib/auth";
+import type { Review, ReviewStats } from "@/types/review";
+import type { ReviewReportReason } from "@/types/review";
+import { toast } from "sonner";
 
-type FilterType = 'all' | 'photo' | 'reported';
-type SortType = 'latest' | 'rating_high' | 'rating_low';
+type FilterType = "all" | "photo" | "reported";
+type SortType = "latest" | "rating_high" | "rating_low";
 
 export function AdminReviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -1300,8 +1268,8 @@ export function AdminReviews() {
   const [hasMore, setHasMore] = useState(false);
 
   // 필터/정렬
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [sortBy, setSortBy] = useState<SortType>('latest');
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [sortBy, setSortBy] = useState<SortType>("latest");
 
   // 모달
   const [replyModalOpen, setReplyModalOpen] = useState(false);
@@ -1309,7 +1277,7 @@ export function AdminReviews() {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
 
-  const storeId = 'store-hyunpung';
+  const storeId = "store-hyunpung";
 
   useEffect(() => {
     loadData();
@@ -1321,8 +1289,8 @@ export function AdminReviews() {
       const [reviewsData, statsData] = await Promise.all([
         getReviews({
           storeId,
-          photoOnly: filter === 'photo',
-          reported: filter === 'reported',
+          photoOnly: filter === "photo",
+          reported: filter === "reported",
           sortBy,
           limit: 10,
           offset: 0,
@@ -1334,8 +1302,8 @@ export function AdminReviews() {
       setHasMore(reviewsData.hasMore);
       setStats(statsData);
     } catch (error) {
-      console.error('리뷰 로딩 실패:', error);
-      toast.error('리뷰를 불러오는데 실패했습니다.');
+      console.error("리뷰 로딩 실패:", error);
+      toast.error("리뷰를 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -1348,8 +1316,8 @@ export function AdminReviews() {
     try {
       const data = await getReviews({
         storeId,
-        photoOnly: filter === 'photo',
-        reported: filter === 'reported',
+        photoOnly: filter === "photo",
+        reported: filter === "reported",
         sortBy,
         limit: 10,
         offset: reviews.length,
@@ -1358,15 +1326,15 @@ export function AdminReviews() {
       setReviews([...reviews, ...data.reviews]);
       setHasMore(data.hasMore);
     } catch (error) {
-      console.error('리뷰 로딩 실패:', error);
-      toast.error('리뷰를 불러오는데 실패했습니다.');
+      console.error("리뷰 로딩 실패:", error);
+      toast.error("리뷰를 불러오는데 실패했습니다.");
     } finally {
       setLoadingMore(false);
     }
   }
 
   function handleReply(reviewId: string) {
-    const review = (reviews || []).find((r) => r.id === reviewId);
+    const review = (reviews || []).find(r => r.id === reviewId);
     if (!review) return;
 
     setSelectedReview(review);
@@ -1375,7 +1343,7 @@ export function AdminReviews() {
 
   async function handleReplySubmit(reviewId: string, text: string) {
     const user = await getCurrentUser();
-    if (!user) throw new Error('인증 필요');
+    if (!user) throw new Error("인증 필요");
 
     await addReviewReply(reviewId, {
       text,
@@ -1384,7 +1352,7 @@ export function AdminReviews() {
 
     // UI 업데이트
     setReviews(
-      reviews.map((r) =>
+      reviews.map(r =>
         r.id === reviewId
           ? {
               ...r,
@@ -1394,8 +1362,8 @@ export function AdminReviews() {
                 at: Date.now(),
               },
             }
-          : r
-      )
+          : r,
+      ),
     );
   }
 
@@ -1404,13 +1372,13 @@ export function AdminReviews() {
 
     // UI 업데이트
     setReviews(
-      reviews.map((r) => {
+      reviews.map(r => {
         if (r.id === reviewId) {
           const { reply, ...rest } = r;
           return rest;
         }
         return r;
-      })
+      }),
     );
   }
 
@@ -1422,20 +1390,18 @@ export function AdminReviews() {
   async function handleReportSubmit(
     reviewId: string,
     reason: ReviewReportReason,
-    description?: string
+    description?: string,
   ) {
     const user = await getCurrentUser();
-    if (!user) throw new Error('인증 필요');
+    if (!user) throw new Error("인증 필요");
 
     await reportReview(reviewId, reason, user.uid, description);
 
     // UI 업데이트
     setReviews(
-      reviews.map((r) =>
-        r.id === reviewId
-          ? { ...r, reportedCount: (r.reportedCount || 0) + 1 }
-          : r
-      )
+      reviews.map(r =>
+        r.id === reviewId ? { ...r, reportedCount: (r.reportedCount || 0) + 1 } : r,
+      ),
     );
   }
 
@@ -1444,14 +1410,12 @@ export function AdminReviews() {
       await hideReview(reviewId, hidden);
 
       // UI 업데이트
-      setReviews(
-        reviews.map((r) => (r.id === reviewId ? { ...r, isHidden: hidden } : r))
-      );
+      setReviews(reviews.map(r => (r.id === reviewId ? { ...r, isHidden: hidden } : r)));
 
-      toast.success(hidden ? '리뷰를 숨겼습니다.' : '리뷰를 표시했습니다.');
+      toast.success(hidden ? "리뷰를 숨겼습니다." : "리뷰를 표시했습니다.");
     } catch (error) {
-      console.error('리뷰 숨김 처리 실패:', error);
-      toast.error('리뷰 숨김 처리에 실패했습니다.');
+      console.error("리뷰 숨김 처리 실패:", error);
+      toast.error("리뷰 숨김 처리에 실패했습니다.");
     }
   }
 
@@ -1460,9 +1424,7 @@ export function AdminReviews() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl text-[#333] mb-2">리뷰 관리</h1>
-        <p className="text-[#8B7355]">
-          고객 리뷰를 확인하고 답글을 작성하세요
-        </p>
+        <p className="text-[#8B7355]">고객 리뷰를 확인하고 답글을 작성하세요</p>
       </div>
 
       {/* 통계 */}
@@ -1481,9 +1443,7 @@ export function AdminReviews() {
               <span className="text-[#8B7355]">평균 평점</span>
               <Star className="w-5 h-5 text-[#F37021] fill-current" />
             </div>
-            <p className="text-2xl text-[#333]">
-              {stats.averageRating.toFixed(1)}
-            </p>
+            <p className="text-2xl text-[#333]">{stats.averageRating.toFixed(1)}</p>
           </Card>
 
           <Card className="p-6">
@@ -1504,7 +1464,7 @@ export function AdminReviews() {
               <span className="text-[#8B7355]">별점 분포</span>
             </div>
             <div className="space-y-1">
-              {[5, 4, 3, 2, 1].map((rating) => (
+              {[5, 4, 3, 2, 1].map(rating => (
                 <div key={rating} className="flex items-center gap-2">
                   <span className="text-[#8B7355] w-3">{rating}</span>
                   <div className="flex-1 h-2 bg-[#E5DDD5] rounded-full overflow-hidden">
@@ -1512,7 +1472,9 @@ export function AdminReviews() {
                       className="h-full bg-[#F37021]"
                       style={{
                         width: `${
-                          (stats.ratingDistribution[rating as keyof typeof stats.ratingDistribution] /
+                          (stats.ratingDistribution[
+                            rating as keyof typeof stats.ratingDistribution
+                          ] /
                             stats.totalCount) *
                           100
                         }%`,
@@ -1532,7 +1494,7 @@ export function AdminReviews() {
       {/* 필터 & 정렬 */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         {/* 필터 탭 */}
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
+        <Tabs value={filter} onValueChange={v => setFilter(v as FilterType)}>
           <TabsList>
             <TabsTrigger value="all">
               전체
@@ -1552,9 +1514,9 @@ export function AdminReviews() {
             </TabsTrigger>
             <TabsTrigger value="reported">
               신고됨
-              {reviews.filter((r) => (r.reportedCount || 0) > 0).length > 0 && (
+              {reviews.filter(r => (r.reportedCount || 0) > 0).length > 0 && (
                 <Badge variant="destructive" className="ml-2">
-                  {reviews.filter((r) => (r.reportedCount || 0) > 0).length}
+                  {reviews.filter(r => (r.reportedCount || 0) > 0).length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -1564,7 +1526,7 @@ export function AdminReviews() {
         {/* 정렬 */}
         <div className="flex items-center gap-2 ml-auto">
           <SortAsc className="w-4 h-4 text-[#8B7355]" />
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortType)}>
+          <Select value={sortBy} onValueChange={v => setSortBy(v as SortType)}>
             <SelectTrigger className="w-[160px]">
               <SelectValue />
             </SelectTrigger>
@@ -1596,13 +1558,11 @@ export function AdminReviews() {
             <Star className="w-8 h-8 text-[#F37021]" />
           </div>
           <p className="text-[#8B7355] mb-2">리뷰가 없습니다</p>
-          <p className="text-[#8B7355]">
-            고객이 리뷰를 남기면 여기에 표시됩니다
-          </p>
+          <p className="text-[#8B7355]">고객이 리뷰를 남기면 여기에 표시됩니다</p>
         </Card>
       ) : (
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {reviews.map(review => (
             <ReviewCard
               key={review.id}
               review={review}
@@ -1621,7 +1581,7 @@ export function AdminReviews() {
                 disabled={loadingMore}
                 className="min-w-[200px]"
               >
-                {loadingMore ? '로딩 중...' : '더 보기'}
+                {loadingMore ? "로딩 중..." : "더 보기"}
               </Button>
             </div>
           )}
@@ -1661,7 +1621,7 @@ export function AdminReviews() {
  * Phase 2-9: KPI 대시보드 + 차트
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   getKPIData,
   getHourlyOrders,
@@ -1671,9 +1631,9 @@ import {
   HourlyOrders,
   MenuSales,
   DailySales,
-} from '../../lib/admin/analytics.api';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Card } from '../../components/ui/card';
+} from "../../lib/admin/analytics.api";
+import { StatCard } from "../../components/admin/common/StatCard";
+import { Card } from "../../components/ui/card";
 import {
   BarChart,
   Bar,
@@ -1685,10 +1645,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import { TrendingUp, Users, Star, Download, RefreshCw } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { toast } from 'sonner';
+} from "recharts";
+import { TrendingUp, Users, Star, Download, RefreshCw } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { toast } from "sonner";
 
 export function AdminAnalytics() {
   const [kpi, setKpi] = useState<KPIData | null>(null);
@@ -1716,8 +1676,8 @@ export function AdminAnalytics() {
       setTopMenus(menuData);
       setDailySales(salesData);
     } catch (error) {
-      console.error('Failed to load analytics:', error);
-      toast.error('데이터를 불러오는데 실패했습니다');
+      console.error("Failed to load analytics:", error);
+      toast.error("데이터를 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -1745,9 +1705,7 @@ export function AdminAnalytics() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#333] mb-2">관제 대시보드</h1>
-          <p className="text-[#8B7355]">
-            핵심 지표와 퍼널 데이터를 확인하세요
-          </p>
+          <p className="text-[#8B7355]">핵심 지표와 퍼널 데이터를 확인하세요</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={loadData}>
@@ -1769,12 +1727,7 @@ export function AdminAnalytics() {
           subtitle={`${kpi.todayOrders}건`}
           icon={TrendingUp}
         />
-        <StatCard
-          title="주문 수"
-          value={kpi.todayOrders}
-          subtitle="오늘 주문"
-          variant="success"
-        />
+        <StatCard title="주문 수" value={kpi.todayOrders} subtitle="오늘 주문" variant="success" />
         <StatCard
           title="평균 평점"
           value={kpi.avgRating.toFixed(1)}
@@ -1805,17 +1758,9 @@ export function AdminAnalytics() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
-            <Tooltip
-              formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`}
-            />
+            <Tooltip formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`} />
             <Legend />
-            <Line
-              type="monotone"
-              dataKey="sales"
-              stroke="#D61C1C"
-              strokeWidth={2}
-              name="매출"
-            />
+            <Line type="monotone" dataKey="sales" stroke="#D61C1C" strokeWidth={2} name="매출" />
           </LineChart>
         </ResponsiveContainer>
       </Card>
@@ -1826,9 +1771,9 @@ export function AdminAnalytics() {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={hourlyOrders}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="hour" tickFormatter={(h) => `${h}시`} />
+            <XAxis dataKey="hour" tickFormatter={h => `${h}시`} />
             <YAxis />
-            <Tooltip labelFormatter={(h) => `${h}시`} />
+            <Tooltip labelFormatter={h => `${h}시`} />
             <Legend />
             <Bar dataKey="orders" fill="#F37021" name="주문 건수" />
           </BarChart>
@@ -1841,11 +1786,9 @@ export function AdminAnalytics() {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={topMenus} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" tickFormatter={(v) => `${(v / 10000).toFixed(0)}만원`} />
+            <XAxis type="number" tickFormatter={v => `${(v / 10000).toFixed(0)}만원`} />
             <YAxis type="category" dataKey="menuName" width={120} />
-            <Tooltip
-              formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`}
-            />
+            <Tooltip formatter={(value: any) => `${(value / 10000).toFixed(0)}만원`} />
             <Legend />
             <Bar dataKey="sales" fill="#C7A45A" name="매출" />
           </BarChart>
@@ -1858,19 +1801,28 @@ export function AdminAnalytics() {
         <div className="space-y-2 text-sm text-[#8B7355]">
           <div className="flex items-start gap-2">
             <span className="text-[#D61C1C]">•</span>
-            <span><strong>실시간 업데이트:</strong> Firebase Firestore onSnapshot (연동 시)</span>
+            <span>
+              <strong>실시간 업데이트:</strong> Firebase Firestore onSnapshot (연동 시)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#F37021]">•</span>
-            <span><strong>주간 리포트:</strong> 매주 월요일 04:00 자동 생성 (Functions)</span>
+            <span>
+              <strong>주간 리포트:</strong> 매주 월요일 04:00 자동 생성 (Functions)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#C7A45A]">•</span>
-            <span><strong>이벤트 로깅:</strong> install_*, menu_view, add_to_cart, payment_*, order_*, review_*</span>
+            <span>
+              <strong>이벤트 로깅:</strong> install_*, menu_view, add_to_cart, payment_*, order_*,
+              review_*
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-gray-400">•</span>
-            <span><strong>알림 (준비):</strong> 결제 실패, 주문 폭증, 평점 급락 등 (FCM)</span>
+            <span>
+              <strong>알림 (준비):</strong> 결제 실패, 주문 폭증, 평점 급락 등 (FCM)
+            </span>
           </div>
         </div>
       </Card>
@@ -1891,11 +1843,11 @@ export function AdminAnalytics() {
  * Phase 3-7: 통합 리포트
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardDescription } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Badge } from '../../components/ui/badge';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardDescription } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Badge } from "../../components/ui/badge";
 import {
   Download,
   RefreshCw,
@@ -1908,8 +1860,8 @@ import {
   Truck,
   Bell,
   Calendar,
-} from 'lucide-react';
-import { toast } from 'sonner';
+} from "lucide-react";
+import { toast } from "sonner";
 import {
   BarChart,
   Bar,
@@ -1924,20 +1876,20 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
+} from "recharts";
 import {
   generateIntegratedReport,
   exportReportToCSV,
-} from '../../lib/admin/integrated-analytics.api';
-import type { IntegratedReport, DateRange } from '../../types/analytics';
-import { formatPrice } from '../../lib/utils';
+} from "../../lib/admin/integrated-analytics.api";
+import type { IntegratedReport, DateRange } from "../../types/analytics";
+import { formatPrice } from "../../lib/utils";
 
-const COLORS = ['#D61C1C', '#F37021', '#C7A45A', '#8B7355', '#4A4A4A'];
+const COLORS = ["#D61C1C", "#F37021", "#C7A45A", "#8B7355", "#4A4A4A"];
 
 export function IntegratedAnalytics() {
   const [report, setReport] = useState<IntegratedReport | null>(null);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+  const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
 
   useEffect(() => {
     loadReport();
@@ -1946,13 +1898,13 @@ export function IntegratedAnalytics() {
   const getDateRange = (): DateRange => {
     const end = new Date();
     const start = new Date();
-    
-    if (period === 'weekly') {
+
+    if (period === "weekly") {
       start.setDate(end.getDate() - 7);
     } else {
       start.setDate(end.getDate() - 30);
     }
-    
+
     return { start, end };
   };
 
@@ -1963,8 +1915,8 @@ export function IntegratedAnalytics() {
       const data = await generateIntegratedReport(period, dateRange);
       setReport(data);
     } catch (error) {
-      console.error('Failed to load report:', error);
-      toast.error('리포트를 불러오는데 실패했습니다');
+      console.error("Failed to load report:", error);
+      toast.error("리포트를 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -1975,38 +1927,39 @@ export function IntegratedAnalytics() {
 
     try {
       const csv = exportReportToCSV(report);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `통합리포트_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", `통합리포트_${new Date().toISOString().split("T")[0]}.csv`);
+      link.style.visibility = "hidden";
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
-      toast.success('리포트를 다운로드했습니다');
+
+      toast.success("리포트를 다운로드했습니다");
     } catch (error) {
-      console.error('Failed to export report:', error);
-      toast.error('다운로드에 실패했습니다');
+      console.error("Failed to export report:", error);
+      toast.error("다운로드에 실패했습니다");
     }
   };
 
   // 데이터 존재 여부 확인
-  const hasData = report && (
-    report.kpi.totalOrders > 0 ||
-    report.kpi.totalSales > 0 ||
-    report.hourlyAnalysis.length > 0 ||
-    report.dayOfWeekAnalysis.length > 0 ||
-    report.topMenus.length > 0 ||
-    report.couponEffectiveness.length > 0 ||
-    (report.pointsEffectiveness.totalEarned > 0 || report.pointsEffectiveness.totalSpent > 0) ||
-    report.reviewAnalysis.totalReviews > 0 ||
-    report.deliveryPerformance.totalDeliveries > 0 ||
-    report.notificationEffectiveness.totalSent > 0
-  );
+  const hasData =
+    report &&
+    (report.kpi.totalOrders > 0 ||
+      report.kpi.totalSales > 0 ||
+      report.hourlyAnalysis.length > 0 ||
+      report.dayOfWeekAnalysis.length > 0 ||
+      report.topMenus.length > 0 ||
+      report.couponEffectiveness.length > 0 ||
+      report.pointsEffectiveness.totalEarned > 0 ||
+      report.pointsEffectiveness.totalSpent > 0 ||
+      report.reviewAnalysis.totalReviews > 0 ||
+      report.deliveryPerformance.totalDeliveries > 0 ||
+      report.notificationEffectiveness.totalSent > 0);
 
   if (loading || !report) {
     return (
@@ -2071,7 +2024,8 @@ export function IntegratedAnalytics() {
         <div>
           <h1 className="text-2xl text-[#333] mb-2">통합 분석</h1>
           <p className="text-[#8B7355]">
-            {report.dateRange.start.toLocaleDateString()} ~ {report.dateRange.end.toLocaleDateString()}
+            {report.dateRange.start.toLocaleDateString()} ~{" "}
+            {report.dateRange.end.toLocaleDateString()}
           </p>
         </div>
         <div className="flex gap-2">
@@ -2097,8 +2051,7 @@ export function IntegratedAnalytics() {
         <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#D61C1C]" />
-              총 매출
+              <TrendingUp className="w-4 h-4 text-[#D61C1C]" />총 매출
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -2117,7 +2070,9 @@ export function IntegratedAnalytics() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl">{report.kpi.newCustomers + report.kpi.returningCustomers}명</div>
+            <div className="text-2xl">
+              {report.kpi.newCustomers + report.kpi.returningCustomers}명
+            </div>
             <p className="text-xs text-gray-500 mt-1">
               유지율 {report.kpi.customerRetentionRate.toFixed(1)}%
             </p>
@@ -2133,9 +2088,7 @@ export function IntegratedAnalytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl">{report.kpi.averageRating.toFixed(1)}점</div>
-            <p className="text-xs text-gray-500 mt-1">
-              리뷰 {report.kpi.totalReviews}개
-            </p>
+            <p className="text-xs text-gray-500 mt-1">리뷰 {report.kpi.totalReviews}개</p>
           </CardContent>
         </Card>
 
@@ -2218,12 +2171,12 @@ export function IntegratedAnalytics() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={report.hourlyAnalysis}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" tickFormatter={(value) => `${value}시`} />
+                  <XAxis dataKey="hour" tickFormatter={value => `${value}시`} />
                   <YAxis />
                   <Tooltip
                     formatter={(value: any, name: string) => {
-                      if (name === 'orders') return [value, '주문 수'];
-                      if (name === 'sales') return [formatPrice(value), '매출'];
+                      if (name === "orders") return [value, "주문 수"];
+                      if (name === "sales") return [formatPrice(value), "매출"];
                       return [value, name];
                     }}
                   />
@@ -2268,7 +2221,10 @@ export function IntegratedAnalytics() {
             <CardContent>
               <div className="space-y-3">
                 {(report.topMenus || []).map((menu, index) => (
-                  <div key={menu.menuId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={menu.menuId}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex items-center gap-3">
                       <Badge variant="outline">{index + 1}</Badge>
                       <div>
@@ -2297,7 +2253,7 @@ export function IntegratedAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {report.couponEffectiveness.map((coupon) => (
+                {report.couponEffectiveness.map(coupon => (
                   <div key={coupon.couponType} className="p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-sm">{coupon.couponType}</p>
@@ -2306,7 +2262,9 @@ export function IntegratedAnalytics() {
                     <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
                       <div>
                         <p className="text-gray-500">발급/사용</p>
-                        <p>{coupon.totalIssued} / {coupon.totalUsed}건</p>
+                        <p>
+                          {coupon.totalIssued} / {coupon.totalUsed}건
+                        </p>
                       </div>
                       <div>
                         <p className="text-gray-500">사용률</p>
@@ -2334,11 +2292,15 @@ export function IntegratedAnalytics() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">적립 포인트</p>
-                  <p className="text-lg">{report.pointsEffectiveness.totalEarned.toLocaleString()}P</p>
+                  <p className="text-lg">
+                    {report.pointsEffectiveness.totalEarned.toLocaleString()}P
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">사용 포인트</p>
-                  <p className="text-lg">{report.pointsEffectiveness.totalSpent.toLocaleString()}P</p>
+                  <p className="text-lg">
+                    {report.pointsEffectiveness.totalSpent.toLocaleString()}P
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">사용률</p>
@@ -2350,7 +2312,8 @@ export function IntegratedAnalytics() {
                 </div>
               </div>
               <p className="text-xs text-gray-600 mt-4">
-                💡 포인트 사용 시 평균 주문 금액이 {formatPrice(report.pointsEffectiveness.orderIncreaseWithPoints)} 증가합니다.
+                💡 포인트 사용 시 평균 주문 금액이{" "}
+                {formatPrice(report.pointsEffectiveness.orderIncreaseWithPoints)} 증가합니다.
               </p>
             </CardContent>
           </Card>
@@ -2385,7 +2348,7 @@ export function IntegratedAnalytics() {
               <div>
                 <p className="text-xs text-gray-500 mb-2">주요 키워드</p>
                 <div className="flex flex-wrap gap-2">
-                  {report.reviewAnalysis.topKeywords.map((keyword) => (
+                  {report.reviewAnalysis.topKeywords.map(keyword => (
                     <Badge key={keyword.keyword} variant="secondary">
                       {keyword.keyword} ({keyword.count})
                     </Badge>
@@ -2413,7 +2376,9 @@ export function IntegratedAnalytics() {
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">평균 배달 시간</p>
-                  <p className="text-lg">{report.deliveryPerformance.averageDeliveryTime.toFixed(1)}분</p>
+                  <p className="text-lg">
+                    {report.deliveryPerformance.averageDeliveryTime.toFixed(1)}분
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">정시 배달률</p>
@@ -2445,7 +2410,9 @@ export function IntegratedAnalytics() {
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">클릭률</p>
-                  <p className="text-lg">{report.notificationEffectiveness.clickRate.toFixed(1)}%</p>
+                  <p className="text-lg">
+                    {report.notificationEffectiveness.clickRate.toFixed(1)}%
+                  </p>
                 </div>
               </div>
 
@@ -2453,10 +2420,14 @@ export function IntegratedAnalytics() {
                 <p className="text-xs text-gray-500 mb-2">타입별 성과</p>
                 <div className="space-y-2">
                   {Object.entries(report.notificationEffectiveness.byType).map(([type, stats]) => (
-                    <div key={type} className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded">
+                    <div
+                      key={type}
+                      className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded"
+                    >
                       <span className="text-gray-700">{type}</span>
                       <span className="text-gray-500">
-                        {stats.sent}건 · 읽음 {((stats.read / stats.sent) * 100).toFixed(0)}% · 클릭 {((stats.clicked / stats.sent) * 100).toFixed(0)}%
+                        {stats.sent}건 · 읽음 {((stats.read / stats.sent) * 100).toFixed(0)}% · 클릭{" "}
+                        {((stats.clicked / stats.sent) * 100).toFixed(0)}%
                       </span>
                     </div>
                   ))}
@@ -2481,30 +2452,43 @@ export function IntegratedAnalytics() {
 /**
  * 관리자 배달 관제 페이지
  * Phase 3-1: GPS Tracking
- * 
+ *
  * 모든 배달 현황을 실시간으로 모니터링
  */
 
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MapPin, Navigation, Clock, AlertTriangle, RefreshCw, Package, Settings } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Button } from '../../components/ui/button';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { getAllMockTasks, subscribeMockTasks } from '../../lib/delivery';
-import { isDeliveryEnabled } from '../../lib/delivery';
-import { getSettings } from '../../lib/admin/settings.api';
-import type { DeliveryTask, DeliveryStatus } from '../../types/delivery';
-import type { StoreSettings } from '../../types/settings';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  MapPin,
+  Navigation,
+  AlertTriangle,
+  RefreshCw,
+  Package,
+  Settings,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getAllMockTasks, subscribeMockTasks } from "@/lib/delivery";
+import { isDeliveryEnabled } from "@/lib/delivery";
+import { getSettings } from "@/lib/admin/settings.api";
+import type { DeliveryTask, DeliveryStatus } from "@/types/delivery";
+import type { StoreSettings } from "@/types/settings";
 
 const STATUS_CONFIG: Record<DeliveryStatus, { label: string; color: string }> = {
-  assigned: { label: '배정됨', color: 'bg-blue-500' },
-  picked_up: { label: '픽업 완료', color: 'bg-purple-500' },
-  delivering: { label: '배달 중', color: 'bg-orange-500' },
-  completed: { label: '완료', color: 'bg-green-500' },
-  canceled: { label: '취소', color: 'bg-gray-500' },
+  assigned: { label: "배정됨", color: "bg-blue-500" },
+  picked_up: { label: "픽업 완료", color: "bg-purple-500" },
+  delivering: { label: "배달 중", color: "bg-orange-500" },
+  completed: { label: "완료", color: "bg-green-500" },
+  canceled: { label: "취소", color: "bg-gray-500" },
 };
 
 const SLA_THRESHOLD_MINUTES = 45; // SLA 기준: 45분
@@ -2513,7 +2497,7 @@ export function AdminDelivery() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<DeliveryTask[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<'all' | 'active' | 'delayed'>('all');
+  const [selectedTab, setSelectedTab] = useState<"all" | "active" | "delayed">("all");
   const [settings, setSettings] = useState<StoreSettings | null>(null);
 
   useEffect(() => {
@@ -2535,10 +2519,10 @@ export function AdminDelivery() {
 
   async function loadSettings() {
     try {
-      const data = await getSettings('store-001');
+      const data = await getSettings("store-001");
       setSettings(data);
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      console.error("Failed to load settings:", error);
     }
   }
 
@@ -2548,7 +2532,7 @@ export function AdminDelivery() {
       const allTasks = getAllMockTasks();
       setTasks(allTasks);
     } catch (error) {
-      console.error('Failed to load delivery tasks:', error);
+      console.error("Failed to load delivery tasks:", error);
     } finally {
       setLoading(false);
     }
@@ -2557,15 +2541,13 @@ export function AdminDelivery() {
   // 배달 추적 비활성화 또는 미설정
   const deliveryProvider = settings?.deliveryProvider;
   const isConfigured = deliveryProvider?.enabled && deliveryProvider?.provider;
-  
+
   if (!isDeliveryEnabled && !isConfigured) {
     return (
       <div className="p-6 space-y-4">
         <Alert>
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            배달 추적 기능이 활성화되지 않았습니다.
-          </AlertDescription>
+          <AlertDescription>배달 추적 기능이 활성화되지 않았습니다.</AlertDescription>
         </Alert>
         <Card>
           <CardHeader>
@@ -2575,10 +2557,7 @@ export function AdminDelivery() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={() => navigate('/admin/settings?tab=delivery')}
-              className="w-full"
-            >
+            <Button onClick={() => navigate("/admin/settings?tab=delivery")} className="w-full">
               <Settings className="w-4 h-4 mr-2" />
               설정 페이지로 이동
             </Button>
@@ -2590,19 +2569,15 @@ export function AdminDelivery() {
 
   // 통계 계산
   const activeTasks = (tasks || []).filter(
-    (t) => t.status !== 'completed' && t.status !== 'canceled'
+    t => t.status !== "completed" && t.status !== "canceled",
   );
-  const delayedTasks = activeTasks.filter((t) => {
+  const delayedTasks = activeTasks.filter(t => {
     const elapsed = (Date.now() - t.createdAt) / 1000 / 60; // 분
     return elapsed > SLA_THRESHOLD_MINUTES;
   });
 
   const filteredTasks =
-    selectedTab === 'all'
-      ? tasks
-      : selectedTab === 'active'
-      ? activeTasks
-      : delayedTasks;
+    selectedTab === "all" ? tasks : selectedTab === "active" ? activeTasks : delayedTasks;
 
   return (
     <div className="space-y-6">
@@ -2614,27 +2589,20 @@ export function AdminDelivery() {
             실시간 배달 현황 모니터링
             {deliveryProvider && (
               <Badge variant="secondary" className="ml-2">
-                {deliveryProvider.provider === 'mock' && 'Mock (테스트)'}
-                {deliveryProvider.provider === 'providerA' && 'Provider A'}
-                {deliveryProvider.provider === 'custom' && deliveryProvider.custom?.name}
+                {deliveryProvider.provider === "mock" && "Mock (테스트)"}
+                {deliveryProvider.provider === "providerA" && "Provider A"}
+                {deliveryProvider.provider === "custom" && deliveryProvider.custom?.name}
               </Badge>
             )}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/admin/settings?tab=delivery')}
-          >
+          <Button variant="outline" onClick={() => navigate("/admin/settings?tab=delivery")}>
             <Settings className="w-4 h-4 mr-2" />
             설정
           </Button>
-          <Button
-            variant="outline"
-            onClick={loadTasks}
-            disabled={loading}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={loadTasks} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
             새로고침
           </Button>
         </div>
@@ -2649,8 +2617,7 @@ export function AdminDelivery() {
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              <Package className="w-3 h-3 inline mr-1" />
-              총 배달 건수
+              <Package className="w-3 h-3 inline mr-1" />총 배달 건수
             </p>
           </CardContent>
         </Card>
@@ -2672,7 +2639,7 @@ export function AdminDelivery() {
           <CardHeader className="pb-2">
             <CardDescription>완료</CardDescription>
             <CardTitle className="text-3xl text-green-600">
-              {tasks.filter((t) => t.status === 'completed').length}
+              {tasks.filter(t => t.status === "completed").length}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -2712,32 +2679,22 @@ export function AdminDelivery() {
       <Card>
         <CardHeader>
           <CardTitle>배달 목록</CardTitle>
-          <CardDescription>
-            실시간으로 업데이트되는 배달 현황
-          </CardDescription>
+          <CardDescription>실시간으로 업데이트되는 배달 현황</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={selectedTab} onValueChange={(v) => setSelectedTab(v as any)}>
+          <Tabs value={selectedTab} onValueChange={v => setSelectedTab(v as any)}>
             <TabsList>
-              <TabsTrigger value="all">
-                전체 ({tasks.length})
-              </TabsTrigger>
-              <TabsTrigger value="active">
-                진행 중 ({activeTasks.length})
-              </TabsTrigger>
-              <TabsTrigger value="delayed">
-                지연 ({delayedTasks.length})
-              </TabsTrigger>
+              <TabsTrigger value="all">전체 ({tasks.length})</TabsTrigger>
+              <TabsTrigger value="active">진행 중 ({activeTasks.length})</TabsTrigger>
+              <TabsTrigger value="delayed">지연 ({delayedTasks.length})</TabsTrigger>
             </TabsList>
 
             <TabsContent value={selectedTab} className="mt-4">
               {filteredTasks.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  배달 내역이 없습니다
-                </div>
+                <div className="text-center py-12 text-muted-foreground">배달 내역이 없습니다</div>
               ) : (
                 <div className="space-y-3">
-                  {filteredTasks.map((task) => (
+                  {filteredTasks.map(task => (
                     <DeliveryTaskCard key={task.taskId} task={task} />
                   ))}
                 </div>
@@ -2751,18 +2708,14 @@ export function AdminDelivery() {
       <Card>
         <CardHeader>
           <CardTitle>배달 지도</CardTitle>
-          <CardDescription>
-            모든 배달 기사의 실시간 위치
-          </CardDescription>
+          <CardDescription>모든 배달 기사의 실시간 위치</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-96 bg-gradient-to-br from-green-100 to-blue-100 rounded-lg flex items-center justify-center">
             <div className="text-center space-y-2">
               <MapPin className="w-16 h-16 text-[#D61C1C] mx-auto" />
               <p className="text-[#2E1C10]">지도 뷰</p>
-              <p className="text-sm text-[#2E1C10]/60">
-                TODO: Kakao Maps / Google Maps 연동
-              </p>
+              <p className="text-sm text-[#2E1C10]/60">TODO: Kakao Maps / Google Maps 연동</p>
               <p className="text-xs text-[#2E1C10]/40">
                 배달대행사의 API 연결 후 확인 가능한 메뉴입니다
               </p>
@@ -2779,28 +2732,22 @@ export function AdminDelivery() {
  */
 function DeliveryTaskCard({ task }: { task: DeliveryTask }) {
   const elapsed = (Date.now() - task.createdAt) / 1000 / 60; // 분
-  const isDelayed = elapsed > SLA_THRESHOLD_MINUTES && 
-                    task.status !== 'completed' && 
-                    task.status !== 'canceled';
+  const isDelayed =
+    elapsed > SLA_THRESHOLD_MINUTES && task.status !== "completed" && task.status !== "canceled";
 
   const statusInfo = STATUS_CONFIG[task.status];
 
   return (
-    <div 
+    <div
       className={`p-4 rounded-lg border-2 ${
-        isDelayed ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
+        isDelayed ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"
       }`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-mono text-[#2E1C10]">
-              {task.taskId}
-            </span>
-            <Badge 
-              variant="secondary" 
-              className={`${statusInfo.color} text-white`}
-            >
+            <span className="text-sm font-mono text-[#2E1C10]">{task.taskId}</span>
+            <Badge variant="secondary" className={`${statusInfo.color} text-white`}>
               {statusInfo.label}
             </Badge>
             {isDelayed && (
@@ -2810,15 +2757,13 @@ function DeliveryTaskCard({ task }: { task: DeliveryTask }) {
               </Badge>
             )}
           </div>
-          <p className="text-sm text-[#2E1C10]/60">
-            주문 ID: {task.orderId}
-          </p>
+          <p className="text-sm text-[#2E1C10]/60">주문 ID: {task.orderId}</p>
         </div>
 
         {task.eta !== undefined && task.eta > 0 && (
           <div className="text-right">
             <p className="text-xs text-[#2E1C10]/60">예상 도착</p>
-            <p className={`text-lg ${isDelayed ? 'text-red-600' : 'text-[#F37021]'}`}>
+            <p className={`text-lg ${isDelayed ? "text-red-600" : "text-[#F37021]"}`}>
               {task.eta}분
             </p>
           </div>
@@ -2828,14 +2773,12 @@ function DeliveryTaskCard({ task }: { task: DeliveryTask }) {
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <p className="text-[#2E1C10]/60 mb-1">배달기사</p>
-          <p className="text-[#2E1C10] font-mono">
-            {task.driverId || '-'}
-          </p>
+          <p className="text-[#2E1C10] font-mono">{task.driverId || "-"}</p>
         </div>
 
         <div>
           <p className="text-[#2E1C10]/60 mb-1">경과 시간</p>
-          <p className={`text-[#2E1C10] ${isDelayed ? 'text-red-600' : ''}`}>
+          <p className={`text-[#2E1C10] ${isDelayed ? "text-red-600" : ""}`}>
             {Math.floor(elapsed)}분
           </p>
         </div>
@@ -2846,7 +2789,7 @@ function DeliveryTaskCard({ task }: { task: DeliveryTask }) {
           <MapPin className="w-3 h-3 inline mr-1" />
           위치: {task.lastCoord.lat.toFixed(4)}, {task.lastCoord.lng.toFixed(4)}
           <span className="ml-2 text-[#2E1C10]/40">
-            ({new Date(task.lastCoord.at).toLocaleTimeString('ko-KR')})
+            ({new Date(task.lastCoord.at).toLocaleTimeString("ko-KR")})
           </span>
         </div>
       )}
@@ -2867,15 +2810,15 @@ function DeliveryTaskCard({ task }: { task: DeliveryTask }) {
  * Phase 2-8: 쿠폰 발급 및 통계
  */
 
-import { useState, useEffect } from 'react';
-import { CouponStats, CouponIssue } from '../../types/coupon';
-import { getCouponStats, issueCoupon } from '../../lib/coupons.api';
-import { getCurrentUser } from '../../lib/auth';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { Button } from '../../components/ui/button';
-import { Card } from '../../components/ui/card';
-import { Plus, Ticket } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { CouponStats, CouponIssue, CouponType } from "@/types/coupon";
+import { getCouponStats, issueCoupon } from "@/lib/coupons.api";
+import { getCurrentUser } from "@/lib/auth";
+import { StatCard } from "@/components/admin/common/StatCard";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Plus, Ticket } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -2883,19 +2826,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
-import { Label } from '../../components/ui/label';
-import { Input } from '../../components/ui/input';
-import { Textarea } from '../../components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { UserSearchDialog } from '../../components/admin/UserSearchDialog';
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { UserSearchDialog } from "@/components/admin/UserSearchDialog";
 
 export function AdminPromotions() {
   const [stats, setStats] = useState<CouponStats | null>(null);
@@ -2905,19 +2848,23 @@ export function AdminPromotions() {
 
   // 발급 폼
   const [issueForm, setIssueForm] = useState<CouponIssue>({
-    type: 'admin',
-    title: '',
-    description: '',
+    type: "admin",
+    title: "",
+    description: "",
     amount: 5000,
     minSpend: 15000,
     expiryDays: 30,
     issueLimit: 100,
-    targetType: 'all',
+    targetType: "all",
   });
 
   // 사용자 검색 다이얼로그
   const [userSearchOpen, setUserSearchOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{ uid: string; name?: string; email?: string } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<{
+    uid: string;
+    name?: string;
+    email?: string;
+  } | null>(null);
 
   const user = getCurrentUser();
 
@@ -2931,8 +2878,8 @@ export function AdminPromotions() {
       const data = await getCouponStats();
       setStats(data);
     } catch (error) {
-      console.error('Failed to load stats:', error);
-      toast.error('통계를 불러오는데 실패했습니다');
+      console.error("Failed to load stats:", error);
+      toast.error("통계를 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -2942,44 +2889,44 @@ export function AdminPromotions() {
     if (!user) return;
 
     if (!issueForm.title.trim() || !issueForm.description.trim()) {
-      toast.error('제목과 설명을 입력하세요');
+      toast.error("제목과 설명을 입력하세요");
       return;
     }
 
     // 발급 대상 검증
-    if (issueForm.targetType === 'user' && !issueForm.targetUserId) {
-      toast.error('특정 고객을 선택하세요');
+    if (issueForm.targetType === "user" && !issueForm.targetUserId) {
+      toast.error("특정 고객을 선택하세요");
       return;
     }
 
-    if (issueForm.targetType === 'phone' && !issueForm.targetPhone?.trim()) {
-      toast.error('전화번호를 입력하세요');
+    if (issueForm.targetType === "phone" && !issueForm.targetPhone?.trim()) {
+      toast.error("전화번호를 입력하세요");
       return;
     }
 
     setIssuing(true);
     try {
       const issued = await issueCoupon(issueForm, user.uid, user.name);
-      
+
       toast.success(`쿠폰 ${issued.length}장을 발급했습니다`);
       setIssueDialogOpen(false);
       loadStats();
 
       // 폼 초기화
       setIssueForm({
-        type: 'admin',
-        title: '',
-        description: '',
+        type: "admin",
+        title: "",
+        description: "",
         amount: 5000,
         minSpend: 15000,
         expiryDays: 30,
         issueLimit: 100,
-        targetType: 'all',
+        targetType: "all",
       });
       setSelectedUser(null);
     } catch (error: any) {
-      console.error('Failed to issue coupons:', error);
-      toast.error(error.message || '쿠폰 발급에 실패했습니다');
+      console.error("Failed to issue coupons:", error);
+      toast.error(error.message || "쿠폰 발급에 실패했습니다");
     } finally {
       setIssuing(false);
     }
@@ -2994,7 +2941,7 @@ export function AdminPromotions() {
     });
     setIssueForm({
       ...issueForm,
-      targetType: 'user',
+      targetType: "user",
       targetUserId: user.uid,
     });
   };
@@ -3005,9 +2952,7 @@ export function AdminPromotions() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#333] mb-2">쿠폰/프로모션</h1>
-          <p className="text-[#8B7355]">
-            쿠폰을 발급하고 사용 현황을 관리하세요
-          </p>
+          <p className="text-[#8B7355]">쿠폰을 발급하고 사용 현황을 관리하세요</p>
         </div>
         <Button onClick={() => setIssueDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
@@ -3018,11 +2963,7 @@ export function AdminPromotions() {
       {/* 통계 */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            title="발급 총량"
-            value={stats.totalIssued}
-            subtitle="총 발급 쿠폰"
-          />
+          <StatCard title="발급 총량" value={stats.totalIssued} subtitle="총 발급 쿠폰" />
           <StatCard
             title="사용 완료"
             value={stats.totalUsed}
@@ -3053,19 +2994,27 @@ export function AdminPromotions() {
         <div className="space-y-3 text-sm text-[#8B7355]">
           <div className="flex items-start gap-2">
             <span className="text-[#D61C1C]">•</span>
-            <span><strong>사진 리뷰 보상:</strong> 자동 발급 (3,000원, 10,000원 이상 주문 시)</span>
+            <span>
+              <strong>사진 리뷰 보상:</strong> 자동 발급 (3,000원, 10,000원 이상 주문 시)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#F37021]">•</span>
-            <span><strong>신규 가입:</strong> 자동 발급 (5,000원, 15,000원 이상 주문 시)</span>
+            <span>
+              <strong>신규 가입:</strong> 자동 발급 (5,000원, 15,000원 이상 주문 시)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-[#C7A45A]">•</span>
-            <span><strong>관리자 발급:</strong> 수동 발급 (금액/조건 설정 가능)</span>
+            <span>
+              <strong>관리자 발급:</strong> 수동 발급 (금액/조건 설정 가능)
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-gray-400">•</span>
-            <span><strong>만료 처리:</strong> 매일 04:00 자동 처리 (Firebase Functions)</span>
+            <span>
+              <strong>만료 처리:</strong> 매일 04:00 자동 처리 (Firebase Functions)
+            </span>
           </div>
         </div>
       </Card>
@@ -3076,9 +3025,7 @@ export function AdminPromotions() {
         <div className="text-center py-8 text-gray-500">
           <Ticket className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p>발급 내역이 표시됩니다</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Firebase 연동 시 실시간 내역 조회
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Firebase 연동 시 실시간 내역 조회</p>
         </div>
       </Card>
 
@@ -3087,9 +3034,7 @@ export function AdminPromotions() {
         <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
             <DialogTitle>쿠폰 발급</DialogTitle>
-            <DialogDescription>
-              새로운 쿠폰을 발급합니다
-            </DialogDescription>
+            <DialogDescription>새로운 쿠폰을 발급합니다</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -3098,7 +3043,7 @@ export function AdminPromotions() {
               <Label>쿠폰 타입</Label>
               <Select
                 value={issueForm.type}
-                onValueChange={(v) => setIssueForm({ ...issueForm, type: v as any })}
+                onValueChange={v => setIssueForm({ ...issueForm, type: v as CouponType })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -3116,7 +3061,7 @@ export function AdminPromotions() {
               <Label>제목</Label>
               <Input
                 value={issueForm.title}
-                onChange={(e) => setIssueForm({ ...issueForm, title: e.target.value })}
+                onChange={e => setIssueForm({ ...issueForm, title: e.target.value })}
                 placeholder="예: 설날 특별 할인 쿠폰"
               />
             </div>
@@ -3126,7 +3071,7 @@ export function AdminPromotions() {
               <Label>설명</Label>
               <Textarea
                 value={issueForm.description}
-                onChange={(e) => setIssueForm({ ...issueForm, description: e.target.value })}
+                onChange={e => setIssueForm({ ...issueForm, description: e.target.value })}
                 placeholder="예: 20,000원 이상 주문 시 사용 가능"
                 rows={2}
               />
@@ -3139,7 +3084,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.amount}
-                  onChange={(e) => setIssueForm({ ...issueForm, amount: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, amount: Number(e.target.value) })}
                   min="1000"
                   step="1000"
                 />
@@ -3149,7 +3094,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.minSpend}
-                  onChange={(e) => setIssueForm({ ...issueForm, minSpend: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, minSpend: Number(e.target.value) })}
                   min="0"
                   step="1000"
                 />
@@ -3163,7 +3108,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.expiryDays}
-                  onChange={(e) => setIssueForm({ ...issueForm, expiryDays: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, expiryDays: Number(e.target.value) })}
                   min="1"
                 />
               </div>
@@ -3172,7 +3117,7 @@ export function AdminPromotions() {
                 <Input
                   type="number"
                   value={issueForm.issueLimit}
-                  onChange={(e) => setIssueForm({ ...issueForm, issueLimit: Number(e.target.value) })}
+                  onChange={e => setIssueForm({ ...issueForm, issueLimit: Number(e.target.value) })}
                   min="1"
                 />
               </div>
@@ -3182,11 +3127,11 @@ export function AdminPromotions() {
             <div className="space-y-3 border-t pt-4">
               <Label>발급 대상</Label>
               <RadioGroup
-                value={issueForm.targetType || 'all'}
-                onValueChange={(value) => {
+                value={issueForm.targetType || "all"}
+                onValueChange={value => {
                   setIssueForm({
                     ...issueForm,
-                    targetType: value as 'all' | 'user' | 'phone',
+                    targetType: value as "all" | "user" | "phone",
                     targetUserId: undefined,
                     targetPhone: undefined,
                   });
@@ -3195,20 +3140,26 @@ export function AdminPromotions() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="all" id="target-all" />
-                  <Label htmlFor="target-all" className="cursor-pointer">전체 고객</Label>
+                  <Label htmlFor="target-all" className="cursor-pointer">
+                    전체 고객
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="user" id="target-user" />
-                  <Label htmlFor="target-user" className="cursor-pointer">특정 고객 (회원 검색)</Label>
+                  <Label htmlFor="target-user" className="cursor-pointer">
+                    특정 고객 (회원 검색)
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="phone" id="target-phone" />
-                  <Label htmlFor="target-phone" className="cursor-pointer">전화번호로 지정</Label>
+                  <Label htmlFor="target-phone" className="cursor-pointer">
+                    전화번호로 지정
+                  </Label>
                 </div>
               </RadioGroup>
 
               {/* 특정 고객 선택 */}
-              {issueForm.targetType === 'user' && (
+              {issueForm.targetType === "user" && (
                 <div className="space-y-2 pl-6">
                   <Button
                     type="button"
@@ -3216,7 +3167,9 @@ export function AdminPromotions() {
                     size="sm"
                     onClick={() => setUserSearchOpen(true)}
                   >
-                    {selectedUser ? `${selectedUser.name || selectedUser.email} (선택됨)` : '고객 검색'}
+                    {selectedUser
+                      ? `${selectedUser.name || selectedUser.email} (선택됨)`
+                      : "고객 검색"}
                   </Button>
                   {selectedUser && (
                     <div className="text-xs text-gray-500">
@@ -3227,15 +3180,15 @@ export function AdminPromotions() {
               )}
 
               {/* 전화번호 입력 */}
-              {issueForm.targetType === 'phone' && (
+              {issueForm.targetType === "phone" && (
                 <div className="space-y-2 pl-6">
                   <Input
                     type="tel"
                     placeholder="010-1234-5678"
-                    value={issueForm.targetPhone || ''}
-                    onChange={(e) => {
+                    value={issueForm.targetPhone || ""}
+                    onChange={e => {
                       // 숫자와 하이픈만 허용
-                      const value = e.target.value.replace(/[^\d-]/g, '');
+                      const value = e.target.value.replace(/[^\d-]/g, "");
                       setIssueForm({ ...issueForm, targetPhone: value });
                     }}
                   />
@@ -3248,15 +3201,11 @@ export function AdminPromotions() {
           </div>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIssueDialogOpen(false)}
-              disabled={issuing}
-            >
+            <Button variant="outline" onClick={() => setIssueDialogOpen(false)} disabled={issuing}>
               취소
             </Button>
             <Button onClick={handleIssue} disabled={issuing}>
-              {issuing ? '발급 중...' : '발급'}
+              {issuing ? "발급 중..." : "발급"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -3285,13 +3234,19 @@ export function AdminPromotions() {
  * Phase 3-3: Points System
  */
 
-import { useState, useEffect } from 'react';
-import { Gift, TrendingUp, TrendingDown, Users, DollarSign, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Textarea } from '../../components/ui/textarea';
+import { useState, useEffect } from "react";
+import { Gift, TrendingUp, TrendingDown, Users, DollarSign, AlertCircle } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -3299,7 +3254,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
+} from "../../components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -3307,28 +3262,30 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../../components/ui/table';
-import { Badge } from '../../components/ui/badge';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Skeleton } from '../../components/ui/skeleton';
-import { StatCard } from '../../components/admin/common/StatCard';
-import { getAllPointsBalances, adjustPoints, POINTS_POLICY } from '../../lib/points.api';
-import { FEATURE_FLAGS } from '../../config/env';
-import { toast } from 'sonner';
-import type { PointsBalance } from '../../types/points';
-import { formatPrice } from '../../lib/utils';
-import { getAdminSettings } from '../../lib/admin/settingsCenter.api';
+} from "../../components/ui/table";
+import { Badge } from "../../components/ui/badge";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Skeleton } from "../../components/ui/skeleton";
+import { StatCard } from "../../components/admin/common/StatCard";
+import { getAllPointsBalances, adjustPoints, POINTS_POLICY } from "../../lib/points.api";
+import { FEATURE_FLAGS } from "../../config/env";
+import { toast } from "sonner";
+import type { PointsBalance } from "../../types/points";
+import { formatPrice } from "../../lib/utils";
+import { getAdminSettings } from "../../lib/admin/settingsCenter.api";
 
 export function AdminPoints() {
-  const [balances, setBalances] = useState<Array<PointsBalance & { phone?: string; name?: string }>>([]);
+  const [balances, setBalances] = useState<
+    Array<PointsBalance & { phone?: string; name?: string }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [pointsEnabled, setPointsEnabled] = useState<boolean>(true);
-  
+
   // 조정 다이얼로그
   const [adjustDialog, setAdjustDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<typeof balances[0] | null>(null);
-  const [adjustAmount, setAdjustAmount] = useState('');
-  const [adjustNote, setAdjustNote] = useState('');
+  const [selectedUser, setSelectedUser] = useState<(typeof balances)[0] | null>(null);
+  const [adjustAmount, setAdjustAmount] = useState("");
+  const [adjustNote, setAdjustNote] = useState("");
   const [adjusting, setAdjusting] = useState(false);
 
   useEffect(() => {
@@ -3347,8 +3304,8 @@ export function AdminPoints() {
       const data = await getAllPointsBalances();
       setBalances(data);
     } catch (error) {
-      console.error('Failed to load points balances:', error);
-      toast.error('포인트 내역 로드 실패');
+      console.error("Failed to load points balances:", error);
+      toast.error("포인트 내역 로드 실패");
     } finally {
       setLoading(false);
     }
@@ -3356,34 +3313,34 @@ export function AdminPoints() {
 
   async function handleAdjust() {
     if (!selectedUser || !adjustAmount || !adjustNote) {
-      toast.error('모든 필드를 입력해주세요');
+      toast.error("모든 필드를 입력해주세요");
       return;
     }
 
     const amount = parseInt(adjustAmount);
     if (isNaN(amount) || amount === 0) {
-      toast.error('올바른 포인트 금액을 입력해주세요');
+      toast.error("올바른 포인트 금액을 입력해주세요");
       return;
     }
 
     try {
       setAdjusting(true);
       await adjustPoints(selectedUser.uid, amount, adjustNote);
-      toast.success('포인트가 조정되었습니다');
+      toast.success("포인트가 조정되었습니다");
       setAdjustDialog(false);
       setSelectedUser(null);
-      setAdjustAmount('');
-      setAdjustNote('');
+      setAdjustAmount("");
+      setAdjustNote("");
       loadBalances();
     } catch (error: any) {
-      console.error('Failed to adjust points:', error);
-      toast.error(error.message || '포인트 조정 실패');
+      console.error("Failed to adjust points:", error);
+      toast.error(error.message || "포인트 조정 실패");
     } finally {
       setAdjusting(false);
     }
   }
 
-  function openAdjustDialog(user: typeof balances[0]) {
+  function openAdjustDialog(user: (typeof balances)[0]) {
     setSelectedUser(user);
     setAdjustDialog(true);
   }
@@ -3413,34 +3370,27 @@ export function AdminPoints() {
       {/* 헤더 */}
       <div>
         <h1 className="text-2xl text-[#2E1C10] mb-1">포인트 관리</h1>
-        <p className="text-[#2E1C10]/60">
-          고객 포인트 현황을 관리하고 조정할 수 있습니다
-        </p>
+        <p className="text-[#2E1C10]/60">고객 포인트 현황을 관리하고 조정할 수 있습니다</p>
       </div>
 
       {/* KPI 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="전체 사용자"
-          value={totalUsers.toString()}
-          icon={Users}
-          variant="info"
-        />
-        
+        <StatCard title="전체 사용자" value={totalUsers.toString()} icon={Users} variant="info" />
+
         <StatCard
           title="전체 포인트"
           value={`${totalPoints.toLocaleString()}P`}
           icon={Gift}
           variant="default"
         />
-        
+
         <StatCard
           title="평균 보유 포인트"
           value={`${avgPoints.toLocaleString()}P`}
           icon={TrendingUp}
           variant="success"
         />
-        
+
         <StatCard
           title="활성 사용자"
           value={activeUsers.toString()}
@@ -3463,21 +3413,19 @@ export function AdminPoints() {
                 {(POINTS_POLICY.earnRate * 100).toFixed(1)}%
               </p>
             </div>
-            
+
             <div className="p-4 border border-gray-200 rounded-lg">
               <p className="text-sm text-[#2E1C10]/60 mb-1">최소 사용 금액</p>
               <p className="text-2xl font-medium text-[#D61C1C]">
                 {POINTS_POLICY.minUse.toLocaleString()}P
               </p>
             </div>
-            
+
             <div className="p-4 border border-gray-200 rounded-lg">
               <p className="text-sm text-[#2E1C10]/60 mb-1">유효기간</p>
-              <p className="text-2xl font-medium text-[#D61C1C]">
-                {POINTS_POLICY.expireDays}일
-              </p>
+              <p className="text-2xl font-medium text-[#D61C1C]">{POINTS_POLICY.expireDays}일</p>
             </div>
-            
+
             <div className="p-4 border border-gray-200 rounded-lg">
               <p className="text-sm text-[#2E1C10]/60 mb-1">사진 리뷰 보너스</p>
               <p className="text-2xl font-medium text-[#D61C1C]">
@@ -3492,14 +3440,12 @@ export function AdminPoints() {
       <Card>
         <CardHeader>
           <CardTitle>사용자별 포인트</CardTitle>
-          <CardDescription>
-            전체 {balances.length}명의 사용자
-          </CardDescription>
+          <CardDescription>전체 {balances.length}명의 사용자</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
+              {[1, 2, 3, 4, 5].map(i => (
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
@@ -3516,13 +3462,13 @@ export function AdminPoints() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {balances.map((balance) => (
+                  {balances.map(balance => (
                     <TableRow key={balance.uid}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-[#D61C1C]/10 flex items-center justify-center">
                             <span className="text-xs text-[#D61C1C]">
-                              {balance.name?.charAt(0) || 'U'}
+                              {balance.name?.charAt(0) || "U"}
                             </span>
                           </div>
                           <div>
@@ -3531,11 +3477,11 @@ export function AdminPoints() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{balance.phone || '-'}</TableCell>
+                      <TableCell>{balance.phone || "-"}</TableCell>
                       <TableCell>
                         <Badge
-                          variant={balance.balance > 0 ? 'default' : 'secondary'}
-                          className={balance.balance > 0 ? 'bg-green-100 text-green-800' : ''}
+                          variant={balance.balance > 0 ? "default" : "secondary"}
+                          className={balance.balance > 0 ? "bg-green-100 text-green-800" : ""}
                         >
                           {balance.balance.toLocaleString()}P
                         </Badge>
@@ -3588,12 +3534,10 @@ export function AdminPoints() {
                 type="number"
                 placeholder="양수는 증가, 음수는 차감"
                 value={adjustAmount}
-                onChange={(e) => setAdjustAmount(e.target.value)}
+                onChange={e => setAdjustAmount(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                예: +1000 (증가), -500 (차감)
-              </p>
+              <p className="text-xs text-gray-500 mt-1">예: +1000 (증가), -500 (차감)</p>
             </div>
 
             <div>
@@ -3602,7 +3546,7 @@ export function AdminPoints() {
                 id="note"
                 placeholder="포인트 조정 사유를 입력하세요"
                 value={adjustNote}
-                onChange={(e) => setAdjustNote(e.target.value)}
+                onChange={e => setAdjustNote(e.target.value)}
                 className="mt-1"
                 rows={3}
               />
@@ -3612,7 +3556,8 @@ export function AdminPoints() {
               <Alert className="border-blue-200 bg-blue-50">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-blue-800">
-                  조정 후 포인트: {(selectedUser!.balance + parseInt(adjustAmount || '0')).toLocaleString()}P
+                  조정 후 포인트:{" "}
+                  {(selectedUser!.balance + parseInt(adjustAmount || "0")).toLocaleString()}P
                 </AlertDescription>
               </Alert>
             )}
@@ -3624,17 +3569,14 @@ export function AdminPoints() {
               onClick={() => {
                 setAdjustDialog(false);
                 setSelectedUser(null);
-                setAdjustAmount('');
-                setAdjustNote('');
+                setAdjustAmount("");
+                setAdjustNote("");
               }}
             >
               취소
             </Button>
-            <Button
-              onClick={handleAdjust}
-              disabled={adjusting || !adjustAmount || !adjustNote}
-            >
-              {adjusting ? '처리 중...' : '조정하기'}
+            <Button onClick={handleAdjust} disabled={adjusting || !adjustAmount || !adjustNote}>
+              {adjusting ? "처리 중..." : "조정하기"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -3657,34 +3599,40 @@ export function AdminPoints() {
  * Firebase Firestore 실시간 채팅 시스템
  */
 
-import { useEffect, useState, useRef } from 'react';
-import { 
-  Send, 
-  MessageSquare, 
-  Clock, 
-  Check, 
-  CheckCheck, 
-  AlertCircle, 
+import { useEffect, useState, useRef } from "react";
+import {
+  Send,
+  MessageSquare,
+  Clock,
+  Check,
+  CheckCheck,
+  AlertCircle,
   RefreshCw,
   UserCheck,
   X,
   CheckCircle,
   Timer,
-  TrendingUp
-} from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Badge } from '../../components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { ScrollArea } from '../../components/ui/scroll-area';
-import { Separator } from '../../components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { FEATURE_FLAGS, USE_FIREBASE } from '../../config/env';
-import { formatDateTime } from '../../lib/utils';
-import { getCurrentUser } from '../../lib/auth';
-import type { ChatSession, ChatMessage } from '../../types/support';
-import { toast } from 'sonner';
+  TrendingUp,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FEATURE_FLAGS, USE_FIREBASE } from "@/config/env";
+import { formatDateTime } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth";
+import type { ChatSession, ChatMessage } from "@/types/support";
+import { toast } from "sonner";
 
 // Firebase API (실제 환경에서 사용)
 import {
@@ -3698,17 +3646,18 @@ import {
   getPendingSessionsCount,
   getAverageResponseTime,
   getTodayCompletedCount,
-} from '../../lib/admin/support.api';
+} from "@/lib/admin/support.api";
 
 export function AdminSupport() {
+  // 1. Hooks 최상단 선언
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [filterTab, setFilterTab] = useState<'all' | 'open' | 'closed'>('all');
-  
+  const [filterTab, setFilterTab] = useState<"all" | "open" | "closed">("all");
+
   // 통계
   const [stats, setStats] = useState({
     pending: 0,
@@ -3718,33 +3667,22 @@ export function AdminSupport() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   const currentUser = getCurrentUser();
 
-  // 지원 기능 비활성화 체크
-  if (!FEATURE_FLAGS.support) {
-    return (
-      <div className="p-6">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            고객 지원 기능이 비활성화되어 있습니다. 환경 변수에서 VITE_SUPPORT_ENABLED=true로 설정하세요.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
+  // 2. Effects (조건부 실행은 내부에서)
   // 초기 로드 + 통계
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     loadSessionsAndStats();
   }, []);
 
   // Firebase 실시간 구독
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     if (!USE_FIREBASE) return;
 
-    const unsubscribe = subscribeToSessions((updatedSessions) => {
+    const unsubscribe = subscribeToSessions(updatedSessions => {
       setSessions(updatedSessions);
       setLoading(false);
     });
@@ -3754,11 +3692,12 @@ export function AdminSupport() {
 
   // 선택된 세션의 메시지 구독
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     if (!selectedSession || !USE_FIREBASE) return;
 
-    const unsubscribe = subscribeToMessages(selectedSession.id, (updatedMessages) => {
+    const unsubscribe = subscribeToMessages(selectedSession.id, updatedMessages => {
       setMessages(updatedMessages);
-      
+
       // 읽음 처리
       markMessagesAsReadByAdmin(selectedSession.id).catch(console.error);
     });
@@ -3768,11 +3707,13 @@ export function AdminSupport() {
 
   // 메시지 자동 스크롤
   useEffect(() => {
+    if (!FEATURE_FLAGS.support) return;
     scrollToBottom();
   }, [messages]);
 
+  // 3. Helper Functions
   function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
   // 세션 및 통계 로드
@@ -3805,8 +3746,8 @@ export function AdminSupport() {
         });
       }
     } catch (error) {
-      console.error('Failed to load sessions:', error);
-      toast.error('세션 목록을 불러오는데 실패했습니다');
+      console.error("Failed to load sessions:", error);
+      toast.error("세션 목록을 불러오는데 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -3814,52 +3755,52 @@ export function AdminSupport() {
 
   // Mock 데이터 로드
   async function loadSessionsMock() {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       setSessions([]);
       return;
     }
 
     try {
-      const sessionsData = localStorage.getItem('chat_sessions') || '{}';
-      
+      const sessionsData = localStorage.getItem("chat_sessions") || "{}";
+
       // localStorage가 비어있으면 빈 배열 반환 (샘플 데이터 생성 제거)
-      if (!sessionsData || sessionsData === '{}') {
+      if (!sessionsData || sessionsData === "{}") {
         setSessions([]);
         return;
       }
 
       const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
       const sessionsList = Object.values(sessionsObj);
-      
+
       // 안전성 체크: 배열이 아니면 빈 배열 반환
       if (!Array.isArray(sessionsList)) {
-        console.warn('[Support] Invalid sessions data format, resetting to empty');
+        console.warn("[Support] Invalid sessions data format, resetting to empty");
         setSessions([]);
         return;
       }
-      
+
       sessionsList.sort((a, b) => {
         const aHasUnread = hasUnreadMessagesMock(a.id);
         const bHasUnread = hasUnreadMessagesMock(b.id);
-        
+
         if (aHasUnread && !bHasUnread) return -1;
         if (!aHasUnread && bHasUnread) return 1;
-        
+
         return b.lastAt - a.lastAt;
       });
 
       setSessions(sessionsList);
     } catch (error) {
-      console.error('[Support] Failed to parse sessions from storage', error);
+      console.error("[Support] Failed to parse sessions from storage", error);
       setSessions([]);
     }
   }
 
   // Mock: 미응답 체크
   function hasUnreadMessagesMock(sessionId: string): boolean {
-    const messagesData = localStorage.getItem(`chat_messages_${sessionId}`) || '[]';
+    const messagesData = localStorage.getItem(`chat_messages_${sessionId}`) || "[]";
     const msgs: ChatMessage[] = JSON.parse(messagesData);
-    return msgs.some((m) => m.from === 'user' && !m.readByAdmin);
+    return msgs.some(m => m.from === "user" && !m.readByAdmin);
   }
 
   // 세션 선택
@@ -3870,25 +3811,25 @@ export function AdminSupport() {
       try {
         const msgs = await getSessionMessages(session.id);
         setMessages(msgs);
-        
+
         // 읽음 처리
         await markMessagesAsReadByAdmin(session.id);
       } catch (error) {
-        console.error('Failed to load messages:', error);
-        toast.error('메시지를 불러오는데 실패했습니다');
+        console.error("Failed to load messages:", error);
+        toast.error("메시지를 불러오는데 실패했습니다");
       }
     } else {
       // Mock
-      const messagesData = localStorage.getItem(`chat_messages_${session.id}`) || '[]';
+      const messagesData = localStorage.getItem(`chat_messages_${session.id}`) || "[]";
       const msgs: ChatMessage[] = JSON.parse(messagesData);
-      
-      const updatedMsgs = msgs.map((m) => {
-        if (m.from === 'user' && !m.readByAdmin) {
+
+      const updatedMsgs = msgs.map(m => {
+        if (m.from === "user" && !m.readByAdmin) {
           return { ...m, readByAdmin: true };
         }
         return m;
       });
-      
+
       localStorage.setItem(`chat_messages_${session.id}`, JSON.stringify(updatedMsgs));
       setMessages(updatedMsgs);
     }
@@ -3899,34 +3840,34 @@ export function AdminSupport() {
     if (!selectedSession || !inputText.trim() || sending || !currentUser) return;
 
     const text = inputText.trim();
-    setInputText('');
+    setInputText("");
     setSending(true);
 
     try {
       if (USE_FIREBASE) {
         await sendAdminMessage(selectedSession.id, text, currentUser.uid);
-        toast.success('메시지가 전송되었습니다');
+        toast.success("메시지가 전송되었습니다");
       } else {
         // Mock
         const newMessage: ChatMessage = {
           id: `msg_${Date.now()}`,
           sessionId: selectedSession.id,
-          from: 'admin',
-          type: 'text',
+          from: "admin",
+          type: "text",
           text,
           at: Date.now(),
           readByUser: false,
         };
 
-        const messagesData = localStorage.getItem(`chat_messages_${selectedSession.id}`) || '[]';
+        const messagesData = localStorage.getItem(`chat_messages_${selectedSession.id}`) || "[]";
         const allMessages: ChatMessage[] = JSON.parse(messagesData);
         allMessages.push(newMessage);
         localStorage.setItem(`chat_messages_${selectedSession.id}`, JSON.stringify(allMessages));
-        
+
         setMessages(allMessages);
 
         // 세션 업데이트
-        const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+        const sessionsData = localStorage.getItem("chat_sessions") || "{}";
         const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
         sessionsObj[selectedSession.id] = {
           ...selectedSession,
@@ -3935,14 +3876,14 @@ export function AdminSupport() {
           updatedAt: Date.now(),
           assignedTo: currentUser.uid,
         };
-        localStorage.setItem('chat_sessions', JSON.stringify(sessionsObj));
-        
+        localStorage.setItem("chat_sessions", JSON.stringify(sessionsObj));
+
         loadSessionsMock();
-        toast.success('메시지가 전송되었습니다');
+        toast.success("메시지가 전송되었습니다");
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
-      toast.error('메시지 전송에 실패했습니다');
+      console.error("Failed to send message:", error);
+      toast.error("메시지 전송에 실패했습니다");
       setInputText(text);
     } finally {
       setSending(false);
@@ -3956,46 +3897,62 @@ export function AdminSupport() {
 
     try {
       const newStatus = !session.open;
-      
+
       if (USE_FIREBASE) {
         await updateSessionStatus(session.id, newStatus, currentUser.uid);
-        toast.success(newStatus ? '세션을 재개했습니다' : '세션을 종료했습니다');
+        toast.success(newStatus ? "세션을 재개했습니다" : "세션을 종료했습니다");
       } else {
         // Mock
-        const sessionsData = localStorage.getItem('chat_sessions') || '{}';
+        const sessionsData = localStorage.getItem("chat_sessions") || "{}";
         const sessionsObj: Record<string, ChatSession> = JSON.parse(sessionsData);
         sessionsObj[session.id] = {
           ...session,
           open: newStatus,
           updatedAt: Date.now(),
         };
-        localStorage.setItem('chat_sessions', JSON.stringify(sessionsObj));
+        localStorage.setItem("chat_sessions", JSON.stringify(sessionsObj));
         loadSessionsMock();
-        
+
         if (selectedSession?.id === session.id) {
           setSelectedSession({ ...session, open: newStatus });
         }
-        
-        toast.success(newStatus ? '세션을 재개했습니다' : '세션을 종료했습니다');
+
+        toast.success(newStatus ? "세션을 재개했습니다" : "세션을 종료했습니다");
       }
     } catch (error) {
-      console.error('Failed to update session status:', error);
-      toast.error('세션 상태 변경에 실패했습니다');
+      console.error("Failed to update session status:", error);
+      toast.error("세션 상태 변경에 실패했습니다");
     }
   }
 
+  // 4. Render Logic
+  // 지원 기능 비활성화 체크
+  if (!FEATURE_FLAGS.support) {
+    return (
+      <div className="p-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            고객 지원 기능이 비활성화되어 있습니다. 환경 변수에서 VITE_SUPPORT_ENABLED=true로
+            설정하세요.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   // 필터링된 세션
-  const filteredSessions = (sessions || []).filter((s) => {
-    if (filterTab === 'open') return s.open;
-    if (filterTab === 'closed') return !s.open;
+  const filteredSessions = (sessions || []).filter(s => {
+    if (filterTab === "open") return s.open;
+    if (filterTab === "closed") return !s.open;
     return true;
   });
 
   // 통계
-  const openSessions = (sessions || []).filter((s) => s.open);
-  const unreadCount = USE_FIREBASE 
-    ? stats.pending 
-    : (sessions || []).filter((s) => hasUnreadMessagesMock(s.id)).length;
+  const openSessions = (sessions || []).filter(s => s.open);
+  const unreadCount = USE_FIREBASE
+    ? stats.pending
+    : (sessions || []).filter(s => hasUnreadMessagesMock(s.id)).length;
 
   return (
     <div className="space-y-6">
@@ -4003,16 +3960,10 @@ export function AdminSupport() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#2E1C10]">고객 지원 채팅</h1>
-          <p className="text-sm text-[#2E1C10]/60">
-            실시간 1:1 고객 문의 관리
-          </p>
+          <p className="text-sm text-[#2E1C10]/60">실시간 1:1 고객 문의 관리</p>
         </div>
-        <Button
-          variant="outline"
-          onClick={loadSessionsAndStats}
-          disabled={loading}
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+        <Button variant="outline" onClick={loadSessionsAndStats} disabled={loading}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           새로고침
         </Button>
       </div>
@@ -4065,8 +4016,7 @@ export function AdminSupport() {
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              <Timer className="w-3 h-3 inline mr-1" />
-              첫 응답까지
+              <Timer className="w-3 h-3 inline mr-1" />첫 응답까지
             </p>
           </CardContent>
         </Card>
@@ -4088,7 +4038,7 @@ export function AdminSupport() {
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle>문의 목록</CardTitle>
-            <Tabs value={filterTab} onValueChange={(v) => setFilterTab(v as any)} className="w-full">
+            <Tabs value={filterTab} onValueChange={v => setFilterTab(v as any)} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="all">전체</TabsTrigger>
                 <TabsTrigger value="open">진행중</TabsTrigger>
@@ -4100,13 +4050,15 @@ export function AdminSupport() {
             <ScrollArea className="h-[500px]">
               {filteredSessions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
-                  {filterTab === 'all' ? '문의가 없습니다' : 
-                   filterTab === 'open' ? '진행 중인 문의가 없습니다' :
-                   '완료된 문의가 없습니다'}
+                  {filterTab === "all"
+                    ? "문의가 없습니다"
+                    : filterTab === "open"
+                      ? "진행 중인 문의가 없습니다"
+                      : "완료된 문의가 없습니다"}
                 </div>
               ) : (
                 <div className="space-y-1 p-2">
-                  {filteredSessions.map((session) => {
+                  {filteredSessions.map(session => {
                     const unread = USE_FIREBASE ? false : hasUnreadMessagesMock(session.id);
                     const isSelected = selectedSession?.id === session.id;
 
@@ -4116,15 +4068,17 @@ export function AdminSupport() {
                         onClick={() => selectSession(session)}
                         className={`w-full text-left p-3 rounded-lg transition-colors ${
                           isSelected
-                            ? 'bg-[#D61C1C] text-white'
+                            ? "bg-[#D61C1C] text-white"
                             : unread
-                            ? 'bg-red-50 hover:bg-red-100'
-                            : 'hover:bg-gray-100'
+                              ? "bg-red-50 hover:bg-red-100"
+                              : "hover:bg-gray-100"
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm ${isSelected ? 'text-white' : 'text-[#2E1C10]'}`}>
+                            <span
+                              className={`text-sm ${isSelected ? "text-white" : "text-[#2E1C10]"}`}
+                            >
                               {session.userName || session.userId.substring(0, 12)}
                             </span>
                             {!session.open && (
@@ -4139,15 +4093,21 @@ export function AdminSupport() {
                             </Badge>
                           )}
                         </div>
-                        <p className={`text-xs truncate ${isSelected ? 'text-white/80' : 'text-[#2E1C10]/60'}`}>
-                          {session.lastMessage || '메시지 없음'}
+                        <p
+                          className={`text-xs truncate ${isSelected ? "text-white/80" : "text-[#2E1C10]/60"}`}
+                        >
+                          {session.lastMessage || "메시지 없음"}
                         </p>
                         <div className="flex items-center justify-between mt-1">
-                          <p className={`text-xs ${isSelected ? 'text-white/60' : 'text-[#2E1C10]/40'}`}>
+                          <p
+                            className={`text-xs ${isSelected ? "text-white/60" : "text-[#2E1C10]/40"}`}
+                          >
                             {formatDateTime(new Date(session.lastAt))}
                           </p>
                           {session.assignedTo && (
-                            <UserCheck className={`w-3 h-3 ${isSelected ? 'text-white/60' : 'text-green-600'}`} />
+                            <UserCheck
+                              className={`w-3 h-3 ${isSelected ? "text-white/60" : "text-green-600"}`}
+                            />
                           )}
                         </div>
                       </button>
@@ -4166,9 +4126,7 @@ export function AdminSupport() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>
-                      {selectedSession.userName || selectedSession.userId}
-                    </CardTitle>
+                    <CardTitle>{selectedSession.userName || selectedSession.userId}</CardTitle>
                     <CardDescription className="flex items-center gap-2 mt-1">
                       <span>세션 ID: {selectedSession.id}</span>
                       {selectedSession.userPhone && (
@@ -4180,8 +4138,8 @@ export function AdminSupport() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={selectedSession.open ? 'default' : 'secondary'}>
-                      {selectedSession.open ? '진행 중' : '종료'}
+                    <Badge variant={selectedSession.open ? "default" : "secondary"}>
+                      {selectedSession.open ? "진행 중" : "종료"}
                     </Badge>
                     <Button
                       variant="outline"
@@ -4216,9 +4174,7 @@ export function AdminSupport() {
                         <p className="text-sm">메시지가 없습니다</p>
                       </div>
                     ) : (
-                      messages.map((msg) => (
-                        <AdminMessageBubble key={msg.id} message={msg} />
-                      ))
+                      messages.map(msg => <AdminMessageBubble key={msg.id} message={msg} />)
                     )}
                     <div ref={messagesEndRef} />
                   </div>
@@ -4238,14 +4194,16 @@ export function AdminSupport() {
                     <Input
                       ref={inputRef}
                       value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                      onChange={e => setInputText(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
                           sendMessage();
                         }
                       }}
-                      placeholder={selectedSession.open ? "답변을 입력하세요..." : "세션이 종료되었습니다"}
+                      placeholder={
+                        selectedSession.open ? "답변을 입력하세요..." : "세션이 종료되었습니다"
+                      }
                       disabled={sending || !selectedSession.open}
                     />
                     <Button
@@ -4304,39 +4262,39 @@ export function AdminSupport() {
  * 관리자용 메시지 말풍선
  */
 function AdminMessageBubble({ message }: { message: ChatMessage }) {
-  const isUser = message.from === 'user';
-  const isBot = message.from === 'bot';
+  const isUser = message.from === "user";
+  const isBot = message.from === "bot";
 
   return (
-    <div className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex ${isUser ? "justify-start" : "justify-end"}`}>
       <div className="max-w-[75%]">
         {/* 보낸 사람 */}
-        <p className={`text-xs text-[#2E1C10]/60 mb-1 px-1 ${isUser ? 'text-left' : 'text-right'}`}>
-          {isUser ? '👤 고객' : isBot ? '🤖 자동 응답' : '👨‍💼 관리자'}
+        <p className={`text-xs text-[#2E1C10]/60 mb-1 px-1 ${isUser ? "text-left" : "text-right"}`}>
+          {isUser ? "👤 고객" : isBot ? "🤖 자동 응답" : "👨‍💼 관리자"}
         </p>
 
         {/* 메시지 */}
         <div
           className={`rounded-2xl px-4 py-3 ${
             isUser
-              ? 'bg-gray-100 text-[#2E1C10]'
+              ? "bg-gray-100 text-[#2E1C10]"
               : isBot
-              ? 'bg-blue-50 text-[#2E1C10] border border-blue-200'
-              : 'bg-[#D61C1C] text-white'
+                ? "bg-blue-50 text-[#2E1C10] border border-blue-200"
+                : "bg-[#D61C1C] text-white"
           }`}
         >
-          <p className="text-sm whitespace-pre-wrap break-words">
-            {message.text}
-          </p>
+          <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
         </div>
 
         {/* 시간 + 읽음 */}
-        <div className={`flex items-center gap-1 mt-1 px-1 ${isUser ? 'justify-start' : 'justify-end'}`}>
+        <div
+          className={`flex items-center gap-1 mt-1 px-1 ${isUser ? "justify-start" : "justify-end"}`}
+        >
           <p className="text-xs text-[#2E1C10]/40">
-            {new Date(message.at).toLocaleTimeString('ko-KR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {new Date(message.at).toLocaleTimeString("ko-KR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              })}
           </p>
           {!isUser && !isBot && (
             <>

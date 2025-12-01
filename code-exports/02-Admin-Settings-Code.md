@@ -1,6 +1,6 @@
 # Admin Settings - Full Source Code
 
-**Generated**: 2025-11-30-1905  
+**Generated**: 2025-12-01-2219  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -19,22 +19,22 @@ Complete source code of admin settings page and 5 tabs.
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
-import { Settings, CreditCard, Truck, Map, Bell, Shield, Store } from 'lucide-react';
-import { useAuth } from '../../../contexts/AuthContext';
-import { USE_FIREBASE } from '../../../config/env';
-import { PaymentTab } from './PaymentTab';
-import { DeliveryTab } from './DeliveryTab';
-import { MapsTab } from './MapsTab';
-import { FCMTab } from './FCMTab';
-import { OperationsTab } from './OperationsTab';
-import { StoreInfoTab } from './StoreInfoTab';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Settings, CreditCard, Truck, Map, Bell, Shield, Store } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { USE_FIREBASE } from "../../../config/env";
+import { PaymentTab } from "./PaymentTab";
+import { DeliveryTab } from "./DeliveryTab";
+import { MapsTab } from "./MapsTab";
+import { FCMTab } from "./FCMTab";
+import { OperationsTab } from "./OperationsTab";
+import { StoreInfoTab } from "./StoreInfoTab";
 
 export function AdminSettingsCenter() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabFromUrl = searchParams.get('tab') || 'storeInfo';
+  const tabFromUrl = searchParams.get("tab") || "storeInfo";
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   // 사용자 정보 가져오기 (AuthContext 사용)
@@ -42,7 +42,7 @@ export function AdminSettingsCenter() {
 
   // URL 쿼리 파라미터 동기화
   useEffect(() => {
-    const tab = searchParams.get('tab');
+    const tab = searchParams.get("tab");
     if (tab) {
       setActiveTab(tab);
     }
@@ -66,12 +66,8 @@ export function AdminSettingsCenter() {
               <Shield className="w-16 h-16 text-[#2E1C10]/20 mx-auto" />
             </div>
             <div>
-              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">
-                로딩 중...
-              </h2>
-              <p className="text-[#2E1C10]/60">
-                사용자 정보를 확인하는 중입니다.
-              </p>
+              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">로딩 중...</h2>
+              <p className="text-[#2E1C10]/60">사용자 정보를 확인하는 중입니다.</p>
             </div>
           </div>
         </div>
@@ -79,21 +75,17 @@ export function AdminSettingsCenter() {
     }
 
     // Firebase 모드: 접근 권한 확인
-    if (user.role !== 'owner' && user.role !== 'admin') {
+    if (user.role !== "owner" && user.role !== "admin") {
       return (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4">
             <Shield className="w-16 h-16 text-[#2E1C10]/20 mx-auto" />
             <div>
-              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">
-                접근 권한이 필요합니다
-              </h2>
+              <h2 className="text-xl font-medium text-[#2E1C10] mb-2">접근 권한이 필요합니다</h2>
               <p className="text-[#2E1C10]/60">
                 설정 센터는 관리자 또는 소유자만 접근할 수 있습니다.
               </p>
-              <p className="text-sm text-[#2E1C10]/40 mt-2">
-                현재 역할: {user.role || '없음'}
-              </p>
+              <p className="text-sm text-[#2E1C10]/40 mt-2">현재 역할: {user.role || "없음"}</p>
             </div>
           </div>
         </div>
@@ -111,9 +103,7 @@ export function AdminSettingsCenter() {
             <Settings className="w-6 h-6 text-[#D61C1C]" />
             <h1 className="text-2xl text-[#2E1C10]">설정 센터</h1>
           </div>
-          <p className="text-[#2E1C10]/60">
-            API 키 및 시스템 설정을 안전하게 관리하세요
-          </p>
+          <p className="text-[#2E1C10]/60">API 키 및 시스템 설정을 안전하게 관리하세요</p>
         </div>
 
         {/* Role 배지 */}
@@ -121,7 +111,7 @@ export function AdminSettingsCenter() {
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#D61C1C]/10 rounded-lg">
             <Shield className="w-4 h-4 text-[#D61C1C]" />
             <span className="text-sm font-medium text-[#D61C1C]">
-              {user.role === 'owner' ? '소유자' : '관리자'}
+              {user.role === "owner" ? "소유자" : "관리자"}
             </span>
           </div>
         )}
@@ -132,12 +122,11 @@ export function AdminSettingsCenter() {
         <div className="flex items-start gap-3">
           <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1 space-y-1">
-            <h3 className="text-sm font-medium text-blue-900">
-              보안 원칙
-            </h3>
+            <h3 className="text-sm font-medium text-blue-900">보안 원칙</h3>
             <p className="text-xs text-blue-800">
-              서버 비밀키는 <code className="px-1 py-0.5 bg-blue-100 rounded">functions:config</code>에만 저장됩니다.
-              클라이언트(.env.local)에는 공개 가능한 키만 저장하세요.
+              서버 비밀키는{" "}
+              <code className="px-1 py-0.5 bg-blue-100 rounded">functions:config</code>에만
+              저장됩니다. 클라이언트(.env.local)에는 공개 가능한 키만 저장하세요.
             </p>
           </div>
         </div>
@@ -146,15 +135,27 @@ export function AdminSettingsCenter() {
       {/* 탭 메뉴 */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="storeInfo" className="gap-2" data-testid="admin-settings-tab-trigger-storeinfo">
+          <TabsTrigger
+            value="storeInfo"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-storeinfo"
+          >
             <Store className="w-4 h-4" />
             <span className="hidden sm:inline">가게 정보</span>
           </TabsTrigger>
-          <TabsTrigger value="payment" className="gap-2" data-testid="admin-settings-tab-trigger-payment">
+          <TabsTrigger
+            value="payment"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-payment"
+          >
             <CreditCard className="w-4 h-4" />
             <span className="hidden sm:inline">결제</span>
           </TabsTrigger>
-          <TabsTrigger value="delivery" className="gap-2" data-testid="admin-settings-tab-trigger-delivery">
+          <TabsTrigger
+            value="delivery"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-delivery"
+          >
             <Truck className="w-4 h-4" />
             <span className="hidden sm:inline">배달대행</span>
           </TabsTrigger>
@@ -166,7 +167,11 @@ export function AdminSettingsCenter() {
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">알림/FCM</span>
           </TabsTrigger>
-          <TabsTrigger value="operations" className="gap-2" data-testid="admin-settings-tab-trigger-operations">
+          <TabsTrigger
+            value="operations"
+            className="gap-2"
+            data-testid="admin-settings-tab-trigger-operations"
+          >
             <Shield className="w-4 h-4" />
             <span className="hidden sm:inline">운영/보안</span>
           </TabsTrigger>
@@ -216,16 +221,22 @@ export function AdminSettingsCenter() {
 /**
  * 결제 설정 탭 (NICEPAY)
  * KS컴퍼니 (사업자번호: 553-17-00098)
- * 
+ *
  * 주의: 현재 실제 결제 연동은 Phase 3 이후로 보류
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Separator } from '../../../components/ui/separator';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { Separator } from "../../../components/ui/separator";
 import {
   CheckCircle2,
   XCircle,
@@ -235,10 +246,10 @@ import {
   Terminal,
   FileText,
   CreditCard,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { checkFunctionsHealth } from '../../../lib/admin/settingsCenter.api';
-import type { FunctionsHealthCheck } from '../../../types/adminSettings';
+} from "lucide-react";
+import { toast } from "sonner";
+import { checkFunctionsHealth } from "../../../lib/admin/settingsCenter.api";
+import type { FunctionsHealthCheck } from "../../../types/adminSettings";
 
 export function PaymentTab() {
   const [healthCheck, setHealthCheck] = useState<FunctionsHealthCheck | null>(null);
@@ -252,8 +263,8 @@ export function PaymentTab() {
       const result = await checkFunctionsHealth();
       setHealthCheck(result);
     } catch (error) {
-      console.error('Health check failed:', error);
-      toast.error('상태 확인에 실패했습니다');
+      console.error("Health check failed:", error);
+      toast.error("상태 확인에 실패했습니다");
     } finally {
       setChecking(false);
       setLoading(false);
@@ -267,7 +278,7 @@ export function PaymentTab() {
   // CLI 명령어 복사
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
-    toast.success('명령어가 복사되었습니다');
+    toast.success("명령어가 복사되었습니다");
   };
 
   return (
@@ -278,9 +289,9 @@ export function PaymentTab() {
         <AlertDescription>
           <div className="font-medium mb-1">현재 결제 연동 상태</div>
           <div className="text-sm text-[#2E1C10]/70">
-            • 현재 이 프로젝트는 <strong>테스트 결제 및 가상 결제</strong>만 지원합니다.<br />
-            • 실제 PG(결제대행) 연동은 <strong>Phase 3 이후</strong>로 보류되었습니다.<br />
-            • 향후 PG사 선정 시 별도 T코드로 연동 작업이 진행됩니다.
+            • 현재 이 프로젝트는 <strong>테스트 결제 및 가상 결제</strong>만 지원합니다.
+            <br />• 실제 PG(결제대행) 연동은 <strong>Phase 3 이후</strong>로 보류되었습니다.
+            <br />• 향후 PG사 선정 시 별도 T코드로 연동 작업이 진행됩니다.
           </div>
         </AlertDescription>
       </Alert>
@@ -302,9 +313,10 @@ export function PaymentTab() {
             <AlertDescription className="text-xs">
               <div className="font-medium mb-1">⚠️ 주의사항</div>
               <div className="text-[#2E1C10]/60">
-                • 현재 설정은 Mock 모드 테스트용입니다.<br />
-                • 실제 결제 승인/취소는 동작하지 않습니다.<br />
-                • Phase 2 이후 Firebase Functions와 연동하여 테스트 결제가 가능해집니다.
+                • 현재 설정은 Mock 모드 테스트용입니다.
+                <br />
+                • 실제 결제 승인/취소는 동작하지 않습니다.
+                <br />• Phase 2 이후 Firebase Functions와 연동하여 테스트 결제가 가능해집니다.
               </div>
             </AlertDescription>
           </Alert>
@@ -323,12 +335,12 @@ export function PaymentTab() {
 }
 
 // 나이스페이 설정 컴포넌트
-function NicePaySettings({ 
-  healthCheck, 
-  loading, 
-  checking, 
-  onRecheck, 
-  onCopyCommand 
+function NicePaySettings({
+  healthCheck,
+  loading,
+  checking,
+  onRecheck,
+  onCopyCommand,
 }: {
   healthCheck: FunctionsHealthCheck | null;
   loading: boolean;
@@ -383,17 +395,18 @@ function NicePaySettings({
             {/* 필수 키 체크 */}
             <div className="space-y-2">
               <span className="text-xs font-medium text-[#2E1C10]/60">필수 설정</span>
-              
-              {healthCheck?.nicepay?.fields && Object.entries(healthCheck.nicepay.fields).map(([key, value]) => (
-                <div key={key} className="flex items-center justify-between text-xs">
-                  <span className="text-[#2E1C10]/70">{key}</span>
-                  {value ? (
-                    <CheckCircle2 className="w-3 h-3 text-green-600" />
-                  ) : (
-                    <XCircle className="w-3 h-3 text-red-600" />
-                  )}
-                </div>
-              ))}
+
+              {healthCheck?.nicepay?.fields &&
+                Object.entries(healthCheck.nicepay.fields).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between text-xs">
+                    <span className="text-[#2E1C10]/70">{key}</span>
+                    {value ? (
+                      <CheckCircle2 className="w-3 h-3 text-green-600" />
+                    ) : (
+                      <XCircle className="w-3 h-3 text-red-600" />
+                    )}
+                  </div>
+                ))}
             </div>
 
             <Separator />
@@ -406,7 +419,7 @@ function NicePaySettings({
               onClick={onRecheck}
               disabled={checking}
             >
-              {checking ? '확인 중...' : '상태 재확인'}
+              {checking ? "확인 중..." : "상태 재확인"}
             </Button>
           </CardContent>
         </Card>
@@ -415,8 +428,7 @@ function NicePaySettings({
         <Alert>
           <AlertCircle className="w-4 h-4" />
           <AlertDescription className="text-xs">
-            NICEPAY 설정은 Firebase Functions에만 저장됩니다.
-            프론트엔드에는 노출되지 않습니다.
+            NICEPAY 설정은 Firebase Functions에만 저장됩니다. 프론트엔드에는 노출되지 않습니다.
           </AlertDescription>
         </Alert>
       </div>
@@ -438,22 +450,14 @@ function NicePaySettings({
             {/* 명령어 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-[#2E1C10]">
-                  1. 설정 명령어
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onCopyCommand(nicepayCommand)}
-                >
+                <span className="text-sm font-medium text-[#2E1C10]">1. 설정 명령어</span>
+                <Button variant="outline" size="sm" onClick={() => onCopyCommand(nicepayCommand)}>
                   <Copy className="w-4 h-4 mr-2" />
                   복사
                 </Button>
               </div>
               <pre className="p-4 bg-[#2E1C10]/5 rounded-lg overflow-x-auto">
-                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">
-                  {nicepayCommand}
-                </code>
+                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">{nicepayCommand}</code>
               </pre>
             </div>
 
@@ -462,22 +466,14 @@ function NicePaySettings({
             {/* 확인 명령어 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-[#2E1C10]">
-                  2. 설정 확인
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onCopyCommand(getCheckCommand)}
-                >
+                <span className="text-sm font-medium text-[#2E1C10]">2. 설정 확인</span>
+                <Button variant="outline" size="sm" onClick={() => onCopyCommand(getCheckCommand)}>
                   <Copy className="w-4 h-4 mr-2" />
                   복사
                 </Button>
               </div>
               <pre className="p-4 bg-[#2E1C10]/5 rounded-lg">
-                <code className="text-xs text-[#2E1C10]/80">
-                  {getCheckCommand}
-                </code>
+                <code className="text-xs text-[#2E1C10]/80">{getCheckCommand}</code>
               </pre>
             </div>
 
@@ -503,23 +499,19 @@ function NicePaySettings({
               <FileText className="w-5 h-5 text-[#F37021]" />
               <CardTitle>NICEPAY 가이드</CardTitle>
             </div>
-            <CardDescription>
-              NICEPAY 개발자 센터에서 필요한 정보를 확인하세요
-            </CardDescription>
+            <CardDescription>NICEPAY 개발자 센터에서 필요한 정보를 확인하세요</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* MID/KEY 발급 */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">
-                1. MID/KEY 발급
-              </h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">1. MID/KEY 발급</h4>
               <p className="text-xs text-[#2E1C10]/60">
                 NICEPAY 개발자 센터에서 가맹점 ID(MID)와 Key를 발급받으세요.
               </p>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('https://npg.nicepay.co.kr', '_blank')}
+                onClick={() => window.open("https://npg.nicepay.co.kr", "_blank")}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 NICEPAY 개발자 센터
@@ -530,24 +522,18 @@ function NicePaySettings({
 
             {/* Return/Cancel URL */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">
-                2. Return/Cancel URL 등록
-              </h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">2. Return/Cancel URL 등록</h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
                 NICEPAY 관리자 페이지에서 아래 URL을 등록하세요:
               </p>
               <div className="space-y-1 text-xs">
                 <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                   <span className="text-[#2E1C10]/60">Return URL:</span>
-                  <code className="flex-1 text-[#2E1C10]">
-                    https://hp-kal.web.app/pay/return
-                  </code>
+                  <code className="flex-1 text-[#2E1C10]">https://hp-kal.web.app/pay/return</code>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                   <span className="text-[#2E1C10]/60">Cancel URL:</span>
-                  <code className="flex-1 text-[#2E1C10]">
-                    https://hp-kal.web.app/pay/cancel
-                  </code>
+                  <code className="flex-1 text-[#2E1C10]">https://hp-kal.web.app/pay/cancel</code>
                 </div>
               </div>
             </div>
@@ -572,34 +558,39 @@ function NicePaySettings({
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Badge } from '../../../components/ui/badge';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Separator } from '../../../components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import { useState, useEffect } from "react";
 import {
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  Copy,
-  Save,
-  Truck,
-  Terminal,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { getAdminSettings, saveAdminSettings } from '../../../lib/admin/settingsCenter.api';
-import { formatPrice } from '../../../lib/utils';
-import { getCurrentUser } from '../../../lib/auth';
-import type { DeliverySettings } from '../../../types/adminSettings';
-import { DEFAULT_DELIVERY_SETTINGS } from '../../../types/adminSettings';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Badge } from "../../../components/ui/badge";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { Separator } from "../../../components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
+import { CheckCircle2, XCircle, AlertCircle, Copy, Save, Truck, Terminal } from "lucide-react";
+import { toast } from "sonner";
+import { getAdminSettings, saveAdminSettings } from "../../../lib/admin/settingsCenter.api";
+import { formatPrice } from "../../../lib/utils";
+import { getCurrentUser } from "../../../lib/auth";
+import type { DeliverySettings } from "../../../types/adminSettings";
+import { DEFAULT_DELIVERY_SETTINGS } from "../../../types/adminSettings";
 
 export function DeliveryTab() {
   const [settings, setSettings] = useState<DeliverySettings>(DEFAULT_DELIVERY_SETTINGS);
-  const [originalSettings, setOriginalSettings] = useState<DeliverySettings>(DEFAULT_DELIVERY_SETTINGS);
+  const [originalSettings, setOriginalSettings] =
+    useState<DeliverySettings>(DEFAULT_DELIVERY_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -620,8 +611,8 @@ export function DeliveryTab() {
         setOriginalSettings(DEFAULT_DELIVERY_SETTINGS);
       }
     } catch (error) {
-      console.error('Failed to load settings:', error);
-      toast.error('설정을 불러오는데 실패했습니다');
+      console.error("Failed to load settings:", error);
+      toast.error("설정을 불러오는데 실패했습니다");
       // 에러 발생 시 기본값 사용
       setSettings(DEFAULT_DELIVERY_SETTINGS);
       setOriginalSettings(DEFAULT_DELIVERY_SETTINGS);
@@ -640,16 +631,12 @@ export function DeliveryTab() {
 
     setSaving(true);
     try {
-      await saveAdminSettings(
-        { delivery: settings },
-        user.uid,
-        user.displayName
-      );
+      await saveAdminSettings({ delivery: settings }, user.uid, user.displayName);
       setOriginalSettings(settings);
-      toast.success('설정을 저장했습니다');
+      toast.success("설정을 저장했습니다");
     } catch (error) {
-      console.error('Failed to save settings:', error);
-      toast.error('설정 저장에 실패했습니다');
+      console.error("Failed to save settings:", error);
+      toast.error("설정 저장에 실패했습니다");
     } finally {
       setSaving(false);
     }
@@ -663,19 +650,24 @@ export function DeliveryTab() {
 
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
-    toast.success('명령어가 복사되었습니다');
+    toast.success("명령어가 복사되었습니다");
   };
 
   const hasChanges = JSON.stringify(settings) !== JSON.stringify(originalSettings);
 
   if (loading) {
-    return <div className="animate-pulse space-y-4">
-      <div className="h-64 bg-gray-100 rounded-lg" />
-    </div>;
+    return (
+      <div className="animate-pulse space-y-4">
+        <div className="h-64 bg-gray-100 rounded-lg" />
+      </div>
+    );
   }
 
   return (
-    <div data-testid="admin-settings-delivery-tab" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div
+      data-testid="admin-settings-delivery-tab"
+      className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+    >
       {/* 좌측: 상태 패널 */}
       <div className="lg:col-span-1 space-y-4">
         <Card>
@@ -686,10 +678,10 @@ export function DeliveryTab() {
             {/* Provider 선택 */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-[#2E1C10]/80">현재 Provider</span>
-              <Badge variant={settings.provider === 'mock' ? 'outline' : 'default'}>
-                {settings.provider === 'mock' && 'Mock (개발)'}
-                {settings.provider === 'providerA' && 'Provider A'}
-                {settings.provider === 'custom' && 'Custom'}
+              <Badge variant={settings.provider === "mock" ? "outline" : "default"}>
+                {settings.provider === "mock" && "Mock (개발)"}
+                {settings.provider === "providerA" && "Provider A"}
+                {settings.provider === "custom" && "Custom"}
               </Badge>
             </div>
 
@@ -698,17 +690,13 @@ export function DeliveryTab() {
             {/* 최대 거리 */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-[#2E1C10]/80">최대 배달 거리</span>
-              <span className="font-medium text-[#2E1C10]">
-                {settings.maxDistanceKm}km
-              </span>
+              <span className="font-medium text-[#2E1C10]">{settings.maxDistanceKm}km</span>
             </div>
 
             {/* 요금 구간 */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-[#2E1C10]/80">요금 구간</span>
-              <span className="font-medium text-[#2E1C10]">
-                {settings.feeTable.length}개
-              </span>
+              <span className="font-medium text-[#2E1C10]">{settings.feeTable.length}개</span>
             </div>
 
             {/* 야간 추가비 */}
@@ -738,9 +726,7 @@ export function DeliveryTab() {
               <Truck className="w-5 h-5 text-[#D61C1C]" />
               <CardTitle>배달 대행사 Provider</CardTitle>
             </div>
-            <CardDescription>
-              사용할 배달 대행사를 선택하세요
-            </CardDescription>
+            <CardDescription>사용할 배달 대행사를 선택하세요</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -760,7 +746,7 @@ export function DeliveryTab() {
               </Select>
             </div>
 
-            {settings.provider === 'providerA' && (
+            {settings.provider === "providerA" && (
               <Alert>
                 <AlertCircle className="w-4 h-4" />
                 <AlertDescription className="text-xs">
@@ -786,10 +772,12 @@ export function DeliveryTab() {
               <Input
                 type="number"
                 value={settings?.maxDistanceKm ?? 5}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  maxDistanceKm: parseFloat(e.target.value) || 0
-                })}
+                onChange={e =>
+                  setSettings({
+                    ...settings,
+                    maxDistanceKm: parseFloat(e.target.value) || 0,
+                  })
+                }
                 min={0}
                 step={0.1}
               />
@@ -806,7 +794,7 @@ export function DeliveryTab() {
                     <Input
                       type="number"
                       value={zone.toKm}
-                      onChange={(e) => {
+                      onChange={e => {
                         const newTable = [...settings.feeTable];
                         newTable[index].toKm = parseFloat(e.target.value) || 0;
                         setSettings({ ...settings, feeTable: newTable });
@@ -818,7 +806,7 @@ export function DeliveryTab() {
                     <Input
                       type="number"
                       value={zone.fee}
-                      onChange={(e) => {
+                      onChange={e => {
                         const newTable = [...settings.feeTable];
                         newTable[index].fee = parseInt(e.target.value) || 0;
                         setSettings({ ...settings, feeTable: newTable });
@@ -836,16 +824,20 @@ export function DeliveryTab() {
 
             {/* 야간 추가비 */}
             <div className="space-y-2">
-              <Label>야간 추가비 ({settings.nightStartHour}:00 ~ {settings.nightEndHour}:00)</Label>
+              <Label>
+                야간 추가비 ({settings.nightStartHour}:00 ~ {settings.nightEndHour}:00)
+              </Label>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[#2E1C10]/60">+</span>
                 <Input
                   type="number"
                   value={settings?.nightSurcharge ?? 0}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    nightSurcharge: parseInt(e.target.value) || 0
-                  })}
+                  onChange={e =>
+                    setSettings({
+                      ...settings,
+                      nightSurcharge: parseInt(e.target.value) || 0,
+                    })
+                  }
                   min={0}
                   step={1000}
                 />
@@ -861,7 +853,7 @@ export function DeliveryTab() {
                 className="w-full bg-[#D61C1C] hover:bg-[#D61C1C]/90"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? '저장 중...' : '저장'}
+                {saving ? "저장 중..." : "저장"}
               </Button>
             )}
           </CardContent>
@@ -874,26 +866,18 @@ export function DeliveryTab() {
               <Terminal className="w-5 h-5 text-[#F37021]" />
               <CardTitle className="text-base">Webhook 비밀키 설정 (서버)</CardTitle>
             </div>
-            <CardDescription>
-              배달 대행사 Webhook 검증을 위한 비밀키
-            </CardDescription>
+            <CardDescription>배달 대행사 Webhook 검증을 위한 비밀키</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-[#2E1C10]">CLI 명령어</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyCommand(webhookCommand)}
-              >
+              <Button variant="outline" size="sm" onClick={() => copyCommand(webhookCommand)}>
                 <Copy className="w-4 h-4 mr-2" />
                 복사
               </Button>
             </div>
             <pre className="p-4 bg-[#2E1C10]/5 rounded-lg overflow-x-auto">
-              <code className="text-xs text-[#2E1C10]/80 whitespace-pre">
-                {webhookCommand}
-              </code>
+              <code className="text-xs text-[#2E1C10]/80 whitespace-pre">{webhookCommand}</code>
             </pre>
           </CardContent>
         </Card>
@@ -914,38 +898,44 @@ export function DeliveryTab() {
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Separator } from '../../../components/ui/separator';
-import { CheckCircle2, XCircle, AlertCircle, Copy, Download, Map as MapIcon } from 'lucide-react';
-import { toast } from 'sonner';
-import { getEnv } from '../../../config/env';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { Separator } from "../../../components/ui/separator";
+import { CheckCircle2, XCircle, AlertCircle, Copy, Download, Map as MapIcon } from "lucide-react";
+import { toast } from "sonner";
+import { getEnv } from "../../../config/env";
 
 export function MapsTab() {
   // 환경 변수 확인 (Figma Make 호환)
-  const kakaoKey = getEnv('VITE_KAKAO_MAP_KEY');
-  const googleKey = getEnv('VITE_GOOGLE_MAPS_API_KEY');
+  const kakaoKey = getEnv("VITE_KAKAO_MAP_KEY");
+  const googleKey = getEnv("VITE_GOOGLE_MAPS_API_KEY");
 
   // .env 템플릿 생성
   const generateEnvTemplate = () => {
     const template = `# 지도/지오코딩 API 키
 # Kakao Maps (https://developers.kakao.com)
-VITE_KAKAO_MAP_KEY=${kakaoKey || 'YOUR_KAKAO_REST_API_KEY'}
+VITE_KAKAO_MAP_KEY=${kakaoKey || "YOUR_KAKAO_REST_API_KEY"}
 
 # Google Maps (https://console.cloud.google.com)
-VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
+VITE_GOOGLE_MAPS_API_KEY=${googleKey || "YOUR_GOOGLE_MAPS_API_KEY"}
 `;
 
-    const blob = new Blob([template], { type: 'text/plain' });
+    const blob = new Blob([template], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = '.env.maps.template';
+    a.download = ".env.maps.template";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('.env 템플릿을 다운로드했습니다');
+    toast.success(".env 템플릿을 다운로드했습니다");
   };
 
   return (
@@ -1007,8 +997,11 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-sm">
-            <strong>🔐 보안 및 복제 편의를 위해</strong> 지도 API 키는 화면에서 직접 입력하지 않고<br />
-            <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일과 복사 스크립트로만 관리합니다.<br />
+            <strong>🔐 보안 및 복제 편의를 위해</strong> 지도 API 키는 화면에서 직접 입력하지 않고
+            <br />
+            <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일과 복사
+            스크립트로만 관리합니다.
+            <br />
             아래 안내에 따라 Kakao/Google 콘솔에서 키를 발급한 뒤, 환경변수에 추가해 주세요.
           </AlertDescription>
         </Alert>
@@ -1020,9 +1013,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               <MapIcon className="w-5 h-5 text-[#FEE500]" />
               <CardTitle>Kakao Maps API (.env로 설정)</CardTitle>
             </div>
-            <CardDescription>
-              Kakao 지도 및 지오코딩 서비스
-            </CardDescription>
+            <CardDescription>Kakao 지도 및 지오코딩 서비스</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -1033,7 +1024,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('https://developers.kakao.com/console/app', '_blank')}
+                onClick={() => window.open("https://developers.kakao.com/console/app", "_blank")}
               >
                 Kakao Developers 콘솔
               </Button>
@@ -1048,18 +1039,22 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               </p>
               <div className="space-y-1 text-xs">
                 <code className="block p-2 bg-gray-50 rounded">
-                  {typeof window !== 'undefined' ? window.location.origin : 'https://hyun-poong.web.app'}
+                  {typeof window !== "undefined"
+                    ? window.location.origin
+                    : "https://hyun-poong.web.app"}
                 </code>
-                <code className="block p-2 bg-gray-50 rounded">
-                  https://{'{배포 도메인}'}
-                </code>
+                <code className="block p-2 bg-gray-50 rounded">https://{"{배포 도메인}"}</code>
               </div>
             </div>
 
             <Separator />
 
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">3. 프로젝트 루트의 <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에 아래와 같이 추가</h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">
+                3. 프로젝트 루트의{" "}
+                <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에
+                아래와 같이 추가
+              </h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
                 이 화면에서는 API 키를 직접 저장하지 않습니다. 아래 환경변수에만 키를 넣어야 합니다.
               </p>
@@ -1067,7 +1062,11 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
                 VITE_KAKAO_MAP_KEY=발급받은_JAVASCRIPT_KEY
               </code>
               <p className="text-xs text-[#2E1C10]/60 mt-2">
-                저장 후 <code className="bg-gray-100 px-1 py-0.5 rounded">npm run build && firebase deploy</code> 로 다시 배포하세요.
+                저장 후{" "}
+                <code className="bg-gray-100 px-1 py-0.5 rounded">
+                  npm run build && firebase deploy
+                </code>{" "}
+                로 다시 배포하세요.
               </p>
             </div>
           </CardContent>
@@ -1080,9 +1079,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               <MapIcon className="w-5 h-5 text-[#4285F4]" />
               <CardTitle>Google Maps API (선택)</CardTitle>
             </div>
-            <CardDescription>
-              Google 지도 및 지오코딩 서비스
-            </CardDescription>
+            <CardDescription>Google 지도 및 지오코딩 서비스</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -1093,7 +1090,9 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('https://console.cloud.google.com/google/maps-apis', '_blank')}
+                onClick={() =>
+                  window.open("https://console.cloud.google.com/google/maps-apis", "_blank")
+                }
               >
                 Google Cloud Console
               </Button>
@@ -1103,9 +1102,7 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
 
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-[#2E1C10]">2. API 활성화</h4>
-              <p className="text-xs text-[#2E1C10]/60 mb-2">
-                다음 API를 활성화하세요:
-              </p>
+              <p className="text-xs text-[#2E1C10]/60 mb-2">다음 API를 활성화하세요:</p>
               <ul className="text-xs text-[#2E1C10]/70 space-y-1 list-disc list-inside">
                 <li>Maps JavaScript API</li>
                 <li>Geocoding API</li>
@@ -1116,7 +1113,11 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
             <Separator />
 
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">3. 프로젝트 루트의 <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에 아래와 같이 추가</h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">
+                3. 프로젝트 루트의{" "}
+                <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.env.local</code> 파일에
+                아래와 같이 추가
+              </h4>
               <p className="text-xs text-[#2E1C10]/60 mb-2">
                 이 화면에서는 API 키를 직접 저장하지 않습니다. 아래 환경변수에만 키를 넣어야 합니다.
               </p>
@@ -1124,7 +1125,11 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
                 VITE_GOOGLE_MAPS_API_KEY=발급받은_BROWSER_KEY
               </code>
               <p className="text-xs text-[#2E1C10]/60 mt-2">
-                저장 후 <code className="bg-gray-100 px-1 py-0.5 rounded">npm run build && firebase deploy</code> 로 다시 배포하세요.
+                저장 후{" "}
+                <code className="bg-gray-100 px-1 py-0.5 rounded">
+                  npm run build && firebase deploy
+                </code>{" "}
+                로 다시 배포하세요.
               </p>
             </div>
           </CardContent>
@@ -1134,15 +1139,10 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">.env 템플릿</CardTitle>
-            <CardDescription>
-              지도 API 키 설정을 위한 템플릿 파일
-            </CardDescription>
+            <CardDescription>지도 API 키 설정을 위한 템플릿 파일</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button
-              onClick={generateEnvTemplate}
-              className="w-full"
-            >
+            <Button onClick={generateEnvTemplate} className="w-full">
               <Download className="w-4 h-4 mr-2" />
               .env 템플릿 다운로드
             </Button>
@@ -1165,17 +1165,23 @@ VITE_GOOGLE_MAPS_API_KEY=${googleKey || 'YOUR_GOOGLE_MAPS_API_KEY'}
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Separator } from '../../../components/ui/separator';
-import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from 'lucide-react';
-import { toast } from 'sonner';
-import { runFCMDiagnostics } from '../../../lib/admin/settingsCenter.api';
-import type { DiagnosticResult } from '../../../types/adminSettings';
-import { USE_FIREBASE } from '../../../config/env';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from "lucide-react";
+import { toast } from "sonner";
+import { runFCMDiagnostics } from "@/lib/admin/settingsCenter.api";
+import type { DiagnosticResult } from "@/types/adminSettings";
+import { USE_FIREBASE } from "@/config/env";
 
 export function FCMTab() {
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult | null>(null);
@@ -1189,24 +1195,24 @@ export function FCMTab() {
       try {
         // Mock 모드용 정보 결과 생성
         const mockResult: DiagnosticResult = {
-          overall: 'info',
+          overall: "info",
           checks: [
             {
-              name: 'Mock 모드',
-              status: 'info',
-              message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+              name: "Mock 모드",
+              status: "info",
+              message: "현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.",
             },
             {
-              name: '실서비스 전환',
-              status: 'info',
-              message: '실서비스 전환 후 Firebase 연결 및 FCM 설정을 진행해 주세요.',
+              name: "실서비스 전환",
+              status: "info",
+              message: "실서비스 전환 후 Firebase 연결 및 FCM 설정을 진행해 주세요.",
             },
           ],
         };
         setDiagnostics(mockResult);
         // Mock 모드에서는 toast를 띄우지 않음
       } catch (error) {
-        console.error('Mock diagnostics failed:', error);
+        console.error("Mock diagnostics failed:", error);
       } finally {
         setRunning(false);
       }
@@ -1218,30 +1224,30 @@ export function FCMTab() {
     try {
       const result = await runFCMDiagnostics();
       setDiagnostics(result);
-      
+
       // 전체 상태에 따라 다른 메시지 표시
-      if (result.overall === 'pass') {
-        toast.success('모든 FCM 설정이 정상입니다');
-      } else if (result.overall === 'info') {
+      if (result.overall === "pass") {
+        toast.success("모든 FCM 설정이 정상입니다");
+      } else if (result.overall === "info") {
         // 미설정 상태는 정보 메시지로 표시
-        toast.info('FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요');
-      } else if (result.overall === 'warning') {
-        toast.warning('일부 설정을 확인해주세요');
+        toast.info("FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요");
+      } else if (result.overall === "warning") {
+        toast.warning("일부 설정을 확인해주세요");
       } else {
         // 실제 오류만 에러 메시지 표시
         const hasActualError = result.checks.some(
-          check => check.status === 'fail' && check.name !== 'VAPID 키'
+          check => check.status === "fail" && check.name !== "VAPID 키",
         );
         if (hasActualError) {
-          toast.error('FCM 설정에 문제가 있습니다');
+          toast.error("FCM 설정에 문제가 있습니다");
         } else {
           // VAPID 키만 미설정인 경우는 정보 메시지
-          toast.info('FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요');
+          toast.info("FCM 설정이 필요합니다. 아래 가이드를 참고하여 설정해주세요");
         }
       }
     } catch (error) {
-      console.error('Diagnostics failed:', error);
-      toast.error('진단 실행에 실패했습니다');
+      console.error("Diagnostics failed:", error);
+      toast.error("진단 실행에 실패했습니다");
     } finally {
       setRunning(false);
     }
@@ -1252,19 +1258,19 @@ export function FCMTab() {
     if (!USE_FIREBASE) {
       // Mock 모드용 정보 결과만 설정
       const mockResult: DiagnosticResult = {
-        overall: 'info',
+        overall: "info",
         checks: [
           {
-            name: 'Mock 모드',
-            status: 'info',
-            message: '현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.',
+            name: "Mock 모드",
+            status: "info",
+            message: "현재 Mock 모드(USE_FIREBASE=false)에서는 FCM 푸시를 사용하지 않습니다.",
           },
         ],
       };
       setDiagnostics(mockResult);
       return;
     }
-    
+
     // 실서비스 모드에서만 자동 진단 실행
     runDiagnostics();
   }, []);
@@ -1275,7 +1281,7 @@ export function FCMTab() {
 
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
-    toast.success('명령어가 복사되었습니다');
+    toast.success("명령어가 복사되었습니다");
   };
 
   return (
@@ -1292,17 +1298,17 @@ export function FCMTab() {
               <span className="text-sm text-[#2E1C10]/80">전체 상태</span>
               {!diagnostics ? (
                 <Badge variant="outline">확인 중...</Badge>
-              ) : diagnostics.overall === 'info' ? (
+              ) : diagnostics.overall === "info" ? (
                 <Badge className="bg-blue-500 gap-1">
                   <AlertCircle className="w-3 h-3" />
                   정보
                 </Badge>
-              ) : diagnostics.overall === 'pass' ? (
+              ) : diagnostics.overall === "pass" ? (
                 <Badge className="bg-green-500 gap-1">
                   <CheckCircle2 className="w-3 h-3" />
                   정상
                 </Badge>
-              ) : diagnostics.overall === 'warning' ? (
+              ) : diagnostics.overall === "warning" ? (
                 <Badge className="bg-yellow-500 gap-1">
                   <AlertCircle className="w-3 h-3" />
                   경고
@@ -1323,11 +1329,11 @@ export function FCMTab() {
                 <span className="text-xs font-medium text-[#2E1C10]/60">진단 결과</span>
                 {diagnostics.checks.map((check, index) => (
                   <div key={index} className="flex items-start gap-2 text-xs">
-                    {check.status === 'info' ? (
+                    {check.status === "info" ? (
                       <AlertCircle className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
-                    ) : check.status === 'pass' ? (
+                    ) : check.status === "pass" ? (
                       <CheckCircle2 className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
-                    ) : check.status === 'warning' ? (
+                    ) : check.status === "warning" ? (
                       <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
                     ) : (
                       <XCircle className="w-3 h-3 text-red-600 mt-0.5 flex-shrink-0" />
@@ -1351,7 +1357,7 @@ export function FCMTab() {
               disabled={running}
             >
               <Play className="w-4 h-4 mr-2" />
-              {running ? '진단 중...' : '진단 재실행'}
+              {running ? "진단 중..." : "진단 재실행"}
             </Button>
           </CardContent>
         </Card>
@@ -1364,9 +1370,12 @@ export function FCMTab() {
           <Alert className="border-blue-200 bg-blue-50">
             <AlertCircle className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-sm text-blue-900">
-              <strong>⚙️ 현재 이 프로젝트는 Mock 모드(USE_FIREBASE=false)입니다.</strong><br />
-              테스트 환경에서는 FCM 푸시를 사용하지 않으며, 아래 경고/진단 결과는 무시해도 됩니다.<br />
-              실서비스 전환 시 Firebase 연결 후 FCM 설정(서버 키, VAPID 키, Service Worker)을 완료해 주세요.
+              <strong>⚙️ 현재 이 프로젝트는 Mock 모드(USE_FIREBASE=false)입니다.</strong>
+              <br />
+              테스트 환경에서는 FCM 푸시를 사용하지 않으며, 아래 경고/진단 결과는 무시해도 됩니다.
+              <br />
+              실서비스 전환 시 Firebase 연결 후 FCM 설정(서버 키, VAPID 키, Service Worker)을 완료해
+              주세요.
             </AlertDescription>
           </Alert>
         )}
@@ -1378,9 +1387,7 @@ export function FCMTab() {
               <Bell className="w-5 h-5 text-[#FFCA28]" />
               <CardTitle>Firebase Cloud Messaging</CardTitle>
             </div>
-            <CardDescription>
-              푸시 알림을 위한 FCM 설정
-            </CardDescription>
+            <CardDescription>푸시 알림을 위한 FCM 설정</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -1393,7 +1400,7 @@ export function FCMTab() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('https://console.firebase.google.com', '_blank')}
+                onClick={() => window.open("https://console.firebase.google.com", "_blank")}
               >
                 Firebase Console 열기
               </Button>
@@ -1417,19 +1424,13 @@ export function FCMTab() {
               <h4 className="text-sm font-medium text-[#2E1C10]">3. 서버 키 설정 (Functions)</h4>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-[#2E1C10]/60">CLI 명령어</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyCommand(fcmCommand)}
-                >
+                <Button variant="outline" size="sm" onClick={() => copyCommand(fcmCommand)}>
                   <Copy className="w-4 h-4 mr-2" />
                   복사
                 </Button>
               </div>
               <pre className="p-3 bg-[#2E1C10]/5 rounded-lg overflow-x-auto">
-                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">
-                  {fcmCommand}
-                </code>
+                <code className="text-xs text-[#2E1C10]/80 whitespace-pre">{fcmCommand}</code>
               </pre>
             </div>
           </CardContent>
@@ -1439,15 +1440,11 @@ export function FCMTab() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Service Worker</CardTitle>
-            <CardDescription>
-              푸시 알림 수신을 위한 Service Worker 설정
-            </CardDescription>
+            <CardDescription>푸시 알림 수신을 위한 Service Worker 설정</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[#2E1C10]">
-                firebase-messaging-sw.js
-              </h4>
+              <h4 className="text-sm font-medium text-[#2E1C10]">firebase-messaging-sw.js</h4>
               <p className="text-xs text-[#2E1C10]/60">
                 프로젝트 루트(/public)에 다음 파일을 생성하세요:
               </p>
@@ -1483,21 +1480,17 @@ const messaging = firebase.messaging();`}</code>
           <CardContent>
             <div className="space-y-2">
               {[
-                'Firebase Cloud Messaging API (V1) 활성화',
-                'VAPID 키 발급 및 .env.local 설정',
-                'FCM 서버 키 Functions Config 설정',
-                'Service Worker 파일 생성 (/public/firebase-messaging-sw.js)',
-                'Service Worker 등록 확인',
-                '브라우저 알림 권한 요청 구현',
-                'FCM 토큰 저장 및 관리',
-                '푸시 알림 수신 테스트',
+                "Firebase Cloud Messaging API (V1) 활성화",
+                "VAPID 키 발급 및 .env.local 설정",
+                "FCM 서버 키 Functions Config 설정",
+                "Service Worker 파일 생성 (/public/firebase-messaging-sw.js)",
+                "Service Worker 등록 확인",
+                "브라우저 알림 권한 요청 구현",
+                "FCM 토큰 저장 및 관리",
+                "푸시 알림 수신 테스트",
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    className="mt-1"
-                    disabled
-                  />
+                  <input type="checkbox" className="mt-1" disabled />
                   <span className="text-[#2E1C10]/70">{item}</span>
                 </div>
               ))}
@@ -1521,17 +1514,23 @@ const messaging = firebase.messaging();`}</code>
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Separator } from '../../../components/ui/separator';
-import { Shield, Terminal, Copy, FileText, Rocket, Gift } from 'lucide-react';
-import { toast } from 'sonner';
-import { Switch } from '../../../components/ui/switch';
-import { useEffect, useState } from 'react';
-import { getAdminSettings, saveAdminSettings } from '../../../lib/admin/settingsCenter.api';
-import type { AdminSettings } from '../../../types/adminSettings';
-import { getCurrentUser } from '../../../lib/auth';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { Separator } from "../../../components/ui/separator";
+import { Shield, Terminal, Copy, FileText, Rocket, Gift } from "lucide-react";
+import { toast } from "sonner";
+import { Switch } from "../../../components/ui/switch";
+import { useEffect, useState } from "react";
+import { getAdminSettings, saveAdminSettings } from "../../../lib/admin/settingsCenter.api";
+import type { AdminSettings } from "../../../types/adminSettings";
+import { getCurrentUser } from "../../../lib/auth";
 
 export function OperationsTab() {
   const [settings, setSettings] = useState<AdminSettings | null>(null);
@@ -1543,7 +1542,7 @@ export function OperationsTab() {
         const s = await getAdminSettings();
         setSettings(s);
       } catch (e) {
-        toast.error('설정을 불러오지 못했습니다');
+        toast.error("설정을 불러오지 못했습니다");
       }
     })();
   }, []);
@@ -1555,14 +1554,14 @@ export function OperationsTab() {
       setSaving(true);
       const updated = await saveAdminSettings(
         { points: { ...settings.points, enabled } },
-        user?.uid || 'system',
-        user?.displayName || user?.email || 'system'
+        user?.uid || "system",
+        user?.displayName || user?.email || "system",
       );
       setSettings(updated);
-      toast.success(`포인트 기능이 ${enabled ? '활성화' : '비활성화'}되었습니다`);
+      toast.success(`포인트 기능이 ${enabled ? "활성화" : "비활성화"}되었습니다`);
     } catch (e) {
-      console.error('Failed to toggle points:', e);
-      toast.error('저장에 실패했습니다');
+      console.error("Failed to toggle points:", e);
+      toast.error("저장에 실패했습니다");
     } finally {
       setSaving(false);
     }
@@ -1571,28 +1570,28 @@ export function OperationsTab() {
   // 배포 스크립트
   const deployScripts = [
     {
-      name: '1. Firestore 인덱스 및 Rules',
-      command: 'firebase deploy --only firestore:indexes,firestore:rules,storage',
-      description: '데이터베이스 인덱스 및 보안 규칙 배포',
+      name: "1. Firestore 인덱스 및 Rules",
+      command: "firebase deploy --only firestore:indexes,firestore:rules,storage",
+      description: "데이터베이스 인덱스 및 보안 규칙 배포",
     },
     {
-      name: '2. Cloud Functions',
-      command: 'firebase deploy --only functions',
-      description: '서버리스 함수 배포',
+      name: "2. Cloud Functions",
+      command: "firebase deploy --only functions",
+      description: "서버리스 함수 배포",
     },
     {
-      name: '3. Hosting (빌드 포함)',
-      command: 'npm run build && firebase deploy --only hosting',
-      description: '프론트엔드 빌드 및 배포',
+      name: "3. Hosting (빌드 포함)",
+      command: "npm run build && firebase deploy --only hosting",
+      description: "프론트엔드 빌드 및 배포",
     },
   ];
 
   // 전체 배포 스크립트
-  const fullDeployScript = deployScripts.map(s => s.command).join('\n');
+  const fullDeployScript = deployScripts.map(s => s.command).join("\n");
 
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
-    toast.success('명령어가 복사되었습니다');
+    toast.success("명령어가 복사되었습니다");
   };
 
   return (
@@ -1604,18 +1603,18 @@ export function OperationsTab() {
             <Gift className="w-5 h-5 text-[#D61C1C]" />
             <CardTitle>포인트 기능</CardTitle>
           </div>
-          <CardDescription>
-            포인트 리워드 시스템 사용 여부를 제어합니다
-          </CardDescription>
+          <CardDescription>포인트 리워드 시스템 사용 여부를 제어합니다</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-between">
           <div>
             <p className="text-sm text-[#2E1C10]">포인트 시스템 활성화</p>
-            <p className="text-xs text-[#2E1C10]/60">체크 해제 시 포인트 관리 페이지에서 안내가 표시됩니다</p>
+            <p className="text-xs text-[#2E1C10]/60">
+              체크 해제 시 포인트 관리 페이지에서 안내가 표시됩니다
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#2E1C10]/60">
-              {settings?.points?.enabled ? 'ON' : 'OFF'}
+              {settings?.points?.enabled ? "ON" : "OFF"}
             </span>
             {settings && settings.points ? (
               <Switch
@@ -1638,9 +1637,7 @@ export function OperationsTab() {
             <Rocket className="w-5 h-5 text-[#D61C1C]" />
             <CardTitle>배포 스크립트</CardTitle>
           </div>
-          <CardDescription>
-            Firebase 프로젝트를 단계별로 배포합니다
-          </CardDescription>
+          <CardDescription>Firebase 프로젝트를 단계별로 배포합니다</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {deployScripts.map((script, index) => (
@@ -1650,19 +1647,13 @@ export function OperationsTab() {
                   <h4 className="text-sm font-medium text-[#2E1C10]">{script.name}</h4>
                   <p className="text-xs text-[#2E1C10]/60">{script.description}</p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyCommand(script.command)}
-                >
+                <Button variant="outline" size="sm" onClick={() => copyCommand(script.command)}>
                   <Copy className="w-4 h-4 mr-2" />
                   복사
                 </Button>
               </div>
               <pre className="p-3 bg-[#2E1C10]/5 rounded-lg">
-                <code className="text-xs text-[#2E1C10]/80">
-                  {script.command}
-                </code>
+                <code className="text-xs text-[#2E1C10]/80">{script.command}</code>
               </pre>
               {index < deployScripts.length - 1 && <Separator />}
             </div>
@@ -1674,19 +1665,13 @@ export function OperationsTab() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-[#2E1C10]">전체 배포 (순차 실행)</h4>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyCommand(fullDeployScript)}
-              >
+              <Button variant="outline" size="sm" onClick={() => copyCommand(fullDeployScript)}>
                 <Copy className="w-4 h-4 mr-2" />
                 전체 복사
               </Button>
             </div>
             <pre className="p-3 bg-[#2E1C10]/5 rounded-lg overflow-x-auto">
-              <code className="text-xs text-[#2E1C10]/80 whitespace-pre">
-                {fullDeployScript}
-              </code>
+              <code className="text-xs text-[#2E1C10]/80 whitespace-pre">{fullDeployScript}</code>
             </pre>
           </div>
 
@@ -1706,9 +1691,7 @@ export function OperationsTab() {
             <Shield className="w-5 h-5 text-[#F37021]" />
             <CardTitle>CORS 설정</CardTitle>
           </div>
-          <CardDescription>
-            Firebase Storage CORS 정책 설정
-          </CardDescription>
+          <CardDescription>Firebase Storage CORS 정책 설정</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -1732,7 +1715,9 @@ export function OperationsTab() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => copyCommand('gsutil cors set cors.json gs://hyun-poong.firebasestorage.app')}
+                onClick={() =>
+                  copyCommand("gsutil cors set cors.json gs://hyun-poong.firebasestorage.app")
+                }
               >
                 <Copy className="w-4 h-4 mr-2" />
                 복사
@@ -1748,7 +1733,7 @@ export function OperationsTab() {
           <Alert>
             <FileText className="w-4 h-4" />
             <AlertDescription className="text-xs">
-              자세한 CORS 설정 방법은{' '}
+              자세한 CORS 설정 방법은{" "}
               <a
                 href="/docs/06-firebase/03-CORS-설정-가이드.md"
                 className="text-[#D61C1C] underline"
@@ -1769,9 +1754,7 @@ export function OperationsTab() {
             <Terminal className="w-5 h-5 text-[#C7A45A]" />
             <CardTitle>Firestore Rules & Indexes</CardTitle>
           </div>
-          <CardDescription>
-            데이터베이스 보안 규칙 및 인덱스 관리
-          </CardDescription>
+          <CardDescription>데이터베이스 보안 규칙 및 인덱스 관리</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1785,7 +1768,7 @@ export function OperationsTab() {
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={() => copyCommand('firebase deploy --only firestore:rules')}
+                onClick={() => copyCommand("firebase deploy --only firestore:rules")}
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Rules 배포 명령어 복사
@@ -1802,7 +1785,7 @@ export function OperationsTab() {
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={() => copyCommand('firebase deploy --only firestore:indexes')}
+                onClick={() => copyCommand("firebase deploy --only firestore:indexes")}
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Indexes 배포 명령어 복사
@@ -1814,9 +1797,7 @@ export function OperationsTab() {
 
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-[#2E1C10]">테스트</h4>
-            <p className="text-xs text-[#2E1C10]/60">
-              에뮬레이터에서 보안 규칙을 테스트하세요:
-            </p>
+            <p className="text-xs text-[#2E1C10]/60">에뮬레이터에서 보안 규칙을 테스트하세요:</p>
             <pre className="p-3 bg-[#2E1C10]/5 rounded-lg">
               <code className="text-xs text-[#2E1C10]/80">
                 firebase emulators:start --only firestore
@@ -1836,7 +1817,7 @@ export function OperationsTab() {
             variant="outline"
             size="sm"
             className="justify-start"
-            onClick={() => window.open('/docs/03-development/02-배포가이드_v1.0.md', '_blank')}
+            onClick={() => window.open("/docs/03-development/02-배포가이드_v1.0.md", "_blank")}
           >
             <FileText className="w-4 h-4 mr-2" />
             배포 가이드
@@ -1845,7 +1826,7 @@ export function OperationsTab() {
             variant="outline"
             size="sm"
             className="justify-start"
-            onClick={() => window.open('/docs/03-development/환경변수-설정가이드.md', '_blank')}
+            onClick={() => window.open("/docs/03-development/환경변수-설정가이드.md", "_blank")}
           >
             <FileText className="w-4 h-4 mr-2" />
             환경변수 가이드
@@ -1854,7 +1835,7 @@ export function OperationsTab() {
             variant="outline"
             size="sm"
             className="justify-start"
-            onClick={() => window.open('/docs/06-firebase/README.md', '_blank')}
+            onClick={() => window.open("/docs/06-firebase/README.md", "_blank")}
           >
             <FileText className="w-4 h-4 mr-2" />
             Firebase 설정 가이드
@@ -1863,7 +1844,9 @@ export function OperationsTab() {
             variant="outline"
             size="sm"
             className="justify-start"
-            onClick={() => window.open('/docs/04-operations/04-배포-전-최종-체크리스트.md', '_blank')}
+            onClick={() =>
+              window.open("/docs/04-operations/04-배포-전-최종-체크리스트.md", "_blank")
+            }
           >
             <FileText className="w-4 h-4 mr-2" />
             배포 전 체크리스트

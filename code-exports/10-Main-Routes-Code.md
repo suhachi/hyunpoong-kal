@@ -1,6 +1,6 @@
 # Main & Routes - Full Source Code
 
-**Generated**: 2025-11-30-1905  
+**Generated**: 2025-12-01-2219  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -16,44 +16,44 @@ Complete source code of main entry points and routing configuration.
 ```tsx
 // ⚠️ 경고: 아래 CSS import 순서를 절대 변경하지 마세요!
 // ⚠️ 이 import를 삭제하면 디자인이 완전히 깨집니다!
-import './styles/globals.css';        // 1. Tailwind CSS + 기본 스타일
-import './styles/design-lock.css';    // 2. 브랜드 컬러 강제 고정 (최우선!)
+import "./styles/globals.css"; // 1. Tailwind CSS + 기본 스타일
+import "./styles/design-lock.css"; // 2. 브랜드 컬러 강제 고정 (최우선!)
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { registerServiceWorker, setupNetworkListeners } from './lib/utils/pwa';
-import { toast } from 'sonner';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { registerServiceWorker, setupNetworkListeners } from "./lib/utils/pwa";
+import { toast } from "sonner";
 
 // Service Worker 등록 (프로덕션 환경, Figma Make 호환)
 try {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.PROD) {
+  if (typeof import.meta !== "undefined" && import.meta.env?.PROD) {
     registerServiceWorker();
   }
 } catch (error) {
-  console.warn('[PWA] Service Worker 등록 실패 (환경 미지원):', error);
+  console.warn("[PWA] Service Worker 등록 실패 (환경 미지원):", error);
 }
 
 // 온라인/오프라인 상태 모니터링 (안전하게)
 try {
   setupNetworkListeners(
     () => {
-      toast.success('인터넷에 연결되었습니다.', {
-        description: '다시 온라인 상태입니다.',
+      toast.success("인터넷에 연결되었습니다.", {
+        description: "다시 온라인 상태입니다.",
       });
     },
     () => {
-      toast.error('인터넷 연결이 끊겼습니다.', {
-        description: '오프라인 모드로 전환되었습니다.',
+      toast.error("인터넷 연결이 끊겼습니다.", {
+        description: "오프라인 모드로 전환되었습니다.",
         duration: 5000,
       });
-    }
+    },
   );
 } catch (error) {
-  console.warn('[PWA] 네트워크 리스너 설정 실패:', error);
+  console.warn("[PWA] 네트워크 리스너 설정 실패:", error);
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
@@ -68,66 +68,111 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 ```tsx
 /**
  * 현풍닭칼국수 PWA - 완전한 라우팅 버전
- * 
+ *
  * 주의: 이 파일은 로컬 개발 환경 전용입니다.
- * 
+ *
  * 사용법:
  * 1. App.tsx를 App.demo.tsx로 백업
  * 2. 이 파일을 App.tsx로 복사
  * 3. npm run dev 실행
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, lazy, Suspense } from 'react';
-import { Toaster } from './components/ui/sonner';
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
-import { ProtectedRoute } from './components/shared/ProtectedRoute';
-import { ensureFcmToken, FCM_TOKEN_KEY } from './lib/fcm';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, lazy, Suspense } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
+import { ensureFcmToken, FCM_TOKEN_KEY } from "@/lib/fcm";
 
 // Layout (레이아웃은 즉시 로드)
-import { AppLayout } from './components/app/AppLayout';
-const AdminLayout = lazy(() => import('./pages/admin/_layout/AdminLayout').then(m => ({ default: m.AdminLayout })));
+import { AppLayout } from "@/components/app/AppLayout";
+const AdminLayout = lazy(() =>
+  import("@/pages/admin/_layout/AdminLayout").then(m => ({ default: m.AdminLayout })),
+);
 
 // 고객 앱 페이지 (lazy load)
-const Home = lazy(() => import('./pages/app/Home').then(m => ({ default: m.Home })));
-const MenuList = lazy(() => import('./pages/app/MenuList').then(m => ({ default: m.MenuList })));
-const MenuDetail = lazy(() => import('./pages/app/MenuDetail').then(m => ({ default: m.MenuDetail })));
-const Cart = lazy(() => import('./pages/app/Cart').then(m => ({ default: m.Cart })));
-const Checkout = lazy(() => import('./pages/app/Checkout').then(m => ({ default: m.Checkout })));
-const My = lazy(() => import('./pages/app/My').then(m => ({ default: m.My })));
-const Login = lazy(() => import('./pages/app/Login').then(m => ({ default: m.Login })));
-const Signup = lazy(() => import('./pages/app/Signup').then(m => ({ default: m.Signup })));
-const OrderTracking = lazy(() => import('./pages/app/OrderTracking').then(m => ({ default: m.OrderTracking })));
-const OrderHistory = lazy(() => import('./pages/app/OrderHistory').then(m => ({ default: m.OrderHistory })));
-const ReviewWrite = lazy(() => import('./pages/app/ReviewWrite').then(m => ({ default: m.ReviewWrite })));
-const ReviewList = lazy(() => import('./pages/app/ReviewList').then(m => ({ default: m.ReviewList })));
-const Points = lazy(() => import('./pages/app/Points').then(m => ({ default: m.Points })));
-const Coupons = lazy(() => import('./pages/app/Coupons').then(m => ({ default: m.Coupons })));
-const Notifications = lazy(() => import('./pages/app/Notifications').then(m => ({ default: m.Notifications })));
-const NotificationSettings = lazy(() => import('./pages/app/NotificationSettings').then(m => ({ default: m.NotificationSettings })));
-const Support = lazy(() => import('./pages/app/Support').then(m => ({ default: m.Support })));
-const InstallGuide = lazy(() => import('./pages/app/InstallGuide').then(m => ({ default: m.InstallGuide })));
+const Home = lazy(() => import("@/pages/app/Home").then(m => ({ default: m.Home })));
+const MenuList = lazy(() => import("@/pages/app/MenuList").then(m => ({ default: m.MenuList })));
+const MenuDetail = lazy(() =>
+  import("@/pages/app/MenuDetail").then(m => ({ default: m.MenuDetail })),
+);
+const Cart = lazy(() => import("@/pages/app/Cart").then(m => ({ default: m.Cart })));
+const Checkout = lazy(() => import("@/pages/app/Checkout").then(m => ({ default: m.Checkout })));
+const My = lazy(() => import("@/pages/app/My").then(m => ({ default: m.My })));
+const Login = lazy(() => import("@/pages/app/Login").then(m => ({ default: m.Login })));
+const Signup = lazy(() => import("@/pages/app/Signup").then(m => ({ default: m.Signup })));
+const OrderTracking = lazy(() =>
+  import("@/pages/app/OrderTracking").then(m => ({ default: m.OrderTracking })),
+);
+const OrderHistory = lazy(() =>
+  import("@/pages/app/OrderHistory").then(m => ({ default: m.OrderHistory })),
+);
+const ReviewWrite = lazy(() =>
+  import("@/pages/app/ReviewWrite").then(m => ({ default: m.ReviewWrite })),
+);
+const ReviewList = lazy(() =>
+  import("@/pages/app/ReviewList").then(m => ({ default: m.ReviewList })),
+);
+const Points = lazy(() => import("@/pages/app/Points").then(m => ({ default: m.Points })));
+const Coupons = lazy(() => import("@/pages/app/Coupons").then(m => ({ default: m.Coupons })));
+const Notifications = lazy(() =>
+  import("@/pages/app/Notifications").then(m => ({ default: m.Notifications })),
+);
+const NotificationSettings = lazy(() =>
+  import("@/pages/app/NotificationSettings").then(m => ({ default: m.NotificationSettings })),
+);
+const Support = lazy(() => import("@/pages/app/Support").then(m => ({ default: m.Support })));
+const InstallGuide = lazy(() =>
+  import("@/pages/app/InstallGuide").then(m => ({ default: m.InstallGuide })),
+);
+const PaymentResult = lazy(() => 
+  import("@/pages/app/PaymentResult").then(m => ({ default: m.PaymentResultPage })),
+);
 
 // 관리자 페이지 (lazy load - Admin 영역 전체 분리)
-const Dashboard = lazy(() => import('./pages/admin/Dashboard').then(m => ({ default: m.Dashboard })));
-const AdminOrders = lazy(() => import('./pages/admin/Orders').then(m => ({ default: m.AdminOrders })));
-const AdminMenus = lazy(() => import('./pages/admin/Menus').then(m => ({ default: m.AdminMenus })));
-const AdminReviews = lazy(() => import('./pages/admin/Reviews').then(m => ({ default: m.AdminReviews })));
-const AdminAnalytics = lazy(() => import('./pages/admin/Analytics').then(m => ({ default: m.AdminAnalytics })));
-const IntegratedAnalytics = lazy(() => import('./pages/admin/IntegratedAnalytics').then(m => ({ default: m.IntegratedAnalytics })));
-const AdminSettingsCenter = lazy(() => import('./pages/admin/Settings').then(m => ({ default: m.AdminSettingsCenter })));
-const AdminSupport = lazy(() => import('./pages/admin/Support').then(m => ({ default: m.AdminSupport })));
-const AdminDelivery = lazy(() => import('./pages/admin/Delivery').then(m => ({ default: m.AdminDelivery })));
-const AdminPromotions = lazy(() => import('./pages/admin/Promotions').then(m => ({ default: m.AdminPromotions })));
-const AdminPoints = lazy(() => import('./pages/admin/Points').then(m => ({ default: m.AdminPoints })));
-const AdminNotices = lazy(() => import('./pages/admin/Notices').then(m => ({ default: m.AdminNotices })));
+const Dashboard = lazy(() =>
+  import("@/pages/admin/Dashboard").then(m => ({ default: m.Dashboard })),
+);
+const AdminOrders = lazy(() =>
+  import("@/pages/admin/Orders").then(m => ({ default: m.AdminOrders })),
+);
+const AdminMenus = lazy(() => import("@/pages/admin/Menus").then(m => ({ default: m.AdminMenus })));
+const AdminReviews = lazy(() =>
+  import("@/pages/admin/Reviews").then(m => ({ default: m.AdminReviews })),
+);
+const AdminAnalytics = lazy(() =>
+  import("@/pages/admin/Analytics").then(m => ({ default: m.AdminAnalytics })),
+);
+const IntegratedAnalytics = lazy(() =>
+  import("@/pages/admin/IntegratedAnalytics").then(m => ({ default: m.IntegratedAnalytics })),
+);
+const AdminSettingsCenter = lazy(() =>
+  import("@/pages/admin/Settings").then(m => ({ default: m.AdminSettingsCenter })),
+);
+const AdminSupport = lazy(() =>
+  import("@/pages/admin/Support").then(m => ({ default: m.AdminSupport })),
+);
+const AdminDelivery = lazy(() =>
+  import("@/pages/admin/Delivery").then(m => ({ default: m.AdminDelivery })),
+);
+const AdminPromotions = lazy(() =>
+  import("@/pages/admin/Promotions").then(m => ({ default: m.AdminPromotions })),
+);
+const AdminPoints = lazy(() =>
+  import("@/pages/admin/Points").then(m => ({ default: m.AdminPoints })),
+);
+const AdminNotices = lazy(() =>
+  import("@/pages/admin/Notices").then(m => ({ default: m.AdminNotices })),
+);
 
 // 개발 도구
-const DevTools = lazy(() => import('./pages/DevTools').then(m => ({ default: m.DevTools })));
+const DevTools = lazy(() => import("@/pages/DevTools").then(m => ({ default: m.DevTools })));
 
 // 관리자 알림 컴포넌트
-const AdminOrderAlert = lazy(() => import('./components/admin/AdminOrderAlert').then(m => ({ default: m.AdminOrderAlert })));
+const AdminOrderAlert = lazy(() =>
+  import("@/components/admin/AdminOrderAlert").then(m => ({ default: m.AdminOrderAlert })),
+);
 
 // 로딩 폴백 컴포넌트
 const LoadingFallback = () => (
@@ -142,10 +187,10 @@ export default function App() {
     try {
       const existing = localStorage.getItem(FCM_TOKEN_KEY);
       if (!existing) {
-        ensureFcmToken().catch((err) => console.error('[FCM] ensureFcmToken error', err));
+        ensureFcmToken().catch(err => console.error("[FCM] ensureFcmToken error", err));
       }
     } catch (e) {
-      console.warn('[FCM] 초기 토큰 확인 실패:', e);
+      console.warn("[FCM] 초기 토큰 확인 실패:", e);
     }
   }, []);
 
@@ -191,6 +236,12 @@ export default function App() {
 
                 {/* 마이페이지 */}
                 <Route path="my" element={<My />} />
+
+                {/* 결제 결과 페이지 */}
+                <Route path="payment">
+                  <Route path="complete" element={<PaymentResult />} />
+                  <Route path="cancel" element={<PaymentResult />} />
+                </Route>
               </Route>
 
               {/* ========================================
@@ -283,59 +334,59 @@ export default function App() {
 ```tsx
 /**
  * 현풍닭칼국수 PWA - 완전한 라우팅 버전
- * 
+ *
  * 주의: 이 파일은 로컬 개발 환경 전용입니다.
- * 
+ *
  * 사용법:
  * 1. App.tsx를 App.demo.tsx로 백업
  * 2. 이 파일을 App.tsx로 복사
  * 3. npm run dev 실행
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from './components/ui/sonner';
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "./components/ui/sonner";
+import { AuthProvider } from "./contexts/AuthContext";
+import { CartProvider } from "./contexts/CartContext";
 
 // Layout
-import { AppLayout } from './components/app/AppLayout';
-import { AdminLayout } from './pages/admin/_layout/AdminLayout';
+import { AppLayout } from "./components/app/AppLayout";
+import { AdminLayout } from "./pages/admin/_layout/AdminLayout";
 
 // 고객 앱 페이지
-import { Home } from './pages/app/Home';
-import { MenuList } from './pages/app/MenuList';
-import { MenuDetail } from './pages/app/MenuDetail';
-import { Cart } from './pages/app/Cart';
-import { Checkout } from './pages/app/Checkout';
-import { My } from './pages/app/My';
-import { Login } from './pages/app/Login';
-import { Signup } from './pages/app/Signup';
-import { OrderTracking } from './pages/app/OrderTracking';
-import { OrderHistory } from './pages/app/OrderHistory';
-import { ReviewWrite } from './pages/app/ReviewWrite';
-import { ReviewList } from './pages/app/ReviewList';
-import { Points } from './pages/app/Points';
-import { Coupons } from './pages/app/Coupons';
-import { Notifications } from './pages/app/Notifications';
-import { NotificationSettings } from './pages/app/NotificationSettings';
-import { Support } from './pages/app/Support';
+import { Home } from "./pages/app/Home";
+import { MenuList } from "./pages/app/MenuList";
+import { MenuDetail } from "./pages/app/MenuDetail";
+import { Cart } from "./pages/app/Cart";
+import { Checkout } from "./pages/app/Checkout";
+import { My } from "./pages/app/My";
+import { Login } from "./pages/app/Login";
+import { Signup } from "./pages/app/Signup";
+import { OrderTracking } from "./pages/app/OrderTracking";
+import { OrderHistory } from "./pages/app/OrderHistory";
+import { ReviewWrite } from "./pages/app/ReviewWrite";
+import { ReviewList } from "./pages/app/ReviewList";
+import { Points } from "./pages/app/Points";
+import { Coupons } from "./pages/app/Coupons";
+import { Notifications } from "./pages/app/Notifications";
+import { NotificationSettings } from "./pages/app/NotificationSettings";
+import { Support } from "./pages/app/Support";
 
 // 관리자 페이지
-import { Dashboard } from './pages/admin/Dashboard';
-import { AdminOrders } from './pages/admin/Orders';
-import { AdminMenus } from './pages/admin/Menus';
-import { AdminReviews } from './pages/admin/Reviews';
-import { AdminAnalytics } from './pages/admin/Analytics';
-import { IntegratedAnalytics } from './pages/admin/IntegratedAnalytics';
-import { AdminSettingsCenter } from './pages/admin/Settings';
-import { AdminSupport } from './pages/admin/Support';
-import { AdminDelivery } from './pages/admin/Delivery';
-import { AdminPromotions } from './pages/admin/Promotions';
-import { AdminPoints } from './pages/admin/Points';
+import { Dashboard } from "./pages/admin/Dashboard";
+import { AdminOrders } from "./pages/admin/Orders";
+import { AdminMenus } from "./pages/admin/Menus";
+import { AdminReviews } from "./pages/admin/Reviews";
+import { AdminAnalytics } from "./pages/admin/Analytics";
+import { IntegratedAnalytics } from "./pages/admin/IntegratedAnalytics";
+import { AdminSettingsCenter } from "./pages/admin/Settings";
+import { AdminSupport } from "./pages/admin/Support";
+import { AdminDelivery } from "./pages/admin/Delivery";
+import { AdminPromotions } from "./pages/admin/Promotions";
+import { AdminPoints } from "./pages/admin/Points";
 
 // 개발 도구
-import { DevTools } from './pages/DevTools';
-import { ProtectedRoute } from './components/shared/ProtectedRoute';
+import { DevTools } from "./pages/DevTools";
+import { ProtectedRoute } from "./components/shared/ProtectedRoute";
 
 export default function App() {
   return (
@@ -349,33 +400,33 @@ export default function App() {
             <Route path="/" element={<AppLayout />}>
               {/* 홈 */}
               <Route index element={<Home />} />
-              
+
               {/* 메뉴 */}
               <Route path="menu" element={<MenuList />} />
               {/* T2-12: Route param은 MenuDetail의 useParams<{ menuId }>() 와 일치해야 함 */}
               <Route path="menu/:menuId" element={<MenuDetail />} />
-              
+
               {/* 장바구니 & 주문 */}
               <Route path="cart" element={<Cart />} />
               <Route path="checkout" element={<Checkout />} />
               <Route path="orders/:orderId" element={<OrderTracking />} />
               <Route path="order-history" element={<OrderHistory />} />
-              
+
               {/* 리뷰 */}
               <Route path="review/:orderId" element={<ReviewWrite />} />
               <Route path="reviews" element={<ReviewList />} />
-              
+
               {/* 포인트 & 쿠폰 */}
               <Route path="points" element={<Points />} />
               <Route path="coupons" element={<Coupons />} />
-              
+
               {/* 알림 */}
               <Route path="notifications" element={<Notifications />} />
               <Route path="notifications/settings" element={<NotificationSettings />} />
-              
+
               {/* 고객지원 */}
               <Route path="support" element={<Support />} />
-              
+
               {/* 마이페이지 */}
               <Route path="my" element={<My />} />
             </Route>
@@ -399,32 +450,32 @@ export default function App() {
             >
               {/* 대시보드 */}
               <Route index element={<Dashboard />} />
-              
+
               {/* 주문 관리 */}
               <Route path="orders" element={<AdminOrders />} />
-              
+
               {/* 메뉴 관리 */}
               <Route path="menus" element={<AdminMenus />} />
-              
+
               {/* 리뷰 관리 */}
               <Route path="reviews" element={<AdminReviews />} />
-              
+
               {/* 분석 */}
               <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="analytics/integrated" element={<IntegratedAnalytics />} />
-              
+
               {/* 배달 관제 */}
               <Route path="delivery" element={<AdminDelivery />} />
-              
+
               {/* 프로모션 */}
               <Route path="promotions" element={<AdminPromotions />} />
-              
+
               {/* 포인트 관리 */}
               <Route path="points" element={<AdminPoints />} />
-              
+
               {/* 고객지원 */}
               <Route path="support" element={<AdminSupport />} />
-              
+
               {/* 설정 */}
               <Route path="settings" element={<AdminSettingsCenter />} />
             </Route>
@@ -455,32 +506,27 @@ export default function App() {
 ## index.html
 
 ```html
-
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
-    <title>현풍닭칼국수 - 주문 & 포장 웹앱</title>
-    <meta
-      name="description"
-      content="현풍닭칼국수 공식 주문/포장 전용 PWA입니다. 모바일 홈 화면에 설치해서 빠르게 주문해 보세요."
-    />
-    <meta name="theme-color" content="#B62020" />
 
-    <!-- TODO: manifest / 아이콘 파일은 추후 Phase에서 실제 파일 생성 후 경로 확정 -->
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>현풍닭칼국수 - 주문 & 포장 웹앱</title>
+  <meta name="description" content="현풍닭칼국수 공식 주문/포장 전용 PWA입니다. 모바일 홈 화면에 설치해서 빠르게 주문해 보세요." />
+  <meta name="theme-color" content="#B62020" />
+
+  <!-- TODO: manifest / 아이콘 파일은 추후 Phase에서 실제 파일 생성 후 경로 확정 -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
-  
 ```
 
 ---

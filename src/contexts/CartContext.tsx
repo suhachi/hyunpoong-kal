@@ -14,7 +14,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const STORAGE_KEY = "hyunpung_cart";
 const MIN_ORDER_DELIVERY = 15000;
-const MIN_ORDER_PICKUP = 5000;
 const BASE_DELIVERY_FEE = 3000;
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -196,11 +195,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const getTotalAmount = useCallback(() => {
     const subtotal = items.reduce((total, item) => total + item.subtotal, 0);
     let deliveryFee = 0;
-    
+
     if (deliveryType === "delivery" && subtotal >= MIN_ORDER_DELIVERY) {
-        deliveryFee = BASE_DELIVERY_FEE;
+      deliveryFee = BASE_DELIVERY_FEE;
     }
-    
+
     return subtotal + deliveryFee - couponDiscount;
   }, [items, deliveryType, couponDiscount]);
 

@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { getOrdersByUser, filterOrdersByStatus, getReviewableOrders } from "@/lib/orders.api";
 import { type Order, OrderStatus } from "@/types/order";
-import type { FTimestamp } from "@/types/common";
+import type { FirestoreTimestamp } from "@/types/common";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { formatPrice } from "@/lib/utils";
 import { toast } from "sonner";
@@ -113,7 +113,7 @@ export function OrderHistory() {
     }
   }
 
-  function formatDate(timestamp: FTimestamp | string): string {
+  function formatDate(timestamp: FirestoreTimestamp | string): string {
     try {
       let date: Date;
 
@@ -181,10 +181,8 @@ export function OrderHistory() {
                     orders.filter(
                       o =>
                         o.status === OrderStatus.ACCEPTED ||
-                        o.status === "preparing" ||
                         o.status === OrderStatus.COOKING ||
-                        o.status === OrderStatus.DELIVERING ||
-                        o.status === "placed",
+                        o.status === OrderStatus.DELIVERING,
                     ).length
                   }
                   )
@@ -260,14 +258,14 @@ export function OrderHistory() {
 interface OrderCardProps {
   order: Order;
   hasReview: boolean;
-  formatDate: (timestamp: FTimestamp | string) => string;
+  formatDate: (timestamp: FirestoreTimestamp | string) => string;
 }
 
 function OrderCard({ order, hasReview, formatDate }: OrderCardProps) {
   const navigate = useNavigate();
 
   const statusInfo = extendedStatusConfig[order.status] || statusConfig[OrderStatus.COMPLETED];
-  const isCompleted = order.status === OrderStatus.COMPLETED || order.status === "done";
+  const isCompleted = order.status === OrderStatus.COMPLETED;
   const isCanceled = order.status === OrderStatus.CANCELLED;
   const canReview = isCompleted && !hasReview;
 

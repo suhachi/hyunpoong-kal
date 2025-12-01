@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { OrderStatus } from "@/types/order";
 import { ORDER_STATUS_TRANSITIONS, type Order } from "@/types/order";
-import type { FTimestamp } from "@/types/common";
+import type { FirestoreTimestamp } from "@/types/common";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

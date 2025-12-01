@@ -8,6 +8,8 @@ import { getFirestore } from "firebase/firestore";
 
 import { getStorage } from "firebase/storage";
 
+import { getFunctions } from "firebase/functions";
+
 import { getMessaging, getToken, onMessage, type MessagePayload } from "firebase/messaging";
 
 // Storage 버킷 이름: 환경 변수 우선, 없으면 기본값 사용
@@ -74,6 +76,9 @@ export const db = getFirestore(app);
 
 // Storage: firebaseConfig의 storageBucket 사용 (명시적 버킷 지정 제거)
 export const storage = getStorage(app);
+
+// Functions
+export const functions = getFunctions(app);
 
 interface FirebaseStorageInternal {
   _location?: { bucket: string };

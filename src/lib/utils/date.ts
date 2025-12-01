@@ -4,13 +4,13 @@
  */
 
 import { Timestamp } from "firebase/firestore";
-import type { FTimestamp } from "../../types/common";
+import type { FirestoreTimestamp } from "../../types/common";
 
 /**
  * 날짜 포맷팅
  * @example formatDate(new Date()) => '2025년 10월 30일'
  */
-export function formatDate(date: Date | FTimestamp | string): string {
+export function formatDate(date: Date | FirestoreTimestamp | string): string {
   const d = convertToDate(date);
   if (!d) return "";
 
@@ -25,7 +25,7 @@ export function formatDate(date: Date | FTimestamp | string): string {
  * 날짜/시간 포맷팅
  * @example formatDateTime(new Date()) => '2025년 10월 30일 14:30'
  */
-export function formatDateTime(date: Date | FTimestamp | string): string {
+export function formatDateTime(date: Date | FirestoreTimestamp | string): string {
   const d = convertToDate(date);
   if (!d) return "";
 
@@ -40,7 +40,7 @@ export function formatDateTime(date: Date | FTimestamp | string): string {
  * 시간만 포맷팅
  * @example formatTime(new Date()) => '14:30'
  */
-export function formatTime(date: Date | FTimestamp | string): string {
+export function formatTime(date: Date | FirestoreTimestamp | string): string {
   const d = convertToDate(date);
   if (!d) return "";
 
@@ -54,7 +54,7 @@ export function formatTime(date: Date | FTimestamp | string): string {
  * 상대 시간 포맷팅
  * @example formatRelativeTime(pastDate) => '3분 전'
  */
-export function formatRelativeTime(date: Date | FTimestamp | string): string {
+export function formatRelativeTime(date: Date | FirestoreTimestamp | string): string {
   const d = convertToDate(date);
   if (!d) return "";
 
@@ -89,7 +89,7 @@ export function isBusinessHour(
 /**
  * 오늘인지 확인
  */
-export function isToday(date: Date | FTimestamp | string): boolean {
+export function isToday(date: Date | FirestoreTimestamp | string): boolean {
   const d = convertToDate(date);
   if (!d) return false;
 
@@ -104,7 +104,7 @@ export function isToday(date: Date | FTimestamp | string): boolean {
 /**
  * 이번 주인지 확인
  */
-export function isThisWeek(date: Date | FTimestamp | string): boolean {
+export function isThisWeek(date: Date | FirestoreTimestamp | string): boolean {
   const d = convertToDate(date);
   if (!d) return false;
 
@@ -117,7 +117,7 @@ export function isThisWeek(date: Date | FTimestamp | string): boolean {
 /**
  * 이번 달인지 확인
  */
-export function isThisMonth(date: Date | FTimestamp | string): boolean {
+export function isThisMonth(date: Date | FirestoreTimestamp | string): boolean {
   const d = convertToDate(date);
   if (!d) return false;
 
@@ -129,7 +129,7 @@ export function isThisMonth(date: Date | FTimestamp | string): boolean {
  * Date 객체로 변환 (헬퍼)
  */
 function convertToDate(
-  date: Date | FTimestamp | string | { seconds?: number; nanoseconds?: number },
+  date: Date | FirestoreTimestamp | string | { seconds?: number; nanoseconds?: number },
 ): Date | null {
   if (date instanceof Date) {
     return date;

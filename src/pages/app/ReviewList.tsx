@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Star, Image as ImageIcon, Loader2, Filter } from "lucide-react";
+import { Star, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -11,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { USE_FIREBASE } from "@/config/env";
 import { getRecentReviews } from "@/lib/reviews.api";
 import { toast } from "sonner";
 import type { Review, ReviewSortOption, ReviewStats } from "@/types/review";
@@ -20,54 +18,47 @@ import type { Review, ReviewSortOption, ReviewStats } from "@/types/review";
 const MOCK_REVIEWS: Review[] = [
   {
     id: "review-001",
-    storeId: "store-hyunpung",
     orderId: "order-001",
-    uid: "user-001",
+    userId: "user-001",
     userName: "김고객",
     rating: 5,
-    text: "칼국수 진짜 맛있어요! 국물이 진하고 면발도 쫄깃해요. 닭고기도 부드럽고 양도 푸짐합니다. 다음에 또 주문할게요!",
-    photos: [
+    content: "칼국수 진짜 맛있어요! 국물이 진하고 면발도 쫄깃해요. 닭고기도 부드럽고 양도 푸짐합니다. 다음에 또 주문할게요!",
+    images: [
       "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800",
       "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800",
     ],
-    hasPhoto: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2, // 2일 전
-    rewardIssued: true,
+    menuNames: ["현풍닭칼국수"],
+    createdAt: { seconds: Math.floor((Date.now() - 1000 * 60 * 60 * 24 * 2) / 1000), nanoseconds: 0 }, // 2일 전
     reply: {
-      text: "감사합니다! 늘 맛있게 준비하겠습니다 😊",
-      by: "owner-001",
-      at: Date.now() - 1000 * 60 * 60 * 24,
+      content: "감사합니다! 늘 맛있게 준비하겠습니다 😊",
+      createdAt: { seconds: Math.floor((Date.now() - 1000 * 60 * 60 * 24) / 1000), nanoseconds: 0 },
     },
   },
   {
     id: "review-002",
-    storeId: "store-hyunpung",
     orderId: "order-002",
-    uid: "user-002",
+    userId: "user-002",
     userName: "이손님",
     rating: 4,
-    text: "맛있게 잘 먹었습니다. 배달도 빨랐어요!",
-    photos: [],
-    hasPhoto: false,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 5, // 5일 전
-    rewardIssued: false,
+    content: "맛있게 잘 먹었습니다. 배달도 빨랐어요!",
+    images: [],
+    menuNames: ["현풍닭칼국수"],
+    createdAt: { seconds: Math.floor((Date.now() - 1000 * 60 * 60 * 24 * 5) / 1000), nanoseconds: 0 }, // 5일 전
   },
   {
     id: "review-003",
-    storeId: "store-hyunpung",
     orderId: "order-003",
-    uid: "user-003",
+    userId: "user-003",
     userName: "박미식",
     rating: 5,
-    text: "현풍닭칼국수 정말 최고예요! 가격 대비 양도 많고 맛도 훌륭합니다. 사진으로는 다 담지 못할 정도로 푸짐해요. 강추!",
-    photos: [
+    content: "현풍닭칼국수 정말 최고예요! 가격 대비 양도 많고 맛도 훌륭합니다. 사진으로는 다 담지 못할 정도로 푸짐해요. 강추!",
+    images: [
       "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800",
       "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=800",
       "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800",
     ],
-    hasPhoto: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 7, // 7일 전
-    rewardIssued: true,
+    menuNames: ["현풍닭칼국수"],
+    createdAt: { seconds: Math.floor((Date.now() - 1000 * 60 * 60 * 24 * 7) / 1000), nanoseconds: 0 }, // 7일 전
   },
 ];
 
@@ -94,27 +85,25 @@ export function ReviewList() {
       setReviews(data);
 
       // 통계 계산
-      const totalCount = data.length;
-      const photoCount = data.filter(r => r.images && r.images.length > 0).length;
+      const total = data.length;
+      const withPhotos = data.filter(r => r.images && r.images.length > 0).length;
       const totalRating = data.reduce((sum, r) => sum + r.rating, 0);
-      const averageRating = totalCount > 0 ? totalRating / totalCount : 0;
+      const averageRating = total > 0 ? totalRating / total : 0;
 
-      const ratingDistribution = data.reduce(
-        (dist, r) => {
-          const rating = Math.floor(r.rating) as 1 | 2 | 3 | 4 | 5;
-          if (dist[rating] !== undefined) {
-            dist[rating]++;
-          }
-          return dist;
-        },
-        { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-      );
+      const byRating: ReviewStats["byRating"] = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+      data.forEach(r => {
+        const rating = Math.floor(r.rating) as 1 | 2 | 3 | 4 | 5;
+        if (byRating[rating] !== undefined) {
+          byRating[rating]++;
+        }
+      });
 
       setStats({
-        totalCount,
+        total,
         averageRating,
-        photoCount,
-        ratingDistribution,
+        withPhotos,
+        byRating,
       });
     } catch (error) {
       console.error("Failed to load reviews:", error);
@@ -162,7 +151,7 @@ export function ReviewList() {
               <span className="text-[#333]">{stats.averageRating.toFixed(1)}</span>
             </div>
             <span className="text-[#8B7355]">
-              리뷰 {stats.totalCount}개 · 사진 {stats.photoCount}개
+              리뷰 {stats.total}개 · 사진 {stats.withPhotos}개
             </span>
           </div>
         )}
@@ -174,8 +163,8 @@ export function ReviewList() {
           <div className="space-y-2">
             {[5, 4, 3, 2, 1].map(rating => {
               const count =
-                stats.ratingDistribution[rating as keyof typeof stats.ratingDistribution];
-              const percentage = stats.totalCount > 0 ? (count / stats.totalCount) * 100 : 0;
+                stats.byRating[rating as keyof typeof stats.byRating];
+              const percentage = stats.total > 0 ? (count / stats.total) * 100 : 0;
 
               return (
                 <div key={rating} className="flex items-center gap-3">
@@ -244,9 +233,8 @@ export function ReviewList() {
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${
-                            i < review.rating ? "fill-[#F37021] text-[#F37021]" : "text-[#E5DDD5]"
-                          }`}
+                          className={`w-4 h-4 ${i < review.rating ? "fill-[#F37021] text-[#F37021]" : "text-[#E5DDD5]"
+                            }`}
                         />
                       ))}
                     </div>
