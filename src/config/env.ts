@@ -21,9 +21,6 @@ export const ENV = (() => {
 // 디버그 모드 (먼저 정의 - 순환 참조 방지)
 export const DEBUG = ENV === "development";
 
-// 환경 변수 로딩 상태 (최초 1회만 경고)
-const envWarningShown = false;
-
 // 환경 변수 안전 접근 헬퍼 (Figma Make 환경 호환)
 export const getEnv = (
   key: string,

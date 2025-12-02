@@ -11,6 +11,9 @@ import {
   PhoneAuthProvider,
   signInWithCredential,
 } from "firebase/auth";
+
+// ConfirmationResult를 다른 모듈에서 사용할 수 있도록 export
+export type { ConfirmationResult };
 import { auth } from "../firebase";
 
 let recaptchaVerifier: RecaptchaVerifier | null = null;

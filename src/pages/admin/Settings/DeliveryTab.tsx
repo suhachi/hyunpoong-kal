@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import { CheckCircle2, XCircle, AlertCircle, Copy, Save, Truck, Terminal } from "lucide-react";
+import { AlertCircle, Copy, Save, Truck, Terminal } from "lucide-react";
 import { toast } from "sonner";
 import { getAdminSettings, saveAdminSettings } from "../../../lib/admin/settingsCenter.api";
 import { formatPrice } from "../../../lib/utils";

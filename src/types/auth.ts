@@ -9,9 +9,11 @@ export interface AuthUser {
   displayName: string | null;
   photoURL: string | null;
   role: UserRole; // Enum 강제
+  storeId?: string;
+  isAnonymous: boolean;
   createdAt: FirestoreTimestamp;
   lastLoginAt: FirestoreTimestamp;
-  
+
   // 마케팅 동의
   agreements?: {
     marketing: boolean;

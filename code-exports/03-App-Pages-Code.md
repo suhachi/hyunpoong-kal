@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-12-01-2219  
+**Generated**: 2025-12-02-1828  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -250,14 +250,6 @@ interface RecommendCardProps {
 }
 
 const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
-  const badgeLabels: Record<string, string> = {
-    best: "베스트",
-    signature: "시그니처",
-    spicy: "매운맛",
-    cold: "냉메뉴",
-    seasonal: "계절메뉴",
-  };
-
   const hasBestBadge = menu.badges.includes("best");
 
   return (
@@ -501,7 +493,7 @@ const MenuCard = memo(MenuCardBase);
 ## src\pages\app\Cart.tsx
 
 ```tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag, Truck, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -560,11 +552,9 @@ export function Cart() {
       getDeliveryFee,
       getTotalAmount,
       addItem: addToCart,
-      forceReload,
     }
   } = useCart();
 
-  const [allMenus, setAllMenus] = useState<Menu[]>([]);
   // T2-16: Cart 페이지 hydration 완전 제거
   const [isHydrating] = useState(false);
 
@@ -577,39 +567,9 @@ export function Cart() {
   const canProceed = subtotal >= minOrderAmount;
   const missingAmount = minOrderAmount - subtotal;
 
-  // 메뉴 데이터 로드 (추천용)
-  useEffect(() => {
-    // loadMenus();
-  }, []);
-
-  async function loadMenus() {
-    try {
-      const response = await fetch("/data/menus.json");
-      const data = await response.json();
-      setAllMenus(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data.map((item: any) => ({
-          id: item.menuId,
-          name: item.name,
-          price: item.price,
-          description: item.description,
-          imageUrl: item.image,
-          category: item.category,
-          available: item.isAvailable !== false,
-          soldOut: item.isAvailable === false,
-          isPopular: item.badges?.includes("best"),
-          rating: 4.5, // Mock data
-          reviewCount: 100,
-        })),
-      );
-    } catch (error) {
-      console.error("Failed to load menus:", error);
-    }
-  }
-
   function handleAddToCart(menu: Menu) {
     addToCart({
-      menuId: menu.id,
+      menuId: menu.menuId,
       menuName: menu.name,
       menuImage: menu.image,
       menuPrice: menu.price,
@@ -762,7 +722,7 @@ export function Cart() {
             {/* 업셀 추천 섹션 */}
             <UpsellSection
               missingAmount={missingAmount}
-              allMenus={allMenus}
+              allMenus={[]} // 빈 배열 전달 (추천 로직 제거됨)
               onAddToCart={handleAddToCart}
               maxRecommendations={3}
             />
@@ -840,8 +800,8 @@ function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
     item.options.noodle && `면양: ${item.options.noodle}`,
     item.options.spicy && `맵기: ${item.options.spicy}`,
     item.options.toppings &&
-      item.options.toppings.length > 0 &&
-      `토핑: ${item.options.toppings.join(", ")}`,
+    item.options.toppings.length > 0 &&
+    `토핑: ${item.options.toppings.join(", ")}`,
   ]
     .filter(Boolean)
     .join(" · ");

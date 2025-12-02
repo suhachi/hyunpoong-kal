@@ -1,6 +1,6 @@
 # Admin Settings - Full Source Code
 
-**Generated**: 2025-12-01-2219  
+**Generated**: 2025-12-02-1828  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -579,7 +579,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import { CheckCircle2, XCircle, AlertCircle, Copy, Save, Truck, Terminal } from "lucide-react";
+import { AlertCircle, Copy, Save, Truck, Terminal } from "lucide-react";
 import { toast } from "sonner";
 import { getAdminSettings, saveAdminSettings } from "../../../lib/admin/settingsCenter.api";
 import { formatPrice } from "../../../lib/utils";
@@ -909,7 +909,7 @@ import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { Separator } from "../../../components/ui/separator";
-import { CheckCircle2, XCircle, AlertCircle, Copy, Download, Map as MapIcon } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, Download, Map as MapIcon } from "lucide-react";
 import { toast } from "sonner";
 import { getEnv } from "../../../config/env";
 
@@ -1177,7 +1177,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, Bell, Play, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { runFCMDiagnostics } from "@/lib/admin/settingsCenter.api";
 import type { DiagnosticResult } from "@/types/adminSettings";

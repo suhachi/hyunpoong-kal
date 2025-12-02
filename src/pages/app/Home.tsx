@@ -234,14 +234,6 @@ interface RecommendCardProps {
 }
 
 const RecommendCardBase = ({ menu, onClick }: RecommendCardProps) => {
-  const badgeLabels: Record<string, string> = {
-    best: "베스트",
-    signature: "시그니처",
-    spicy: "매운맛",
-    cold: "냉메뉴",
-    seasonal: "계절메뉴",
-  };
-
   const hasBestBadge = menu.badges.includes("best");
 
   return (

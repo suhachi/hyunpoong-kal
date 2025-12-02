@@ -1,6 +1,6 @@
 # Lib APIs - Full Source Code
 
-**Generated**: 2025-12-01-2219  
+**Generated**: 2025-12-02-1828  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -23,6 +23,8 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 import { getStorage } from "firebase/storage";
+
+import { getFunctions } from "firebase/functions";
 
 import { getMessaging, getToken, onMessage, type MessagePayload } from "firebase/messaging";
 
@@ -90,6 +92,9 @@ export const db = getFirestore(app);
 
 // Storage: firebaseConfig의 storageBucket 사용 (명시적 버킷 지정 제거)
 export const storage = getStorage(app);
+
+// Functions
+export const functions = getFunctions(app);
 
 interface FirebaseStorageInternal {
   _location?: { bucket: string };
@@ -299,15 +304,14 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
 
       // 최신순 정렬
       orderList.sort((a, b) => {
-        const aTime =
-          typeof a.createdAt === "string"
-            ? new Date(a.createdAt).getTime()
-            : a.createdAt.seconds * 1000;
-        const bTime =
-          typeof b.createdAt === "string"
-            ? new Date(b.createdAt).getTime()
-            : b.createdAt.seconds * 1000;
-        return bTime - aTime;
+        const getTime = (ts: any) => {
+          if (!ts) return 0;
+          if (typeof ts === "string") return new Date(ts).getTime();
+          if ("seconds" in ts) return ts.seconds * 1000;
+          if (typeof ts.toDate === "function") return ts.toDate().getTime();
+          return 0;
+        };
+        return getTime(b.createdAt) - getTime(a.createdAt);
       });
 
       return Promise.resolve(orderList);
@@ -387,7 +391,7 @@ export function getReviewableOrders(orders: Order[]): Order[] {
   return orders.filter(order => {
     // 완료된 주문 중 리뷰를 작성하지 않은 주문
     return (
-      (order.status === OrderStatus.COMPLETED || order.status === "done") && !hasReview(order)
+      order.status === OrderStatus.COMPLETED && !hasReview(order)
     );
   });
 }

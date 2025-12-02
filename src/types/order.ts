@@ -49,23 +49,23 @@ export interface OrderPaymentInfo {
   method: PaymentMethod;
   status: PaymentStatus;
   amount: number;
-  
+
   // PG 관련 정보 (App 결제 시)
   pgProvider?: 'nicepay' | 'mock';
   pgOrderId?: string; // PG 거래 ID (TID)
   pgTid?: string; // PG Transaction ID
   pgReceiptUrl?: string;
-  
+
   // 카드 정보
   cardName?: string;
   cardNum?: string;
-  
+
   // 타임스탬프
   requestedAt?: FirestoreTimestamp;
   approvedAt?: FirestoreTimestamp;
   cancelledAt?: FirestoreTimestamp;
   failedAt?: FirestoreTimestamp;
-  
+
   // 실패/취소 사유
   failCode?: string;
   failReason?: string;
@@ -104,12 +104,13 @@ export interface Order {
   deliveryType: "delivery" | "pickup";
   deliveryAddress: DeliveryAddress | null;
   phoneNumber: string;
+  phone?: string; // 호환성 유지
   email?: string;
   requests?: string;
 
   status: OrderStatus;
   payment: OrderPaymentInfo;
-  
+
   // 멱등성 키 (중복 결제 방지)
   clientOrderId?: string;
 

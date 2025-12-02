@@ -1,10 +1,10 @@
 ﻿// Route: /admin/orders
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { OrderStatus } from "@/types/order";
 import { ORDER_STATUS_TRANSITIONS, type Order } from "@/types/order";
 import type { FirestoreTimestamp } from "@/types/common";
 import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -273,7 +273,7 @@ export function AdminOrders() {
   };
 
   const getOrderDate = (order: Order) => {
-    const ts = order.createdAt as FTimestamp | string;
+    const ts = order.createdAt as FirestoreTimestamp | string;
     if (typeof ts === "string") return new Date(ts);
     if (ts && "toDate" in ts) return ts.toDate();
     if (ts && "seconds" in ts) return new Date(ts.seconds * 1000);

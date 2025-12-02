@@ -1,6 +1,6 @@
 # Config & Utils - Full Source Code
 
-**Generated**: 2025-12-01-2219  
+**Generated**: 2025-12-02-1828  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -36,9 +36,6 @@ export const ENV = (() => {
 
 // 디버그 모드 (먼저 정의 - 순환 참조 방지)
 export const DEBUG = ENV === "development";
-
-// 환경 변수 로딩 상태 (최초 1회만 경고)
-const envWarningShown = false;
 
 // 환경 변수 안전 접근 헬퍼 (Figma Make 환경 호환)
 export const getEnv = (
@@ -210,8 +207,42 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
+import { VitePWA } from "vite-plugin-pwa";
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+      manifest: {
+        name: "현풍닭칼국수 주문/포장 웹앱",
+        short_name: "현풍닭칼국수",
+        description: "현풍닭칼국수 공식 주문/포장 전용 PWA입니다.",
+        theme_color: "#B62020",
+        background_color: "#FFFFFF",
+        display: "standalone",
+        orientation: "portrait",
+        icons: [
+          {
+            src: "/icons/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "/icons/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        navigateFallback: "/index.html",
+        // Firebase 관련 파일 제외 (선택 사항)
+      },
+    }),
+  ],
   publicDir: "public",
   resolve: {
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
@@ -226,7 +257,7 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
-    strictPort: false, // 포트 충돌 시 자동으로 다른 포트 사용
+    strictPort: false,
   },
 });
 
@@ -407,6 +438,7 @@ export default {
             "@types/node": "^20.10.0",
             "@types/react": "^19.2.7",
             "@types/react-dom": "^19.2.3",
+            "@types/uuid": "^10.0.0",
             "@typescript-eslint/eslint-plugin": "^8.48.0",
             "@typescript-eslint/parser": "^8.48.0",
             "@vitejs/plugin-react-swc": "^3.10.2",
@@ -424,6 +456,7 @@ export default {
             "tailwindcss": "^3.4.14",
             "typescript-eslint": "^8.48.0",
             "vite": "6.3.5",
+            "vite-plugin-pwa": "^1.2.0",
             "vitest": "^4.0.14"
       },
       "scripts": {
@@ -450,6 +483,7 @@ export default {
             "format": "prettier --write ."
       }
 }
+
 ```
 
 ---

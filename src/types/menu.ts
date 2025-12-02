@@ -46,6 +46,7 @@ export interface CustomOption {
 }
 
 export interface Menu {
+  id?: string; // 호환성 유지
   menuId: string;
   category: MenuCategory;
   name: string;

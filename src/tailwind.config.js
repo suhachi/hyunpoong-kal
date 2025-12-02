@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    'index.html',
-    'src/**/*.{ts,tsx,js,jsx,html}',
+    './index.html',
+    './src/**/*.{ts,tsx,js,jsx}',
   ],
   theme: {
     extend: {
@@ -43,7 +43,7 @@ export default {
         'dark-brown': 'var(--color-dark-brown)',
         'cream-bg': 'var(--color-cream-bg)',
         'brass-gold': 'var(--color-brass-gold)',
-        
+
         // 시맨틱 브랜드 컬러
         'brand-primary': 'var(--color-brand-primary)',
         'brand-primary-hover': 'var(--color-brand-primary-hover)',
@@ -54,7 +54,7 @@ export default {
         'brand-accent': 'var(--color-brand-accent)',
         'brand-accent-hover': 'var(--color-brand-accent-hover)',
         'brand-accent-light': 'var(--color-brand-accent-light)',
-        
+
         // 시스템 컬러 (기존 유지)
         background: 'var(--color-background)',
         foreground: 'var(--color-foreground)',

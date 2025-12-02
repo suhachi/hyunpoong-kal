@@ -1,3 +1,3 @@
-import { Timestamp } from "firebase/firestore";
+import { Timestamp, FieldValue } from "firebase/firestore";
 
-export type FirestoreTimestamp = Timestamp | { seconds: number; nanoseconds: number };
+export type FirestoreTimestamp = Timestamp | FieldValue | { seconds: number; nanoseconds: number };

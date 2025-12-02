@@ -1,6 +1,6 @@
 # Contexts - Full Source Code
 
-**Generated**: 2025-12-01-2219  
+**Generated**: 2025-12-02-1828  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -21,7 +21,7 @@ Complete source code of React Contexts (AuthContext, CartContext, etc.).
  * KS컴퍼니 (사업자번호: 553-17-00098)
  */
 
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -79,6 +79,7 @@ const MOCK_USERS: Record<string, AuthUser> = {
     role: "owner",
     storeId: "store-hyunpung",
     phoneNumber: "010-0000-0000",
+    photoURL: null,
     createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 },
     lastLoginAt: { seconds: Date.now() / 1000, nanoseconds: 0 },
     isAnonymous: false,
@@ -89,6 +90,7 @@ const MOCK_USERS: Record<string, AuthUser> = {
     displayName: "김고객",
     role: "customer",
     phoneNumber: "010-1234-5678",
+    photoURL: null,
     createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 },
     lastLoginAt: { seconds: Date.now() / 1000, nanoseconds: 0 },
     isAnonymous: false,
@@ -163,6 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: firebaseUser.uid,
         email: firebaseUser.email || email,
         displayName,
+        photoURL: null,
         role: "customer",
         phoneNumber: "",
         createdAt: { seconds: now, nanoseconds: 0 },
@@ -184,6 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: `user-${Date.now()}`,
         email,
         displayName,
+        photoURL: null,
         role: "customer",
         phoneNumber: "",
         createdAt: { seconds: now, nanoseconds: 0 },
@@ -224,7 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: firebaseUser.uid,
         email: firebaseUser.email || email,
         displayName: firebaseUser.displayName || "사용자",
-        photoURL: firebaseUser.photoURL || undefined,
+        photoURL: firebaseUser.photoURL || null,
         role,
         storeId: userData?.storeId,
         phoneNumber: userData?.phoneNumber || "",
@@ -273,7 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           uid: firebaseUser.uid,
           email: firebaseUser.email || "",
           displayName: firebaseUser.displayName || "사용자",
-          photoURL: firebaseUser.photoURL || undefined,
+          photoURL: firebaseUser.photoURL || null,
           role: defaultRole,
           phoneNumber: "",
           createdAt: { seconds: now, nanoseconds: 0 },
@@ -305,7 +309,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           uid: firebaseUser.uid,
           email: firebaseUser.email || "",
           displayName: firebaseUser.displayName || "사용자",
-          photoURL: firebaseUser.photoURL || undefined,
+          photoURL: firebaseUser.photoURL || null,
           role,
           storeId: userData?.storeId,
           phoneNumber: userData?.phoneNumber || "",
@@ -352,7 +356,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 전화번호 로그인
   const signInWithPhone = async (
     phoneNumber: string,
-    code: string,
+    _code: string,
     displayName?: string,
   ): Promise<AuthUser> => {
     if (USE_FIREBASE && auth) {
@@ -376,6 +380,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           uid: firebaseUser.uid,
           email: firebaseUser.email || "",
           displayName: displayName || "사용자",
+          photoURL: null,
           role: "customer",
           phoneNumber: normalizePhoneNumber(phoneNumber),
           createdAt: { seconds: now, nanoseconds: 0 },
@@ -400,6 +405,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           uid: firebaseUser.uid,
           email: firebaseUser.email || "",
           displayName: userData?.displayName || displayName || "사용자",
+          photoURL: userData?.photoURL || null,
           role: (userData?.role as UserRole) || "customer",
           storeId: userData?.storeId,
           phoneNumber: userData?.phoneNumber || normalizePhoneNumber(phoneNumber),
@@ -418,6 +424,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: `phone-${Date.now()}`,
         email: "",
         displayName: displayName || "전화번호 사용자",
+        photoURL: null,
         role: "customer",
         phoneNumber: normalizePhoneNumber(phoneNumber),
         createdAt: { seconds: now, nanoseconds: 0 },
@@ -434,7 +441,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 전화번호 회원가입
   const signUpWithPhone = async (
     phoneNumber: string,
-    code: string,
+    _code: string,
     displayName: string,
   ): Promise<void> => {
     if (USE_FIREBASE && auth) {
@@ -456,6 +463,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: firebaseUser.uid,
         email: firebaseUser.email || "",
         displayName,
+        photoURL: null,
         role: "customer",
         phoneNumber: normalizePhoneNumber(phoneNumber),
         createdAt: { seconds: now, nanoseconds: 0 },
@@ -477,6 +485,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: `phone-${Date.now()}`,
         email: "",
         displayName,
+        photoURL: null,
         role: "customer",
         phoneNumber: normalizePhoneNumber(phoneNumber),
         createdAt: { seconds: now, nanoseconds: 0 },

@@ -14,7 +14,7 @@ import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { Separator } from "../../../components/ui/separator";
-import { CheckCircle2, XCircle, AlertCircle, Copy, Download, Map as MapIcon } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, Download, Map as MapIcon } from "lucide-react";
 import { toast } from "sonner";
 import { getEnv } from "../../../config/env";
 

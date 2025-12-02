@@ -17,21 +17,9 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Badge } from "../ui/badge";
-import { Upload, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "../../lib/utils";
-
-interface CSVRow {
-  name: string;
-  category: string;
-  price: string;
-  description: string;
-  badges: string;
-  options: string;
-  imageUrl: string;
-  allergens: string;
-  origin: string;
-}
 
 interface ParsedMenu {
   data: Partial<Menu>;
@@ -124,7 +112,7 @@ export function MenuCSVImport({ open, onOpenChange, onImport }: MenuCSVImportPro
 
         // 배지
         if (row.badges) {
-          const badges = row.badges.split("|").map(b => b.trim());
+          const badges = row.badges.split("|").map((b: string) => b.trim());
           menuData.badges = badges as any;
         }
 
@@ -146,7 +134,7 @@ export function MenuCSVImport({ open, onOpenChange, onImport }: MenuCSVImportPro
 
         // 알레르기
         if (row.allergens) {
-          menuData.allergens = row.allergens.split("|").map(a => a.trim());
+          menuData.allergens = row.allergens.split("|").map((a: string) => a.trim());
         }
 
         // 원산지

@@ -112,7 +112,7 @@ export function OrderTracking() {
 
   // 배달 추적 상태
   const [deliveryTask, setDeliveryTask] = useState<DeliveryTask | null>(null);
-  const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [_deliveryLoading, setDeliveryLoading] = useState(false);
 
   // 현금영수증 신청 상태
   const [cashReceiptDialog, setCashReceiptDialog] = useState(false);
@@ -281,7 +281,7 @@ export function OrderTracking() {
 
     // 주문 완료 상태이고 아직 포인트 적립이 안된 경우
     if (
-      (order.status === OrderStatus.COMPLETED || order.status === "done") &&
+      order.status === OrderStatus.COMPLETED &&
       !order.pointsEarned
     ) {
       processPointsEarn();
@@ -436,7 +436,7 @@ export function OrderTracking() {
       <div
         className="pb-6"
         data-testid={
-          order?.status === OrderStatus.COMPLETED || order?.status === "done"
+          order?.status === OrderStatus.COMPLETED
             ? "order-complete.page"
             : undefined
         }
@@ -470,7 +470,7 @@ export function OrderTracking() {
             <h1 className="text-2xl text-[#2E1C10] mb-2" data-testid="order-tracking.status">
               <span
                 data-testid={
-                  order.status === OrderStatus.COMPLETED || order.status === "done"
+                  order.status === OrderStatus.COMPLETED
                     ? "order-complete.message"
                     : undefined
                 }
@@ -481,7 +481,7 @@ export function OrderTracking() {
             <p className="text-[#2E1C10]/60" data-testid="order-tracking.order-id">
               <span
                 data-testid={
-                  order.status === OrderStatus.COMPLETED || order.status === "done"
+                  order.status === OrderStatus.COMPLETED
                     ? "order-complete.order-id"
                     : undefined
                 }
@@ -501,31 +501,31 @@ export function OrderTracking() {
                     label="주문 접수"
                     timestamp={order.timeline.placed}
                     completed={!!order.timeline.placed}
-                    active={order.status === "placed"}
+                    active={order.status === OrderStatus.PENDING}
                   />
                   <TimelineItem
                     label="접수 확인"
                     timestamp={order.timeline.accepted}
                     completed={!!order.timeline.accepted}
-                    active={order.status === "accepted"}
+                    active={order.status === OrderStatus.ACCEPTED}
                   />
                   <TimelineItem
                     label="조리 중"
                     timestamp={order.timeline.cooking}
                     completed={!!order.timeline.cooking}
-                    active={order.status === "cooking"}
+                    active={order.status === OrderStatus.COOKING}
                   />
                   <TimelineItem
                     label="배달 중"
                     timestamp={order.timeline.out_for_delivery}
                     completed={!!order.timeline.out_for_delivery}
-                    active={order.status === "out_for_delivery"}
+                    active={order.status === OrderStatus.DELIVERING}
                   />
                   <TimelineItem
                     label="완료"
                     timestamp={order.timeline.done}
                     completed={!!order.timeline.done}
-                    active={order.status === "done"}
+                    active={order.status === OrderStatus.COMPLETED}
                     isLast
                   />
                 </>
@@ -535,25 +535,25 @@ export function OrderTracking() {
                     label="주문 접수"
                     timestamp={order.timeline.placed}
                     completed={!!order.timeline.placed}
-                    active={order.status === "placed"}
+                    active={order.status === OrderStatus.PENDING}
                   />
                   <TimelineItem
                     label="조리 중"
                     timestamp={order.timeline.cooking}
                     completed={!!order.timeline.cooking}
-                    active={order.status === "cooking"}
+                    active={order.status === OrderStatus.COOKING}
                   />
                   <TimelineItem
                     label="포장 완료"
                     timestamp={order.timeline.pickup_ready}
                     completed={!!order.timeline.pickup_ready}
-                    active={order.status === "pickup_ready"}
+                    active={order.status === OrderStatus.ACCEPTED}
                   />
                   <TimelineItem
                     label="완료"
                     timestamp={order.timeline.done}
                     completed={!!order.timeline.done}
-                    active={order.status === "done"}
+                    active={order.status === OrderStatus.COMPLETED}
                     isLast
                   />
                 </>
@@ -627,14 +627,14 @@ export function OrderTracking() {
           {/* 예상 시간 (조리 중일 때만, 또는 배달추적 미활성화 시) */}
           {(order.status === OrderStatus.COOKING ||
             (order.status === OrderStatus.DELIVERING && (!isDeliveryEnabled || !deliveryTask))) && (
-            <div className="bg-[#F37021]/10 rounded-2xl p-4 text-center">
-              <Clock className="w-6 h-6 text-[#F37021] mx-auto mb-2" />
-              <p className="text-[#2E1C10]">
-                {order.deliveryType === "delivery" ? "예상 도착" : "예상 완료"}
-              </p>
-              <p className="text-xl text-[#F37021]">약 30-40분</p>
-            </div>
-          )}
+              <div className="bg-[#F37021]/10 rounded-2xl p-4 text-center">
+                <Clock className="w-6 h-6 text-[#F37021] mx-auto mb-2" />
+                <p className="text-[#2E1C10]">
+                  {order.deliveryType === "delivery" ? "예상 도착" : "예상 완료"}
+                </p>
+                <p className="text-xl text-[#F37021]">약 30-40분</p>
+              </div>
+            )}
 
           {/* 가게 문의 */}
           <div className="bg-white rounded-2xl p-4">
@@ -666,8 +666,8 @@ export function OrderTracking() {
                           item.options.noodle && `면양: ${item.options.noodle}`,
                           item.options.spicy && `맵기: ${item.options.spicy}`,
                           item.options.toppings &&
-                            item.options.toppings.length > 0 &&
-                            `토핑: ${item.options.toppings.join(", ")}`,
+                          item.options.toppings.length > 0 &&
+                          `토핑: ${item.options.toppings.join(", ")}`,
                         ]
                           .filter(Boolean)
                           .join(" · ")}
@@ -732,7 +732,7 @@ export function OrderTracking() {
           )}
 
           {/* 영수증 관련 버튼 (완료 시) */}
-          {(order.status === OrderStatus.COMPLETED || order.status === "done") && (
+          {order.status === OrderStatus.COMPLETED && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <Button
@@ -879,9 +879,8 @@ function TimelineItem({ label, timestamp, completed, active, isLast }: TimelineI
       {/* 아이콘 */}
       <div className="relative">
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            completed ? "bg-green-500" : active ? "bg-[#D61C1C]" : "bg-gray-200"
-          }`}
+          className={`w-8 h-8 rounded-full flex items-center justify-center ${completed ? "bg-green-500" : active ? "bg-[#D61C1C]" : "bg-gray-200"
+            }`}
         >
           {completed ? (
             <CheckCircle2 className="w-5 h-5 text-white" />
@@ -893,9 +892,8 @@ function TimelineItem({ label, timestamp, completed, active, isLast }: TimelineI
         </div>
         {!isLast && (
           <div
-            className={`absolute left-1/2 top-8 w-0.5 h-8 -translate-x-1/2 ${
-              completed ? "bg-green-500" : "bg-gray-200"
-            }`}
+            className={`absolute left-1/2 top-8 w-0.5 h-8 -translate-x-1/2 ${completed ? "bg-green-500" : "bg-gray-200"
+              }`}
           />
         )}
       </div>

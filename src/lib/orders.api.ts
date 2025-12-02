@@ -139,15 +139,14 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
 
       // 최신순 정렬
       orderList.sort((a, b) => {
-        const aTime =
-          typeof a.createdAt === "string"
-            ? new Date(a.createdAt).getTime()
-            : a.createdAt.seconds * 1000;
-        const bTime =
-          typeof b.createdAt === "string"
-            ? new Date(b.createdAt).getTime()
-            : b.createdAt.seconds * 1000;
-        return bTime - aTime;
+        const getTime = (ts: any) => {
+          if (!ts) return 0;
+          if (typeof ts === "string") return new Date(ts).getTime();
+          if ("seconds" in ts) return ts.seconds * 1000;
+          if (typeof ts.toDate === "function") return ts.toDate().getTime();
+          return 0;
+        };
+        return getTime(b.createdAt) - getTime(a.createdAt);
       });
 
       return Promise.resolve(orderList);
@@ -227,7 +226,7 @@ export function getReviewableOrders(orders: Order[]): Order[] {
   return orders.filter(order => {
     // 완료된 주문 중 리뷰를 작성하지 않은 주문
     return (
-      (order.status === OrderStatus.COMPLETED || order.status === "done") && !hasReview(order)
+      order.status === OrderStatus.COMPLETED && !hasReview(order)
     );
   });
 }

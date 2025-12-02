@@ -19,7 +19,6 @@ import {
   getDoc,
   updateDoc,
   serverTimestamp,
-  Timestamp,
 } from "firebase/firestore";
 
 // 샘플 데이터 제거: 초기 상태에서는 주문/로그 없음
@@ -105,7 +104,7 @@ export async function fetchOrders(
       filtered = filtered.filter(
         order =>
           order.orderId.toLowerCase().includes(query) ||
-          order.phone.includes(query) ||
+          order.phone?.includes(query) ||
           order.items.some(item => item.menuName.toLowerCase().includes(query)),
       );
     }
@@ -182,7 +181,7 @@ export async function fetchOrders(
       orders = orders.filter(
         order =>
           order.orderId.toLowerCase().includes(queryStr) ||
-          order.phone.includes(queryStr) ||
+          order.phone?.includes(queryStr) ||
           order.items.some(item => item.menuName.toLowerCase().includes(queryStr)),
       );
     }
@@ -251,7 +250,7 @@ export async function updateOrderStatus(
 
     if (newStatus === OrderStatus.CANCELLED && reason) {
       order.payment.cancelReason = reason;
-      order.payment.canceledAt = { seconds: Date.now() / 1000, nanoseconds: 0 } as any;
+      order.payment.cancelledAt = { seconds: Date.now() / 1000, nanoseconds: 0 } as any;
     }
 
     // 로그 추가
@@ -373,7 +372,7 @@ export async function fetchOrderStats(storeId: string): Promise<OrderStats> {
     const todayTimestamp = today.getTime() / 1000;
     const q = query(collection(db, "orders"), where("storeId", "==", storeId));
     const snapshot = await getDocs(q);
-    const orders: Order[] = snapshot.docs.map(doc => ({ orderId: doc.id, ...doc.data() }));
+    const orders: Order[] = snapshot.docs.map(doc => ({ orderId: doc.id, ...doc.data() as Omit<Order, 'orderId'> }));
     const todayOrders = orders.filter(o => {
       const createdAt = o.createdAt;
       const seconds =

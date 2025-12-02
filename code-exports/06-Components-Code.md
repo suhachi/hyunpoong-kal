@@ -1,6 +1,6 @@
 # Components - Full Source Code
 
-**Generated**: 2025-12-01-2219  
+**Generated**: 2025-12-02-1828  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -1214,7 +1214,6 @@ import {
   type MenuBadge,
   CATEGORY_LABELS,
   BADGE_LABELS,
-  type MenuOptionGroup,
   type CustomOption,
   type OptionGroup,
 } from "@/types/menu";
@@ -1223,7 +1222,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -1232,13 +1230,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, X, Upload, Image as ImageIcon, Trash2, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { formatPrice } from "@/lib/utils";
 import { uploadMenuImage, validateImageFile } from "@/lib/storage";
 import { USE_FIREBASE } from "@/config/env";
 import { AdminMenuCustomOptionsEditor } from "./AdminMenuCustomOptionsEditor";
@@ -1336,12 +1329,7 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
     }
   };
 
-  // 옵션 그룹 선택/해제
-  const handleToggleOptionGroup = (groupId: string) => {
-    setSelectedOptionGroupIds(prev =>
-      prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId],
-    );
-  };
+
 
   // 커스텀 옵션 변경 핸들러
   const handleCustomOptionsChange = (next: CustomOption[]) => {
@@ -1418,9 +1406,9 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
       // allergens를 string[]로 변환 (쉼표로 구분된 문자열을 배열로 변환)
       const allergensArray = allergens.trim()
         ? allergens
-            .split(",")
-            .map(a => a.trim())
-            .filter(a => a.length > 0)
+          .split(",")
+          .map(a => a.trim())
+          .filter(a => a.length > 0)
         : [];
       // 유효한 커스텀 옵션만 필터링 (이름이 있는 것만)
       const validCustomOptions = customOptions.filter(opt => opt.name.trim().length > 0);
@@ -1522,7 +1510,7 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
             {/* 카테고리 */}
             <div>
               <Label htmlFor="category">카테고리 *</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={v => setCategory(v as MenuCategory)}>
                 <SelectTrigger id="category">
                   <SelectValue />
                 </SelectTrigger>
@@ -1593,9 +1581,8 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
                     <Badge
                       key={key}
                       variant={isSelected ? "default" : "outline"}
-                      className={`cursor-pointer border-2 transition-colors ${
-                        isSelected ? colors.selected : colors.unselected
-                      }`}
+                      className={`cursor-pointer border-2 transition-colors ${isSelected ? colors.selected : colors.unselected
+                        }`}
                       onClick={() => handleToggleBadge(badgeKey)}
                     >
                       {label}
@@ -1682,21 +1669,9 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Badge } from "../ui/badge";
-import { Upload, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "../../lib/utils";
-
-interface CSVRow {
-  name: string;
-  category: string;
-  price: string;
-  description: string;
-  badges: string;
-  options: string;
-  imageUrl: string;
-  allergens: string;
-  origin: string;
-}
 
 interface ParsedMenu {
   data: Partial<Menu>;
@@ -1789,7 +1764,7 @@ export function MenuCSVImport({ open, onOpenChange, onImport }: MenuCSVImportPro
 
         // 배지
         if (row.badges) {
-          const badges = row.badges.split("|").map(b => b.trim());
+          const badges = row.badges.split("|").map((b: string) => b.trim());
           menuData.badges = badges as any;
         }
 
@@ -1811,7 +1786,7 @@ export function MenuCSVImport({ open, onOpenChange, onImport }: MenuCSVImportPro
 
         // 알레르기
         if (row.allergens) {
-          menuData.allergens = row.allergens.split("|").map(a => a.trim());
+          menuData.allergens = row.allergens.split("|").map((a: string) => a.trim());
         }
 
         // 원산지

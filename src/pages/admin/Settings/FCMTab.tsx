@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, XCircle, AlertCircle, Bell, Terminal, Play, Copy } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, Bell, Play, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { runFCMDiagnostics } from "@/lib/admin/settingsCenter.api";
 import type { DiagnosticResult } from "@/types/adminSettings";
