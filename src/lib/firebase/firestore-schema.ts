@@ -50,6 +50,7 @@ export interface StoreDoc {
   };
   isOpen: boolean;
   deliveryAvailable: boolean;
+  deliveryRadiusKm?: number; // 배달 가능 반경 (km, 없으면 env 기본값)
   minOrderAmount: number;
   deliveryFee: number;
   settings: {

@@ -209,10 +209,17 @@ export function Checkout() {
       return;
     }
 
-    // 배달 가능 범위 체크 (T-ADDR-03)
+    // 배달 가능 범위 체크 (T-ADDR-03, T-ADDR-04)
+    // 우선순위: storeInfo.deliveryRadiusKm > MAX_DELIVERY_RADIUS_KM > OFF
+    const storeRadiusKm = storeInfo?.deliveryRadiusKm;
+    const effectiveRadiusKm =
+      typeof storeRadiusKm === "number" && storeRadiusKm > 0
+        ? storeRadiusKm
+        : MAX_DELIVERY_RADIUS_KM;
+
     if (
       deliveryType === "delivery" &&
-      MAX_DELIVERY_RADIUS_KM > 0
+      effectiveRadiusKm > 0
     ) {
       const storeLat = storeInfo?.address?.lat;
       const storeLng = storeInfo?.address?.lng;
@@ -233,9 +240,9 @@ export function Checkout() {
           customerLng,
         );
 
-        if (distanceKm > MAX_DELIVERY_RADIUS_KM) {
+        if (distanceKm > effectiveRadiusKm) {
           toast.error(
-            `배달 가능 범위(${MAX_DELIVERY_RADIUS_KM}km)를 벗어났습니다. 매장 인근 주소로 다시 시도해 주세요.`,
+            `배달 가능 범위(${effectiveRadiusKm}km)를 벗어났습니다. 매장 인근 주소로 다시 시도해 주세요.`,
           );
           setIsProcessing(false);
           return;

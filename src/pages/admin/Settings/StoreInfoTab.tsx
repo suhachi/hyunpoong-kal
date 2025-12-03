@@ -125,6 +125,10 @@ export function StoreInfoTab() {
         deliveryAvailable: storeInfo.deliveryAvailable ?? true,
         minOrderAmount: storeInfo.minOrderAmount || 15000,
         deliveryFee: storeInfo.deliveryFee || 3000,
+        deliveryRadiusKm:
+          typeof storeInfo.deliveryRadiusKm === "number" && storeInfo.deliveryRadiusKm > 0
+            ? storeInfo.deliveryRadiusKm
+            : undefined,
         settings: storeInfo.settings || {
           pointsRate: 0.03,
           pointsMinUse: 1000,
@@ -311,6 +315,29 @@ export function StoreInfoTab() {
               }
               className="bg-gray-50"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="store-delivery-radius">배달 가능 범위 (km)</Label>
+            <Input
+              id="store-delivery-radius"
+              type="number"
+              min={0}
+              step={0.1}
+              value={storeInfo.deliveryRadiusKm ?? ""}
+              onChange={e => {
+                const val = e.target.value;
+                setStoreInfo({
+                  ...storeInfo,
+                  deliveryRadiusKm: val === "" ? undefined : Number(val),
+                });
+              }}
+              placeholder="예: 3"
+              className="bg-gray-50"
+            />
+            <p className="text-sm text-[#2E1C10]/60">
+              0 또는 비워두면 시스템 기본값을 사용합니다. 예: 3 → 매장 기준 3km 이내만 배달
+            </p>
           </div>
         </CardContent>
       </Card>
