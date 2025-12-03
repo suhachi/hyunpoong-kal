@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { approvePayment } from "@/lib/nicepay";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,15 @@ export default function PaymentReturn() {
     const navigate = useNavigate();
     const [status, setStatus] = useState<"processing" | "success" | "failed">("processing");
     const [errorMessage, setErrorMessage] = useState("");
+    const processedRef = useRef(false); // 멱등성 보호: 중복 승인 방지
 
     useEffect(() => {
         const processPayment = async () => {
+            // 멱등성 가드: 이미 처리 시도한 경우 중복 호출 방지
+            if (processedRef.current) {
+                return;
+            }
+            processedRef.current = true;
             const orderId = searchParams.get("orderId");
             let authToken = searchParams.get("authToken");
             const authUrl = searchParams.get("authUrl"); // 일부 환경에서 다를 수 있음
@@ -58,6 +64,7 @@ export default function PaymentReturn() {
                 console.error("Payment approval failed:", error);
                 setStatus("failed");
                 setErrorMessage(error.message || "결제 승인 중 오류가 발생했습니다.");
+                // TODO: 서버 측에서 이미 승인된 주문에 대해 중복 approve 요청이 오면 멱등적으로 처리하도록 보완 필요
             }
         };
 

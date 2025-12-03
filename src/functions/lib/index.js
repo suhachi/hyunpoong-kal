@@ -1,23 +1,4 @@
 "use strict";
-/**
- * Firebase Functions
- * 현풍닭칼국수 PWA 백엔드 트리거 및 스케줄러
- * v1.0 STEP 6~7: Cloud Functions + FCM 트리거 구현
- *
- * STEP6 NOTE: 현재 export되고 있는 functions 목록 요약
- * - onReviewCreated: 리뷰 생성 트리거 (기존)
- * - onReviewReportCreated: 리뷰 신고 트리거 (기존)
- * - onOrderUpdated: 주문 상태 변경 트리거 (기존, orders/{orderId} 구조)
- * - scheduledCouponExpiration: 쿠폰 만료 스케줄러 (기존)
- * - weeklyReport: 주간 리포트 스케줄러 (기존)
- * - payAuthorize, payCancel, generateReceipt, requestCashReceipt: HTTPS Functions (기존)
- *
- * v1.0 새로 추가:
- * - onOrderStatusChanged: stores/{storeId}/orders/{orderId} 상태 변경 트리거
- * - onReviewCreatedV1: stores/{storeId}/reviews/{reviewId} 생성 트리거
- * - onScheduleExpirePoints: 포인트 만료 스케줄러
- * - onScheduleExpireCoupons: 쿠폰 만료 스케줄러 (v1.0 구조)
- */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -52,561 +33,152 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOnSitePaymentOrder = exports.cancelPayment = exports.getPaymentResult = exports.approvePayment = exports.createPayment = exports.handleSaenggakdaeroWebhook = exports.requestCashReceipt = exports.generateReceipt = exports.payCancel = exports.payAuthorize = exports.weeklyReport = exports.scheduledCouponExpiration = exports.onOrderUpdated = exports.onReviewReportCreated = exports.onReviewCreated = exports.onScheduleExpireCoupons = exports.onScheduleExpirePoints = exports.onReviewCreatedV1 = exports.onOrderStatusChanged = void 0;
+exports.createOnSitePaymentOrder = exports.getPaymentResult = exports.cancelPayment = exports.approvePayment = exports.createPayment = exports.confirmPayment = exports.createPaymentIntent = exports.cleanupPendingOrders = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
-const push_1 = require("./lib/push");
-const coupons_1 = require("./lib/coupons");
-const report_1 = require("./lib/report");
-const nicepay_1 = require("./lib/nicepay");
-const pdf_1 = require("./lib/pdf");
+const providers_1 = require("./payments/providers");
 const config_1 = require("./config");
-const points_1 = require("./lib/points");
-const fcm_1 = require("./lib/fcm");
-// Firebase Admin 초기화
+const nicepay_handlers_1 = require("./payments/nicepay-handlers");
+// Schedulers
+var cleanup_pending_orders_1 = require("./schedulers/cleanup-pending-orders");
+Object.defineProperty(exports, "cleanupPendingOrders", { enumerable: true, get: function () { return cleanup_pending_orders_1.cleanupPendingOrders; } });
+// Firebase Admin should be initialized in index.ts, but double check here just in case
 if (!admin.apps.length) {
     admin.initializeApp();
 }
-// ============================================================================
-// v1.0: 주문 상태 변경 트리거 (stores/{storeId}/orders/{orderId})
-// ============================================================================
+const db = admin.firestore();
 /**
- * v1.0 주문 상태 변경 트리거
- * stores/{storeId}/orders/{orderId} 문서의 status 변경을 감지하여
- * 포인트 적립/환불 + FCM 알림 실행
+ * 결제 요청 생성 (createPaymentIntent)
+ * - 주문 상태 검증
+ * - 멱등성 키(clientOrderId) 확인
+ * - PG 초기화 요청
  */
-exports.onOrderStatusChanged = functions
+exports.createPaymentIntent = functions
     .region(config_1.REGION)
     .runWith(config_1.RUNTIME_OPTS)
-    .firestore.document('stores/{storeId}/orders/{orderId}')
-    .onUpdate(async (change, context) => {
-    const before = change.before.data();
-    const after = change.after.data();
-    const { storeId, orderId } = context.params;
-    if (!before || !after) {
-        console.log('[onOrderStatusChanged] Missing before/after data');
-        return;
+    .https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError("unauthenticated", "로그인이 필요합니다");
     }
-    const prevStatus = before.status;
-    const nextStatus = after.status;
-    // 상태가 변하지 않았다면 아무 것도 하지 않음
-    if (prevStatus === nextStatus) {
-        return;
-    }
-    console.log('[onOrderStatusChanged]', { storeId, orderId, prevStatus, nextStatus });
-    const userId = after.userId;
-    const finalAmount = after.finalAmount;
-    if (!userId || finalAmount === undefined) {
-        console.warn('[onOrderStatusChanged] Missing userId or finalAmount', { userId, finalAmount });
-        return;
-    }
+    const { orderId, amount, clientOrderId, method } = data;
+    const providerName = process.env.VITE_PAYMENT_PROVIDER || "nicepay"; // or from data
+    console.log(`[Payment] createPaymentIntent: ${orderId}, ${method}, ${providerName}`);
     try {
-        // 1) 주문 완료 -> 포인트 적립
-        if (prevStatus !== 'completed' && nextStatus === 'completed') {
-            const amount = Math.floor(finalAmount * config_1.POINTS_POLICY.ORDER_REWARD_RATE);
-            if (amount > 0) {
-                console.log('[onOrderStatusChanged] Earning points', { userId, storeId, orderId, amount });
-                await (0, points_1.earnPointsServer)({
-                    userId,
-                    storeId,
-                    amount,
-                    refKind: 'order',
-                    refId: orderId,
-                    note: '주문 적립',
-                });
-                await (0, fcm_1.notifyUser)({
-                    userId,
-                    title: '주문이 완료되었어요',
-                    body: `주문이 완료되어 ${amount}포인트가 적립되었습니다.`,
-                    data: {
-                        type: 'order_completed',
-                        storeId,
-                        orderId,
-                    },
-                });
-                console.log('[onOrderStatusChanged] Points earned and notification sent', { userId, amount });
+        // 1. 주문 조회 및 검증
+        const orderRef = db.collection("orders").doc(orderId);
+        const orderDoc = await orderRef.get();
+        if (!orderDoc.exists) {
+            throw new functions.https.HttpsError("not-found", "주문을 찾을 수 없습니다");
+        }
+        const order = orderDoc.data();
+        // 본인 주문 확인
+        if (order?.userId !== context.auth.uid) {
+            throw new functions.https.HttpsError("permission-denied", "권한이 없습니다");
+        }
+        // 이미 결제된 주문인지 확인
+        if (order?.status === "paid" || order?.payment?.status === "paid") {
+            throw new functions.https.HttpsError("failed-precondition", "이미 결제된 주문입니다");
+        }
+        // 금액 검증
+        if (order?.finalAmount !== amount) {
+            throw new functions.https.HttpsError("invalid-argument", "결제 금액이 일치하지 않습니다");
+        }
+        // 2. Payment Provider Init
+        const provider = (0, providers_1.getPaymentProvider)(providerName);
+        const initResult = await provider.initPayment(data);
+        // 3. 주문에 결제 시도 정보 업데이트 (PENDING)
+        await orderRef.update({
+            "payment.method": method,
+            "payment.status": "pending",
+            "payment.pgProvider": providerName,
+            "payment.pgOrderId": initResult.pgOrderId,
+            "clientOrderId": clientOrderId,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return initResult;
+    }
+    catch (error) {
+        console.error("[Payment] Init Error:", error);
+        throw new functions.https.HttpsError("internal", error.message || "결제 초기화 실패");
+    }
+});
+/**
+ * 결제 승인/검증 (confirmPayment)
+ * - PG 승인 결과 검증
+ * - 주문 상태 업데이트 (Transaction)
+ */
+exports.confirmPayment = functions
+    .region(config_1.REGION)
+    .runWith(config_1.RUNTIME_OPTS)
+    .https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError("unauthenticated", "로그인이 필요합니다");
+    }
+    const { orderId, pgToken, pgOrderId } = data;
+    console.log(`[Payment] confirmPayment: ${orderId}, ${pgOrderId}`);
+    try {
+        // 1. 주문 조회
+        const orderRef = db.collection("orders").doc(orderId);
+        // Transaction 사용
+        await db.runTransaction(async (t) => {
+            const orderDoc = await t.get(orderRef);
+            if (!orderDoc.exists)
+                throw new functions.https.HttpsError("not-found", "주문 없음");
+            const order = orderDoc.data();
+            if (order?.payment?.status === "paid") {
+                // 이미 처리됨 (멱등성)
+                return { success: true, message: "Already paid" };
             }
-        }
-        // 2) 완료 → 취소, 또는 다른 상태 → 취소 시 환불 로직
-        if (nextStatus === 'cancelled' && prevStatus !== 'cancelled') {
-            // 주문 완료 상태였다면 적립된 포인트 환불
-            if (prevStatus === 'completed') {
-                const earnedAmount = Math.floor(finalAmount * config_1.POINTS_POLICY.ORDER_REWARD_RATE);
-                if (earnedAmount > 0) {
-                    try {
-                        await (0, points_1.refundPointsServer)({
-                            userId,
-                            storeId,
-                            amount: earnedAmount,
-                            refKind: 'order',
-                            refId: orderId,
-                            note: '주문 취소 환불',
-                        });
-                        console.log('[onOrderStatusChanged] Refunded points for cancelled order', { userId, orderId, amount: earnedAmount });
-                    }
-                    catch (refundError) {
-                        console.error('[onOrderStatusChanged] Failed to refund points:', refundError);
-                    }
-                }
-            }
-            console.log('[onOrderStatusChanged] Order cancelled', { userId, orderId });
-        }
-    }
-    catch (error) {
-        console.error('[onOrderStatusChanged] Error:', error);
-    }
-});
-// ============================================================================
-// v1.0: 리뷰 작성 트리거 (stores/{storeId}/reviews/{reviewId})
-// ============================================================================
-/**
- * v1.0 리뷰 작성 트리거
- * stores/{storeId}/reviews/{reviewId} 문서가 새로 생성될 때,
- * 리뷰 종류에 따라 포인트 적립 + FCM 알림
- */
-exports.onReviewCreatedV1 = functions
-    .region(config_1.REGION)
-    .runWith(config_1.RUNTIME_OPTS)
-    .firestore.document('stores/{storeId}/reviews/{reviewId}')
-    .onCreate(async (snap, context) => {
-    const review = snap.data();
-    const { storeId, reviewId } = context.params;
-    const userId = review.userId;
-    if (!userId) {
-        console.warn('[onReviewCreatedV1] Missing userId', { storeId, reviewId });
-        return;
-    }
-    const hasPhoto = Array.isArray(review.images) && review.images.length > 0;
-    const base = hasPhoto ? config_1.POINTS_POLICY.REVIEW_PHOTO_BONUS : config_1.POINTS_POLICY.REVIEW_TEXT_BONUS;
-    console.log('[onReviewCreatedV1]', { storeId, reviewId, userId, hasPhoto, base });
-    if (base <= 0) {
-        console.log('[onReviewCreatedV1] No points to earn', { base });
-        return;
-    }
-    try {
-        await (0, points_1.earnPointsServer)({
-            userId,
-            storeId,
-            amount: base,
-            refKind: 'review',
-            refId: reviewId,
-            note: hasPhoto ? '포토 리뷰 적립' : '텍스트 리뷰 적립',
-        });
-        await (0, fcm_1.notifyUser)({
-            userId,
-            title: '리뷰 감사합니다',
-            body: `${base}포인트가 적립되었습니다.`,
-            data: {
-                type: 'review_created',
-                storeId,
-                reviewId,
-            },
-        });
-        console.log('[onReviewCreatedV1] Points earned and notification sent', { userId, amount: base });
-    }
-    catch (error) {
-        console.error('[onReviewCreatedV1] Error:', error);
-    }
-});
-// ============================================================================
-// v1.0: 포인트 만료 스케줄러
-// ============================================================================
-/**
- * 포인트 만료 스케줄러
- * 매일 04:00 KST에 실행되어 만료된 포인트를 처리
- */
-exports.onScheduleExpirePoints = functions
-    .region(config_1.REGION)
-    .runWith(config_1.RUNTIME_OPTS)
-    .pubsub.schedule('0 4 * * *')
-    .timeZone('Asia/Seoul')
-    .onRun(async () => {
-    console.log('[SCHEDULE] onScheduleExpirePoints started');
-    // TODO:
-    // - stores/*/pointsTransactions 또는 별도 expire 기준을 조회
-    // - 만료 대상 포인트를 찾아서
-    //   - pointsBalances 업데이트
-    //   - pointsTransactions 에 expire 트랜잭션 기록
-    console.log('[SCHEDULE] onScheduleExpirePoints completed (TODO: implement)');
-});
-// ============================================================================
-// v1.0: 쿠폰 만료 스케줄러
-// ============================================================================
-/**
- * 쿠폰 만료 스케줄러
- * 매일 04:05 KST에 실행되어 만료된 쿠폰을 비활성화
- */
-exports.onScheduleExpireCoupons = functions
-    .region(config_1.REGION)
-    .runWith(config_1.RUNTIME_OPTS)
-    .pubsub.schedule('5 4 * * *')
-    .timeZone('Asia/Seoul')
-    .onRun(async () => {
-    console.log('[SCHEDULE] onScheduleExpireCoupons started');
-    // TODO:
-    // - stores/*/coupons 에서 validUntil < now 이고 isActive=true 인 쿠폰 검색
-    // - isActive=false 로 업데이트
-    console.log('[SCHEDULE] onScheduleExpireCoupons completed (TODO: implement)');
-});
-// ============================================================================
-// 기존 트리거 (호환성 유지)
-// ============================================================================
-// ============================================================================
-// 1. 리뷰 생성 트리거: 사진 리뷰 쿠폰 자동 발급 (기존 구조)
-// ============================================================================
-exports.onReviewCreated = functions.firestore
-    .document('reviews/{reviewId}')
-    .onCreate(async (snap, context) => {
-    const review = snap.data();
-    const reviewId = context.params.reviewId;
-    // 이미 보상 발급된 경우 스킵
-    if (review?.rewardIssued || !review?.userId) {
-        return;
-    }
-    // 사진 리뷰 확인
-    const hasPhoto = Array.isArray(review.photos) && review.photos.length > 0;
-    if (!hasPhoto) {
-        return;
-    }
-    try {
-        // 사진 리뷰 쿠폰 발급 (3,000원 / 30일 / 15,000원 이상 주문시 사용)
-        await (0, coupons_1.issuePhotoReviewCoupon)(review.userId);
-        // 리뷰에 보상 발급 완료 표시
-        await snap.ref.update({ rewardIssued: true });
-        // 푸시 알림 전송
-        await (0, push_1.sendPushToUser)(review.userId, {
-            notification: {
-                title: '🎁 리뷰 감사 쿠폰이 발급되었어요',
-                body: '소중한 후기 감사합니다. 다음 주문에 사용해 보세요!',
-            },
-            data: {
-                type: 'coupon_issued',
-                couponType: 'photo_review',
-            },
-        });
-        console.log(`Photo review coupon issued for user ${review.userId}`);
-    }
-    catch (error) {
-        console.error('Failed to issue photo review coupon:', error);
-    }
-});
-// ============================================================================
-// 2. 리뷰 신고 트리거: 3건 이상 시 자동 숨김 + 관리자 알림
-// ============================================================================
-exports.onReviewReportCreated = functions.firestore
-    .document('reviews_reports/{reportId}')
-    .onCreate(async (snap, context) => {
-    const report = snap.data();
-    const reviewId = report?.reviewId;
-    if (!reviewId) {
-        return;
-    }
-    const db = admin.firestore();
-    try {
-        // 해당 리뷰의 전체 신고 건수 조회
-        const reportsSnapshot = await db
-            .collection('reviews_reports')
-            .where('reviewId', '==', reviewId)
-            .get();
-        const reportCount = reportsSnapshot.size;
-        console.log(`Review ${reviewId} has ${reportCount} reports`);
-        // 신고 3건 이상 시 자동 숨김 처리
-        if (reportCount >= 3) {
-            await db.collection('reviews').doc(reviewId).set({
-                hidden: true,
-                hiddenReason: 'auto-reported',
-                hiddenAt: admin.firestore.FieldValue.serverTimestamp(),
-            }, { merge: true });
-            // 관리자들에게 알림
-            await (0, push_1.sendPushToAdmins)({
-                notification: {
-                    title: '⚠️ 리뷰 신고 누적 알림',
-                    body: `신고 ${reportCount}건 누적된 리뷰가 자동 숨김 처리되었습니다.`,
-                },
-                data: {
-                    type: 'review_auto_hidden',
-                    reviewId,
-                    reportCount: String(reportCount),
-                },
-            });
-            console.log(`Review ${reviewId} auto-hidden due to ${reportCount} reports`);
-        }
-    }
-    catch (error) {
-        console.error('Failed to process review report:', error);
-    }
-});
-// ============================================================================
-// 3. 주문 상태 변경 트리거: 고객에게 푸시 알림
-// ============================================================================
-exports.onOrderUpdated = functions.firestore
-    .document('orders/{orderId}')
-    .onUpdate(async (change, context) => {
-    const before = change.before.data();
-    const after = change.after.data();
-    const orderId = context.params.orderId;
-    if (!before || !after) {
-        return;
-    }
-    // 상태 변경이 없으면 스킵
-    if (before.status === after.status) {
-        return;
-    }
-    try {
-        const title = (0, report_1.getStatusChangeTitle)(after.status);
-        const message = (0, report_1.getStatusChangeMessage)(after.status);
-        await (0, push_1.sendPushToUser)(after.userId, {
-            notification: {
-                title,
-                body: message,
-            },
-            data: {
-                type: 'order_status_changed',
+            // 2. Payment Provider Confirm
+            const providerName = order?.payment?.pgProvider || "mock";
+            const provider = (0, providers_1.getPaymentProvider)(providerName);
+            const result = await provider.confirmPayment({
                 orderId,
-                status: String(after.status),
-                orderNumber: String(after.orderNumber || ''),
-            },
-        });
-        console.log(`Order ${orderId} status changed: ${before.status} → ${after.status}`);
-    }
-    catch (error) {
-        console.error('Failed to send order status notification:', error);
-    }
-});
-// ============================================================================
-// 4. 쿠폰 만료 배치: 매일 04:00 KST (기존 구조: coupons 컬렉션)
-// ============================================================================
-exports.scheduledCouponExpiration = functions.pubsub
-    .schedule('0 4 * * *')
-    .timeZone('Asia/Seoul')
-    .onRun(async (context) => {
-    console.log('[SCHEDULE] scheduledCouponExpiration started');
-    const db = admin.firestore();
-    const now = admin.firestore.Timestamp.now();
-    try {
-        // 만료된 미사용 쿠폰 조회
-        const expiredCoupons = await db
-            .collection('coupons')
-            .where('expiresAt', '<=', now)
-            .where('status', '==', 'unused')
-            .get();
-        if (expiredCoupons.empty) {
-            console.log('[SCHEDULE] scheduledCouponExpiration: No expired coupons found');
-            return;
-        }
-        // 배치로 상태 업데이트
-        const batch = db.batch();
-        expiredCoupons.forEach((doc) => {
-            batch.update(doc.ref, {
-                status: 'expired',
-                expiredAt: admin.firestore.FieldValue.serverTimestamp(),
+                pgOrderId,
+                pgToken,
+                amount: order?.finalAmount // 검증용
             });
+            if (result.success) {
+                // 3. 성공 시 상태 업데이트
+                t.update(orderRef, {
+                    "status": "accepted", // 결제 완료 시 '접수됨' 상태로 (정책에 따라 다름)
+                    "payment.status": "paid", // or APPROVED
+                    "payment.approvedAt": admin.firestore.FieldValue.serverTimestamp(),
+                    "payment.pgTid": result.pgTid,
+                    "payment.pgReceiptUrl": result.pgReceiptUrl,
+                    "payment.cardName": result.cardName,
+                    "payment.cardNum": result.cardNum,
+                    "updatedAt": admin.firestore.FieldValue.serverTimestamp(),
+                });
+            }
+            else {
+                // 4. 실패 시 상태 업데이트
+                t.update(orderRef, {
+                    "payment.status": "failed",
+                    "payment.failReason": result.failReason,
+                    "payment.failCode": result.failCode,
+                    "payment.failedAt": admin.firestore.FieldValue.serverTimestamp(),
+                    "updatedAt": admin.firestore.FieldValue.serverTimestamp(),
+                });
+                // Transaction 내에서 에러를 던지면 롤백되므로, 여기서는 롤백하지 않고 실패 상태를 기록함.
+                // 하지만 클라이언트에게는 에러를 던져야 함.
+                throw new functions.https.HttpsError("aborted", result.failReason || "결제 승인 실패");
+            }
         });
-        await batch.commit();
-        console.log(`[SCHEDULE] scheduledCouponExpiration: Expired ${expiredCoupons.size} coupons`);
+        return { success: true };
     }
     catch (error) {
-        console.error('[SCHEDULE] scheduledCouponExpiration: Failed to expire coupons:', error);
-    }
-    console.log('[SCHEDULE] scheduledCouponExpiration completed');
-});
-// ============================================================================
-// 5. 주간 리포트: 매주 월요일 09:00 KST
-// ============================================================================
-exports.weeklyReport = functions.pubsub
-    .schedule('0 9 * * 1')
-    .timeZone('Asia/Seoul')
-    .onRun(async (context) => {
-    console.log('[SCHEDULE] weeklyReport started');
-    const db = admin.firestore();
-    try {
-        const now = new Date();
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        // TODO: 실제 집계 로직 구현
-        // - 주문 건수, 매출, 평균 주문 금액
-        // - 리뷰 수, 평균 평점
-        // - 인기 메뉴 Top 5
-        // - 시간대별 주문 분포
-        const reportData = {
-            period: {
-                start: admin.firestore.Timestamp.fromDate(weekAgo),
-                end: admin.firestore.Timestamp.fromDate(now),
-            },
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            summary: {
-                totalOrders: 0,
-                totalRevenue: 0,
-                avgOrderAmount: 0,
-                totalReviews: 0,
-                avgRating: 0,
-            },
-            topMenus: [],
-            hourlyDistribution: [],
-        };
-        await db.collection('weekly_reports').add(reportData);
-        // 관리자에게 알림
-        await (0, push_1.sendPushToAdmins)({
-            notification: {
-                title: '📊 주간 리포트가 생성되었습니다',
-                body: '지난 주 운영 현황을 확인하세요.',
-            },
-            data: {
-                type: 'weekly_report',
-            },
-        });
-        console.log('[SCHEDULE] weeklyReport: Weekly report generated');
-    }
-    catch (error) {
-        console.error('[SCHEDULE] weeklyReport: Failed to generate weekly report:', error);
-    }
-    console.log('[SCHEDULE] weeklyReport completed');
-});
-// ============================================================================
-// HTTPS Functions: 결제 및 영수증
-// ============================================================================
-/**
- * 결제 승인 (NICEPAY)
- */
-exports.payAuthorize = functions.https.onCall(async (data, context) => {
-    // 인증 확인
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', '로그인이 필요합니다');
-    }
-    try {
-        const result = await (0, nicepay_1.authorizePayment)(data);
-        return result;
-    }
-    catch (error) {
-        console.error('Payment authorization failed:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        console.error("[Payment] Confirm Error:", error);
+        // HttpsError는 그대로 전달
+        if (error instanceof functions.https.HttpsError)
+            throw error;
+        throw new functions.https.HttpsError("internal", error.message || "결제 승인 처리 중 오류");
     }
 });
 /**
- * 결제 취소 (망취소)
+ * 프론트엔드 호환성을 위한 별칭 Export
+ * src/lib/nicepay.ts에서 사용하는 함수 이름과 일치
  */
-exports.payCancel = functions.https.onCall(async (data, context) => {
-    // 인증 확인
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', '로그인이 필요합니다');
-    }
-    try {
-        const result = await (0, nicepay_1.cancelPayment)(data);
-        return result;
-    }
-    catch (error) {
-        console.error('Payment cancellation failed:', error);
-        throw new functions.https.HttpsError('internal', error.message);
-    }
-});
-/**
- * 영수증 PDF 생성
- */
-exports.generateReceipt = functions.https.onCall(async (data, context) => {
-    // 인증 확인
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', '로그인이 필요합니다');
-    }
-    const { orderId } = data;
-    if (!orderId) {
-        throw new functions.https.HttpsError('invalid-argument', '주문 ID가 필요합니다');
-    }
-    try {
-        const db = admin.firestore();
-        const orderDoc = await db.collection('orders').doc(orderId).get();
-        if (!orderDoc.exists) {
-            throw new functions.https.HttpsError('not-found', '주문을 찾을 수 없습니다');
-        }
-        const order = orderDoc.data();
-        // 본인 주문이거나 관리자인지 확인
-        const isOwner = order.userId === context.auth.uid;
-        const userDoc = await db.collection('users').doc(context.auth.uid).get();
-        const isAdmin = ['owner', 'admin'].includes(userDoc.get('role'));
-        if (!isOwner && !isAdmin) {
-            throw new functions.https.HttpsError('permission-denied', '권한이 없습니다');
-        }
-        // 영수증 데이터 준비
-        const receiptData = {
-            orderId,
-            orderNumber: order.orderNumber || orderId.slice(0, 8).toUpperCase(),
-            orderDate: order.createdAt?.toDate().toLocaleString('ko-KR') || '',
-            storeName: '현풍닭칼국수',
-            storePhone: '1588-0000',
-            storeAddress: '대구광역시 달성군 현풍면',
-            customerName: order.customerInfo?.name || '고객',
-            customerPhone: order.customerInfo?.phone || '',
-            items: order.items || [],
-            itemsTotal: order.itemsTotal || 0,
-            deliveryFee: order.deliveryFee || 0,
-            discount: order.discount || 0,
-            finalAmount: order.finalAmount || 0,
-            paymentMethod: order.payment?.method || '카드',
-            developerInfo: {
-                company: 'KS컴퍼니',
-                bizNo: '553-17-00098',
-                ceo: '석경선/배종수(공동대표)',
-            },
-        };
-        const url = await (0, pdf_1.generateReceiptPDF)(receiptData);
-        return { url };
-    }
-    catch (error) {
-        console.error('Failed to generate receipt:', error);
-        throw new functions.https.HttpsError('internal', error.message);
-    }
-});
-/**
- * 현금영수증 발급
- */
-exports.requestCashReceipt = functions.https.onCall(async (data, context) => {
-    // 인증 확인
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', '로그인이 필요합니다');
-    }
-    const { orderId, phoneOrBizNo } = data;
-    if (!orderId || !phoneOrBizNo) {
-        throw new functions.https.HttpsError('invalid-argument', '주문 ID와 전화번호/사업자번호가 필요합니다');
-    }
-    try {
-        const db = admin.firestore();
-        const orderDoc = await db.collection('orders').doc(orderId).get();
-        if (!orderDoc.exists) {
-            throw new functions.https.HttpsError('not-found', '주문을 찾을 수 없습니다');
-        }
-        const order = orderDoc.data();
-        // 본인 주문인지 확인
-        if (order.userId !== context.auth.uid) {
-            throw new functions.https.HttpsError('permission-denied', '권한이 없습니다');
-        }
-        // NICEPAY 현금영수증 발급
-        const result = await (0, nicepay_1.issueCashReceipt)({
-            tid: order.payment?.tid || '',
-            phoneOrBizNo,
-            amount: order.finalAmount,
-        });
-        // 주문에 현금영수증 정보 저장
-        await orderDoc.ref.update({
-            'payment.cashReceipt': {
-                phoneOrBizNo,
-                issuedAt: admin.firestore.FieldValue.serverTimestamp(),
-                receiptNo: result.receiptNo,
-            },
-        });
-        return { success: true, receiptNo: result.receiptNo };
-    }
-    catch (error) {
-        console.error('Failed to issue cash receipt:', error);
-        throw new functions.https.HttpsError('internal', error.message);
-    }
-});
-// ============================================================================
-// 배달대행 Webhook (별도 파일에서 export)
-// ============================================================================
-var delivery_webhook_saenggakdaero_1 = require("./delivery-webhook-saenggakdaero");
-Object.defineProperty(exports, "handleSaenggakdaeroWebhook", { enumerable: true, get: function () { return delivery_webhook_saenggakdaero_1.handleSaenggakdaeroWebhook; } });
-// ============================================================================
-// NICEPAY 결제 Functions (클라이언트 호출용)
-// ============================================================================
-const nicepay_handlers_1 = require("./payments/nicepay-handlers");
 exports.createPayment = functions
     .region(config_1.REGION)
     .runWith(config_1.RUNTIME_OPTS)
@@ -615,14 +187,14 @@ exports.approvePayment = functions
     .region(config_1.REGION)
     .runWith(config_1.RUNTIME_OPTS)
     .https.onCall(nicepay_handlers_1.approvePaymentHandler);
-exports.getPaymentResult = functions
-    .region(config_1.REGION)
-    .runWith(config_1.RUNTIME_OPTS)
-    .https.onCall(nicepay_handlers_1.getPaymentResultHandler);
 exports.cancelPayment = functions
     .region(config_1.REGION)
     .runWith(config_1.RUNTIME_OPTS)
     .https.onCall(nicepay_handlers_1.cancelPaymentHandler);
+exports.getPaymentResult = functions
+    .region(config_1.REGION)
+    .runWith(config_1.RUNTIME_OPTS)
+    .https.onCall(nicepay_handlers_1.getPaymentResultHandler);
 exports.createOnSitePaymentOrder = functions
     .region(config_1.REGION)
     .runWith(config_1.RUNTIME_OPTS)

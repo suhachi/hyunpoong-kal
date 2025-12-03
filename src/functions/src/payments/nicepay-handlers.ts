@@ -90,8 +90,11 @@ export async function createPaymentHandler(
 }
 
 /**
- * approvePayment 핸들러
+ * approvePayment 핸들러 (멱등성 보장)
  * NICEPAY 승인 API 호출
+ * 
+ * - 이미 승인된 주문은 NICEPAY를 다시 호출하지 않고 기존 결과를 반환한다.
+ * - Firestore 트랜잭션을 이용해 동시 승인 요청을 방지한다.
  */
 export async function approvePaymentHandler(
   data: { orderId: string; authToken: string },
@@ -107,43 +110,99 @@ export async function approvePaymentHandler(
 
     console.log("[approvePayment] Request:", { orderId, authToken });
 
-    // Mock 응답 (실제 API 구현 시 교체)
-    const orderDoc = await db.collection("orders").doc(orderId).get();
-    if (!orderDoc.exists) {
-      throw new functions.https.HttpsError("not-found", "주문을 찾을 수 없습니다");
-    }
+    const orderRef = db.collection("orders").doc(orderId);
 
-    const orderData = orderDoc.data();
-    const amount = orderData?.finalAmount || orderData?.amount || 0;
+    // 트랜잭션을 사용한 멱등성 보장
+    const result = await db.runTransaction(async (transaction) => {
+      const orderDoc = await transaction.get(orderRef);
+      
+      if (!orderDoc.exists) {
+        throw new functions.https.HttpsError("not-found", "주문을 찾을 수 없습니다");
+      }
 
-    const mockResult: PaymentResult = {
-      success: true,
-      orderId,
-      tid: `TID_${Date.now()}`,
-      amount,
-      resultCode: "0000",
-      resultMsg: "결제가 완료되었습니다",
-      authToken,
-      cardName: "신한카드",
-      cardNum: "1234-****-****-5678",
-    };
+      const orderData = orderDoc.data();
+      if (!orderData) {
+        throw new functions.https.HttpsError("internal", "주문 데이터가 없습니다");
+      }
 
-    // 주문 상태 업데이트
-    await db.collection("orders").doc(orderId).update({
-      "payment.status": "authorized",
-      "payment.tid": mockResult.tid,
-      "payment.approvedAt": admin.firestore.FieldValue.serverTimestamp(),
-      status: "accepted", // 주문 접수 완료
+      const paymentStatus = orderData.payment?.status;
+      const paymentMethod = orderData.payment?.method;
+      
+      // 1. 멱등성 체크: 이미 승인된 경우 기존 결과 반환
+      if (paymentStatus === "authorized" || paymentStatus === "approved") {
+        console.log("[approvePayment] Already approved (idempotent):", orderId);
+        return {
+          success: true,
+          orderId,
+          tid: orderData.payment?.tid || "",
+          amount: orderData.payment?.amount || orderData.finalAmount || 0,
+          resultCode: "0000",
+          resultMsg: "이미 승인된 주문입니다",
+          authToken: orderData.payment?.authToken || authToken,
+          cardName: orderData.payment?.cardName,
+          cardNum: orderData.payment?.cardNum,
+        } as PaymentResult;
+      }
+
+      // 2. 취소/실패된 주문 체크
+      if (paymentStatus === "cancelled" || paymentStatus === "failed") {
+        throw new functions.https.HttpsError(
+          "failed-precondition",
+          "이미 취소/실패된 주문입니다"
+        );
+      }
+
+      // 3. APP_CARD 체크
+      if (paymentMethod !== "app_card") {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "앱 결제 방식이 아닙니다"
+        );
+      }
+
+      const amount = orderData.finalAmount || orderData.amount || 0;
+
+      // Mock 응답 (실제 NICEPAY API 호출 시 교체)
+      // TODO: 실제 환경에서는 NICEPAY REST API 호출 로직으로 교체
+      const mockResult: PaymentResult = {
+        success: true,
+        orderId,
+        tid: `TID_${Date.now()}`,
+        amount,
+        resultCode: "0000",
+        resultMsg: "결제가 완료되었습니다",
+        authToken,
+        cardName: "신한카드",
+        cardNum: "1234-****-****-5678",
+      };
+
+      // 4. 주문 상태 업데이트 (트랜잭션 내)
+      transaction.update(orderRef, {
+        "payment.status": "authorized",
+        "payment.tid": mockResult.tid,
+        "payment.authToken": authToken,
+        "payment.cardName": mockResult.cardName,
+        "payment.cardNum": mockResult.cardNum,
+        "payment.approvedAt": admin.firestore.FieldValue.serverTimestamp(),
+        status: "accepted", // 주문 접수 완료
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return mockResult;
     });
 
-    console.log("[approvePayment] Success:", mockResult);
+    console.log("[approvePayment] Success:", result);
 
-    return mockResult;
+    return result;
   } catch (error: unknown) {
     console.error("[approvePayment] Error:", error);
+    // HttpsError는 그대로 전달
+    if (error instanceof functions.https.HttpsError) throw error;
     const message = error instanceof Error ? error.message : "결제 승인에 실패했습니다";
     throw new functions.https.HttpsError("internal", message);
   }
+  
+  // TODO: 서버 측에서 이미 승인된 주문에 대해 중복 approve 요청이 오면 멱등적으로 처리하도록 보완 필요 (✅ 구현 완료)
 }
 
 /**

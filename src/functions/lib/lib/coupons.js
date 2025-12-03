@@ -53,12 +53,12 @@ async function issueCoupon(params) {
         type,
         amount,
         minOrderAmount: min,
-        status: 'unused',
+        status: "unused",
         issuedAt: admin.firestore.FieldValue.serverTimestamp(),
         expiresAt,
         description: description || `${type} 쿠폰`,
     };
-    const docRef = await admin.firestore().collection('coupons').add(couponData);
+    const docRef = await admin.firestore().collection("coupons").add(couponData);
     console.log(`Coupon issued: ${docRef.id} for user ${uid}`);
     return docRef.id;
 }
@@ -71,8 +71,8 @@ async function issuePhotoReviewCoupon(uid) {
         amount: 3000,
         min: 15000,
         days: 30,
-        type: 'photo_review',
-        description: '사진 리뷰 감사 쿠폰',
+        type: "photo_review",
+        description: "사진 리뷰 감사 쿠폰",
     });
 }
 /**
@@ -84,8 +84,8 @@ async function issueFirstOrderCoupon(uid) {
         amount: 5000,
         min: 20000,
         days: 7,
-        type: 'first_order',
-        description: '첫 주문 환영 쿠폰',
+        type: "first_order",
+        description: "첫 주문 환영 쿠폰",
     });
 }
 /**
@@ -97,7 +97,7 @@ async function issueRepeatOrderCoupon(uid) {
         amount: 2000,
         min: 10000,
         days: 14,
-        type: 'repeat_order',
-        description: '단골 고객 감사 쿠폰',
+        type: "repeat_order",
+        description: "단골 고객 감사 쿠폰",
     });
 }

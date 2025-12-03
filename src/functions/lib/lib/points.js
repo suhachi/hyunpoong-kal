@@ -16,16 +16,13 @@ const firestore_1 = require("./firestore");
 async function earnPointsServer(params) {
     const { userId, storeId, amount, refKind, refId, note, expiresAt } = params;
     if (amount <= 0) {
-        throw new Error('적립 포인트는 0보다 커야 합니다');
+        throw new Error("적립 포인트는 0보다 커야 합니다");
     }
     await firestore_1.db.runTransaction(async (tx) => {
-        const balanceRef = firestore_1.db.collection('pointsBalances').doc(userId);
+        const balanceRef = firestore_1.db.collection("pointsBalances").doc(userId);
         const balanceSnap = await tx.get(balanceRef);
         const now = firestore_1.FieldValue.serverTimestamp();
-        let prev = null;
-        if (balanceSnap.exists) {
-            prev = balanceSnap.data();
-        }
+        const prev = balanceSnap.exists ? balanceSnap.data() : null;
         const nextBalance = {
             userId,
             balance: (prev?.balance ?? 0) + amount,
@@ -36,16 +33,13 @@ async function earnPointsServer(params) {
         };
         tx.set(balanceRef, nextBalance);
         // 포인트 거래 문서 생성
-        const txCol = firestore_1.db
-            .collection('stores')
-            .doc(storeId)
-            .collection('pointsTransactions');
+        const txCol = firestore_1.db.collection("stores").doc(storeId).collection("pointsTransactions");
         const txDocRef = txCol.doc();
         const txDoc = {
             txId: txDocRef.id,
             storeId,
             userId,
-            type: 'earn',
+            type: "earn",
             amount,
             ref: {
                 kind: refKind,
@@ -64,18 +58,18 @@ async function earnPointsServer(params) {
 async function refundPointsServer(params) {
     const { userId, storeId, amount, refKind, refId, note } = params;
     if (amount <= 0) {
-        throw new Error('환불 포인트는 0보다 커야 합니다');
+        throw new Error("환불 포인트는 0보다 커야 합니다");
     }
     await firestore_1.db.runTransaction(async (tx) => {
-        const balanceRef = firestore_1.db.collection('pointsBalances').doc(userId);
+        const balanceRef = firestore_1.db.collection("pointsBalances").doc(userId);
         const balanceSnap = await tx.get(balanceRef);
         if (!balanceSnap.exists) {
-            throw new Error('포인트 잔액이 부족합니다.');
+            throw new Error("포인트 잔액이 부족합니다.");
         }
         const prev = balanceSnap.data();
         const current = prev.balance ?? 0;
         if (current < amount) {
-            throw new Error('포인트 잔액이 부족합니다.');
+            throw new Error("포인트 잔액이 부족합니다.");
         }
         const now = firestore_1.FieldValue.serverTimestamp();
         const nextBalance = {
@@ -88,16 +82,13 @@ async function refundPointsServer(params) {
         };
         tx.set(balanceRef, nextBalance);
         // 포인트 거래 문서 생성
-        const txCol = firestore_1.db
-            .collection('stores')
-            .doc(storeId)
-            .collection('pointsTransactions');
+        const txCol = firestore_1.db.collection("stores").doc(storeId).collection("pointsTransactions");
         const txDocRef = txCol.doc();
         const txDoc = {
             txId: txDocRef.id,
             storeId,
             userId,
-            type: 'spend',
+            type: "spend",
             amount: -amount,
             ref: {
                 kind: refKind,

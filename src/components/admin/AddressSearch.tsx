@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Loader2 } from "lucide-react";
 import type { DeliveryAddress } from "@/types/order"; // or types/cart if preferred, they should be compatible
+import { KAKAO_REST_API_KEY } from "@/config/env";
 
 // Force update
 interface AddressSearchProps {
@@ -25,6 +26,58 @@ export function AddressSearch({
     readOnly = false,
 }: AddressSearchProps) {
     const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+    const [isGeocoding, setIsGeocoding] = useState(false);
+
+    /**
+     * Kakao REST API를 사용한 Geocoding
+     * 주소 문자열 → 위도/경도 변환
+     * 
+     * @param address - 주소 문자열
+     * @returns { lat, lng } 또는 빈 객체 (실패 시)
+     */
+    async function geocodeAddress(address: string): Promise<{ lat?: number; lng?: number }> {
+        // 1) REST API 키 확인
+        if (!KAKAO_REST_API_KEY) {
+            console.warn("[AddressSearch] KAKAO_REST_API_KEY가 설정되지 않아 Geocoding을 건너뜁니다.");
+            return {};
+        }
+
+        try {
+            // 2) Kakao REST API 호출
+            const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `KakaoAK ${KAKAO_REST_API_KEY}`,
+                },
+            });
+
+            if (!response.ok) {
+                console.error("[AddressSearch] Geocoding API 호출 실패:", response.status);
+                return {};
+            }
+
+            const result = await response.json();
+
+            // 3) 응답에서 좌표 추출
+            if (result.documents && result.documents.length > 0) {
+                const firstResult = result.documents[0];
+                const lat = parseFloat(firstResult.y); // Kakao API는 y가 위도
+                const lng = parseFloat(firstResult.x); // x가 경도
+
+                console.log("[AddressSearch] Geocoding 성공:", { address, lat, lng });
+
+                return { lat, lng };
+            } else {
+                console.warn("[AddressSearch] Geocoding 결과 없음:", address);
+                return {};
+            }
+
+        } catch (error) {
+            console.error("[AddressSearch] Geocoding 에러:", error);
+            return {};
+        }
+    }
 
     useEffect(() => {
         const scriptId = "daum-postcode-script";
@@ -54,7 +107,7 @@ export function AddressSearch({
         }
 
         new (window as any).daum.Postcode({
-            oncomplete: (data: any) => {
+            oncomplete: async (data: any) => {
                 // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
 
                 // 각 주소의 노출 규칙에 따라 주소를 조합한다.
@@ -91,14 +144,28 @@ export function AddressSearch({
                     addr += extraAddr;
                 }
 
-                // 부모 컴포넌트에 전달
+                // Geocoding: 주소 → 좌표 변환
+                setIsGeocoding(true);
+                let lat: number | undefined;
+                let lng: number | undefined;
+
+                try {
+                    const coords = await geocodeAddress(addr);
+                    lat = coords.lat;
+                    lng = coords.lng;
+                } catch (error) {
+                    console.error("[AddressSearch] Geocoding 실패 (UX는 유지):", error);
+                    // Geocoding 실패해도 주소 선택 자체는 정상 진행
+                } finally {
+                    setIsGeocoding(false);
+                }
+
+                // 부모 컴포넌트에 전달 (lat/lng 포함)
                 onChange({
                     address: addr,
                     detail: value?.detail || "",
-                    // lat, lng는 여기서 바로 알 수 없음 (Geocoding 필요). 
-                    // 현재는 undefined로 유지하거나 기존 값 유지.
-                    lat: value?.lat,
-                    lng: value?.lng,
+                    lat,
+                    lng,
                 });
             },
         }).open();
@@ -126,9 +193,18 @@ export function AddressSearch({
                         required={required}
                     />
                 </div>
-                <Button type="button" onClick={handleSearch} variant="outline">
-                    <Search className="w-4 h-4 mr-2" />
-                    주소검색
+                <Button type="button" onClick={handleSearch} variant="outline" disabled={isGeocoding}>
+                    {isGeocoding ? (
+                        <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            좌표 검색중
+                        </>
+                    ) : (
+                        <>
+                            <Search className="w-4 h-4 mr-2" />
+                            주소검색
+                        </>
+                    )}
                 </Button>
             </div>
             {!readOnly && (

@@ -3,6 +3,16 @@ import * as admin from "firebase-admin";
 import { getPaymentProvider } from "./payments/providers";
 import { PaymentRequestPayload, PaymentConfirmPayload } from "./payments/types";
 import { RUNTIME_OPTS, REGION } from "./config";
+import {
+  createPaymentHandler,
+  approvePaymentHandler,
+  cancelPaymentHandler,
+  getPaymentResultHandler,
+  createOnSitePaymentOrderHandler,
+} from "./payments/nicepay-handlers";
+
+// Schedulers
+export { cleanupPendingOrders } from "./schedulers/cleanup-pending-orders";
 
 // Firebase Admin should be initialized in index.ts, but double check here just in case
 if (!admin.apps.length) {
@@ -156,3 +166,32 @@ export const confirmPayment = functions
       throw new functions.https.HttpsError("internal", error.message || "결제 승인 처리 중 오류");
     }
   });
+
+/**
+ * 프론트엔드 호환성을 위한 별칭 Export
+ * src/lib/nicepay.ts에서 사용하는 함수 이름과 일치
+ */
+export const createPayment = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(createPaymentHandler);
+
+export const approvePayment = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(approvePaymentHandler);
+
+export const cancelPayment = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(cancelPaymentHandler);
+
+export const getPaymentResult = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(getPaymentResultHandler);
+
+export const createOnSitePaymentOrder = functions
+  .region(REGION)
+  .runWith(RUNTIME_OPTS)
+  .https.onCall(createOnSitePaymentOrderHandler);

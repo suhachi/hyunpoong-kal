@@ -63,6 +63,8 @@ export interface PaymentRequest {
   buyerName: string;
   buyerTel: string;
   buyerEmail: string;
+  returnUrl?: string;
+  cancelUrl?: string;
 }
 
 // 결제 결과

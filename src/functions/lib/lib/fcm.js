@@ -16,7 +16,7 @@ async function notifyUser(params) {
     const { userId, title, body, data } = params;
     // TODO: users/{userId}/fcmTokens 컬렉션에서 토큰 목록을 가져오는 구조로 확장 예정
     // 현재는 토큰 조회 대신 로깅만 수행
-    console.log('[FCM][TODO] notifyUser called', { userId, title, body, data });
+    console.log("[FCM][TODO] notifyUser called", { userId, title, body, data });
     // 향후 구현 예시:
     // const tokensSnap = await db
     //   .collection('users')

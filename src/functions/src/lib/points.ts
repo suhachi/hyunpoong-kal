@@ -42,16 +42,7 @@ export async function earnPointsServer(params: EarnPointsParams): Promise<void> 
     const balanceSnap = await tx.get(balanceRef);
 
     const now = FieldValue.serverTimestamp();
-    let prev: {
-      balance?: number;
-      totalEarned?: number;
-      totalSpent?: number;
-      totalExpired?: number;
-    } | null = null;
-
-    if (balanceSnap.exists) {
-      prev = balanceSnap.data();
-    }
+    const prev = balanceSnap.exists ? balanceSnap.data() : null;
 
     const nextBalance = {
       userId,

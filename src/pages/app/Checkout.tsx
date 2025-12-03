@@ -23,10 +23,14 @@ import { toast } from "sonner";
 import { getPointsBalance, spendPoints, POINTS_POLICY } from "@/lib/points.api";
 import { createOrder } from "@/lib/orders.api";
 import { initiatePayment } from "@/lib/nicepay"; // NICEPAY 헬퍼 사용
-import { FEATURE_FLAGS, NICEPAY_CONFIG } from "@/config/env";
-import { PaymentMethod, PaymentStatus, type PaymentRequest } from "@/types/order";
+import { FEATURE_FLAGS, NICEPAY_CONFIG, MAX_DELIVERY_RADIUS_KM, STORE_ID } from "@/config/env";
+import { PaymentMethod, PaymentStatus } from "@/types/order";
+import type { PaymentRequest } from "@/types/payment";
 import { CheckoutSummary } from "@/components/app/CheckoutSummary";
 import { formatPrice } from "@/lib/utils";
+import { calculateDistanceKm } from "@/lib/distance";
+import { getDoc } from "firebase/firestore";
+import { storeDocRef, type StoreDoc } from "@/lib/firebase/firestore-schema";
 import { v4 as uuidv4 } from "uuid"; // clientOrderId 생성용
 
 export function Checkout() {
@@ -61,6 +65,9 @@ export function Checkout() {
   const [usePoints, setUsePoints] = useState(false);
   const [pointsToUse, setPointsToUse] = useState(0);
 
+  // 매장 정보 (배달 범위 체크용)
+  const [storeInfo, setStoreInfo] = useState<StoreDoc | null>(null);
+
   // 2. Derived State 계산 (Hooks 아래, Early Return 위)
   const subtotal = getSubtotal();
   const deliveryFee = getDeliveryFee();
@@ -81,6 +88,24 @@ export function Checkout() {
       navigate("/cart");
     }
   }, [items, navigate, authLoading]);
+
+  // 매장 정보 로드 (배달 범위 체크용)
+  useEffect(() => {
+    async function loadStoreInfo() {
+      try {
+        const docRef = storeDocRef(STORE_ID);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setStoreInfo(docSnap.data() as StoreDoc);
+        }
+      } catch (error) {
+        console.error("Failed to load store info:", error);
+        // 매장 정보 로드 실패는 치명적이지 않으므로 에러 무시 (배달 범위 체크만 스킵됨)
+      }
+    }
+
+    loadStoreInfo();
+  }, []);
 
   // 포인트 잔액 로드
   useEffect(() => {
@@ -184,6 +209,41 @@ export function Checkout() {
       return;
     }
 
+    // 배달 가능 범위 체크 (T-ADDR-03)
+    if (
+      deliveryType === "delivery" &&
+      MAX_DELIVERY_RADIUS_KM > 0
+    ) {
+      const storeLat = storeInfo?.address?.lat;
+      const storeLng = storeInfo?.address?.lng;
+      const customerLat = deliveryAddress?.lat;
+      const customerLng = deliveryAddress?.lng;
+
+      // 좌표가 모두 있을 때만 거리 체크
+      if (
+        typeof storeLat === "number" &&
+        typeof storeLng === "number" &&
+        typeof customerLat === "number" &&
+        typeof customerLng === "number"
+      ) {
+        const distanceKm = calculateDistanceKm(
+          storeLat,
+          storeLng,
+          customerLat,
+          customerLng,
+        );
+
+        if (distanceKm > MAX_DELIVERY_RADIUS_KM) {
+          toast.error(
+            `배달 가능 범위(${MAX_DELIVERY_RADIUS_KM}km)를 벗어났습니다. 매장 인근 주소로 다시 시도해 주세요.`,
+          );
+          setIsProcessing(false);
+          return;
+        }
+      }
+      // 좌표가 없으면 거리 체크를 건너뛰고 기존 플로우 진행 (안전 모드)
+    }
+
     setIsProcessing(true);
 
     try {
@@ -239,7 +299,7 @@ export function Checkout() {
       ) {
         try {
           const origin = window.location.origin;
-          
+
           // 2) PaymentRequest 구성
           const paymentRequest: PaymentRequest = {
             orderId,
@@ -269,9 +329,14 @@ export function Checkout() {
           console.error("PG Init Error:", pgError);
           toast.error("결제 초기화 실패: " + pgError.message);
           setIsProcessing(false);
+          // TODO: 결제 요청 실패 시 PENDING 상태로 남은 주문 처리(취소/만료) 로직 추가 검토
           return; // 중단
         }
       }
+
+      // MEET_CARD / MEET_CASH:
+      //  - PG(NICEPAY)를 거치지 않고 주문만 생성한다.
+      //  - 추후 매장 POS에서 결제 완료 처리(승인) 상태로 변경될 수 있다.
 
       // 3. 만나서 결제 (또는 앱결제 미사용 시 Mock 처리) - 기존 로직
       // 포인트 사용 처리 (여기서 처리하거나 서버에서 처리)

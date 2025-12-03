@@ -47,9 +47,9 @@ const config_1 = require("./config");
  */
 function mapSaenggakdaeroStatusToOrderStatus(deliveryStatus) {
     const statusMap = {
-        PICKED_UP: 'delivering',
-        IN_TRANSIT: 'delivering',
-        DELIVERED: 'completed',
+        PICKED_UP: "delivering",
+        IN_TRANSIT: "delivering",
+        DELIVERED: "completed",
     };
     return statusMap[deliveryStatus] || null;
 }
@@ -64,25 +64,25 @@ exports.handleSaenggakdaeroWebhook = functions
     .runWith(config_1.RUNTIME_OPTS)
     .https.onRequest(async (req, res) => {
     // CORS 설정
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (req.method === 'OPTIONS') {
-        res.status(204).send('');
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+        res.status(204).send("");
         return;
     }
-    if (req.method !== 'POST') {
-        res.status(405).send('Method Not Allowed');
+    if (req.method !== "POST") {
+        res.status(405).send("Method Not Allowed");
         return;
     }
     try {
         const { orderId, taskId, status, driver, location } = req.body;
         if (!orderId || !status) {
-            console.error('[Saenggakdaero Webhook] Missing required fields:', req.body);
-            res.status(400).send('Missing required fields: orderId, status');
+            console.error("[Saenggakdaero Webhook] Missing required fields:", req.body);
+            res.status(400).send("Missing required fields: orderId, status");
             return;
         }
-        console.log('[Saenggakdaero Webhook] Received:', {
+        console.log("[Saenggakdaero Webhook] Received:", {
             orderId,
             taskId,
             status,
@@ -95,15 +95,15 @@ exports.handleSaenggakdaeroWebhook = functions
         // 주문 문서 찾기 (stores/{storeId}/orders/{orderId} 또는 orders/{orderId})
         let orderRef = null;
         // 먼저 orders/{orderId}에서 찾기
-        const orderDoc = await db.collection('orders').doc(orderId).get();
+        const orderDoc = await db.collection("orders").doc(orderId).get();
         if (orderDoc.exists) {
             orderRef = orderDoc.ref;
         }
         else {
             // stores/{storeId}/orders/{orderId} 구조에서 찾기
-            const storesSnapshot = await db.collection('stores').get();
+            const storesSnapshot = await db.collection("stores").get();
             for (const storeDoc of storesSnapshot.docs) {
-                const storeOrderRef = storeDoc.ref.collection('orders').doc(orderId);
+                const storeOrderRef = storeDoc.ref.collection("orders").doc(orderId);
                 const storeOrderDoc = await storeOrderRef.get();
                 if (storeOrderDoc.exists) {
                     orderRef = storeOrderRef;
@@ -112,50 +112,50 @@ exports.handleSaenggakdaeroWebhook = functions
             }
         }
         if (!orderRef) {
-            console.error('[Saenggakdaero Webhook] Order not found:', orderId);
-            res.status(404).send('Order not found');
+            console.error("[Saenggakdaero Webhook] Order not found:", orderId);
+            res.status(404).send("Order not found");
             return;
         }
         // 주문 상태 업데이트
         const orderStatus = mapSaenggakdaeroStatusToOrderStatus(status);
         const updates = {
-            'delivery.status': status,
-            'delivery.taskId': taskId || null,
-            'delivery.updatedAt': admin.firestore.FieldValue.serverTimestamp(),
+            "delivery.status": status,
+            "delivery.taskId": taskId || null,
+            "delivery.updatedAt": admin.firestore.FieldValue.serverTimestamp(),
         };
         if (driver) {
-            updates['delivery.driver'] = {
+            updates["delivery.driver"] = {
                 id: driver.id || driver.driverId,
                 name: driver.name,
                 phone: driver.phone,
             };
         }
         if (location) {
-            updates['delivery.lastLocation'] = {
+            updates["delivery.lastLocation"] = {
                 lat: location.lat || location.latitude,
                 lng: location.lng || location.longitude,
                 at: admin.firestore.FieldValue.serverTimestamp(),
             };
         }
         // 배달 상태에 따라 주문 상태도 업데이트
-        if (orderStatus === 'delivering') {
-            updates.status = 'delivering';
-            updates['timeline.delivering'] = admin.firestore.FieldValue.serverTimestamp();
+        if (orderStatus === "delivering") {
+            updates.status = "delivering";
+            updates["timeline.delivering"] = admin.firestore.FieldValue.serverTimestamp();
         }
-        else if (orderStatus === 'completed') {
-            updates.status = 'completed';
-            updates['timeline.completed'] = admin.firestore.FieldValue.serverTimestamp();
+        else if (orderStatus === "completed") {
+            updates.status = "completed";
+            updates["timeline.completed"] = admin.firestore.FieldValue.serverTimestamp();
         }
         await orderRef.update(updates);
-        console.log('[Saenggakdaero Webhook] Order updated:', {
+        console.log("[Saenggakdaero Webhook] Order updated:", {
             orderId,
             status: orderStatus,
             updates,
         });
-        res.status(200).send('OK');
+        res.status(200).send("OK");
     }
     catch (error) {
-        console.error('[Saenggakdaero Webhook] Error:', error);
-        res.status(500).send('Internal Server Error');
+        console.error("[Saenggakdaero Webhook] Error:", error);
+        res.status(500).send("Internal Server Error");
     }
 });

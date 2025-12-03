@@ -8,9 +8,9 @@ exports.SCHEDULE_TIMEZONE = exports.POINTS_POLICY = exports.RUNTIME_OPTS = expor
 // STEP6 NOTE: functions 섹션 존재, 현재 설정 요약
 // - firebase.json에 functions 섹션 추가됨
 // - source: "functions", runtime: "nodejs20"
-exports.REGION = 'asia-northeast3'; // 서울 리전
+exports.REGION = "asia-northeast3"; // 서울 리전
 exports.RUNTIME_OPTS = {
-    memory: '256MB',
+    memory: "256MB",
     timeoutSeconds: 60,
 };
 exports.POINTS_POLICY = {
@@ -18,4 +18,4 @@ exports.POINTS_POLICY = {
     REVIEW_TEXT_BONUS: 100,
     REVIEW_PHOTO_BONUS: 200,
 };
-exports.SCHEDULE_TIMEZONE = 'Asia/Seoul';
+exports.SCHEDULE_TIMEZONE = "Asia/Seoul";
