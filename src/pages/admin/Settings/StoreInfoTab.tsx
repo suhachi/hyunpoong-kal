@@ -24,6 +24,7 @@ import { storeDocRef, type StoreDoc } from "../../../lib/firebase/firestore-sche
 import { STORE_ID } from "../../../config/env";
 import { useAuth } from "../../../contexts/AuthContext";
 import { StoreLocationPicker } from "../../../components/admin/StoreLocationPicker";
+import { AddressSearch } from "../../../components/admin/AddressSearch";
 
 export function StoreInfoTab() {
   const { user } = useAuth();
@@ -209,43 +210,29 @@ export function StoreInfoTab() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="store-address-full">주소 *</Label>
-            <Input
-              id="store-address-full"
-              value={storeInfo.address?.full || ""}
-              onChange={e =>
+            <AddressSearch
+              value={{
+                address: storeInfo.address?.full || "",
+                detail: storeInfo.address?.detail || "",
+                lat: storeInfo.address?.lat,
+                lng: storeInfo.address?.lng,
+              }}
+              onChange={val =>
                 setStoreInfo({
                   ...storeInfo,
                   address: {
                     ...storeInfo.address,
-                    full: e.target.value,
-                    detail: storeInfo.address?.detail || "",
+                    full: val.address,
+                    detail: val.detail,
+                    // lat/lng는 AddressSearch에서 오지 않을 수 있음 (기존 값 유지 or Geocoding 필요)
+                    // 여기서는 AddressSearch가 lat/lng를 주지 않으면 기존 값을 유지하도록 함
+                    lat: val.lat ?? storeInfo.address?.lat,
+                    lng: val.lng ?? storeInfo.address?.lng,
                   },
                 })
               }
-              placeholder="대구광역시 달성군 현풍면"
-              className="bg-gray-50"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="store-address-detail">상세 주소</Label>
-            <Input
-              id="store-address-detail"
-              value={storeInfo.address?.detail || ""}
-              onChange={e =>
-                setStoreInfo({
-                  ...storeInfo,
-                  address: {
-                    ...storeInfo.address,
-                    full: storeInfo.address?.full || "",
-                    detail: e.target.value,
-                    lat: storeInfo.address?.lat,
-                    lng: storeInfo.address?.lng,
-                  },
-                })
-              }
-              placeholder="상세 주소를 입력하세요"
-              className="bg-gray-50"
+              placeholder="주소를 검색해주세요"
+              required
             />
           </div>
         </CardContent>

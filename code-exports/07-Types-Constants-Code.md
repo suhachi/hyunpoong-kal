@@ -1,6 +1,6 @@
 # Types & Constants - Full Source Code
 
-**Generated**: 2025-12-02-1828  
+**Generated**: 2025-12-03-1259  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 

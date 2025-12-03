@@ -1,6 +1,6 @@
 # App Pages - Full Source Code
 
-**Generated**: 2025-12-02-1828  
+**Generated**: 2025-12-03-1259  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -510,7 +510,7 @@ import { PriceBreakdown } from "@/components/shared/PriceBreakdown";
 import { ORDER_LIMITS } from "@/constants";
 import type { Menu } from "@/types/menu";
 import { formatPrice } from "@/lib/utils";
-import { AddressInput } from "@/components/app/AddressInput";
+import { AddressSearch } from "@/components/admin/AddressSearch";
 import { toast } from "sonner";
 
 // 실제 음식 이미지 매핑
@@ -683,7 +683,7 @@ export function Cart() {
         {/* 배달 주소 설정 (배달 선택 시 필수) */}
         {deliveryType === "delivery" && (
           <div className="space-y-2">
-            <AddressInput value={deliveryAddress} onChange={setDeliveryAddress} required />
+            <AddressSearch value={deliveryAddress} onChange={setDeliveryAddress} required />
             {!deliveryAddress?.address && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />

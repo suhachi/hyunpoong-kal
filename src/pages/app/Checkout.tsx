@@ -22,9 +22,9 @@ import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { getPointsBalance, spendPoints, POINTS_POLICY } from "@/lib/points.api";
 import { createOrder } from "@/lib/orders.api";
-import { createPaymentIntentClient } from "@/lib/payments.client";
-import { FEATURE_FLAGS } from "@/config/env";
-import { PaymentMethod, PaymentStatus } from "@/types/order";
+import { initiatePayment } from "@/lib/nicepay"; // NICEPAY 헬퍼 사용
+import { FEATURE_FLAGS, NICEPAY_CONFIG } from "@/config/env";
+import { PaymentMethod, PaymentStatus, type PaymentRequest } from "@/types/order";
 import { CheckoutSummary } from "@/components/app/CheckoutSummary";
 import { formatPrice } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid"; // clientOrderId 생성용
@@ -192,8 +192,8 @@ export function Checkout() {
 
       // 1. 주문 생성 (Firebase 또는 localStorage)
       // 앱 결제인 경우 PENDING 상태로 시작
-      const initialStatus = paymentMethod === PaymentMethod.APP_CARD 
-        ? PaymentStatus.PENDING 
+      const initialStatus = paymentMethod === PaymentMethod.APP_CARD
+        ? PaymentStatus.PENDING
         : PaymentStatus.PENDING; // 만나서 결제도 승인 전이므로 PENDING
 
       const newOrder = await createOrder({
@@ -231,26 +231,36 @@ export function Checkout() {
       const orderId = newOrder.orderId;
 
       // 2. 앱 결제(PG) 프로세스
-      if (paymentMethod === PaymentMethod.APP_CARD && useOnlinePayment) {
+      // A-2: 결제 방식이 APP_CARD이고, 온라인 결제가 활성화되어 있을 때만 NICEPAY 연동
+      if (
+        paymentMethod === PaymentMethod.APP_CARD &&
+        FEATURE_FLAGS.onlinePayment &&
+        NICEPAY_CONFIG.mid
+      ) {
         try {
-          // Cloud Function 호출하여 결제 준비
           const origin = window.location.origin;
-          const paymentInit = await createPaymentIntentClient({
+          
+          // 2) PaymentRequest 구성
+          const paymentRequest: PaymentRequest = {
             orderId,
             amount: totalAmount,
-            method: paymentMethod,
-            clientOrderId,
-            returnUrl: `${origin}/payment/complete`,
-            cancelUrl: `${origin}/payment/cancel`,
             goodsName: items[0].menuName + (items.length > 1 ? ` 외 ${items.length - 1}건` : ""),
             buyerName: user.displayName || "고객",
             buyerTel: phone,
             buyerEmail: email,
-          });
+            returnUrl: `${origin}/order/return`,
+            cancelUrl: `${origin}/order/cancel`,
+          };
 
-          // PG사 결제 페이지로 리다이렉트
-          if (paymentInit.redirectUrl) {
-            window.location.href = paymentInit.redirectUrl;
+          // 3) NICEPAY 결제 생성 (initiatePayment 사용)
+          const { authUrl, authToken } = await initiatePayment(paymentRequest);
+
+          // 4) authToken 저장 (로컬/세션) - Return 페이지에서 검증용
+          sessionStorage.setItem(`payment_auth_${orderId}`, authToken);
+
+          // 5) PG사 결제 페이지로 리다이렉트
+          if (authUrl) {
+            window.location.href = authUrl;
             return; // 리다이렉트되므로 이후 로직 중단
           } else {
             throw new Error("PG 결제 URL을 받아오지 못했습니다.");
@@ -509,7 +519,7 @@ export function Checkout() {
                 </Label>
               </div>
             )}
-            
+
             <div className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-[#2E1C10]/10 mb-2">
               <RadioGroupItem value={PaymentMethod.MEET_CARD} id="payment-meet-card" />
               <Label

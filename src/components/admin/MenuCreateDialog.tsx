@@ -113,9 +113,8 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
     if (USE_FIREBASE) {
       // Firebase Storage에 업로드
       try {
-        const result = await uploadMenuImage(file);
-        console.log("[MenuCreateDialog] Image uploaded to Firebase Storage:", result.path);
-        return result.url;
+      const result = await uploadMenuImage(file);
+      return result.url;
       } catch (error: any) {
         console.error("[MenuCreateDialog] Firebase Storage upload failed:", error);
         throw new Error(error.message || "이미지 업로드에 실패했습니다.");
@@ -151,43 +150,32 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
 
   // 저장 핸들러
   const handleSave = async () => {
-    console.log("[MenuCreateDialog] handleSave called");
     // 검증
     if (!name.trim()) {
-      console.log("[MenuCreateDialog] Validation failed: name is empty");
       toast.error("메뉴 이름을 입력하세요");
       return;
     }
     if (!price || parseFloat(price) < 0) {
-      console.log("[MenuCreateDialog] Validation failed: invalid price");
       toast.error("올바른 가격을 입력하세요");
       return;
     }
     if (!imageFile) {
-      console.log("[MenuCreateDialog] Validation failed: no image file");
       toast.error("이미지 파일을 선택하세요");
       return;
     }
-    console.log("[MenuCreateDialog] Validation passed, starting save process");
     setLoading(true);
     try {
       const selectedGroups = availableOptionGroups.filter(group =>
         selectedOptionGroupIds.includes(group.id),
       );
-      console.log("[MenuCreateDialog] Selected option groups:", selectedGroups.length);
       // 이미지 파일 업로드
-      console.log("[MenuCreateDialog] Uploading image file...");
-      console.log("[MenuCreateDialog] USE_FIREBASE:", USE_FIREBASE);
       let finalImageUrl: string;
       if (USE_FIREBASE) {
         try {
           // Firebase 모드: 임시 ID로 업로드 (메뉴 생성 후 실제 ID로 업데이트 필요)
           const tempMenuId = `temp-${Date.now()}`;
-          console.log("[MenuCreateDialog] Calling uploadMenuImage with tempMenuId:", tempMenuId);
           const result = await uploadMenuImage(imageFile!, tempMenuId);
           finalImageUrl = result.url;
-          console.log("[MenuCreateDialog] Image uploaded to Firebase Storage:", result.path);
-          console.log("[MenuCreateDialog] Firebase Storage URL:", finalImageUrl);
         } catch (error: any) {
           console.error("[MenuCreateDialog] Firebase Storage upload failed:", error);
           toast.error("이미지 업로드에 실패했습니다. 다시 시도해주세요.");
@@ -196,10 +184,8 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
         }
       } else {
         // Mock 모드: blob URL 사용
-        console.log("[MenuCreateDialog] Mock mode: using blob URL");
         finalImageUrl = await uploadImage(imageFile!);
       }
-      console.log("[MenuCreateDialog] Image uploaded, URL:", finalImageUrl);
       // allergens를 string[]로 변환 (쉼표로 구분된 문자열을 배열로 변환)
       const allergensArray = allergens.trim()
         ? allergens
@@ -223,10 +209,7 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
         customOptions: validCustomOptions.length > 0 ? validCustomOptions : undefined,
         optionGroups: selectedGroups,
       };
-      console.log("[MenuCreateDialog] menuData prepared:", menuData);
-      console.log("[MenuCreateDialog] Calling onSave...");
       await onSave(menuData);
-      console.log("[MenuCreateDialog] onSave completed successfully");
       resetForm();
       onOpenChange(false);
     } catch (error: any) {
@@ -388,6 +371,43 @@ export function MenuCreateDialog({ open, onOpenChange, onSave }: MenuCreateDialo
                 })}
               </div>
             </div>
+            {/* 옵션 그룹 선택 */}
+            {availableOptionGroups.length > 0 && (
+              <div>
+                <Label>옵션 그룹 (선택)</Label>
+                <p className="text-xs text-gray-500 mb-2">
+                  이 메뉴에 적용할 옵션 그룹을 선택하세요
+                </p>
+                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+                  {availableOptionGroups.map(group => (
+                    <div key={group.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`option-group-${group.id}`}
+                        checked={selectedOptionGroupIds.includes(group.id)}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedOptionGroupIds(prev => [...prev, group.id]);
+                          } else {
+                            setSelectedOptionGroupIds(prev => prev.filter(id => id !== group.id));
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <Label
+                        htmlFor={`option-group-${group.id}`}
+                        className="cursor-pointer flex-1"
+                      >
+                        {group.name}
+                        {group.required && (
+                          <span className="text-xs text-red-500 ml-1">(필수)</span>
+                        )}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {/* 커스텀 옵션 관리 */}
             <AdminMenuCustomOptionsEditor
               value={customOptions}

@@ -1,6 +1,6 @@
 # Main & Routes - Full Source Code
 
-**Generated**: 2025-12-02-1828  
+**Generated**: 2025-12-03-1259  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -126,9 +126,11 @@ const Support = lazy(() => import("@/pages/app/Support").then(m => ({ default: m
 const InstallGuide = lazy(() =>
   import("@/pages/app/InstallGuide").then(m => ({ default: m.InstallGuide })),
 );
-const PaymentResult = lazy(() => 
+const PaymentResult = lazy(() =>
   import("@/pages/app/PaymentResult").then(m => ({ default: m.PaymentResultPage })),
 );
+const PaymentReturn = lazy(() => import("@/pages/app/PaymentReturn"));
+const PaymentCancel = lazy(() => import("@/pages/app/PaymentCancel"));
 
 // 관리자 페이지 (lazy load - Admin 영역 전체 분리)
 const Dashboard = lazy(() =>
@@ -237,7 +239,11 @@ export default function App() {
                 {/* 마이페이지 */}
                 <Route path="my" element={<My />} />
 
-                {/* 결제 결과 페이지 */}
+                {/* NICEPAY 결제 결과 페이지 */}
+                <Route path="order/return" element={<PaymentReturn />} />
+                <Route path="order/cancel" element={<PaymentCancel />} />
+
+                {/* 기존 결제 결과 페이지 (유지) */}
                 <Route path="payment">
                   <Route path="complete" element={<PaymentResult />} />
                   <Route path="cancel" element={<PaymentResult />} />
