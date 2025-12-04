@@ -1,6 +1,6 @@
 # Config & Utils - Full Source Code
 
-**Generated**: 2025-12-03-1259  
+**Generated**: 2025-12-04-1021  
 **Project**: hyunpoong-kal  
 **Company**: KS Company (BRN: 553-17-00098)
 
@@ -115,6 +115,10 @@ export const STORE_ID = getEnv("VITE_STORE_ID", "hyunpoong_main");
 // VITE_KAKAO_MAP_APP_KEY 환경 변수를 읽어서 사용
 export const KAKAO_MAP_APP_KEY = getEnv("VITE_KAKAO_MAP_APP_KEY", "");
 
+// Kakao REST API Key (Geocoding용)
+// VITE_KAKAO_REST_API_KEY 환경 변수를 읽어서 사용
+export const KAKAO_REST_API_KEY = getEnv("VITE_KAKAO_REST_API_KEY", "");
+
 // Firebase 설정 (Firebase 사용 시)
 export const FIREBASE_CONFIG = {
   apiKey: getEnv("VITE_FIREBASE_API_KEY"),
@@ -172,6 +176,11 @@ export const FEATURE_FLAGS = {
   onlinePayment: getEnv("VITE_ONLINE_PAYMENT_ENABLED", "false") === "true",
   onlinePaymentProvider: getEnv("VITE_ONLINE_PAYMENT_PROVIDER", "none"),
 };
+
+// 배달 가능 범위 (km) - 0이면 범위 제한 없음
+export const MAX_DELIVERY_RADIUS_KM = Number(
+  getEnv("VITE_MAX_DELIVERY_RADIUS_KM", "0")
+);
 
 // 로깅 유틸
 export function log(...args: any[]) {

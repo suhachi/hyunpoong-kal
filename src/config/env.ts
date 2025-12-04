@@ -103,6 +103,19 @@ export const KAKAO_MAP_APP_KEY = getEnv("VITE_KAKAO_MAP_APP_KEY", "");
 // VITE_KAKAO_REST_API_KEY 환경 변수를 읽어서 사용
 export const KAKAO_REST_API_KEY = getEnv("VITE_KAKAO_REST_API_KEY", "");
 
+// User requested env object mapping
+export const env = {
+  MODE: ENV,
+  ONLINE_PAYMENT_ENABLED: getEnv("VITE_ONLINE_PAYMENT_ENABLED", "false") === "true",
+  PAYMENT_PROVIDER: getEnv("VITE_ONLINE_PAYMENT_PROVIDER", "none"),
+  NICEPAY: {
+    MID: getEnv("VITE_NICEPAY_MID", ""),
+    CLIENT_KEY: getEnv("VITE_NICEPAY_CLIENT_KEY", ""),
+    RETURN_URL: getEnv("VITE_NICEPAY_RETURN_URL", ""),
+    CANCEL_URL: getEnv("VITE_NICEPAY_CANCEL_URL", ""),
+  },
+};
+
 // Firebase 설정 (Firebase 사용 시)
 export const FIREBASE_CONFIG = {
   apiKey: getEnv("VITE_FIREBASE_API_KEY"),
@@ -114,18 +127,16 @@ export const FIREBASE_CONFIG = {
   measurementId: getEnv("VITE_FIREBASE_MEASUREMENT_ID"),
 };
 
-// NICEPAY 설정
+// NICEPAY 설정 (Updated to use the new env object or consistent getters)
 export const NICEPAY_CONFIG = {
-  mid: getEnv("VITE_NICEPAY_MID", "NICE_DEV_MID"),
-  clientKey: getEnv("VITE_NICEPAY_CLIENT_KEY", "NICE_DEV_KEY"),
-  returnUrl: getEnv(
-    "VITE_NICEPAY_RETURN_URL",
+  mid: env.NICEPAY.MID || "NICE_DEV_MID",
+  clientKey: env.NICEPAY.CLIENT_KEY || "NICE_DEV_KEY",
+  returnUrl:
+    env.NICEPAY.RETURN_URL ||
     `${typeof window !== "undefined" ? window.location.origin : ""}/order/return`,
-  ),
-  cancelUrl: getEnv(
-    "VITE_NICEPAY_CANCEL_URL",
+  cancelUrl:
+    env.NICEPAY.CANCEL_URL ||
     `${typeof window !== "undefined" ? window.location.origin : ""}/order/cancel`,
-  ),
 };
 
 // 배달 대행사 Provider A 설정
@@ -145,25 +156,32 @@ export const SAENGGAKDAERO_CONFIG = {
 // Phase 3 기능 토글
 export const FEATURE_FLAGS = {
   // 배달 추적 기능 (개발 환경에서는 기본 활성화)
-  delivery: getEnv("VITE_DELIVERY_ENABLED", ENV === "development" ? "true" : "false") === "true",
+  delivery: getEnv(
+    "VITE_DELIVERY_ENABLED",
+    ENV === "development" ? "true" : "false",
+  ) === "true",
   deliveryProvider: getEnv("VITE_DELIVERY_PROVIDER", "mock"),
   deliveryWebhookSecret: getEnv("VITE_DELIVERY_WEBHOOK_SECRET", "change_me"),
   // 고객 지원 채팅 기능 (개발 환경에서는 기본 활성화)
-  support: getEnv("VITE_SUPPORT_ENABLED", ENV === "development" ? "true" : "false") === "true",
+  support:
+    getEnv("VITE_SUPPORT_ENABLED", ENV === "development" ? "true" : "false") ===
+    "true",
   // 포인트 리워드 시스템 (개발 환경에서는 기본 활성화)
-  points: getEnv("VITE_POINTS_ENABLED", ENV === "development" ? "true" : "false") === "true",
+  points:
+    getEnv("VITE_POINTS_ENABLED", ENV === "development" ? "true" : "false") ===
+    "true",
   pointsRate: parseFloat(getEnv("VITE_POINTS_RATE", "0.03")),
   pointsMinUse: parseInt(getEnv("VITE_POINTS_MIN_USE", "1000"), 10),
   pointsExpireDays: parseInt(getEnv("VITE_POINTS_EXPIRE_DAYS", "365"), 10),
   // 온라인 결제 기능 (Phase 3)
   // v0.9.0에서는 강제로 false (env 기본값도 false)
-  onlinePayment: getEnv("VITE_ONLINE_PAYMENT_ENABLED", "false") === "true",
-  onlinePaymentProvider: getEnv("VITE_ONLINE_PAYMENT_PROVIDER", "none"),
+  onlinePayment: env.ONLINE_PAYMENT_ENABLED,
+  onlinePaymentProvider: env.PAYMENT_PROVIDER,
 };
 
 // 배달 가능 범위 (km) - 0이면 범위 제한 없음
 export const MAX_DELIVERY_RADIUS_KM = Number(
-  getEnv("VITE_MAX_DELIVERY_RADIUS_KM", "0")
+  getEnv("VITE_MAX_DELIVERY_RADIUS_KM", "0"),
 );
 
 // 로깅 유틸
@@ -187,4 +205,5 @@ export default {
   log,
   logError,
   getEnv,
+  env,
 };
