@@ -1,10 +1,20 @@
 // Route: /admin
+/**
+ * 수동 테스트:
+ * 1. 관리자 대시보드 페이지 열기
+ * 2. 고객 앱에서 주문 생성 (배달/포장/만나서결제 아무거나)
+ * 3. 1~3초 내:
+ *    - 알림음 반복 재생
+ *    - 토스트 알림 등장
+ * 4. 토스트의 '확인/접수' 버튼 클릭 → 알림 중지 + 주문 페이지 이동
+ */
 import { useState, useEffect } from "react";
 import { DollarSign, ShoppingBag, Star, TrendingUp } from "lucide-react";
 import { StatCard } from "@/components/admin/common/StatCard";
 import { Card } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
 import { getDashboardStats } from "@/lib/admin/stats.api";
+import { AdminOrderAlert } from "@/components/admin/AdminOrderAlert";
 
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -17,6 +27,13 @@ export function Dashboard() {
 
   useEffect(() => {
     loadStats();
+  }, []);
+
+  // 브라우저 알림 권한 요청 (최초 1회)
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   }, []);
 
   async function loadStats() {
@@ -32,6 +49,9 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* 실시간 주문 알림 (headless) */}
+      <AdminOrderAlert />
+
       {/* Page Header */}
       <div>
         <h1 className="text-2xl text-[#333] mb-2">대시보드</h1>
@@ -88,8 +108,16 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-[#8B7355]">새로운 주문이 없습니다</p>
-                <p className="text-[#8B7355] mt-1">주문이 들어오면 여기에 표시됩니다</p>
+                <div className="mb-3">
+                  <span className="text-3xl">🔔</span>
+                </div>
+                <p className="text-[#333] font-semibold mb-2">실시간 알림 활성화됨</p>
+                <p className="text-[#8B7355] text-sm">
+                  새 주문이 들어오면 자동으로 알림이 표시됩니다
+                </p>
+                <p className="text-[#8B7355] text-sm mt-1">
+                  (배달/포장/만나서결제 모든 주문)
+                </p>
               </div>
             )}
           </div>
